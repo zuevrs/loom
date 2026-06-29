@@ -30,10 +30,14 @@ pi install git:github.com/zuevrs/loom
 
 ### OpenCode
 
-Add to `opencode.json`:
+```
+opencode plugin github:zuevrs/loom -g
+```
+
+Or add manually to `opencode.json`:
 
 ```json
-{ "plugin": ["git:github.com/zuevrs/loom"] }
+{ "plugin": ["github:zuevrs/loom"] }
 ```
 
 ### Cursor
