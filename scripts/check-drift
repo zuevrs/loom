@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# loom: drift canary — checks skills/ vs AGENTS.md managed block consistency
+# Exit: 0 clean, 1 drift detected
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+AGENTS="$ROOT/AGENTS.md"
+SKILLS_DIR="$ROOT/skills"
+errors=()
+
+if [ ! -f "$AGENTS" ]; then
+  echo '{"status":"skip","message":"No AGENTS.md found"}'
+  exit 0
+fi
+
+# Extract version from managed block
+block_version=$(grep -o 'loom:begin version=[^ ]*' "$AGENTS" 2>/dev/null | head -1 | sed 's/loom:begin version=//')
+pkg_version=$(grep '"version"' "$ROOT/package.json" 2>/dev/null | head -1 | sed 's/.*: *"//' | sed 's/".*//')
+
+if [ -n "$block_version" ] && [ -n "$pkg_version" ]; then
+  # Strip leading v for comparison
+  bv="${block_version#v}"
+  if [ "$bv" != "$pkg_version" ]; then
+    errors+=("version mismatch: AGENTS.md=$block_version vs package.json=$pkg_version")
+  fi
+fi
+
+# Check all skills referenced in AGENTS.md router exist
+for skill in loom-init loom-plan loom-implement loom-verify loom-tend loom-loop; do
+  if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then
+    errors+=("router references $skill but skills/$skill/SKILL.md missing")
+  fi
+done
+
+# Check managed block mentions all skills from skills/
+for skill_dir in "$SKILLS_DIR"/*/; do
+  [ -d "$skill_dir" ] || continue
+  skill_name=$(basename "$skill_dir")
+  if ! grep -q "$skill_name" "$AGENTS" 2>/dev/null; then
+    errors+=("skills/$skill_name exists but not mentioned in AGENTS.md")
+  fi
+done
+
+if [ ${#errors[@]} -eq 0 ]; then
+  echo '{"status":"clean","message":"No drift detected"}'
+  exit 0
+fi
+
+echo "{"
+echo "  \"status\": \"drift\","
+echo "  \"errors\": ["
+for i in "${!errors[@]}"; do
+  comma=","
+  [ $i -eq $((${#errors[@]} - 1)) ] && comma=""
+  echo "    \"${errors[$i]}\"$comma"
+done
+echo "  ]"
+echo "}"
+exit 1
