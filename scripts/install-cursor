@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
-# loom: install skills for Cursor IDE
-# Creates symlinks in ~/.agents/skills/ pointing to loom skill directories.
-# Cursor natively discovers skills from ~/.agents/skills/ (global scope).
+# loom: install skills + hooks for Cursor IDE
+# 1. Creates symlinks in ~/.agents/skills/ → loom skill directories
+# 2. Merges loom hooks into ~/.cursor/hooks.json
+# Cursor discovers skills from ~/.agents/skills/ and hooks from ~/.cursor/hooks.json.
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="$LOOM_ROOT/skills"
+HOOKS_DIR="$LOOM_ROOT/hooks"
 TARGET_DIR="$HOME/.agents/skills"
+HOOKS_FILE="$HOME/.cursor/hooks.json"
 
+# --- Skills ---
+echo "Skills:"
 mkdir -p "$TARGET_DIR"
 
 installed=0
@@ -37,6 +42,41 @@ for skill_dir in "$SKILLS_DIR"/loom-*/; do
   installed=$((installed + 1))
 done
 
+echo "  $installed skills linked"
 echo ""
-echo "Done. $installed loom skills linked in $TARGET_DIR"
-echo "Cursor will discover them on next session start."
+
+# --- Hooks ---
+echo "Hooks:"
+mkdir -p "$(dirname "$HOOKS_FILE")"
+
+# Build the hooks entries with absolute paths
+SESSION_CMD="node $HOOKS_DIR/loom-session-start.cjs"
+PRELLM_CMD="node $HOOKS_DIR/loom-pre-llm.cjs"
+SUBAGENT_CMD="node $HOOKS_DIR/loom-subagent-cursor.cjs"
+
+if [ ! -f "$HOOKS_FILE" ]; then
+  cat > "$HOOKS_FILE" << HOOKSEOF
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{"command": "$SESSION_CMD", "timeout": 5}],
+    "beforeSubmitPrompt": [{"command": "$PRELLM_CMD", "timeout": 3}],
+    "subagentStart": [{"command": "$SUBAGENT_CMD", "timeout": 3}]
+  }
+}
+HOOKSEOF
+  echo "  ✓ Created $HOOKS_FILE with loom hooks"
+else
+  # Check if loom hooks already present
+  if grep -q "loom-session-start" "$HOOKS_FILE" 2>/dev/null; then
+    echo "  ✓ Loom hooks already in $HOOKS_FILE"
+  else
+    echo "  ⚠ $HOOKS_FILE exists. Add these entries manually:"
+    echo "    sessionStart: {\"command\": \"$SESSION_CMD\", \"timeout\": 5}"
+    echo "    beforeSubmitPrompt: {\"command\": \"$PRELLM_CMD\", \"timeout\": 3}"
+    echo "    subagentStart: {\"command\": \"$SUBAGENT_CMD\", \"timeout\": 3}"
+  fi
+fi
+
+echo ""
+echo "Done. Restart Cursor to pick up changes."
