@@ -10,39 +10,14 @@ A skills-first harness that makes coding agents work like disciplined senior dev
 
 Pick **one** path for your host.
 
-### Claude Code
-
-```
-/install-plugin zuevrs/loom
-```
-
-### Codex
-
-```
-codex install zuevrs/loom
-```
-
-### Pi
-
-```
-pi install git:github.com/zuevrs/loom
-```
-
-### OpenCode
-
-```
-opencode plugin github:zuevrs/loom -g
-```
-
-Or add manually to `opencode.json`:
-
-```json
-{ "plugin": ["github:zuevrs/loom"] }
-```
-
-### Cursor
-
-Cursor reads `AGENTS.md` from the project root. Run **`loom-init`** in your project — it writes the managed block and `.cursor/rules/loom.mdc`.
+| Host | Command |
+|------|---------|
+| Claude Code | `/install-plugin zuevrs/loom` |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin install loom` |
+| Pi | `pi install git:github.com/zuevrs/loom` |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
+| OpenCode | `opencode plugin github:zuevrs/loom` or add `"github:zuevrs/loom"` to `plugin` array in `opencode.json` |
+| Cursor | Run `loom-init` in your project (writes `AGENTS.md` + `.cursor/rules/loom.mdc`) |
 
 ## Quickstart
 
@@ -102,13 +77,25 @@ Start in `report-only`; opt in to `assisted` / `unattended` after trust is earne
 
 Add your own loops: copy any file in `loops/`, follow the shape (objective gate, hard stops, safety, human gate).
 
+## What each host gets
+
+| Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor |
+|---------|:-----------:|:-----:|:--:|:---:|:--------:|:------:|
+| Skills (6 rituals) | yes | yes | yes | yes | yes | via AGENTS.md |
+| Slash commands | yes | — | — | — | yes (auto) | — |
+| Lifecycle hooks | 3 | 3 | — | 1 (session) | — | — |
+| Discipline injection | hook | hook | skills body | extension | system.transform | rule file |
+| Loops catalog | yes | yes | yes | yes | yes | yes |
+
 ## Uninstall
 
 | Host | Command |
 |---|---|
 | Claude Code | `/remove-plugin loom` |
-| Codex | `codex uninstall loom` |
-| Pi | `pi uninstall loom` |
+| Codex | `codex plugin uninstall loom` |
+| Pi | `pi uninstall git:github.com/zuevrs/loom` |
+| OMP | `omp plugin uninstall loom` |
+| OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
 | Cursor | Delete `.cursor/rules/loom.mdc`; remove `<!-- loom:begin -->…<!-- loom:end -->` from `AGENTS.md` |
 
 ## Safety
