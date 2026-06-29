@@ -10,5 +10,11 @@
     ".": "./opencode-plugin.mjs",
     "./server": "./opencode-plugin.mjs"
   },
+  "omp": {
+    "name": "loom",
+    "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
+    "extensions": ["./omp-extension.mjs"],
+    "skills": ["./skills"]
+  },
   "keywords": ["agent", "harness", "skills", "loops", "discipline"]
 }
