@@ -8,16 +8,28 @@ A skills-first harness that makes coding agents work like disciplined senior dev
 
 ## Install
 
-Pick **one** path for your host.
+Clone once, then run the install for your host:
 
-| Host | Command |
-|------|---------|
+```
+git clone https://github.com/zuevrs/loom ~/.loom
+```
+
+| Host | Install command |
+|------|----------------|
 | Claude Code | `/install-plugin zuevrs/loom` |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin install loom` |
 | Pi | `pi install git:github.com/zuevrs/loom` |
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
-| OpenCode | `opencode plugin github:zuevrs/loom` or add `"github:zuevrs/loom"` to `plugin` array in `opencode.json` |
-| Cursor | `git clone https://github.com/zuevrs/loom && loom/scripts/install-cursor` then run `loom-init` per project |
+| OpenCode | `opencode plugin github:zuevrs/loom` or add to `opencode.json` |
+| Cursor | `~/.loom/scripts/install-cursor` |
+| Windsurf | `~/.loom/scripts/install-windsurf` |
+| Kiro | `~/.loom/scripts/install-kiro` |
+| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom` then enable |
+| Cline | Skills via `~/.agents/skills/` (same as Cursor); reads `AGENTS.md` |
+| Droid (Factory) | Accepts `.claude-plugin/plugin.json` format natively |
+| OpenClaw | Skills via `~/.agents/skills/` (same as Cursor); or `clawhub install` |
+
+Then run **`loom-init`** in each project to write the managed block.
 
 ## Quickstart
 
@@ -79,24 +91,29 @@ Add your own loops: copy any file in `loops/`, follow the shape (objective gate,
 
 ## What each host gets
 
-| Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor |
-|---------|:-----------:|:-----:|:--:|:---:|:--------:|:------:|
-| Skills (6 rituals) | yes | yes | yes | yes | yes | via AGENTS.md |
-| Slash commands | yes | — | — | — | yes (auto) | — |
-| Lifecycle hooks | 3 | 3 | — | 1 (session) | — | — |
-| Discipline injection | hook | hook | skills body | extension | system.transform | rule file |
-| Loops catalog | yes | yes | yes | yes | yes | yes |
+| Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor | Windsurf | Kiro | Hermes | Cline | Droid | OpenClaw |
+|---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
+| Commands | yes | — | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
+| Hooks | 3 | 3 | — | 1 | — | 3 | — | config | Python | — | yes | ext |
+| Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
 
 ## Uninstall
 
 | Host | Command |
 |---|---|
 | Claude Code | `/remove-plugin loom` |
-| Codex | `codex plugin uninstall loom` |
+| Codex | `codex plugin marketplace remove loom` |
 | Pi | `pi uninstall git:github.com/zuevrs/loom` |
 | OMP | `omp plugin uninstall loom` |
 | OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
-| Cursor | Delete `.cursor/rules/loom.mdc`; remove `<!-- loom:begin -->…<!-- loom:end -->` from `AGENTS.md` |
+| Cursor | Remove `loom-*` symlinks from `~/.agents/skills/`; remove hooks from `~/.cursor/hooks.json` |
+| Windsurf | Remove `loom-*` symlinks from `~/.codeium/windsurf/skills/` |
+| Kiro | `rm ~/.kiro/agents/loom.json`; remove `loom-*` from `~/.kiro/skills/` |
+| Hermes | `rm -rf ~/.hermes/plugins/loom` |
+| Cline/Droid/OpenClaw | Remove symlinks from `~/.agents/skills/loom-*` |
+
+In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGENTS.md` and delete `.loom/` if present.
 
 ## Safety
 
