@@ -10,5 +10,6 @@
   "repository": "https://github.com/zuevrs/loom",
   "license": "MIT",
   "skills": "./skills/",
+  "commands": "./commands/",
   "hooks": "./hooks/claude-codex-hooks.json"
 }

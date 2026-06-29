@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-session-start.js\"; exit 0",
-            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-session-start.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-session-start.cjs\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-session-start.cjs\"",
             "timeout": 5,
             "statusMessage": "Loading Loom context..."
           }
@@ -19,8 +19,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-pre-llm.js\"; exit 0",
-            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-pre-llm.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-pre-llm.cjs\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-pre-llm.cjs\"",
             "timeout": 3
           }
         ]
@@ -31,8 +31,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-subagent.js\"; exit 0",
-            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-subagent.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-subagent.cjs\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-subagent.cjs\"",
             "timeout": 3
           }
         ]

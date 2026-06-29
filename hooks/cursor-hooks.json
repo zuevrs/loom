@@ -3,13 +3,13 @@
   "hooks": {
     "sessionStart": [
       {
-        "command": "node hooks/loom-session-start.js",
+        "command": "node hooks/loom-session-start.cjs",
         "timeout": 5
       }
     ],
     "subagentStart": [
       {
-        "command": "node hooks/loom-subagent-cursor.js",
+        "command": "node hooks/loom-subagent-cursor.cjs",
         "timeout": 3
       }
     ]
