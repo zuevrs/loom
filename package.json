@@ -4,5 +4,11 @@
   "description": "Skills-first harness for agent workflows",
   "license": "MIT",
   "repository": "zuevrs/loom",
+  "type": "module",
+  "main": "./opencode-plugin.mjs",
+  "exports": {
+    ".": "./opencode-plugin.mjs",
+    "./server": "./opencode-plugin.mjs"
+  },
   "keywords": ["agent", "harness", "skills", "loops", "discipline"]
 }
