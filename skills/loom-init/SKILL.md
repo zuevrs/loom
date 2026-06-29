@@ -10,7 +10,7 @@ One safe, idempotent project setup: managed block, `.loom/`, host shims — then
 
 ## Inputs
 
-- Global Loom install on host
+- Global Loom install on host (skills already available via plugin or `scripts/install-cursor`)
 - Current repo state (`AGENTS.md`, host rule targets, `.loom/`)
 
 ## Outputs
@@ -118,6 +118,7 @@ Small fix → implement directly. Ambiguous build → list ready-for-agent, ask 
 | Symptom | Response |
 |---|---|
 | Host ignores AGENTS.md | Apply Cursor shim above |
+| Skills not discoverable | Verify global install (`scripts/install-cursor` for Cursor, plugin for others) |
 | User declines confirm | No writes; report what would have changed |
 | Major version mismatch | Warn-and-continue with explicit refresh guidance |
 
