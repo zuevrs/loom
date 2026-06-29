@@ -14,7 +14,7 @@
         ]
       }
     ],
-    "PreLLMCall": [
+    "UserPromptSubmit": [
       {
         "hooks": [
           {
