@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node hooks/loom-session-start.js",
+        "timeout": 5
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "node hooks/loom-subagent-cursor.js",
+        "timeout": 3
+      }
+    ]
+  }
+}

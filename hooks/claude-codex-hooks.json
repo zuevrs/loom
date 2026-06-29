@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-session-start.js\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-session-start.js\"",
+            "timeout": 5,
+            "statusMessage": "Loading Loom context..."
+          }
+        ]
+      }
+    ],
+    "PreLLMCall": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-pre-llm.js\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-pre-llm.js\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-subagent.js\"; exit 0",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-subagent.js\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

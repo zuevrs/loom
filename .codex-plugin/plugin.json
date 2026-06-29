@@ -1,0 +1,6 @@
+{
+  "name": "loom",
+  "version": "0.1.0",
+  "description": "Lazy senior dev harness — discipline + rituals",
+  "hooks": "./hooks/claude-codex-hooks.json"
+}
