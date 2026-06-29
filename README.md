@@ -17,7 +17,7 @@ Pick **one** path for your host.
 | Pi | `pi install git:github.com/zuevrs/loom` |
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
 | OpenCode | `opencode plugin github:zuevrs/loom` or add `"github:zuevrs/loom"` to `plugin` array in `opencode.json` |
-| Cursor | Run `loom-init` in your project (writes `AGENTS.md` + `.cursor/rules/loom.mdc`) |
+| Cursor | `git clone https://github.com/zuevrs/loom && loom/scripts/install-cursor` then run `loom-init` per project |
 
 ## Quickstart
 
