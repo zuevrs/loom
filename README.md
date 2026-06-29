@@ -8,26 +8,31 @@ A skills-first harness that makes coding agents work like disciplined senior dev
 
 ## Install
 
-Clone once, then run the install for your host:
+**Plugin-native hosts** (no clone needed):
+
+| Host | Command |
+|------|---------|
+| Claude Code | `/install-plugin zuevrs/loom` |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin install loom` |
+| Pi | `pi install git:github.com/zuevrs/loom` |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
+| OpenCode | `opencode plugin github:zuevrs/loom` |
+| Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) |
+
+**Script-based hosts** (clone first):
 
 ```
 git clone https://github.com/zuevrs/loom ~/.loom
 ```
 
-| Host | Install command |
-|------|----------------|
-| Claude Code | `/install-plugin zuevrs/loom` |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin install loom` |
-| Pi | `pi install git:github.com/zuevrs/loom` |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
-| OpenCode | `opencode plugin github:zuevrs/loom` or add to `opencode.json` |
+| Host | Command |
+|------|---------|
 | Cursor | `~/.loom/scripts/install-cursor` |
 | Windsurf | `~/.loom/scripts/install-windsurf` |
 | Kiro | `~/.loom/scripts/install-kiro` |
-| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom` then enable |
-| Cline | Skills via `~/.agents/skills/` (same as Cursor); reads `AGENTS.md` |
-| Droid (Factory) | Accepts `.claude-plugin/plugin.json` format natively |
-| OpenClaw | Skills via `~/.agents/skills/` (same as Cursor); or `clawhub install` |
+| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` |
+| Cline | Same as Cursor (`~/.loom/scripts/install-cursor`); also reads `AGENTS.md` |
+| OpenClaw | Same as Cursor; or `clawhub install zuevrs/loom` |
 
 Then run **`loom-init`** in each project to write the managed block.
 
