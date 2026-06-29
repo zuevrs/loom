@@ -7,6 +7,12 @@
         "timeout": 5
       }
     ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "node hooks/loom-pre-llm.cjs",
+        "timeout": 3
+      }
+    ],
     "subagentStart": [
       {
         "command": "node hooks/loom-subagent-cursor.cjs",
