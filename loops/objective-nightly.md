@@ -1,4 +1,4 @@
-# Loop starter: objective-nightly
+# Loop: objective-nightly
 
 ## id
 
@@ -32,10 +32,11 @@ Verify digest is supplemental — gate failure stops the loop iteration.
 
 ## hard stops
 
-- `max_iterations_per_item`: 3
+- `max_iterations`: 3
 - `max_run_minutes`: 30
 - `max_auto_actions_per_run`: 3
-- iteration cap + cooldown between runs
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
