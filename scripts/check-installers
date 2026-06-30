@@ -43,6 +43,29 @@ fi
 if ! grep -Fq 'AGENT_TARGET="$HOME/.kiro/agents"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
   errors+=("install-kiro agent target contract drifted")
 fi
+if ! grep -Fq 'loom-stop-gate' "$ROOT/scripts/install-cursor" 2>/dev/null; then
+  errors+=("install-cursor missing stop-gate enforcement hook")
+fi
+if ! grep -Fq '"Stop"' "$ROOT/hooks/claude-codex-hooks.json" 2>/dev/null; then
+  errors+=("claude-codex-hooks.json missing Stop enforcement hook")
+fi
+
+# Enforcement artifacts exist and are non-empty
+if [ ! -x "$ROOT/hooks/loom-stop-gate.sh" ]; then
+  errors+=("hooks/loom-stop-gate.sh missing or not executable")
+fi
+if ! ls "$ROOT/rules/"*.md >/dev/null 2>&1; then
+  errors+=("rules/ has no .md files (OMP TTSR convention)")
+fi
+if ! ls "$ROOT/agents/"*.md >/dev/null 2>&1; then
+  errors+=("agents/ has no .md files (OMP custom agent convention)")
+fi
+if ! grep -Fq 'session_stop' "$ROOT/omp-extension.mjs" 2>/dev/null; then
+  errors+=("omp-extension.mjs missing session_stop verify gate")
+fi
+if [ ! -f "$ROOT/hooks/stop-gate-logic.cjs" ]; then
+  errors+=("hooks/stop-gate-logic.cjs missing (shared verify gate)")
+fi
 
 if [ ${#errors[@]} -eq 0 ]; then
   echo '{"status":"clean","message":"Installer checks passed"}'

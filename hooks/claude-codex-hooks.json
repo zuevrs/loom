@@ -37,6 +37,19 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-stop-gate.sh\"",
+            "commandWindows": "bash \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-stop-gate.sh\"",
+            "timeout": 5,
+            "statusMessage": "Checking verify-before-done gate..."
+          }
+        ]
+      }
     ]
   }
 }
