@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// loom: pre-LLM hook (ADR-0044, ADR-0059)
+// loom: pre-LLM hook
 // Light invariant guard. No prompt rewrite, no file mutations.
 
 "use strict";

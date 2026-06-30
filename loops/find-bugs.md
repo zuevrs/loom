@@ -42,7 +42,7 @@ Finding is actionable only when tied to a deterministic check (linter exit code,
 
 Human reviews each finding before `ready-for-agent`. No auto-merge. No auto-fix on discovery.
 
-## shape invariants (ADR-0029)
+## shape invariants
 
 1. **Objective gate** — deterministic check required; vague → `needs-info`
 2. **Hard stops** — caps above; no unbounded scans
