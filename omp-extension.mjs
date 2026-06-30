@@ -1,9 +1,8 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
-// session_start: context pointers (once). before_agent_start: per-turn invariants.
+// session_start: context pointers. before_agent_start: invariants. session_stop: verify gate.
 //
 // Ref: can1357/oh-my-pi extensibility/extensions/types.ts
-// Extension factory: (pi: ExtensionAPI) => void
 
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -11,8 +10,9 @@ import { resolve } from "node:path";
 
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
+const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.2.8";
+const MANAGED_BLOCK_VERSION = "v0.3.0";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -64,7 +64,6 @@ function buildContextPointers(root) {
 }
 
 export default function loomExtension(pi) {
-  // One-shot: context pointers + managed-block version check
   pi.on("session_start", () => {
     try {
       const root = findProjectRoot();
@@ -83,7 +82,6 @@ export default function loomExtension(pi) {
     return undefined;
   });
 
-  // Per-turn: invariants + role manifest via systemPrompt append
   pi.on("before_agent_start", (event) => {
     try {
       const role = (process.env.LOOM_ROLE || "").toLowerCase();
@@ -92,6 +90,21 @@ export default function loomExtension(pi) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
       }
       return { systemPrompt: event.systemPrompt + "\n\n" + injection };
+    } catch {
+      return undefined;
+    }
+  });
+
+  // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)
+  pi.on("session_stop", () => {
+    try {
+      const blocked = findUnverifiedDoneIssues(findProjectRoot());
+      if (blocked.length === 0) return undefined;
+      const names = blocked.map((p) => p.split("/").pop()).join(", ");
+      return {
+        continue: true,
+        additionalContext: `BLOCKED: ${names} marked done without ## Verify. Run loom-verify, write the ## Verify section into the issue file, then retry.`,
+      };
     } catch {
       return undefined;
     }
