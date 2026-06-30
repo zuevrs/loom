@@ -4,6 +4,8 @@ description: Implement a single issue from the active Loom pack. Use when a spec
 disable-model-invocation: true
 ---
 
+**Ship one slice, leave one check. No verify → no done.**
+
 ## Goal
 
 Ship one vertical slice that satisfies issue acceptance with minimal diff.
@@ -34,7 +36,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 8. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
 9. Leave **one runnable check** (proportional).
 10. Run issue verification commands; capture output in issue comment.
-11. Run `loom-verify` before marking `done`.
+11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents).
 
 ## Discipline ladder
 
@@ -54,10 +56,6 @@ Before writing code, stop at the **first rung that holds**:
 
 **Not lazy about:** trust-boundary validation, security, data-loss errors, accessibility, explicit requests. Lazy without a check is unfinished — non-trivial logic leaves one runnable check.
 
-## Carve-outs
-
-Trust-boundary validation, security, error handling that prevents data loss, accessibility, explicit user requests.
-
 ## Hard stops
 
 - One issue at a time.
@@ -65,6 +63,7 @@ Trust-boundary validation, security, error handling that prevents data loss, acc
 - Never auto-commit unless user asked.
 - Denylist path touched → `ready-for-human`.
 - Verification failed → issue stays not-`done`.
+- **No verify digest → no done.** Runnable checks passing is necessary but not sufficient.
 
 ## Anti-rationalization
 
@@ -72,12 +71,14 @@ Trust-boundary validation, security, error handling that prevents data loss, acc
 |---|---|
 | "Quick refactor while here" | Out of scope — new issue |
 | "Tests later" | One runnable check is part of done |
-| "Skip verify for tiny change" | Verify runs on every implement completion |
+| "Skip verify for tiny change" | Verify runs on every implement completion — no yield without digest |
+| "Tests pass, we're done" | Tests ≠ verify; maker/checker split is mandatory |
 | "I'll batch commits/issues" | One issue, one slice, one verify |
 | "This abstraction will help later" | No abstractions nobody asked for |
 
-## Verification
+## Done when
 
 - Issue verification commands pass
 - Runnable check exists and passes
-- `loom-verify` invoked before `Status: done`
+- **`loom-verify` digest produced** with Verdict + Sub-agent evidence (or documented host limitation)
+- Issue not marked `Status: done` until verify APPROVE
