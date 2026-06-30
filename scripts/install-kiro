@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # loom: install agent + skills for Kiro CLI
 # 1. Creates symlinks in ~/.kiro/skills/ for all Loom skill directories
-# 2. Copies loom agent config to ~/.kiro/agents/
+# 2. Links loom agent config in ~/.kiro/agents/
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

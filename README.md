@@ -31,8 +31,8 @@ git clone https://github.com/zuevrs/loom ~/.loom
 | Windsurf | `~/.loom/scripts/install-windsurf` |
 | Kiro | `~/.loom/scripts/install-kiro` |
 | Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` |
-| Cline | Same as Cursor (`~/.loom/scripts/install-cursor`); also reads `AGENTS.md` |
-| OpenClaw | Same as Cursor; or `clawhub install zuevrs/loom` |
+| Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) |
+| OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` |
 
 Then run **`loom-init`** in each project to write the managed block.
 
@@ -142,7 +142,9 @@ Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook p
 | Windsurf | Remove Loom skill symlinks from `~/.codeium/windsurf/skills/` |
 | Kiro | `rm ~/.kiro/agents/loom.json`; remove Loom skill symlinks from `~/.kiro/skills/` |
 | Hermes | `rm -rf ~/.hermes/plugins/loom` |
-| Cline/Droid/OpenClaw | Remove Loom skill symlinks from `~/.agents/skills/` |
+| Droid | `droid plugin uninstall loom` |
+| Cline | Remove Loom skill symlinks from `~/.agents/skills/` |
+| OpenClaw | If installed via `clawhub`, remove Loom via clawhub plugin manager. If installed via `install-agents-skills`, remove Loom skill symlinks from `~/.agents/skills/`. |
 
 In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGENTS.md` and delete `.loom/` if present.
 
