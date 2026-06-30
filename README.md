@@ -174,14 +174,14 @@ Templates are co-located with the skills that use them:
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
 | Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
-| Hooks | 3 | 3 | — | 1 | — | 3 | — | config | Python | — | yes | ext |
+| Hooks | 3 | 3 | — | 2 | — | 3 | — | config | 3 | — | yes | ext |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
 
-Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn, `1` = session-start only, `config` = host config-driven hook, `Python` = Python plugin hook, `ext` = extension callback, `—` = no hook primitive.
+Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn, `2` = session-start + per-turn (extension), `config` = host config-driven hook, `ext` = extension callback, `—` = no hook primitive.
 
 Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
 
-**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. Hermes ships pre-LLM injection only; OMP/Pi ship session-start discipline; script-tier hosts rely on AGENTS.md managed block.
+**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. OMP ships session-start + per-turn via extension; Hermes ships session-start + per-turn + subagent (observability); script-tier hosts rely on AGENTS.md managed block.
 
 ## Uninstall
 

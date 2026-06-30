@@ -3,7 +3,9 @@ version: 0.2.8
 description: Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.
 author: zuevrs
 provides_hooks:
+  - on_session_start
   - pre_llm_call
+  - subagent_start
 provides_commands:
   - loom-plan
   - loom-implement
