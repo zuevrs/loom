@@ -3,6 +3,7 @@
 # 1. Creates symlinks in ~/.agents/skills/ → all Loom skill directories
 # 2. Installs loom hooks in ~/.cursor/hooks.json (creates file, otherwise prints manual merge hints)
 # Cursor discovers skills from ~/.agents/skills/ and hooks from ~/.cursor/hooks.json.
+# Exit: 0 all installed, 1 partial (some skipped), 2 preflight failure
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -10,6 +11,24 @@ SKILLS_DIR="$LOOM_ROOT/skills"
 HOOKS_DIR="$LOOM_ROOT/hooks"
 TARGET_DIR="$HOME/.agents/skills"
 HOOKS_FILE="$HOME/.cursor/hooks.json"
+
+# Preflight
+if [ ! -d "$SKILLS_DIR" ]; then
+  echo "ERROR: skills/ directory not found at $SKILLS_DIR" >&2
+  exit 2
+fi
+for f in loom-session-start.cjs loom-pre-llm.cjs loom-subagent-cursor.cjs; do
+  if [ ! -f "$HOOKS_DIR/$f" ]; then
+    echo "ERROR: hook source missing: $HOOKS_DIR/$f" >&2
+    exit 2
+  fi
+done
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node not found on PATH (required for Cursor hooks)" >&2
+  exit 2
+fi
+
+skipped=0
 
 # --- Skills ---
 echo "Skills:"
@@ -29,11 +48,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       continue
     fi
     echo "  ⚠ $skill_name: symlink exists → $existing (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
   if [ -e "$target" ]; then
     echo "  ⚠ $skill_name: path exists and is not a symlink (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
@@ -90,4 +111,8 @@ else
 fi
 
 echo ""
+if [ "$skipped" -gt 0 ]; then
+  echo "Done ($skipped skipped). Restart Cursor to pick up changes."
+  exit 1
+fi
 echo "Done. Restart Cursor to pick up changes."

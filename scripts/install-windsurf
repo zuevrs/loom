@@ -2,16 +2,23 @@
 # loom: install skills for Windsurf IDE
 # Creates symlinks in ~/.codeium/windsurf/skills/ pointing to all Loom skill directories.
 # Windsurf discovers skills from ~/.codeium/windsurf/skills/ (global) and .windsurf/skills/ (project).
+# Exit: 0 all installed, 1 partial, 2 preflight failure
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="$LOOM_ROOT/skills"
 TARGET_DIR="$HOME/.codeium/windsurf/skills"
 
+if [ ! -d "$SKILLS_DIR" ]; then
+  echo "ERROR: skills/ directory not found at $SKILLS_DIR" >&2
+  exit 2
+fi
+
 mkdir -p "$TARGET_DIR"
 
 echo "Windsurf skills:"
 installed=0
+skipped=0
 for skill_dir in "$SKILLS_DIR"/*/; do
   [ -f "${skill_dir}SKILL.md" ] || continue
   skill_name=$(basename "$skill_dir")
@@ -25,11 +32,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       continue
     fi
     echo "  ⚠ $skill_name: symlink exists → $existing (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
   if [ -e "$target" ]; then
     echo "  ⚠ $skill_name: path exists and is not a symlink (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
@@ -39,6 +48,11 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 done
 
 echo ""
+if [ "$skipped" -gt 0 ]; then
+  echo "Done. $installed linked, $skipped skipped in $TARGET_DIR"
+  echo "Windsurf will discover linked skills on next Cascade session."
+  exit 1
+fi
 echo "Done. $installed skills linked in $TARGET_DIR"
 echo "Windsurf will discover them on next Cascade session."
 echo ""
