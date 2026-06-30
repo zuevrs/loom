@@ -67,57 +67,14 @@ Recommend host-native skills when scope touches security/perf/CI — do not fold
 - Pick the **lowest-numbered unblocked** issue when no specific one requested.
 - One issue per session; separate sessions claim separate issues.
 
-## PRD template
+## Templates
 
-```markdown
-# PRD: <feature-name>
+Use co-located template files when creating project artifacts:
 
-## Problem
-
-## Solution / Outcome
-
-## User Stories
-
-## Implementation Decisions
-
-## Testing Decisions
-
-- What makes a good test here (behavior through public interface, not implementation details)
-- Which modules/seams will be tested
-- Prior art (similar tests in repo)
-
-## Scope boundaries
-### In scope
-
-### Out of scope
-
-## Quality gates
-
-## Acceptance Criteria
-
-## Risks / Rollout
-```
-
-## Issue template
-
-```markdown
-# <NN> — <issue title>
-
-Parent: `.loom/<feature-slug>/PRD.md`
-Status: ready-for-agent
-
-## What to build
-
-## Acceptance criteria
-
-## Blocked by
-
-## Out of scope
-
-## Verification command/check
-
-## Comments
-```
+- PRD → [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md)
+- Issue → [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md)
+- PRODUCT.md → [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) (first adoption only)
+- DESIGN.md → [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) (user-facing UI projects only)
 
 ## Hard stops
 

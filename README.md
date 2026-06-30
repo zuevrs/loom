@@ -105,16 +105,16 @@ Add your own loops: copy any file in `loops/`, follow the shape (objective gate,
 
 ## Templates
 
-Loom ships project document templates in `templates/`:
+Templates are co-located with the skills that use them:
 
-| Template | Used by | Creates |
-|----------|---------|---------|
-| `PRD.md` | Plan | `.loom/<feature>/PRD.md` |
-| `ISSUE.md` | Plan | `.loom/<feature>/issues/*.md` |
-| `PRODUCT.md` | Init/Plan | `PRODUCT.md` at project root |
-| `DESIGN.md` | Plan | `DESIGN.md` (user-facing UI projects) |
-| `STATE.md` | Loop | `.loom/STATE.md` |
-| `SAFETY.md` | Loop | `.loom/SAFETY.md` |
+| Template | Location | Creates |
+|----------|----------|---------|
+| PRD | `skills/loom-plan/PRD-TEMPLATE.md` | `.loom/<feature>/PRD.md` |
+| Issue | `skills/loom-plan/ISSUE-TEMPLATE.md` | `.loom/<feature>/issues/*.md` |
+| PRODUCT | `skills/loom-plan/PRODUCT-TEMPLATE.md` | `PRODUCT.md` at project root |
+| DESIGN | `skills/loom-plan/DESIGN-TEMPLATE.md` | `DESIGN.md` (user-facing UI projects) |
+| STATE | `skills/loom-loop/STATE-TEMPLATE.md` | `.loom/STATE.md` |
+| SAFETY | `skills/loom-loop/SAFETY-TEMPLATE.md` | `.loom/SAFETY.md` |
 
 ## What each host gets
 

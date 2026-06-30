@@ -24,8 +24,8 @@ Two modes — **setup** (default entry) and **apply** (after setup + user approv
 ### Outputs
 
 - `.loom/loops/<starter-id>.yaml`
-- `.loom/SAFETY.md` (from template if missing)
-- `.loom/STATE.md` (from template if missing)
+- `.loom/SAFETY.md` (from [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md) if missing)
+- `.loom/STATE.md` (from [`STATE-TEMPLATE.md`](STATE-TEMPLATE.md) if missing)
 - Dry-run precheck evidence
 - Handoff prompt for apply mode
 
