@@ -14,9 +14,10 @@ Before writing code, stop at the first rung that holds:
 
 ```
 skills/          ← canonical ritual and trait skills (SKILL.md each)
+  loom-plan/     ← includes PRD, ISSUE, PRODUCT, DESIGN templates
+  loom-loop/     ← includes STATE, SAFETY templates + TEMPLATES.md
 hooks/           ← lifecycle hooks (CJS, plugin-tier hosts)
-loops/           ← loop starter templates
-templates/       ← project doc templates (PRD, ISSUE, PRODUCT, etc.)
+loops/           ← loop starter catalog (markdown)
 scripts/         ← install scripts for script-tier hosts
 commands/        ← slash command definitions
 tests/           ← hook tests and canaries
