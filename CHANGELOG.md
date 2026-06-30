@@ -10,18 +10,27 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Verify digest requirement before `loom-implement` completion
 - Explicit done-when criteria for `loom-verify`, `loom-tend`
 - Loop templates extracted to `skills/loom-loop/TEMPLATES.md`
+- Project document templates co-located with skills (PRD, ISSUE, PRODUCT, DESIGN, STATE, SAFETY)
 - CI workflow for hooks, drift, and loop config checks
 - Cursor hooks install via `scripts/install-cursor`
 - Hermes, Kiro, Windsurf adapters
 - 12-host capability matrix in README
+- CHANGELOG and CONTRIBUTING docs
+- Question patterns and anti-rationalization for `plan-grill`
+- Concrete audit commands for `loom-tend`
+- `loomRole` field for explicit sub-agent role assignment
 
 ### Fixed
 - `loom-init` managed block and host shim templates restored
 - Install scripts now symlink all skills (not only `loom-*` rituals)
+- Version synced to 0.2.0 across package.json, hook, and init template
+- Sub-agent hook no longer misassigns roles based on host subagent type
 
 ### Changed
 - Hook and loop starter comments simplified (no internal references)
 - README split into plugin-native vs script-based install sections
+- ADR format expanded to full section structure (Status/Context/Decision/Why/Notes)
+- Verify skill documents `loomRole` pass-through for checker sub-agents
 
 ## [0.1.0] - 2026-06-28
 
