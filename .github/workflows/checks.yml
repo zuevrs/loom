@@ -14,3 +14,4 @@ jobs:
       - run: scripts/check-installers
       - run: scripts/check-loop-starters
       - run: scripts/check-loop-config
+      - run: scripts/check-skill-template-contract

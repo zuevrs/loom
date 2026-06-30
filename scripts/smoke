@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# loom: structural smoke — no LLM, runs all maintainer checks (ADR-0040)
+# Exit: 0 pass, 1 drift/failure, 3 execution error
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$ROOT"
+
+run() {
+  echo "→ $*"
+  "$@"
+}
+
+run node tests/hooks.test.mjs
+run node tests/loop-checks.test.mjs
+run bash scripts/check-drift
+run bash scripts/check-doc-consistency
+run bash scripts/check-installers
+run bash scripts/check-loop-starters
+run bash scripts/check-loop-config
+run bash scripts/check-skill-template-contract
+
+echo '{"status":"pass","message":"Structural smoke passed"}'
