@@ -26,9 +26,11 @@ Finding is actionable only when tied to a deterministic check (linter exit code,
 
 ## hard stops
 
-- `max_iterations_per_item`: 3
+- `max_iterations`: 3
 - `max_run_minutes`: 30
 - `max_auto_actions_per_run`: 5
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
@@ -50,4 +52,4 @@ Human reviews each finding before `ready-for-agent`. No auto-merge. No auto-fix 
 4. **Security** — read-only scan; no credential logging
 5. **Comprehension** — scope bounded by configured tools only
 6. **Onboarding** — run manually first → confirm value → automate
-7. **Low acceptance** — if findings consistently rejected → degrade + tuning issue
+7. **Low acceptance** — accepted-change rate <50% rolling → force report-only + tuning issue

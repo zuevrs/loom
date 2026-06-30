@@ -26,9 +26,11 @@ Finding is actionable when: coverage delta is measurable (numeric drop below thr
 
 ## hard stops
 
-- `max_iterations_per_item`: 3
+- `max_iterations`: 3
 - `max_run_minutes`: 30
 - `max_auto_actions_per_run`: 3
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
@@ -51,4 +53,4 @@ Human decides which coverage gaps are worth fixing. No auto-generated tests with
 4. **Security** — read-only coverage analysis
 5. **Comprehension** — scope = src/ files with coverage tooling configured
 6. **Onboarding** — establish coverage baseline manually → set threshold → automate
-7. **Low acceptance** — if coverage issues consistently closed-wontfix → raise threshold discussion
+7. **Low acceptance** — accepted-change rate <50% rolling → force report-only + tuning issue

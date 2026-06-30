@@ -26,9 +26,11 @@ Finding is actionable when: specific broken link, reference to deleted symbol, o
 
 ## hard stops
 
-- `max_iterations_per_item`: 3
+- `max_iterations`: 3
 - `max_run_minutes`: 20
 - `max_auto_actions_per_run`: 5
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
@@ -50,7 +52,7 @@ Human reviews each doc update proposal. No auto-merge on documentation changes.
 4. **Security** — read-only; docs are public surface
 5. **Comprehension** — scope = docs/ + README + inline doc comments
 6. **Onboarding** — run link-check manually first → confirm value → automate
-7. **Low acceptance** — if doc fixes consistently rejected → degrade + tuning issue
+7. **Low acceptance** — accepted-change rate <50% rolling → force report-only + tuning issue
 
 ## note
 

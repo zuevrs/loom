@@ -26,9 +26,11 @@ Finding is actionable when: CVE exists + fix version available + no breaking cha
 
 ## hard stops
 
-- `max_iterations_per_item`: 2
+- `max_iterations`: 2
 - `max_run_minutes`: 15
 - `max_auto_actions_per_run`: 3
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
@@ -50,4 +52,4 @@ Human approves each upgrade before `ready-for-agent`. No auto-merge. Breaking ch
 4. **Security** — read-only audit; no credential logging; report CVEs, not exploit details
 5. **Comprehension** — scope = declared dependencies only
 6. **Onboarding** — run audit manually first → confirm tool accuracy → automate
-7. **Low acceptance** — if upgrades consistently rejected → degrade + tuning issue
+7. **Low acceptance** — accepted-change rate <50% rolling → force report-only + tuning issue

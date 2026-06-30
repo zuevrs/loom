@@ -1,4 +1,4 @@
-# Loop starter: discovery-daily
+# Loop: discovery-daily
 
 ## id
 
@@ -26,9 +26,11 @@ Finding is actionable only when tied to a deterministic check (CI status, linter
 
 ## hard stops
 
-- `max_iterations_per_item`: 3
+- `max_iterations`: 3
 - `max_run_minutes`: 30
 - `max_auto_actions_per_run`: 3
+- `cooldown_minutes`: 60
+- `low_acceptance_threshold`: 0.5
 
 ## safety ref
 
@@ -52,4 +54,4 @@ Human reviews each discovery before `ready-for-agent`. No auto-merge.
 6. **Security** — read-only; no credential logging
 7. **Comprehension** — discovery scope bounded by enabled sources only
 8. **Onboarding** — manual scan first → automate only after human confirms value
-9. **Low acceptance** — if findings consistently rejected → degrade + tuning issue
+9. **Low acceptance** — accepted-change rate <50% rolling → force report-only + tuning issue
