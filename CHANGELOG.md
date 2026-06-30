@@ -14,6 +14,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ### Changed
 - Aligned invariant wording across managed block and pre-LLM hook (`No verify digest → no done`, traits reference)
 - README host matrix now includes a legend for hooks/discipline shorthand
+- `loom-verify`: replaced legacy `Task` wording with `Subagent` wording
+- `loom-tend`: switched search command examples from `grep` to `rg`
 
 ## [0.2.1] - 2026-06-30
 
