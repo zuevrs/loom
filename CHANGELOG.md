@@ -5,10 +5,11 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ## [Unreleased]
 
 ### Added
-- _None yet_
+- README `Prerequisites & Troubleshooting` section for install UX
 
 ### Changed
-- _None yet_
+- `check-doc-consistency` now enforces README prerequisites/troubleshooting section presence
+- README Hooks table now reflects current `pre-LLM` invariant scope
 
 ## [0.2.6] - 2026-06-30
 
