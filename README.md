@@ -103,6 +103,8 @@ Start in `report-only`; opt in to `assisted` / `unattended` after trust is earne
 
 Add your own loops: copy any file in `loops/`, follow the shape (objective gate, hard stops, safety, human gate).
 
+Maintainer note: CI validates loop contracts with `scripts/check-loop-starters` (starter shape + catalog sync) and `scripts/check-loop-config` (generated `.loom/loops/*.yaml` schema and safety/state wiring).
+
 ## Templates
 
 Templates are co-located with the skills that use them:

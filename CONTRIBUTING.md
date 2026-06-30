@@ -30,9 +30,12 @@ tests/           ← hook tests and canaries
 3. Run checks before pushing:
    ```bash
    node --test tests/hooks.test.mjs
+   node tests/loop-checks.test.mjs
    bash scripts/check-drift
    bash scripts/check-doc-consistency
    bash scripts/check-installers
+   bash scripts/check-loop-starters
+   bash scripts/check-loop-config
    ```
 4. Open a PR with a clear description of what and why.
 
@@ -53,12 +56,16 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 
 - One markdown file under `loops/`.
 - Follow the loop starter shape (see `skills/loom-loop/TEMPLATES.md`).
-- `scripts/check-loop-config` validates generated loop configs in `.loom/loops/*.yaml` (not `loops/*.md` starter shape).
+- `scripts/check-loop-starters` validates `loops/*.md` starter shape and starter catalog sync.
+- `scripts/check-loop-config` validates generated loop configs in `.loom/loops/*.yaml`.
 
 ## Tests
 
 - `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
+- `tests/loop-checks.test.mjs` — fixture tests for loop canary scripts.
 - `scripts/check-drift` — adapter drift canary.
 - `scripts/check-doc-consistency` — user-facing docs drift canary.
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
+- `scripts/check-loop-starters` — loop starter shape + starter catalog sync canary.
+- `scripts/check-loop-config` — generated loop config schema + state/safety consistency canary.
 - CI runs these checks on every push.
