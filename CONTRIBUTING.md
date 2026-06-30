@@ -32,6 +32,7 @@ tests/           ← hook tests and canaries
    node --test tests/hooks.test.mjs
    bash scripts/check-drift
    bash scripts/check-doc-consistency
+   bash scripts/check-installers
    ```
 4. Open a PR with a clear description of what and why.
 
@@ -59,4 +60,5 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
 - `scripts/check-drift` — adapter drift canary.
 - `scripts/check-doc-consistency` — user-facing docs drift canary.
+- `scripts/check-installers` — installer script canary (syntax + key target contracts).
 - CI runs these checks on every push.

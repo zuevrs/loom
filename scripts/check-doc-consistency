@@ -23,6 +23,24 @@ fi
 if ! grep -Fq 'codex plugin remove loom@loom && codex plugin marketplace remove loom' "$README"; then
   errors+=("README Codex uninstall command is stale")
 fi
+if ! grep -Fq '~/.loom/scripts/install-agents-skills' "$README"; then
+  errors+=("README Cline/OpenClaw install command should use install-agents-skills")
+fi
+if grep -Fq 'Same as Cursor (`~/.loom/scripts/install-cursor`)' "$README"; then
+  errors+=("README still points Cline/OpenClaw to install-cursor")
+fi
+if ! grep -Fq 'droid plugin uninstall loom' "$README"; then
+  errors+=("README Droid uninstall command should use plugin uninstall")
+fi
+if grep -Fq 'Cline/Droid/OpenClaw' "$README"; then
+  errors+=("README still groups Droid with Cline/OpenClaw uninstall path")
+fi
+if ! grep -Fq 'If installed via `clawhub`' "$README"; then
+  errors+=("README OpenClaw uninstall should describe clawhub path")
+fi
+if ! grep -Fq 'If installed via `install-agents-skills`' "$README"; then
+  errors+=("README OpenClaw uninstall should describe install-agents-skills path")
+fi
 
 # AGENTS managed block and loom-init managed block template must stay identical.
 tmp_agents="$(mktemp)"

@@ -2,6 +2,18 @@
 
 All notable changes to Loom are documented here. Follows [Keep a Changelog](https://keepachangelog.com/) and [SemVer](https://semver.org/).
 
+## [0.2.4] - 2026-06-30
+
+### Added
+- `scripts/install-agents-skills` for AGENTS.md-tier hosts (skills-only install path)
+- `scripts/check-installers` canary for installer syntax and key target contracts
+
+### Changed
+- README host install/uninstall paths clarified for Cline, OpenClaw (dual-path), and Droid
+- `install-cursor` now checks all three Loom hook entries before reporting hooks as installed
+- Installer script header comments aligned with current behavior
+- CI and CONTRIBUTING checks now include `check-installers`
+
 ## [0.2.3] - 2026-06-30
 
 ### Changed

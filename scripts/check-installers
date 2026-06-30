@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# loom: installer canary — validates install script presence and contracts
+# Exit: 0 clean, 1 drift detected
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+errors=()
+
+required_scripts=(
+  "scripts/install-cursor"
+  "scripts/install-windsurf"
+  "scripts/install-kiro"
+  "scripts/install-agents-skills"
+)
+
+for rel in "${required_scripts[@]}"; do
+  file="$ROOT/$rel"
+  if [ ! -f "$file" ]; then
+    errors+=("missing installer script: $rel")
+    continue
+  fi
+  if [ ! -x "$file" ]; then
+    errors+=("installer script is not executable: $rel")
+  fi
+  if ! bash -n "$file"; then
+    errors+=("installer script has invalid bash syntax: $rel")
+  fi
+done
+
+# Key target contracts.
+if ! grep -Fq 'TARGET_DIR="$HOME/.agents/skills"' "$ROOT/scripts/install-agents-skills" 2>/dev/null; then
+  errors+=("install-agents-skills target dir contract drifted")
+fi
+if ! grep -Fq 'HOOKS_FILE="$HOME/.cursor/hooks.json"' "$ROOT/scripts/install-cursor" 2>/dev/null; then
+  errors+=("install-cursor hooks file contract drifted")
+fi
+if ! grep -Fq 'TARGET_DIR="$HOME/.codeium/windsurf/skills"' "$ROOT/scripts/install-windsurf" 2>/dev/null; then
+  errors+=("install-windsurf target dir contract drifted")
+fi
+if ! grep -Fq 'SKILLS_TARGET="$HOME/.kiro/skills"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
+  errors+=("install-kiro skills target contract drifted")
+fi
+if ! grep -Fq 'AGENT_TARGET="$HOME/.kiro/agents"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
+  errors+=("install-kiro agent target contract drifted")
+fi
+
+if [ ${#errors[@]} -eq 0 ]; then
+  echo '{"status":"clean","message":"Installer checks passed"}'
+  exit 0
+fi
+
+echo "{"
+echo '  "status": "drift",'
+echo '  "errors": ['
+for i in "${!errors[@]}"; do
+  comma=","
+  [ "$i" -eq "$((${#errors[@]} - 1))" ] && comma=""
+  echo "    \"${errors[$i]}\"$comma"
+done
+echo '  ]'
+echo "}"
+exit 1
