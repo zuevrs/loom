@@ -58,7 +58,7 @@ Then run **`loom-init`** in each project to write the managed block.
 1. **Install** Loom for your host (above).
 2. In your project, invoke **`loom-init`** — confirm the write plan.
 3. **`loom-plan`** for multi-session work (or **`loom-implement`** directly for a small fix).
-4. **`loom-implement`** one issue at a time, then **`loom-verify`** before marking done.
+4. **`loom-implement`** one issue at a time; ensure a **`loom-verify`** digest exists before marking done (auto-invoked on some hosts, manual on others).
 
 ## Upgrade
 

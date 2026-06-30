@@ -73,14 +73,13 @@ Status effects: **APPROVE** → set issue `Status: done`. **REJECT** → no auto
 
 ## Host limitations
 
-Not all hosts support parallel sub-agents:
+Documented parallel sub-agent support today:
 
-| Capability | Claude Code | Codex | Cursor | Windsurf | Kiro | OpenCode |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|
-| Parallel sub-agents | yes | yes | yes | — | — | yes |
-| Sequential fallback | — | — | — | yes | yes | — |
+| Capability | Claude Code | Codex | Cursor | OpenCode |
+|---|:-:|:-:|:-:|:-:|
+| Parallel sub-agents | yes | yes | yes | yes |
 
-When host cannot spawn parallel sub-agents: run Spec then Standards **sequentially in separate context windows**. Document in "Sub-agent evidence" which path was used.
+For other supported hosts (Pi, OMP, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), treat parallel support as unavailable unless the host documents equivalent capability. Run Spec then Standards **sequentially in separate context windows** and document the limitation in "Sub-agent evidence".
 
 ## Done when
 
