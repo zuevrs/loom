@@ -1,9 +1,9 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
-// Injects discipline on session_start and guards invariants.
+// session_start: context pointers (once). before_agent_start: per-turn invariants.
 //
-// Ref: can1357/oh-my-pi extensibility/plugins/loader.ts
-// Hook factory: (pi: HookAPI) => void
+// Ref: can1357/oh-my-pi extensibility/extensions/types.ts
+// Extension factory: (pi: ExtensionAPI) => void
 
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -14,9 +14,15 @@ const { PRE_LLM } = require("./hooks/invariants.cjs");
 
 const MANAGED_BLOCK_VERSION = "v0.2.8";
 
-const DISCIPLINE = `${PRE_LLM}
+const INVARIANTS = `${PRE_LLM}
 
 - Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.`;
+
+const ROLES = {
+  maker: "Ship one vertical slice. Do not self-approve. Leave runnable check.",
+  "spec-checker": "Judge against issue + PRD only. Quote spec lines. Do not fix code.",
+  "standards-checker": "Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
+};
 
 function findProjectRoot() {
   let dir = process.env.PI_PROJECT_DIR || process.cwd();
@@ -58,23 +64,36 @@ function buildContextPointers(root) {
 }
 
 export default function loomExtension(pi) {
+  // One-shot: context pointers + managed-block version check
   pi.on("session_start", () => {
     try {
       const root = findProjectRoot();
       const pointers = buildContextPointers(root);
       const lines = [
-        DISCIPLINE,
+        "# Loom session context",
         "",
-        "## Session context",
         ...pointers,
         "",
-        "Map intent → loom-init | loom-plan | loom-implement | loom-verify | loom-tend | loom-loop.",
+        "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
       ];
-      // loom: OMP injects hook stdout into session context
       process.stdout.write(lines.join("\n") + "\n");
     } catch {
       // best effort — never break session start
     }
     return undefined;
+  });
+
+  // Per-turn: invariants + role manifest via systemPrompt append
+  pi.on("before_agent_start", (event) => {
+    try {
+      const role = (process.env.LOOM_ROLE || "").toLowerCase();
+      let injection = INVARIANTS;
+      if (role && ROLES[role]) {
+        injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
+      }
+      return { systemPrompt: event.systemPrompt + "\n\n" + injection };
+    } catch {
+      return undefined;
+    }
   });
 }

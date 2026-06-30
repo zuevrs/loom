@@ -51,8 +51,10 @@ When capture-learning approves a project skill: create `skills/<name>/SKILL.md` 
 
 ## Hard stops
 
-- No autonomous long-term knowledge writes.
-- No feature expansion during maintenance.
+- No autonomous long-term knowledge writes without user confirmation.
+- No feature expansion during maintenance — cut new issue instead.
+- No status changes to issues outside the Tend scope (e.g. marking issues `done`).
+- Do not delete or rewrite existing `loom:` debt markers — only pay them down with real code.
 
 ## Failure modes
 

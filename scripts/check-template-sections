@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# loom: template section contract canary
+# Verifies required sections exist in each *-TEMPLATE.md
+# Exit: 0 clean, 1 drift detected
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+errors=()
+
+check_sections() {
+  local file="$1"
+  shift
+  local name
+  name="$(basename "$file")"
+  for section in "$@"; do
+    if ! grep -Fq "$section" "$file"; then
+      errors+=("$name: missing required section '$section'")
+    fi
+  done
+}
+
+# PRD (ADR-0054: Matt core + Addy guards)
+prd="$ROOT/skills/loom-plan/PRD-TEMPLATE.md"
+[ -f "$prd" ] && check_sections "$prd" \
+  "## Problem" \
+  "## Solution / Outcome" \
+  "## Scope" \
+  "## User Stories" \
+  "## Implementation Decisions" \
+  "## Acceptance Criteria" \
+  "## Quality Gates" \
+  "## Risks / Rollout"
+
+# Issue (ADR-0055: vertical slice)
+issue="$ROOT/skills/loom-plan/ISSUE-TEMPLATE.md"
+[ -f "$issue" ] && check_sections "$issue" \
+  "## What to build" \
+  "## Acceptance criteria" \
+  "## Verification command" \
+  "## Blocked by" \
+  "## Out of scope" \
+  "## Status"
+
+# STATE (ADR-0056)
+state="$ROOT/skills/loom-loop/STATE-TEMPLATE.md"
+[ -f "$state" ] && check_sections "$state" \
+  "## Goal" \
+  "## Current mode" \
+  "## Active items" \
+  "## Run log" \
+  "## Acceptance metrics" \
+  "## Post-Run Critique" \
+  "## Cumulative summary" \
+  "## Needs-human"
+
+# SAFETY (ADR-0057)
+safety="$ROOT/skills/loom-loop/SAFETY-TEMPLATE.md"
+[ -f "$safety" ] && check_sections "$safety" \
+  "## Denylist paths" \
+  "## Human-gate required actions" \
+  "## Auto-merge policy" \
+  "## Connector permissions" \
+  "## Escalation triggers" \
+  "## Kill switch"
+
+# PRODUCT (ADR-0049)
+product="$ROOT/skills/loom-plan/PRODUCT-TEMPLATE.md"
+[ -f "$product" ] && check_sections "$product" \
+  "## What is this?" \
+  "## Who is it for?" \
+  "## Why does it exist?"
+
+# DESIGN (ADR-0043)
+design="$ROOT/skills/loom-plan/DESIGN-TEMPLATE.md"
+[ -f "$design" ] && check_sections "$design" \
+  "## Tokens" \
+  "## Rationale"
+
+if [ ${#errors[@]} -eq 0 ]; then
+  echo '{"status":"clean","message":"Template section checks passed"}'
+  exit 0
+fi
+
+echo "{"
+echo '  "status": "drift",'
+echo '  "errors": ['
+for i in "${!errors[@]}"; do
+  comma=","
+  [ "$i" -eq "$((${#errors[@]} - 1))" ] && comma=""
+  echo "    \"${errors[$i]}\"$comma"
+done
+echo '  ]'
+echo "}"
+exit 1

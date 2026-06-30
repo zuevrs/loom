@@ -19,5 +19,6 @@ run bash scripts/check-installers
 run bash scripts/check-loop-starters
 run bash scripts/check-loop-config
 run bash scripts/check-skill-template-contract
+run bash scripts/check-template-sections
 
 echo '{"status":"pass","message":"Structural smoke passed"}'

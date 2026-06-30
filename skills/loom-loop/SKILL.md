@@ -14,6 +14,26 @@ Two modes — **setup** (default entry) and **apply** (after setup + user approv
 
 **Setup internal pipeline (ADR-0084):** mini Plan (grill intent) → mini Implement (write config/SAFETY/STATE) → mini Verify (contract + safety + objective gate) before handoff to apply.
 
+## Inputs
+
+- Natural-language loop intent (setup) or existing config + runner credentials (apply)
+- `.loom/SAFETY.md`, `.loom/STATE.md` (created from templates if missing)
+
+## Outputs
+
+- `.loom/loops/<starter-id>.yaml` — validated config
+- `.loom/SAFETY.md`, `.loom/STATE.md` — loop artifacts
+- Enabled runner with evidence (apply mode)
+
+## Process
+
+1. Route to **setup** (default) or **apply** (post-setup, user requests enable).
+2. Setup: scope interview → write config/SAFETY/STATE → verify contract + objective gate → present dry-run plan.
+3. Apply: enforce safety → validate bundle → prechecks → request explicit approval → enable runner → capture evidence.
+4. Both: never auto-enable without explicit user confirmation.
+
+See mode-specific subsections below for detailed steps.
+
 ---
 
 ## Mode: setup

@@ -15,3 +15,4 @@ jobs:
       - run: scripts/check-loop-starters
       - run: scripts/check-loop-config
       - run: scripts/check-skill-template-contract
+      - run: scripts/check-template-sections

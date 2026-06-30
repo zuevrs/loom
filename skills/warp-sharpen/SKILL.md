@@ -9,14 +9,12 @@ Keep the warp (CONTEXT, ADRs) aligned with decisions as they crystallize during 
 
 ## Process
 
-Actively build and sharpen the domain model as you design — not just read `CONTEXT.md`.
-
-- **Challenge glossary** — when a term conflicts with `CONTEXT.md`, call it out.
-- **Sharpen fuzzy language** — propose precise canonical terms.
-- **Stress-test with scenarios** — invent edge cases that force boundary decisions.
-- **Cross-reference code** — if the user states how something works, check the code agrees.
-- **Update CONTEXT.md inline** — capture terms as they resolve; don't batch. Format → [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md).
-- **Offer ADRs sparingly** — only when hard to reverse, surprising without context, and a real trade-off. Format → [`ADR-FORMAT.md`](ADR-FORMAT.md).
+1. **Challenge glossary** — when a term conflicts with `CONTEXT.md`, call it out immediately.
+2. **Sharpen fuzzy language** — propose precise canonical terms; confirm with user before writing.
+3. **Stress-test with scenarios** — invent edge cases that force boundary decisions.
+4. **Cross-reference code** — if the user states how something works, check the code agrees.
+5. **Update CONTEXT.md inline** — capture terms as they resolve; don't batch. Format → [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md).
+6. **Offer ADRs sparingly** — only when hard to reverse, surprising without context, and a real trade-off. Format → [`ADR-FORMAT.md`](ADR-FORMAT.md).
 
 `CONTEXT.md` is glossary only — no implementation details, no specs, no scratchpad.
 
