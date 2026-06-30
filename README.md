@@ -27,7 +27,7 @@ git clone https://github.com/zuevrs/loom ~/.loom
 
 | Host | Command |
 |------|---------|
-| Cursor | `~/.loom/scripts/install-cursor` |
+| Cursor | `~/.loom/scripts/install-cursor` (skills + hooks) |
 | Windsurf | `~/.loom/scripts/install-windsurf` |
 | Kiro | `~/.loom/scripts/install-kiro` |
 | Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` |
@@ -102,6 +102,19 @@ Loom ships a seed catalog of scheduled loop configs in `loops/`:
 Start in `report-only`; opt in to `assisted` / `unattended` after trust is earned.
 
 Add your own loops: copy any file in `loops/`, follow the shape (objective gate, hard stops, safety, human gate).
+
+## Templates
+
+Loom ships project document templates in `templates/`:
+
+| Template | Used by | Creates |
+|----------|---------|---------|
+| `PRD.md` | Plan | `.loom/<feature>/PRD.md` |
+| `ISSUE.md` | Plan | `.loom/<feature>/issues/*.md` |
+| `PRODUCT.md` | Init/Plan | `PRODUCT.md` at project root |
+| `DESIGN.md` | Plan | `DESIGN.md` (user-facing UI projects) |
+| `STATE.md` | Loop | `.loom/STATE.md` |
+| `SAFETY.md` | Loop | `.loom/SAFETY.md` |
 
 ## What each host gets
 
