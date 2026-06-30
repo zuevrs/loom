@@ -42,6 +42,32 @@ if [ -f "$hermes_yaml" ] && [ -n "$pkg_version" ]; then
   fi
 fi
 
+# Check version constants in adapters that embed MANAGED_BLOCK_VERSION
+for adapter in "$ROOT/omp-extension.mjs" "$ROOT/hermes-plugin/__init__.py" "$ROOT/hooks/loom-session-start.cjs"; do
+  [ -f "$adapter" ] || continue
+  av=$(grep -o 'MANAGED_BLOCK_VERSION.*=.*"v\?[0-9.]*"' "$adapter" 2>/dev/null | grep -o '[0-9][0-9.]*' | head -1)
+  if [ -n "$av" ] && [ -n "$pkg_version" ] && [ "$av" != "$pkg_version" ]; then
+    errors+=("version mismatch: $(basename "$adapter") MANAGED_BLOCK_VERSION=$av vs package.json=$pkg_version")
+  fi
+done
+
+# Check adapters with explicit version fields
+kiro="$ROOT/kiro-agent.json"
+if [ -f "$kiro" ] && [ -n "$pkg_version" ]; then
+  kv=$(grep '"version"' "$kiro" 2>/dev/null | head -1 | sed 's/.*: *"//' | sed 's/".*//')
+  if [ -n "$kv" ] && [ "$kv" != "$pkg_version" ]; then
+    errors+=("version mismatch: kiro-agent.json=$kv vs package.json=$pkg_version")
+  fi
+fi
+
+opencode="$ROOT/opencode-plugin.mjs"
+if [ -f "$opencode" ] && [ -n "$pkg_version" ]; then
+  ov=$(grep -o 'Version: [0-9.]*' "$opencode" 2>/dev/null | grep -o '[0-9][0-9.]*' | head -1)
+  if [ -n "$ov" ] && [ "$ov" != "$pkg_version" ]; then
+    errors+=("version mismatch: opencode-plugin.mjs=$ov vs package.json=$pkg_version")
+  fi
+fi
+
 # Check all skills referenced in AGENTS.md router exist
 for skill in loom-init loom-plan loom-implement loom-verify loom-tend loom-loop plan-grill warp-sharpen; do
   if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then
