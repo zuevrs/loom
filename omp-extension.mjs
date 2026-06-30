@@ -8,7 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const MANAGED_BLOCK_VERSION = "v0.2.5";
+const MANAGED_BLOCK_VERSION = "v0.2.6";
 
 const DISCIPLINE = `# Loom invariants (session guard)
 
