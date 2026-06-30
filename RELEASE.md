@@ -21,9 +21,15 @@ If uncertain between patch vs minor, prefer **minor** and document the reasoning
 
 1. Move curated bullets from `## [Unreleased]` into a new section:
    - `## [X.Y.Z] - YYYY-MM-DD`
-2. Keep `## [Unreleased]` with placeholder bullets for next cycle.
-3. Ensure old tagged sections are not rewritten.
-4. Update compare links at the bottom of `CHANGELOG.md`:
+2. Under each release section, include ADR-0062 upgrade blocks (omit empty blocks):
+   - `### Highlights`
+   - `### Breaking changes` (if any)
+   - `### Migration steps`
+   - `### Adapter impacts`
+   - `### Safety changes`
+3. Keep `## [Unreleased]` with placeholder bullets for next cycle.
+4. Ensure old tagged sections are not rewritten.
+5. Update compare links at the bottom of `CHANGELOG.md`:
    - `[Unreleased]` must point to `...compare/vX.Y.Z...HEAD`
    - `[X.Y.Z]` must point to `...compare/v(previous)...vX.Y.Z`
 
@@ -50,6 +56,8 @@ bash scripts/check-doc-consistency
 bash scripts/check-installers
 bash scripts/check-loop-starters
 bash scripts/check-loop-config
+bash scripts/check-skill-template-contract
+bash scripts/smoke
 ```
 
 ## 5) Commit release changes
@@ -68,3 +76,4 @@ git push origin main --tags
 1. `git rev-parse --short HEAD`
 2. `git rev-parse --short vX.Y.Z`
 3. Confirm both hashes match.
+4. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md) checklist (maintainer ledger).

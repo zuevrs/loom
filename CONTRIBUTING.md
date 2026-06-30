@@ -29,6 +29,10 @@ tests/           ← hook tests and canaries
 2. Keep commits atomic — one logical change per commit.
 3. Run checks before pushing:
    ```bash
+   bash scripts/smoke
+   ```
+   Or individually:
+   ```bash
    node tests/hooks.test.mjs
    node tests/loop-checks.test.mjs
    bash scripts/check-drift
@@ -36,6 +40,7 @@ tests/           ← hook tests and canaries
    bash scripts/check-installers
    bash scripts/check-loop-starters
    bash scripts/check-loop-config
+   bash scripts/check-skill-template-contract
    ```
 4. Open a PR with a clear description of what and why.
 
@@ -54,6 +59,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 
 ## Adding a ritual or trait
 
+- [`docs/authoring.md`](docs/authoring.md) — maintainer skill/hook authoring guide.
 - One `SKILL.md` under `skills/<slug>/`.
 - Register in `AGENTS.md` managed block.
 - Register in `hermes-plugin/`, `kiro-agent.json`, and `scripts/check-drift`.
@@ -75,4 +81,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
 - `scripts/check-loop-starters` — loop starter shape + starter catalog sync canary.
 - `scripts/check-loop-config` — generated loop config schema + state/safety consistency canary.
+- `scripts/check-skill-template-contract` — skill section contract canary (ADR-0091).
+- `scripts/smoke` — runs all structural checks (ADR-0040).
+- `scripts/run-loop` — loop runner entrypoint with `--dry-run` (ADR-0079).
 - CI runs these checks on every push.

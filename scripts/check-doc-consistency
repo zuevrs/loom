@@ -10,6 +10,7 @@ INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
 PLAN_SKILL="$ROOT/skills/loom-plan/SKILL.md"
 LOOP_SKILL="$ROOT/skills/loom-loop/SKILL.md"
 PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
+INVARIANTS_SRC="$ROOT/hooks/invariants.cjs"
 CHANGELOG="$ROOT/CHANGELOG.md"
 RELEASE_DOC="$ROOT/RELEASE.md"
 PKG_JSON="$ROOT/package.json"
@@ -18,7 +19,7 @@ CHECKS_WORKFLOW="$ROOT/.github/workflows/checks.yml"
 
 errors=()
 
-if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PLAN_SKILL" ] || [ ! -f "$LOOP_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ] || [ ! -f "$CHECKS_WORKFLOW" ]; then
+if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PLAN_SKILL" ] || [ ! -f "$LOOP_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$INVARIANTS_SRC" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ] || [ ! -f "$CHECKS_WORKFLOW" ]; then
   echo '{"status":"skip","message":"Required docs/hook files are missing"}'
   exit 0
 fi
@@ -56,6 +57,47 @@ fi
 if ! grep -Fq '## Prerequisites & Troubleshooting' "$README"; then
   errors+=("README is missing required Prerequisites & Troubleshooting section")
 fi
+if ! grep -Fq '**Loom is:**' "$README"; then
+  errors+=("README is missing Loom is/is-not boundaries")
+fi
+if ! grep -Fq 'docs/glossary.md' "$README"; then
+  errors+=("README is missing glossary link")
+fi
+if ! grep -Fq 'docs/security.md' "$README"; then
+  errors+=("README is missing security doc link")
+fi
+GLOSSARY_DOC="$ROOT/docs/glossary.md"
+SECURITY_DOC="$ROOT/docs/security.md"
+AUTHORING_DOC="$ROOT/docs/authoring.md"
+if [ ! -f "$GLOSSARY_DOC" ]; then
+  errors+=("docs/glossary.md is missing")
+fi
+if [ ! -f "$SECURITY_DOC" ]; then
+  errors+=("docs/security.md is missing")
+fi
+if [ ! -f "$AUTHORING_DOC" ]; then
+  errors+=("docs/authoring.md is missing")
+fi
+if [ ! -f "$ROOT/scripts/smoke" ]; then
+  errors+=("scripts/smoke is missing")
+fi
+if [ ! -f "$ROOT/scripts/run-loop" ]; then
+  errors+=("scripts/run-loop is missing")
+fi
+LOOP_HEADLESS_DOC="$ROOT/docs/loop-headless.md"
+EVIDENCE_DOC="$ROOT/docs/evidence/HOST-INSTALL.md"
+if [ ! -f "$LOOP_HEADLESS_DOC" ]; then
+  errors+=("docs/loop-headless.md is missing")
+fi
+if [ ! -f "$EVIDENCE_DOC" ]; then
+  errors+=("docs/evidence/HOST-INSTALL.md is missing")
+fi
+if ! grep -Fq 'docs/loop-headless.md' "$README"; then
+  errors+=("README is missing loop-headless doc link")
+fi
+if ! grep -Fq 'docs/evidence/HOST-INSTALL.md' "$RELEASE_DOC"; then
+  errors+=("RELEASE.md is missing host install evidence checklist link")
+fi
 if ! grep -Fq '## [Unreleased]' "$CHANGELOG"; then
   errors+=("CHANGELOG is missing required [Unreleased] section")
 fi
@@ -81,7 +123,8 @@ for cmd in \
   'bash scripts/check-doc-consistency' \
   'bash scripts/check-installers' \
   'bash scripts/check-loop-starters' \
-  'bash scripts/check-loop-config'
+  'bash scripts/check-loop-config' \
+  'bash scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$cmd" "$CONTRIBUTING_DOC"; then
     errors+=("CONTRIBUTING is missing required check command: $cmd")
@@ -97,7 +140,8 @@ for ci_cmd in \
   'scripts/check-doc-consistency' \
   'scripts/check-installers' \
   'scripts/check-loop-starters' \
-  'scripts/check-loop-config'
+  'scripts/check-loop-config' \
+  'scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$ci_cmd" "$CHECKS_WORKFLOW"; then
     errors+=("checks.yml is missing required CI step: $ci_cmd")
@@ -184,11 +228,14 @@ fi
 if ! grep -Fq 'No verify digest' "$INIT_SKILL"; then
   errors+=("skills/loom-init/SKILL.md missing 'No verify digest' invariant")
 fi
-if ! grep -Fq 'No verify digest' "$PRELLM_HOOK"; then
-  errors+=("hooks/loom-pre-llm.cjs missing 'No verify digest' invariant")
+if ! grep -Fq 'No verify digest' "$INVARIANTS_SRC"; then
+  errors+=("hooks/invariants.cjs missing 'No verify digest' invariant")
 fi
-if ! grep -Fq 'Traits (model-invoked from Plan): plan-grill, warp-sharpen.' "$PRELLM_HOOK"; then
-  errors+=("hooks/loom-pre-llm.cjs missing traits reference")
+if ! grep -Fq 'Traits (model-invoked from Plan): plan-grill, warp-sharpen.' "$INVARIANTS_SRC"; then
+  errors+=("hooks/invariants.cjs missing traits reference")
+fi
+if ! grep -Fq 'require("./invariants.cjs")' "$PRELLM_HOOK" && ! grep -Fq "require('./invariants.cjs')" "$PRELLM_HOOK"; then
+  errors+=("hooks/loom-pre-llm.cjs must require hooks/invariants.cjs")
 fi
 
 if [ ${#errors[@]} -eq 0 ]; then
