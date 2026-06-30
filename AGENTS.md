@@ -21,13 +21,14 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Non-trivial logic leaves one runnable check before `done`.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.
+- Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
 
 ### Router
 
 Map intent to ritual skills:
 
 - setup/install/project wiring → `loom-init`
-- planning/grilling/prd/issues/slicing → `loom-plan`
+- planning/scope/prd/issues/slicing → `loom-plan`
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
@@ -44,8 +45,9 @@ Map intent to ritual skills:
 
 ### Invocation policy
 
-- User-invoked by default: `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
-- `loom-verify` must run before considering implementation complete.
+- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
+- Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
+- Model-invoked (ritual): `loom-verify` (after every Implement completion)
 
 ### Session state
 
