@@ -20,8 +20,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   target="$SKILLS_TARGET/$skill_name"
 
   if [ -L "$target" ]; then
-    echo "  ✓ $skill_name (already linked)"
-    installed=$((installed + 1))
+    existing=$(readlink "$target")
+    if [ "$existing" = "${skill_dir%/}" ]; then
+      echo "  ✓ $skill_name (already linked)"
+      installed=$((installed + 1))
+      continue
+    fi
+    echo "  ⚠ $skill_name: symlink exists → $existing (skipping)"
     continue
   fi
 
@@ -43,11 +48,18 @@ echo "Kiro agent:"
 mkdir -p "$AGENT_TARGET"
 
 AGENT_FILE="$AGENT_TARGET/loom.json"
-if [ -f "$AGENT_FILE" ]; then
-  echo "  ✓ loom agent already exists"
+if [ -L "$AGENT_FILE" ]; then
+  existing=$(readlink "$AGENT_FILE")
+  if [ "$existing" = "$LOOM_ROOT/kiro-agent.json" ]; then
+    echo "  ✓ loom agent (already linked)"
+  else
+    echo "  ⚠ loom.json: symlink exists → $existing (skipping)"
+  fi
+elif [ -f "$AGENT_FILE" ]; then
+  echo "  ⚠ loom.json exists (not a symlink — skipping)"
 else
-  cp "$LOOM_ROOT/kiro-agent.json" "$AGENT_FILE"
-  echo "  ✓ installed loom.json → $AGENT_FILE"
+  ln -s "$LOOM_ROOT/kiro-agent.json" "$AGENT_FILE"
+  echo "  ✓ linked loom.json → $AGENT_FILE"
 fi
 
 echo ""

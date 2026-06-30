@@ -6,7 +6,7 @@ Install: symlink or copy this directory to ~/.hermes/plugins/loom/
 
 from pathlib import Path
 
-SKILLS_DIR = Path(__file__).parent.parent / "skills"
+SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -15,8 +15,10 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
+- No verify digest → no done.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
+- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.
+- Traits (model-invoked from Plan): plan-grill, warp-sharpen."""
 
 SKILL_NAMES = [
     "loom-init", "loom-plan", "loom-implement",

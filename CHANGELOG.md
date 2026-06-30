@@ -2,6 +2,26 @@
 
 All notable changes to Loom are documented here. Follows [Keep a Changelog](https://keepachangelog.com/) and [SemVer](https://semver.org/).
 
+## [0.2.1] - 2026-06-30
+
+### Fixed
+- Version synced to 0.2.1 across all manifests (was 0.2.0 while tag existed)
+- Hermes plugin: resolve symlinks for skills directory path
+- Hermes plugin: discipline injection now includes verify-before-done and traits
+- Kiro agent config: removed restrictive `allowedTools` that blocked writes
+- Kiro install: symlink validation now verifies target matches (aligned with other scripts)
+- Kiro install: agent config uses symlink instead of copy (auto-updates)
+
+### Added
+- Codex plugin: register commands directory
+- `loom-verify`: host limitation table for parallel sub-agents
+- `loom-loop`: starter discoverability note for symlinked installs
+- `loom-plan`: EXECUTION-ORDER.md clarification in templates section
+- `check-loop-config`: CI exit code documentation
+
+### Changed
+- README host matrix: Codex now shows commands support
+
 ## [0.2.0] - 2026-06-30
 
 ### Added
