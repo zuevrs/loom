@@ -121,7 +121,7 @@ Templates are co-located with the skills that use them:
 | Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor | Windsurf | Kiro | Hermes | Cline | Droid | OpenClaw |
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Commands | yes | — | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
+| Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
 | Hooks | 3 | 3 | — | 1 | — | 3 | — | config | Python | — | yes | ext |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
 
