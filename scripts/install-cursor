@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # loom: install skills + hooks for Cursor IDE
 # 1. Creates symlinks in ~/.agents/skills/ → all Loom skill directories
-# 2. Merges loom hooks into ~/.cursor/hooks.json
+# 2. Installs loom hooks in ~/.cursor/hooks.json (creates file, otherwise prints manual merge hints)
 # Cursor discovers skills from ~/.agents/skills/ and hooks from ~/.cursor/hooks.json.
 set -euo pipefail
 
@@ -67,14 +67,25 @@ if [ ! -f "$HOOKS_FILE" ]; then
 HOOKSEOF
   echo "  ✓ Created $HOOKS_FILE with loom hooks"
 else
-  # Check if loom hooks already present
-  if grep -q "loom-session-start" "$HOOKS_FILE" 2>/dev/null; then
+  # Check whether all loom hooks are present
+  missing=()
+  if ! grep -q "loom-session-start" "$HOOKS_FILE" 2>/dev/null; then
+    missing+=("sessionStart: {\"command\": \"$SESSION_CMD\", \"timeout\": 5}")
+  fi
+  if ! grep -q "loom-pre-llm" "$HOOKS_FILE" 2>/dev/null; then
+    missing+=("beforeSubmitPrompt: {\"command\": \"$PRELLM_CMD\", \"timeout\": 3}")
+  fi
+  if ! grep -q "loom-subagent-cursor" "$HOOKS_FILE" 2>/dev/null; then
+    missing+=("subagentStart: {\"command\": \"$SUBAGENT_CMD\", \"timeout\": 3}")
+  fi
+
+  if [ ${#missing[@]} -eq 0 ]; then
     echo "  ✓ Loom hooks already in $HOOKS_FILE"
   else
-    echo "  ⚠ $HOOKS_FILE exists. Add these entries manually:"
-    echo "    sessionStart: {\"command\": \"$SESSION_CMD\", \"timeout\": 5}"
-    echo "    beforeSubmitPrompt: {\"command\": \"$PRELLM_CMD\", \"timeout\": 3}"
-    echo "    subagentStart: {\"command\": \"$SUBAGENT_CMD\", \"timeout\": 3}"
+    echo "  ⚠ $HOOKS_FILE exists. Add missing entries manually:"
+    for entry in "${missing[@]}"; do
+      echo "    $entry"
+    done
   fi
 fi
 
