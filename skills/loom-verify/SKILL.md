@@ -71,8 +71,19 @@ Status effects: **APPROVE** → set issue `Status: done`. **REJECT** → no auto
 | "I'll fix it myself in verify" | Verify judges; hand back to implement |
 | "Approve with known gap" | REJECT or ESCALATE_HUMAN with explicit debt marker |
 
+## Host limitations
+
+Not all hosts support parallel sub-agents:
+
+| Capability | Claude Code | Codex | Cursor | Windsurf | Kiro | OpenCode |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| Parallel sub-agents | yes | yes | yes | — | — | yes |
+| Sequential fallback | — | — | — | yes | yes | — |
+
+When host cannot spawn parallel sub-agents: run Spec then Standards **sequentially in separate context windows**. Document in "Sub-agent evidence" which path was used.
+
 ## Done when
 
-- Both sub-agents ran in parallel (or documented host limitation)
+- Both sub-agents ran in parallel (or documented host limitation with sequential fallback)
 - Digest has all required sections
 - Checks executed section lists commands with pass/fail
