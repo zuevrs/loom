@@ -25,6 +25,23 @@ if [ -n "$block_version" ] && [ -n "$pkg_version" ]; then
   fi
 fi
 
+# Check adapter versions match package.json
+for adapter in "$ROOT/.claude-plugin/plugin.json" "$ROOT/.codex-plugin/plugin.json"; do
+  [ -f "$adapter" ] || continue
+  av=$(grep '"version"' "$adapter" 2>/dev/null | head -1 | sed 's/.*: *"//' | sed 's/".*//')
+  if [ -n "$av" ] && [ -n "$pkg_version" ] && [ "$av" != "$pkg_version" ]; then
+    errors+=("version mismatch: $(basename "$(dirname "$adapter")")/plugin.json=$av vs package.json=$pkg_version")
+  fi
+done
+
+hermes_yaml="$ROOT/hermes-plugin/plugin.yaml"
+if [ -f "$hermes_yaml" ] && [ -n "$pkg_version" ]; then
+  hv=$(grep '^version:' "$hermes_yaml" 2>/dev/null | sed 's/version: *//')
+  if [ -n "$hv" ] && [ "$hv" != "$pkg_version" ]; then
+    errors+=("version mismatch: hermes-plugin/plugin.yaml=$hv vs package.json=$pkg_version")
+  fi
+fi
+
 # Check all skills referenced in AGENTS.md router exist
 for skill in loom-init loom-plan loom-implement loom-verify loom-tend loom-loop plan-grill warp-sharpen; do
   if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then

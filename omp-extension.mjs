@@ -8,7 +8,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const MANAGED_BLOCK_VERSION = "v0.1.0";
+const MANAGED_BLOCK_VERSION = "v0.2.0";
 
 const DISCIPLINE = `# Loom invariants (session guard)
 
@@ -18,7 +18,9 @@ const DISCIPLINE = `# Loom invariants (session guard)
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.`;
+- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.
+- No verify digest → no done.
+- Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
 
 function findProjectRoot() {
   let dir = process.env.PI_PROJECT_DIR || process.cwd();
