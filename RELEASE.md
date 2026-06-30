@@ -1,0 +1,70 @@
+# Loom Release Checklist
+
+Use this checklist for every Loom release.
+
+## 1) Prepare notes
+
+1. Keep all pending notes under `CHANGELOG.md` -> `## [Unreleased]`.
+2. Decide target version (`MAJOR.MINOR.PATCH`) using SemVer.
+
+### Version selection quick guide
+
+| Bump | Use when | Typical Loom examples |
+|---|---|---|
+| `PATCH` | Backward-compatible fixes and docs/process hardening | hook/install bugfixes, canary improvements, docs clarity, test additions |
+| `MINOR` | Backward-compatible capability expansion | new starter/checker/installer, new host support, new optional workflow |
+| `MAJOR` | Backward-incompatible behavior/config changes | removed/renamed rituals, incompatible managed-block format, dropped host path |
+
+If uncertain between patch vs minor, prefer **minor** and document the reasoning in changelog notes.
+
+## 2) Cut changelog section
+
+1. Move curated bullets from `## [Unreleased]` into a new section:
+   - `## [X.Y.Z] - YYYY-MM-DD`
+2. Keep `## [Unreleased]` with placeholder bullets for next cycle.
+3. Ensure old tagged sections are not rewritten.
+4. Update compare links at the bottom of `CHANGELOG.md`:
+   - `[Unreleased]` must point to `...compare/vX.Y.Z...HEAD`
+   - `[X.Y.Z]` must point to `...compare/v(previous)...vX.Y.Z`
+
+## 3) Bump versions and managed block pointers
+
+Update these files to `X.Y.Z`:
+
+- `package.json`
+- `.claude-plugin/plugin.json`
+- `.codex-plugin/plugin.json`
+- `hermes-plugin/plugin.yaml`
+- `AGENTS.md` managed block marker (`vX.Y.Z`)
+- `skills/loom-init/SKILL.md` managed block marker (`vX.Y.Z`)
+- `hooks/loom-session-start.cjs` (`MANAGED_BLOCK_VERSION`)
+- `omp-extension.mjs` (`MANAGED_BLOCK_VERSION`)
+
+## 4) Run checks
+
+```bash
+node tests/hooks.test.mjs
+node tests/loop-checks.test.mjs
+bash scripts/check-drift
+bash scripts/check-doc-consistency
+bash scripts/check-installers
+bash scripts/check-loop-starters
+bash scripts/check-loop-config
+```
+
+## 5) Commit release changes
+
+Create a release commit (or final release batch) with product-facing message.
+
+## 6) Tag and push
+
+```bash
+git tag vX.Y.Z
+git push origin main --tags
+```
+
+## 7) Verify
+
+1. `git rev-parse --short HEAD`
+2. `git rev-parse --short vX.Y.Z`
+3. Confirm both hashes match.

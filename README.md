@@ -43,6 +43,21 @@ Then run **`loom-init`** in each project to write the managed block.
 3. **`loom-plan`** for multi-session work (or **`loom-implement`** directly for a small fix).
 4. **`loom-implement`** one issue at a time, then **`loom-verify`** before marking done.
 
+## Upgrade
+
+When upgrading Loom, use this flow:
+
+1. **Global Loom install**
+   - Plugin-native hosts: re-run the install command from the table above for your host.
+   - Script-based hosts:
+     - `git -C ~/.loom pull --ff-only`
+     - re-run your host installer script (`install-cursor`, `install-windsurf`, `install-kiro`, or `install-agents-skills`)
+     - Hermes: ensure the plugin symlink still points to `~/.loom/hermes-plugin` and plugin is enabled.
+2. **Per project**
+   - Run `loom-init` in active repos to refresh managed block version when prompted.
+3. **Verification**
+   - Run your normal quality checks and confirm no managed-block version mismatch warnings remain.
+
 ## Skills
 
 | Skill | Purpose |

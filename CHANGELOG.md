@@ -2,6 +2,22 @@
 
 All notable changes to Loom are documented here. Follows [Keep a Changelog](https://keepachangelog.com/) and [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- README `Upgrade` section with host-level + project-level update flow
+- `RELEASE.md` with a repeatable release checklist
+
+### Changed
+- CONTRIBUTING now documents `Unreleased`-first changelog discipline
+- `check-doc-consistency` now enforces presence of `CHANGELOG` `Unreleased`, README `Upgrade`, and `RELEASE.md`
+- CHANGELOG now includes compare links for `Unreleased` and release tags
+- `check-doc-consistency` now enforces `[Unreleased]` compare link alignment with `package.json` version
+- `RELEASE.md` now includes a concrete SemVer bump decision table for patch/minor/major cuts
+- `check-doc-consistency` now enforces release-doc cross-link (`CONTRIBUTING` -> `RELEASE.md`)
+- `RELEASE.md` now includes explicit compare-link update steps during release cut
+- `check-doc-consistency` now requires compare-link presence for current `package.json` version
+
 ## [0.2.5] - 2026-06-30
 
 ### Added
@@ -104,3 +120,12 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Slash commands for Plan, Implement, Tend
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
+
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/zuevrs/loom/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/zuevrs/loom/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/zuevrs/loom/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/zuevrs/loom/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/zuevrs/loom/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/zuevrs/loom/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/zuevrs/loom/releases/tag/v0.1.0
