@@ -24,6 +24,8 @@ SKILL_NAMES = [
     "plan-grill", "warp-sharpen",
 ]
 
+RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]
+
 
 def register(ctx):
     for name in SKILL_NAMES:
@@ -36,7 +38,7 @@ def register(ctx):
 
     ctx.register_hook("pre_llm_call", pre_llm_hook)
 
-    for name in SKILL_NAMES:
+    for name in RITUAL_NAMES:
         skill_path = SKILLS_DIR / name / "SKILL.md"
 
         def make_handler(p):
