@@ -31,6 +31,7 @@ tests/           ← hook tests and canaries
    ```bash
    node --test tests/hooks.test.mjs
    bash scripts/check-drift
+   bash scripts/check-doc-consistency
    ```
 4. Open a PR with a clear description of what and why.
 
@@ -51,10 +52,11 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 
 - One markdown file under `loops/`.
 - Follow the loop starter shape (see `skills/loom-loop/TEMPLATES.md`).
-- `scripts/check-loop-config` validates structure.
+- `scripts/check-loop-config` validates generated loop configs in `.loom/loops/*.yaml` (not `loops/*.md` starter shape).
 
 ## Tests
 
 - `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
 - `scripts/check-drift` — adapter drift canary.
-- CI runs both on every push.
+- `scripts/check-doc-consistency` — user-facing docs drift canary.
+- CI runs these checks on every push.

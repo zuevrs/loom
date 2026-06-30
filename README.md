@@ -13,7 +13,7 @@ A skills-first harness that makes coding agents work like disciplined senior dev
 | Host | Command |
 |------|---------|
 | Claude Code | `/install-plugin zuevrs/loom` |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin install loom` |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` |
 | Pi | `pi install git:github.com/zuevrs/loom` |
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
 | OpenCode | `opencode plugin github:zuevrs/loom` |
@@ -125,12 +125,16 @@ Templates are co-located with the skills that use them:
 | Hooks | 3 | 3 | — | 1 | — | 3 | — | config | Python | — | yes | ext |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
 
+Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn, `1` = session-start only, `config` = host config-driven hook, `Python` = Python plugin hook, `ext` = extension callback, `—` = no hook primitive.
+
+Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
+
 ## Uninstall
 
 | Host | Command |
 |---|---|
 | Claude Code | `/remove-plugin loom` |
-| Codex | `codex plugin marketplace remove loom` |
+| Codex | `codex plugin remove loom@loom && codex plugin marketplace remove loom` |
 | Pi | `pi uninstall git:github.com/zuevrs/loom` |
 | OMP | `omp plugin uninstall loom` |
 | OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
