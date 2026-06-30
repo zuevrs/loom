@@ -7,7 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const MANAGED_BLOCK_VERSION = "v0.2.2";
+const MANAGED_BLOCK_VERSION = "v0.2.3";
 
 function findProjectRoot() {
   let dir = process.cwd();
