@@ -21,6 +21,7 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 SKILL_NAMES = [
     "loom-init", "loom-plan", "loom-implement",
     "loom-verify", "loom-tend", "loom-loop",
+    "plan-grill", "warp-sharpen",
 ]
 
 
