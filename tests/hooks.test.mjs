@@ -42,16 +42,27 @@ function run(script, env = {}) {
   ok(out.includes("Do not fix code"), "checker constraint present");
 }
 
-// subagent-cursor (receives stdin JSON)
+// subagent-cursor defaults to maker
 {
   const out = execFileSync("node", [resolve(hooksDir, "loom-subagent-cursor.cjs")], {
     encoding: "utf8",
-    input: JSON.stringify({ subagentType: "explore" }),
+    input: JSON.stringify({}),
     timeout: 5000,
   });
   const parsed = JSON.parse(out.trim());
   strictEqual(parsed.permission, "allow", "cursor subagent allows");
-  ok(parsed.user_message.includes("spec-checker"), "explore maps to spec-checker");
+  ok(parsed.user_message.includes("maker"), "defaults to maker role");
+}
+
+// subagent-cursor respects loomRole
+{
+  const out = execFileSync("node", [resolve(hooksDir, "loom-subagent-cursor.cjs")], {
+    encoding: "utf8",
+    input: JSON.stringify({ loomRole: "spec-checker" }),
+    timeout: 5000,
+  });
+  const parsed = JSON.parse(out.trim());
+  ok(parsed.user_message.includes("spec-checker"), "loomRole overrides default");
 }
 
 console.log("✔ All hook tests passed");
