@@ -23,6 +23,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - `check-doc-consistency` now enforces required check-command parity across `RELEASE.md` as well
 - `check-doc-consistency` now validates template inventory and README/skill template references
 - CONTRIBUTING now documents the expanded `check-doc-consistency` scope
+- `loom-verify` host-limitation guidance now matches full supported host matrix with explicit sequential fallback policy
+- README quickstart now clarifies verify digest requirement across auto/manual host paths
 
 ## [0.2.6] - 2026-06-30
 
