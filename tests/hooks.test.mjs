@@ -35,11 +35,21 @@ function run(script, env = {}) {
   ok(out.includes("Loom sub-agent role: maker"), "subagent defaults to maker");
 }
 
-// subagent with role override
+// subagent with role override (env)
 {
   const out = run("loom-subagent.cjs", { LOOM_SUBAGENT_ROLE: "spec-checker" });
   ok(out.includes("spec-checker"), "subagent respects role env");
   ok(out.includes("Do not fix code"), "checker constraint present");
+}
+
+// subagent respects loomRole from stdin JSON
+{
+  const out = execFileSync("node", [resolve(hooksDir, "loom-subagent.cjs")], {
+    encoding: "utf8",
+    input: JSON.stringify({ loomRole: "standards-checker" }),
+    timeout: 5000,
+  });
+  ok(out.includes("standards-checker"), "subagent respects loomRole stdin");
 }
 
 // subagent-cursor defaults to maker

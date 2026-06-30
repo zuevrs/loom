@@ -8,7 +8,11 @@
 
 import fs from "fs";
 import path from "path";
+import { createRequire } from "module";
 import { fileURLToPath } from "url";
+
+const require = createRequire(import.meta.url);
+const { PRE_LLM } = require("./hooks/invariants.cjs");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillsDir = path.resolve(__dirname, "skills");
@@ -24,25 +28,20 @@ Lazy senior dev mode: the best code is the code you never wrote. Lazy means effi
 Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
 
 - Prefer minimal working change over broad rewrites.
+- No unrelated refactors while implementing an issue.
 - One issue at a time; respect blocker order.
 - Mark intentional shortcuts with loom: comments (ceiling + upgrade path).
-- Not lazy about: trust-boundary validation, security, data-loss errors, accessibility.
+- Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before done.
+- Confirm before project writes in setup/apply flows.
 
-## Invariants
-
-- Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
-- Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
-- No verify digest → no done.
+${PRE_LLM}
 
 ## Router
 
 Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain) | loom-loop (loops).
 
-Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.
-Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
+Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
 
 export default async ({ client } = {}) => {
   return {
