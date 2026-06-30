@@ -2,12 +2,24 @@
 # loom: install agent + skills for Kiro CLI
 # 1. Creates symlinks in ~/.kiro/skills/ for all Loom skill directories
 # 2. Links loom agent config in ~/.kiro/agents/
+# Exit: 0 all installed, 1 partial, 2 preflight failure
 set -euo pipefail
 
 LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="$LOOM_ROOT/skills"
 SKILLS_TARGET="$HOME/.kiro/skills"
 AGENT_TARGET="$HOME/.kiro/agents"
+
+if [ ! -d "$SKILLS_DIR" ]; then
+  echo "ERROR: skills/ directory not found at $SKILLS_DIR" >&2
+  exit 2
+fi
+if [ ! -f "$LOOM_ROOT/kiro-agent.json" ]; then
+  echo "ERROR: kiro-agent.json not found at $LOOM_ROOT" >&2
+  exit 2
+fi
+
+skipped=0
 
 # --- Skills ---
 echo "Kiro skills:"
@@ -27,11 +39,13 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       continue
     fi
     echo "  ⚠ $skill_name: symlink exists → $existing (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
   if [ -e "$target" ]; then
     echo "  ⚠ $skill_name: exists (skipping)"
+    skipped=$((skipped + 1))
     continue
   fi
 
@@ -54,13 +68,19 @@ if [ -L "$AGENT_FILE" ]; then
     echo "  ✓ loom agent (already linked)"
   else
     echo "  ⚠ loom.json: symlink exists → $existing (skipping)"
+    skipped=$((skipped + 1))
   fi
 elif [ -f "$AGENT_FILE" ]; then
   echo "  ⚠ loom.json exists (not a symlink — skipping)"
+  skipped=$((skipped + 1))
 else
   ln -s "$LOOM_ROOT/kiro-agent.json" "$AGENT_FILE"
   echo "  ✓ linked loom.json → $AGENT_FILE"
 fi
 
 echo ""
+if [ "$skipped" -gt 0 ]; then
+  echo "Done ($skipped skipped). Use 'kiro --agent loom' or switch via /agent loom."
+  exit 1
+fi
 echo "Done. Use 'kiro --agent loom' or switch via /agent loom."
