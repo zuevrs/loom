@@ -20,7 +20,6 @@ Every `skills/<name>/SKILL.md` must include:
 
 - **Rituals** (user-invoked): `disable-model-invocation: true`
 - **`loom-verify`**: model-invoked (exception — post-Implement trigger)
-- **Traits** (`plan-grill`, `warp-sharpen`): model-invoked from Plan; may omit Inputs/Outputs/Failure modes when behavior is fully inline
 
 ## Templates
 

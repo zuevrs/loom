@@ -24,8 +24,6 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Ritual** — Named flow: Init, Plan, Implement, Verify, Tend.
 
-**Trait** — Model-invoked reusable behavior called from rituals (`plan-grill`, `warp-sharpen`).
-
 **Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
 
 **Implement** — Ship one issue with minimal diff; leave one runnable check.
@@ -34,7 +32,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Tend** — Maintain warp and issue state; pay down `loom:` debt; no feature scope.
 
-**Init** — Idempotent project setup: managed block, `.loom/`, host shims.
+**Init** — Idempotent project setup: managed block, `.loom/`.
 
 ## Work artifacts
 

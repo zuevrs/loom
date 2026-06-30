@@ -2,7 +2,7 @@
 
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-**What it does:** installs a discipline ladder, five ritual skills, two Plan traits, lifecycle hooks, and host-native enforcement into any supported agent host.
+**What it does:** installs a discipline ladder, five ritual skills, lifecycle hooks, and host-native enforcement into any supported agent host.
 
 **Why:** cold agents guess intent, over-engineer, skip verification, and lose context between sessions. Loom closes these gaps with on-disk conventions — no runtime engine, no lock-in.
 
@@ -85,20 +85,11 @@ When upgrading Loom, use this flow:
 
 | Skill | Purpose |
 |---|---|
-| `loom-init` | Project setup: managed block, `.loom/`, host shims |
+| `loom-init` | Project setup: managed block, `.loom/` |
 | `loom-plan` | Scope interview → PRD + issue pack |
 | `loom-implement` | Ship one issue with minimal diff |
 | `loom-verify` | Fresh checker: Spec + Standards in parallel |
 | `loom-tend` | Warp maintenance, stale issues, capture learning |
-
-## Traits
-
-Model-invoked skills that rituals call for reusable behavior — not standalone commands.
-
-| Trait | Called from | Purpose |
-|---|---|---|
-| `plan-grill` | Plan | Relentless one-question-at-a-time scope interview with recommended answers |
-| `warp-sharpen` | Plan | Sharpen glossary, challenge terms, offer ADRs sparingly |
 
 ## Hooks
 
@@ -107,7 +98,7 @@ Three light lifecycle hooks — non-mutating, no auto-run.
 | Hook | Purpose |
 |---|---|
 | `session-start` | Sync context pointers; check managed-block version |
-| `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done, Plan traits reference) |
+| `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done) |
 | `sub-agent-spawn` | Attach role manifest; enforce checker no-auto-fix |
 
 Hooks inject guidance — they never edit files or run rituals automatically. If your host has no hook primitive, the invariants live in the managed block instead.
@@ -123,6 +114,8 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 | **Cursor** | `Stop` hook (`hooks/loom-stop-gate.sh`) + managed rules | Same verify gate via hook + rule-file injection |
 
 **OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if `## Verify` is missing, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
+
+**Known OMP limitation:** Some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work. See [issue tracker](https://github.com/zuevrs/loom/issues) for status.
 
 **Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without a `## Verify` section, the hook fails and the agent must run `loom-verify` first.
 
@@ -146,7 +139,7 @@ cd your-project && omp
 |-------|------|-------------|--------------|
 | **Plan** | `loom-plan` → PRD + issues | **Plan Mode** (`/plan`) | OMP blocks write tools during planning; Loom produces structured `.loom/` artifacts |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
-| **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` | Loom defines digest; OMP agents run as isolated checkers |
+| **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
 | **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** | Loom tracks state on disk; OMP runs unattended with token budget |
 | **Maintenance** | `loom-tend` | — | Warp audit, stale issues, `loom:` debt |
@@ -158,7 +151,7 @@ cd your-project && omp
 | **`/plan`** | Starting a feature — enforce read-only planning, then Loom writes PRD/issues |
 | **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
 | **Advisor** | Long implement sessions — continuous review while Loom scopes one issue |
-| **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — spawn via task tool for structured verify |
+| **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
 | **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
@@ -190,6 +183,8 @@ Templates are co-located with the skills that use them:
 | Issue | `skills/loom-plan/ISSUE-TEMPLATE.md` | `.loom/<feature>/issues/*.md` |
 | PRODUCT | `skills/loom-plan/PRODUCT-TEMPLATE.md` | `PRODUCT.md` at project root |
 | DESIGN | `skills/loom-plan/DESIGN-TEMPLATE.md` | `DESIGN.md` (user-facing UI projects) |
+| CONTEXT | `skills/loom-plan/CONTEXT-FORMAT.md` | `CONTEXT.md` glossary |
+| ADR | `skills/loom-plan/ADR-FORMAT.md` | `docs/adr/*.md` |
 
 ## What each host gets
 
@@ -233,7 +228,7 @@ Loom rituals work everywhere; verify-before-done is **hard-enforced** only on St
 | Pi | `pi uninstall git:github.com/zuevrs/loom` |
 | OMP | `omp plugin uninstall loom` |
 | OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
-| Cursor | Remove Loom skill symlinks from `~/.agents/skills/` (`loom-*`, `plan-grill`, `warp-sharpen`); remove hooks from `~/.cursor/hooks.json` |
+| Cursor | Remove Loom skill symlinks from `~/.agents/skills/` (`loom-*`); remove hooks from `~/.cursor/hooks.json` |
 | Windsurf | Remove Loom skill symlinks from `~/.codeium/windsurf/skills/` |
 | Kiro | `rm ~/.kiro/agents/loom.json`; remove Loom skill symlinks from `~/.kiro/skills/` |
 | Hermes | `rm -rf ~/.hermes/plugins/loom` |

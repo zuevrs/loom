@@ -9,8 +9,7 @@ const PRE_LLM = `# Loom invariants (pre-turn guard)
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
 - No verify digest → no done.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
+- Mark shortcuts with loom: comments (ceiling + upgrade path).`;
 
 /** Load-bearing phrases every discipline injection must include. */
 const REQUIRED_PHRASES = [
@@ -19,7 +18,6 @@ const REQUIRED_PHRASES = [
   "Maker/checker separation",
   "Denylist paths",
   "No verify digest",
-  "plan-grill, warp-sharpen",
 ];
 
 module.exports = { PRE_LLM, REQUIRED_PHRASES };

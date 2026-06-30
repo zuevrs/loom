@@ -17,31 +17,19 @@ required_sections=(
   "## Done when"
 )
 
-# Traits use Process-style body without numbered Process header — allow alternate.
-trait_optional=("## Inputs" "## Outputs" "## Failure modes")
-
 for skill_dir in "$SKILLS_DIR"/*/; do
   [ -f "${skill_dir}SKILL.md" ] || continue
   name="$(basename "$skill_dir")"
   skill="${skill_dir}SKILL.md"
-  is_trait=0
-  [[ "$name" == "plan-grill" || "$name" == "warp-sharpen" ]] && is_trait=1
 
   for section in "${required_sections[@]}"; do
-    if [ "$is_trait" -eq 1 ]; then
-      skip=0
-      for opt in "${trait_optional[@]}"; do
-        [ "$section" = "$opt" ] && skip=1 && break
-      done
-      [ "$skip" -eq 1 ] && continue
-    fi
     if ! grep -q "^${section}" "$skill"; then
       errors+=("$name: missing required section '$section'")
     fi
   done
 
   if ! grep -q '^disable-model-invocation:' "$skill" 2>/dev/null; then
-    if [ "$name" != "loom-verify" ] && [ "$is_trait" -eq 0 ]; then
+    if [ "$name" != "loom-verify" ]; then
       errors+=("$name: ritual skill should declare disable-model-invocation in frontmatter")
     fi
   fi

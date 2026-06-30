@@ -8,29 +8,27 @@ disable-model-invocation: true
 
 ## Goal
 
-One safe, idempotent project setup: managed block, `.loom/`, host shims — then hand off to `loom-plan`.
+One safe, idempotent project setup: managed block, `.loom/` — then hand off to `loom-plan`.
 
 ## Inputs
 
-- Global Loom install on host (skills already available via plugin or `scripts/install-cursor`)
-- Current repo state (`AGENTS.md`, host rule targets, `.loom/`)
+- Global Loom install on host (skills already available via plugin or host-native install)
+- Current repo state (`AGENTS.md`, `.loom/`)
 
 ## Outputs
 
 - Managed Loom block in `AGENTS.md` (`<!-- loom:begin version=vX.Y.Z -->` … `<!-- loom:end -->`)
-- Host shims where needed (`.cursor/rules/loom.mdc` for Cursor)
 - Empty `.loom/` directory
 - Completion summary
 
 ## Process
 
-1. Inspect: `AGENTS.md`, host shims, `.loom/`, managed block version vs installed Loom.
+1. Inspect: `AGENTS.md`, `.loom/`, managed block version vs installed Loom.
 2. Prepare write plan — show exactly what will change.
 3. Ask explicit confirmation before any write.
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-   - For Cursor: write `.cursor/rules/loom.mdc` (shim below) if host ignores AGENTS.md
 5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
 6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`.
 7. If nothing needed: `No changes needed` + what was checked.
@@ -60,7 +58,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - No verify digest → no done.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.
-- Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
+- Match the user's language for project content; ritual names and `loom:` markers stay English.
 
 ### Invariants
 
@@ -68,7 +66,6 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Human gate: never auto-merge, auto-publish, or bypass denylist.
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen.
 
 ### Router
 
@@ -92,7 +89,6 @@ Map intent to ritual skills:
 ### Invocation policy
 
 - User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`
-- Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
 - Model-invoked (ritual): `loom-verify` (after every Implement completion)
 
 ### Session state
@@ -111,26 +107,6 @@ After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.
 <!-- loom:end -->
 ```
 
-### Cursor shim (`.cursor/rules/loom.mdc`)
-
-```markdown
----
-description: Loom base rule and router
-globs:
-alwaysApply: true
----
-
-# Loom base rule
-
-Lazy senior dev: the best code is the code you never wrote.
-
-Discipline ladder (first rung that holds): YAGNI → reuse → stdlib → platform → dep → one line → minimum.
-
-Route intent: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
-
-Small fix → implement directly. Ambiguous build → list ready-for-agent, ask one question.
-```
-
 ## Hard stops
 
 - Never write without explicit confirmation.
@@ -142,8 +118,7 @@ Small fix → implement directly. Ambiguous build → list ready-for-agent, ask 
 
 | Symptom | Response |
 |---|---|
-| Host ignores AGENTS.md | Apply Cursor shim above |
-| Skills not discoverable | Verify global install (`scripts/install-cursor` for Cursor, plugin for others) |
+| Skills not discoverable | Verify global install (plugin for host, or host-native install) |
 | User declines confirm | No writes; report what would have changed |
 | Major version mismatch | Warn-and-continue with explicit refresh guidance |
 
