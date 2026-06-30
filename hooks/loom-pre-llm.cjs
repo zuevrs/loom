@@ -11,6 +11,8 @@ const INVARIANTS = `# Loom invariants (pre-turn guard)
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).`;
+- No verify digest → no done.
+- Mark shortcuts with loom: comments (ceiling + upgrade path).
+- Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
 
 process.stdout.write(INVARIANTS + "\n");

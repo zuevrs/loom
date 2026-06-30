@@ -19,6 +19,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before `done`.
+- No verify digest → no done.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.
 - Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
