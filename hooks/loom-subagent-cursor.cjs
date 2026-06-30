@@ -19,8 +19,7 @@ process.stdin.on("end", () => {
   let role = "maker";
   try {
     const data = JSON.parse(input);
-    // loom: Cursor passes subagent type in data; map to role if possible
-    if (data.subagentType === "explore") role = "spec-checker";
+    if (data.loomRole && ROLES[data.loomRole]) role = data.loomRole;
   } catch {}
 
   const message = ROLES[role] || ROLES.maker;
