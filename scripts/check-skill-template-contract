@@ -35,7 +35,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
       done
       [ "$skip" -eq 1 ] && continue
     fi
-    if ! grep -Fq "$section" "$skill"; then
+    if ! grep -q "^${section}" "$skill"; then
       errors+=("$name: missing required section '$section'")
     fi
   done
@@ -57,7 +57,7 @@ echo '  "status": "drift",'
 echo '  "errors": ['
 for i in "${!errors[@]}"; do
   comma=","
-  [ "$i" -eq "$((${#errors[@]} - 1)) ]" && comma=""
+  [ "$i" -eq "$((${#errors[@]} - 1))" ] && comma=""
   echo "    \"${errors[$i]}\"$comma"
 done
 echo '  ]'

@@ -1,12 +1,19 @@
 """Loom plugin for Hermes Agent.
 
-Registers skills, slash commands, and a pre_llm_call hook for discipline injection.
+Registers skills, slash commands, and lifecycle hooks:
+- on_session_start: context pointers + managed-block version check
+- pre_llm_call: per-turn invariant injection (can return context)
+- subagent_start: loomRole detection for delegate_task children
+
 Install: symlink or copy this directory to ~/.hermes/plugins/loom/
 """
 
+import os
 from pathlib import Path
 
-SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
+PLUGIN_DIR = Path(__file__).resolve().parent
+SKILLS_DIR = PLUGIN_DIR.parent / "skills"
+MANAGED_BLOCK_VERSION = "v0.2.8"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -20,6 +27,12 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 - Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.
 - Traits (model-invoked from Plan): plan-grill, warp-sharpen."""
 
+ROLES = {
+    "maker": "Ship one vertical slice. Do not self-approve. Leave runnable check.",
+    "spec-checker": "Judge against issue + PRD only. Quote spec lines. Do not fix code.",
+    "standards-checker": "Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
+}
+
 SKILL_NAMES = [
     "loom-init", "loom-plan", "loom-implement",
     "loom-verify", "loom-tend", "loom-loop",
@@ -29,17 +42,82 @@ SKILL_NAMES = [
 RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]
 
 
+def _find_project_root():
+    cwd = Path.cwd()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / "AGENTS.md").exists():
+            return parent
+    return cwd
+
+
+def _build_context_pointers(root: Path) -> str:
+    lines = ["# Loom session context", ""]
+    agents = root / "AGENTS.md"
+    if agents.exists():
+        import re
+        content = agents.read_text()
+        m = re.search(r"<!-- loom:begin version=(\S+)", content)
+        if m and m.group(1) != MANAGED_BLOCK_VERSION:
+            lines.append(
+                f"⚠️ Managed block {m.group(1)} != installed {MANAGED_BLOCK_VERSION}; run loom-init to update."
+            )
+        lines.append(f"AGENTS.md: {agents}")
+
+    context = root / "CONTEXT.md"
+    if context.exists():
+        lines.append(f"CONTEXT.md: {context}")
+
+    loom_dir = root / ".loom"
+    if loom_dir.is_dir():
+        lines.append(f".loom/: {loom_dir}/")
+        safety = loom_dir / "SAFETY.md"
+        if safety.exists():
+            lines.append(f"SAFETY: {safety}")
+        state = loom_dir / "STATE.md"
+        if state.exists():
+            lines.append(f"STATE: {state}")
+
+    if len(lines) == 2:
+        lines.append("No Loom project detected. Run loom-init to set up this project.")
+
+    lines.extend(["", "Keep discipline + router active. Reconstruct state from .loom/ before acting."])
+    return "\n".join(lines)
+
+
 def register(ctx):
     for name in SKILL_NAMES:
         skill_path = SKILLS_DIR / name / "SKILL.md"
         if skill_path.exists():
             ctx.register_skill(name, str(skill_path))
 
-    def pre_llm_hook(messages, **kwargs):
-        return DISCIPLINE
+    # --- Hook: session start (one-shot context pointers) ---
+    def on_session_start(**kwargs):
+        try:
+            root = _find_project_root()
+            return _build_context_pointers(root)
+        except Exception:
+            return None
+
+    ctx.register_hook("on_session_start", on_session_start)
+
+    # --- Hook: pre_llm_call (per-turn invariants + role context) ---
+    def pre_llm_hook(messages=None, **kwargs):
+        role = os.environ.get("LOOM_ROLE", "").lower()
+        ctx_text = DISCIPLINE
+        if role in ROLES:
+            ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
+        return {"context": ctx_text}
 
     ctx.register_hook("pre_llm_call", pre_llm_hook)
 
+    # --- Hook: subagent_start (role propagation for delegate_task children) ---
+    def on_subagent_start(**kwargs):
+        # loom: observability-only; role inject happens via env + pre_llm_call in child
+        pass
+
+    ctx.register_hook("subagent_start", on_subagent_start)
+
+    # --- Slash commands ---
     for name in RITUAL_NAMES:
         skill_path = SKILLS_DIR / name / "SKILL.md"
 

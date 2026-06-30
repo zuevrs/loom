@@ -9,24 +9,15 @@ Reach shared understanding of scope through a relentless one-question-at-a-time 
 
 ## Process
 
-Interview every aspect of the plan until clarity holds. Walk down each branch of the design tree, resolving dependencies one-by-one. **For each question, provide your recommended answer.**
-
-Ask **one question at a time**. Wait for feedback before the next. Multiple questions at once is bewildering.
-
-If a question can be answered by exploring the codebase, **explore the codebase instead** of asking.
-
-### Question patterns
-
-Start broad, narrow to specifics:
-
-1. **Scope** — "What's the smallest version that solves the core problem?"
-2. **Users** — "Who uses this? What does success look like for them?"
-3. **Boundaries** — "What's explicitly NOT in scope?"
-4. **Existing art** — "Does something in this codebase already do part of this?"
-5. **Seams** — "Where would you test this? What's the natural boundary?"
-6. **Trade-offs** — "You mentioned X — have you considered the cost of Y?"
-7. **Edge cases** — "What happens when [degenerate input / concurrent access / failure]?"
-8. **Ordering** — "Which piece must exist before the others can work?"
+1. **Start broad** — ask about scope, users, and success criteria first.
+2. **Narrow incrementally** — walk each branch of the design tree; resolve dependencies one-by-one.
+3. **One question at a time** — wait for feedback before the next. Multiple questions is bewildering.
+4. **Provide your recommended answer** with each question.
+5. **Explore before asking** — if a question can be answered by reading the codebase, read it instead.
+6. **Push on boundaries** — "What's explicitly NOT in scope?"
+7. **Stress seams and trade-offs** — "Where would you test this?", "Have you considered the cost of Y?"
+8. **Confirm ordering** — "Which piece must exist before the others can work?"
+9. **Exit only on explicit readiness** — user says "ready to materialize" or equivalent.
 
 ## Hard stops
 
