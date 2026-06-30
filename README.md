@@ -210,6 +210,10 @@ In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGE
 - No auto-merge, no auto-publish, no silent self-rewrite.
 - `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local setup, checks, and PR process.
+
 ## License
 
-MIT
+[MIT](LICENSE)
