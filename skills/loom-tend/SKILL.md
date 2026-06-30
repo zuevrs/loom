@@ -4,6 +4,8 @@ description: Keep warp and issue state current. Use for maintenance between impl
 disable-model-invocation: true
 ---
 
+**Never expand scope. Maintain what exists.**
+
 ## Goal
 
 Keep the warp current and debts from rotting — without inventing feature scope.
@@ -43,7 +45,7 @@ When capture-learning approves a project skill: create `skills/<name>/SKILL.md` 
 | Many stale issues | List all; prioritize by active build |
 | User asks for feature in tend | Route to `loom-plan` |
 
-## Verification
+## Done when
 
 - Stale `ready-for-agent` items surfaced or corrected
 - No scope creep into new features
