@@ -50,6 +50,9 @@ fi
 if ! grep -Fq '## Upgrade' "$README"; then
   errors+=("README is missing required Upgrade section")
 fi
+if ! grep -Fq '## Prerequisites & Troubleshooting' "$README"; then
+  errors+=("README is missing required Prerequisites & Troubleshooting section")
+fi
 if ! grep -Fq '## [Unreleased]' "$CHANGELOG"; then
   errors+=("CHANGELOG is missing required [Unreleased] section")
 fi

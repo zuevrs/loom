@@ -34,6 +34,23 @@ git clone https://github.com/zuevrs/loom ~/.loom
 | Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) |
 | OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` |
 
+## Prerequisites & Troubleshooting
+
+### Prerequisites
+
+- Git (for script-based install and upgrades via `~/.loom` clone).
+- Node.js available on `PATH` for hook scripts (`loom-session-start`, `loom-pre-llm`, `loom-subagent`).
+- Symlink support in your shell environment for script-based installers.
+
+### Common issues
+
+- **`path exists and is not a symlink` during install scripts**
+  - A conflicting path already exists in the target skills directory. Move/remove the conflicting path, then re-run installer.
+- **Hooks not taking effect in Cursor/Claude/Codex**
+  - Confirm hook entries exist in host config and restart the host session.
+- **Managed block version mismatch warning**
+  - Re-run `loom-init` in the affected project to refresh the managed block.
+
 Then run **`loom-init`** in each project to write the managed block.
 
 ## Quickstart
@@ -85,7 +102,7 @@ Three light lifecycle hooks — non-mutating, no auto-run.
 | Hook | Purpose |
 |---|---|
 | `session-start` | Sync context pointers; check managed-block version |
-| `pre-LLM` | Light invariant guard (router, human-gate, maker/checker) |
+| `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done, Plan traits reference) |
 | `sub-agent-spawn` | Attach role manifest; enforce checker no-auto-fix |
 
 Hooks inject guidance — they never edit files or run rituals automatically. If your host has no hook primitive, the invariants live in the managed block instead.
