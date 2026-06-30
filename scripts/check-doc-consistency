@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# loom: docs consistency canary — validates key user-facing docs stay aligned
+# Exit: 0 clean, 1 drift detected
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+README="$ROOT/README.md"
+AGENTS="$ROOT/AGENTS.md"
+INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
+PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
+
+errors=()
+
+if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PRELLM_HOOK" ]; then
+  echo '{"status":"skip","message":"Required docs/hook files are missing"}'
+  exit 0
+fi
+
+# README: Codex install/uninstall commands must match current CLI verbs.
+if ! grep -Fq 'codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom' "$README"; then
+  errors+=("README Codex install command is stale")
+fi
+if ! grep -Fq 'codex plugin remove loom@loom && codex plugin marketplace remove loom' "$README"; then
+  errors+=("README Codex uninstall command is stale")
+fi
+
+# AGENTS managed block and loom-init managed block template must stay identical.
+tmp_agents="$(mktemp)"
+tmp_init="$(mktemp)"
+cleanup() {
+  rm -f "$tmp_agents" "$tmp_init"
+}
+trap cleanup EXIT
+
+awk '
+  /<!-- loom:begin version=/ {in_block=1}
+  in_block {print}
+  /<!-- loom:end -->/ {if (in_block) exit}
+' "$AGENTS" > "$tmp_agents"
+
+awk '
+  /^```markdown$/ {fence_count++; in_block=(fence_count==1); next}
+  in_block && /^```$/ {exit}
+  in_block {print}
+' "$INIT_SKILL" > "$tmp_init"
+
+if [ ! -s "$tmp_agents" ] || [ ! -s "$tmp_init" ]; then
+  errors+=("could not extract managed block from AGENTS.md or loom-init template")
+elif ! cmp -s "$tmp_agents" "$tmp_init"; then
+  errors+=("AGENTS managed block differs from skills/loom-init/SKILL.md template")
+fi
+
+# Key invariants must stay explicit across docs and pre-LLM hook.
+if ! grep -Fq 'No verify digest' "$AGENTS"; then
+  errors+=("AGENTS.md missing 'No verify digest' invariant")
+fi
+if ! grep -Fq 'No verify digest' "$INIT_SKILL"; then
+  errors+=("skills/loom-init/SKILL.md missing 'No verify digest' invariant")
+fi
+if ! grep -Fq 'No verify digest' "$PRELLM_HOOK"; then
+  errors+=("hooks/loom-pre-llm.cjs missing 'No verify digest' invariant")
+fi
+if ! grep -Fq 'Traits (model-invoked from Plan): plan-grill, warp-sharpen.' "$PRELLM_HOOK"; then
+  errors+=("hooks/loom-pre-llm.cjs missing traits reference")
+fi
+
+if [ ${#errors[@]} -eq 0 ]; then
+  echo '{"status":"clean","message":"Docs consistency checks passed"}'
+  exit 0
+fi
+
+echo "{"
+echo '  "status": "drift",'
+echo '  "errors": ['
+for i in "${!errors[@]}"; do
+  comma=","
+  [ "$i" -eq "$((${#errors[@]} - 1))" ] && comma=""
+  echo "    \"${errors[$i]}\"$comma"
+done
+echo '  ]'
+echo "}"
+exit 1
