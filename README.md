@@ -6,6 +6,12 @@ A skills-first harness that makes coding agents work like disciplined senior dev
 
 **Why:** cold agents guess intent, over-engineer, skip verification, and lose context between sessions. Loom closes these gaps with on-disk conventions — no runtime engine, no lock-in.
 
+**Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and optional scheduled loops over scoped work.
+
+**Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service. Loops never auto-Plan; ambiguous intent stops and asks.
+
+See [`docs/glossary.md`](docs/glossary.md) for terms, [`docs/security.md`](docs/security.md) for loop safety, and [`docs/loop-headless.md`](docs/loop-headless.md) for host-native headless invocation.
+
 ## Install
 
 **Plugin-native hosts** (no clone needed):
@@ -122,10 +128,22 @@ Loom ships a seed catalog of scheduled loop configs in `loops/`:
 
 ### Setting up a loop
 
-1. Describe intent: *"Set up a nightly objective loop in report-only mode."*
+Tell your agent (natural language — no structured config required):
+
+- *"Set up a nightly objective loop in report-only mode."*
+- *"Configure discovery-daily to scan for stale docs weekly."*
+- *"Add objective-nightly; gate is \`npm test\`; owner is me; don't enable until I approve apply."*
+- *"Show me a dry-run of the loop config before writing anything."*
+- *"Apply the loop on GitHub Actions after I confirm — kill switch stays off until I opt in."*
+
+Universal flow:
+
+1. Describe intent (phrases above).
 2. Agent runs **`loom-loop`** (setup) → writes config + safety policy under `.loom/`.
 3. You **explicitly approve** apply.
-4. **`loom-loop`** (apply) → enables on your runner.
+4. **`loom-loop`** (apply) → enables on your runner (`scripts/run-loop` or [`.github/workflows/loom-loop.yml`](.github/workflows/loom-loop.yml)).
+
+**Manual apply path:** if CI access is unavailable, run `bash scripts/run-loop --dry-run` locally, then `LOOM_LOOPS_ENABLED=true bash scripts/run-loop` after review. For agent-driven loop steps, see [`docs/loop-headless.md`](docs/loop-headless.md).
 
 **Safety defaults:** kill switch off by default, no auto-merge, denylist in `.loom/SAFETY.md`, human gate required.
 
@@ -163,6 +181,8 @@ Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn, `1` = sessi
 
 Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
 
+**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. Hermes ships pre-LLM injection only; OMP/Pi ship session-start discipline; script-tier hosts rely on AGENTS.md managed block.
+
 ## Uninstall
 
 | Host | Command |
@@ -185,9 +205,10 @@ In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGE
 ## Safety
 
 - Hooks are non-mutating — they never edit files.
-- Loops default to `report-only` with kill switch disabled.
-- Denylist paths (auth, payments, secrets) require human approval.
+- Loops default to `report-only` with kill switch disabled (`LOOM_LOOPS_ENABLED=false`).
+- Denylist paths (auth, payments, secrets) require human approval — see [`docs/security.md`](docs/security.md).
 - No auto-merge, no auto-publish, no silent self-rewrite.
+- `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 
 ## License
 
