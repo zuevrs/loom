@@ -36,7 +36,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 8. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
 9. Leave **one runnable check** (proportional).
 10. Run issue verification commands; capture output in issue comment.
-11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents).
+11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
 
 ## Discipline ladder
 

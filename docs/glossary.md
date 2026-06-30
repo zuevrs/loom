@@ -6,11 +6,11 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Harness** — The operating setup for one agent session: rules, skills, warp, and dispatch.
 
-**Loop** — A harness plus schedule, durable state, and verification chain. Loops run unattended rituals over work Plan already scoped.
+**Enforcement hook** — Host-native mechanism that blocks or redirects agent behavior at runtime. Examples: Stop hook (Claude Code/Codex/Cursor/Droid), `session_stop` (OMP), TTSR reminder (OMP).
 
-**Discovery loop** — Finds machine-checkable drift on a schedule; opens issues; stops on ambiguity.
+**TTSR rule** — Time-Traveling Stream Rule (OMP-specific). Regex condition on the agent's output stream that injects corrective guidance at zero upfront token cost. Loom uses TTSR as a reminder layer; the hard gate is `session_stop`.
 
-**Execution loop** — Runs Implement → Verify → Tend over `ready-for-agent` issues.
+**Verify signal** — The `## Verify` section written into an issue file after `loom-verify` APPROVE. Stop hooks and OMP `session_stop` check for it before allowing `Status: done`.
 
 **Objective gate** — Automated pass/fail command (test, build, linter) that stops bad iterations without human judgment.
 
@@ -22,7 +22,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 ## Rituals
 
-**Ritual** — Named flow: Init, Plan, Implement, Verify, Tend, Loop.
+**Ritual** — Named flow: Init, Plan, Implement, Verify, Tend.
 
 **Trait** — Model-invoked reusable behavior called from rituals (`plan-grill`, `warp-sharpen`).
 
@@ -36,20 +36,16 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Init** — Idempotent project setup: managed block, `.loom/`, host shims.
 
-**Loop** — Configure (setup) and enable (apply) scheduled loops under `.loom/loops/`.
-
 ## Work artifacts
 
 **PRD** — Build plan under `.loom/<feature>/PRD.md`.
 
 **Issue** — One grabbable slice under `.loom/<feature>/issues/`.
 
-**STATE.md** — Loop durable memory at `.loom/STATE.md`.
-
-**SAFETY.md** — Loop safety policy at `.loom/SAFETY.md` (denylist, human gates, kill switch).
+**Managed block** — Delimited section (`<!-- loom:begin -->…<!-- loom:end -->`) injected into `AGENTS.md` for host-agnostic discipline delivery.
 
 ## Status vocabulary
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
-After Verify APPROVE → `done`. Denylist paths → `ready-for-human`.
+After Verify APPROVE → write `## Verify` section, then set `Status: done`. Denylist paths → `ready-for-human`.

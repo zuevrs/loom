@@ -2,15 +2,15 @@
 
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-**What it does:** installs a discipline ladder, six ritual skills, two Plan traits, lifecycle hooks, and a seed catalog of scheduled loops into any supported agent host.
+**What it does:** installs a discipline ladder, five ritual skills, two Plan traits, lifecycle hooks, and host-native enforcement into any supported agent host.
 
 **Why:** cold agents guess intent, over-engineer, skip verification, and lose context between sessions. Loom closes these gaps with on-disk conventions — no runtime engine, no lock-in.
 
-**Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and optional scheduled loops over scoped work.
+**Loom is:** a markdown-native harness — discipline ladder, five rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
 
-**Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service. Loops never auto-Plan; ambiguous intent stops and asks.
+**Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service.
 
-See [`docs/glossary.md`](docs/glossary.md) for terms, [`docs/security.md`](docs/security.md) for loop safety, and [`docs/loop-headless.md`](docs/loop-headless.md) for host-native headless invocation.
+See [`docs/glossary.md`](docs/glossary.md) for terms.
 
 ## Install
 
@@ -90,7 +90,6 @@ When upgrading Loom, use this flow:
 | `loom-implement` | Ship one issue with minimal diff |
 | `loom-verify` | Fresh checker: Spec + Standards in parallel |
 | `loom-tend` | Warp maintenance, stale issues, capture learning |
-| `loom-loop` | Configure and apply scheduled loops |
 
 ## Traits
 
@@ -113,47 +112,73 @@ Three light lifecycle hooks — non-mutating, no auto-run.
 
 Hooks inject guidance — they never edit files or run rituals automatically. If your host has no hook primitive, the invariants live in the managed block instead.
 
-## Loops
+## Host-Native Enforcement
 
-Loom ships a seed catalog of scheduled loop configs in `loops/`:
+Loom leverages each host's native enforcement primitives to guarantee discipline at runtime — stronger than prompt injection alone.
 
-| Loop | Mode | Goal |
-|---|---|---|
-| `objective-nightly` | execution | Quality gates on schedule; surface failures |
-| `discovery-daily` | discovery | Find machine-checkable drift; open issues |
-| `find-bugs` | discovery | Static analysis + lint + type-check findings |
-| `vuln-scan` | discovery | Dependency vulnerability detection |
-| `doc-refresh` | discovery | Detect stale docs and broken links |
-| `test-coverage` | discovery | Coverage regressions and untested paths |
+| Host | Mechanism | What it enforces |
+|------|-----------|-----------------|
+| **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) | Hard gate at turn end + stream reminder + verify agents via `task` tool |
+| **Claude Code / Codex** | `Stop` hook (`hooks/loom-stop-gate.sh`) | Blocks agent stop if issues marked done without verify digest |
+| **Cursor** | `Stop` hook (`hooks/loom-stop-gate.sh`) + managed rules | Same verify gate via hook + rule-file injection |
 
-### Setting up a loop
+**OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if `## Verify` is missing, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
 
-Tell your agent (natural language — no structured config required):
+**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without a `## Verify` section, the hook fails and the agent must run `loom-verify` first.
 
-- *"Set up a nightly objective loop in report-only mode."*
-- *"Configure discovery-daily to scan for stale docs weekly."*
-- *"Add objective-nightly; gate is \`npm test\`; owner is me; don't enable until I approve apply."*
-- *"Show me a dry-run of the loop config before writing anything."*
-- *"Apply the loop on GitHub Actions after I confirm — kill switch stays off until I opt in."*
+For scheduled/CI work, use your host's native goal/loop feature (e.g., `omp goal`, `claude /loop`, `codex /goal`, Cursor cloud agents) with Loom discipline active — the enforcement hooks keep the agent honest regardless of invocation mode.
 
-Universal flow:
+## Loom + OMP (maximum synergy)
 
-1. Describe intent (phrases above).
-2. Agent runs **`loom-loop`** (setup) → writes config + safety policy under `.loom/`.
-3. You **explicitly approve** apply.
-4. **`loom-loop`** (apply) → enables on your runner (`scripts/run-loop` or [`.github/workflows/loom-loop.yml`](.github/workflows/loom-loop.yml)).
+Loom owns **what** to build (PRD, issues, verify contract). OMP owns **how** the agent runs (enforcement, orchestration, review). They complement — not compete.
 
-**Manual apply path:** if CI access is unavailable, run `bash scripts/run-loop --dry-run` locally, then `LOOM_LOOPS_ENABLED=true bash scripts/run-loop` after review. For agent-driven loop steps, see [`docs/loop-headless.md`](docs/loop-headless.md).
+### Setup (once)
 
-**Safety defaults:** kill switch off by default, no auto-merge, denylist in `.loom/SAFETY.md`, human gate required.
+```bash
+omp plugin install git:github.com/zuevrs/loom
+cd your-project && omp
+# In session: run loom-init — creates .loom/, AGENTS.md managed block
+```
 
-**Modes:** Discovery scans for drift and opens issues. Execution runs quality gates over ready issues.
+### Daily workflow
 
-Start in `report-only`; opt in to `assisted` / `unattended` after trust is earned.
+| Phase | Loom | OMP feature | Why together |
+|-------|------|-------------|--------------|
+| **Plan** | `loom-plan` → PRD + issues | **Plan Mode** (`/plan`) | OMP blocks write tools during planning; Loom produces structured `.loom/` artifacts |
+| **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
+| **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` | Loom defines digest; OMP agents run as isolated checkers |
+| **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
+| **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** | Loom tracks state on disk; OMP runs unattended with token budget |
+| **Maintenance** | `loom-tend` | — | Warp audit, stale issues, `loom:` debt |
 
-Add your own loops: copy any file in `loops/`, follow the shape (objective gate, hard stops, safety, human gate).
+### OMP features that amplify Loom
 
-Maintainer note: CI validates loop contracts with `scripts/check-loop-starters` (starter shape + catalog sync) and `scripts/check-loop-config` (generated `.loom/loops/*.yaml` schema and safety/state wiring).
+| OMP command/feature | Use with Loom when… |
+|---------------------|---------------------|
+| **`/plan`** | Starting a feature — enforce read-only planning, then Loom writes PRD/issues |
+| **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
+| **Advisor** | Long implement sessions — continuous review while Loom scopes one issue |
+| **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — spawn via task tool for structured verify |
+| **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
+| **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
+| **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
+
+### Example session
+
+```
+> Plan JWT auth feature                    # → loom-plan (+ optional /plan for tool enforcement)
+> Implement issue 001-auth-endpoint        # → loom-implement
+> Verify                                   # → task: loom-verify-spec + loom-verify-standards
+> (agent writes ## Verify, sets Status: done)
+> Implement issue 002-token-refresh        # → next ready-for-agent issue
+```
+
+For unattended multi-issue runs:
+
+```
+omp goal "Work through .loom/jwt-auth/issues/ in order. One issue per iteration.
+Run loom-implement then loom-verify before marking done."
+```
 
 ## Templates
 
@@ -165,8 +190,6 @@ Templates are co-located with the skills that use them:
 | Issue | `skills/loom-plan/ISSUE-TEMPLATE.md` | `.loom/<feature>/issues/*.md` |
 | PRODUCT | `skills/loom-plan/PRODUCT-TEMPLATE.md` | `PRODUCT.md` at project root |
 | DESIGN | `skills/loom-plan/DESIGN-TEMPLATE.md` | `DESIGN.md` (user-facing UI projects) |
-| STATE | `skills/loom-loop/STATE-TEMPLATE.md` | `.loom/STATE.md` |
-| SAFETY | `skills/loom-loop/SAFETY-TEMPLATE.md` | `.loom/SAFETY.md` |
 
 ## What each host gets
 
@@ -174,14 +197,32 @@ Templates are co-located with the skills that use them:
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
 | Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
-| Hooks | 3 | 3 | — | 2 | — | 3 | — | config | 3 | — | yes | ext |
+| Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 3 | — | yes | ext |
+| Enforcement | Stop | Stop | — | Stop+TTSR+agents | — | Stop+rule | — | — | — | — | Stop | — |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
 
-Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn, `2` = session-start + per-turn (extension), `config` = host config-driven hook, `ext` = extension callback, `—` = no hook primitive.
+Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn (or OMP: session_start + before_agent_start + session_stop), `2` = session-start + per-turn (extension), `config` = host config-driven hook, `ext` = extension callback, `—` = no hook primitive.
+
+Legend: `Enforcement` → `Stop` = Stop hook / session_stop gate, `Stop+TTSR+agents` = session_stop + TTSR reminder + custom verify agents, `Stop+rule` = Stop hook + managed rule file.
 
 Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
 
-**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. OMP ships session-start + per-turn via extension; Hermes ships session-start + per-turn + subagent (observability); script-tier hosts rely on AGENTS.md managed block.
+**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. OMP ships session_start + before_agent_start + session_stop via extension; Hermes ships session-start + per-turn + subagent; script-tier hosts rely on AGENTS.md managed block.
+
+### Other hosts (discipline-only tier)
+
+These hosts get **skills + managed block** but no hard verify gate. Discipline is prompt-based — same rituals, honor-system enforcement:
+
+| Host | Install | What you get | For hard gates use… |
+|------|---------|--------------|---------------------|
+| **Pi** | `pi install git:github.com/zuevrs/loom` | Skills via Agent Skills standard | OMP or Claude/Codex/Cursor |
+| **OpenCode** | `opencode plugin github:zuevrs/loom` | Skills + system prompt injection | Claude/Codex/Cursor |
+| **Windsurf** | `install-windsurf` | Skills + AGENTS.md | Cursor |
+| **Kiro** | `install-kiro` | Agent prompt + skills | Claude/Codex |
+| **Hermes** | plugin symlink | 3 hooks (no stop gate) | Claude/Codex/Cursor |
+| **Cline / OpenClaw** | `install-agents-skills` | Skills + AGENTS.md | Cursor or OMP |
+
+Loom rituals work everywhere; verify-before-done is **hard-enforced** only on Stop-hook and OMP `session_stop` hosts.
 
 ## Uninstall
 
@@ -205,8 +246,8 @@ In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGE
 ## Safety
 
 - Hooks are non-mutating — they never edit files.
-- Loops default to `report-only` with kill switch disabled (`LOOM_LOOPS_ENABLED=false`).
-- Denylist paths (auth, payments, secrets) require human approval — see [`docs/security.md`](docs/security.md).
+- Enforcement hooks block only at the Stop gate — they cannot modify your code.
+- Denylist paths (auth, payments, secrets) require human approval.
 - No auto-merge, no auto-publish, no silent self-rewrite.
 - `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 

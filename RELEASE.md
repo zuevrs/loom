@@ -46,6 +46,8 @@ Update these files to `X.Y.Z`:
 - `skills/loom-init/SKILL.md` managed block marker (`vX.Y.Z`)
 - `hooks/loom-session-start.cjs` (`MANAGED_BLOCK_VERSION`)
 - `omp-extension.mjs` (`MANAGED_BLOCK_VERSION`)
+- `hooks/stop-gate-logic.cjs`, `hooks/loom-stop-gate.sh` (verify gate)
+- `rules/`, `agents/` (OMP plugin root convention)
 - `kiro-agent.json` (`"version"`)
 - `opencode-plugin.mjs` (header comment `Version: X.Y.Z`)
 
@@ -53,12 +55,9 @@ Update these files to `X.Y.Z`:
 
 ```bash
 node tests/hooks.test.mjs
-node tests/loop-checks.test.mjs
 bash scripts/check-drift
 bash scripts/check-doc-consistency
 bash scripts/check-installers
-bash scripts/check-loop-starters
-bash scripts/check-loop-config
 bash scripts/check-skill-template-contract
 bash scripts/check-template-sections
 bash scripts/smoke
