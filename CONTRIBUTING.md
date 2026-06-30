@@ -29,7 +29,7 @@ tests/           ← hook tests and canaries
 2. Keep commits atomic — one logical change per commit.
 3. Run checks before pushing:
    ```bash
-   node --test tests/hooks.test.mjs
+   node tests/hooks.test.mjs
    node tests/loop-checks.test.mjs
    bash scripts/check-drift
    bash scripts/check-doc-consistency
@@ -71,7 +71,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
 - `tests/loop-checks.test.mjs` — fixture tests for loop canary scripts.
 - `scripts/check-drift` — adapter drift canary.
-- `scripts/check-doc-consistency` — user-facing docs drift canary.
+- `scripts/check-doc-consistency` — user-facing docs drift canary (README/install facts, changelog links, command-set parity, template inventory + references).
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
 - `scripts/check-loop-starters` — loop starter shape + starter catalog sync canary.
 - `scripts/check-loop-config` — generated loop config schema + state/safety consistency canary.

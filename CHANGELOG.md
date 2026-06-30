@@ -18,6 +18,11 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ### Changed
 - `check-doc-consistency` now enforces README prerequisites/troubleshooting section presence
 - README Hooks table now reflects current `pre-LLM` invariant scope
+- CONTRIBUTING check command now matches CI invocation for hooks smoke tests
+- `check-doc-consistency` now enforces `CONTRIBUTING`/CI parity for required check commands
+- `check-doc-consistency` now enforces required check-command parity across `RELEASE.md` as well
+- `check-doc-consistency` now validates template inventory and README/skill template references
+- CONTRIBUTING now documents the expanded `check-doc-consistency` scope
 
 ## [0.2.6] - 2026-06-30
 

@@ -7,15 +7,18 @@ ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
 README="$ROOT/README.md"
 AGENTS="$ROOT/AGENTS.md"
 INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
+PLAN_SKILL="$ROOT/skills/loom-plan/SKILL.md"
+LOOP_SKILL="$ROOT/skills/loom-loop/SKILL.md"
 PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
 CHANGELOG="$ROOT/CHANGELOG.md"
 RELEASE_DOC="$ROOT/RELEASE.md"
 PKG_JSON="$ROOT/package.json"
 CONTRIBUTING_DOC="$ROOT/CONTRIBUTING.md"
+CHECKS_WORKFLOW="$ROOT/.github/workflows/checks.yml"
 
 errors=()
 
-if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ]; then
+if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PLAN_SKILL" ] || [ ! -f "$LOOP_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ] || [ ! -f "$CHECKS_WORKFLOW" ]; then
   echo '{"status":"skip","message":"Required docs/hook files are missing"}'
   exit 0
 fi
@@ -69,6 +72,84 @@ fi
 if ! grep -Fq '[`RELEASE.md`](RELEASE.md)' "$CONTRIBUTING_DOC"; then
   errors+=("CONTRIBUTING is missing release checklist link to RELEASE.md")
 fi
+
+# Contributing/CI parity for mandatory checks.
+for cmd in \
+  'node tests/hooks.test.mjs' \
+  'node tests/loop-checks.test.mjs' \
+  'bash scripts/check-drift' \
+  'bash scripts/check-doc-consistency' \
+  'bash scripts/check-installers' \
+  'bash scripts/check-loop-starters' \
+  'bash scripts/check-loop-config'
+do
+  if ! grep -Fq "$cmd" "$CONTRIBUTING_DOC"; then
+    errors+=("CONTRIBUTING is missing required check command: $cmd")
+  fi
+  if ! grep -Fq "$cmd" "$RELEASE_DOC"; then
+    errors+=("RELEASE.md is missing required check command: $cmd")
+  fi
+done
+
+for ci_cmd in \
+  'node tests/hooks.test.mjs && node tests/loop-checks.test.mjs' \
+  'scripts/check-drift' \
+  'scripts/check-doc-consistency' \
+  'scripts/check-installers' \
+  'scripts/check-loop-starters' \
+  'scripts/check-loop-config'
+do
+  if ! grep -Fq "$ci_cmd" "$CHECKS_WORKFLOW"; then
+    errors+=("checks.yml is missing required CI step: $ci_cmd")
+  fi
+done
+
+# Template inventory and reference consistency.
+template_paths=(
+  "skills/loom-plan/PRD-TEMPLATE.md"
+  "skills/loom-plan/ISSUE-TEMPLATE.md"
+  "skills/loom-plan/PRODUCT-TEMPLATE.md"
+  "skills/loom-plan/DESIGN-TEMPLATE.md"
+  "skills/loom-loop/STATE-TEMPLATE.md"
+  "skills/loom-loop/SAFETY-TEMPLATE.md"
+)
+
+for rel in "${template_paths[@]}"; do
+  tmpl="$ROOT/$rel"
+  if [ ! -f "$tmpl" ]; then
+    errors+=("missing required template file: $rel")
+    continue
+  fi
+  if ! grep -Eq '^# ' "$tmpl"; then
+    errors+=("$rel is missing top-level heading")
+  fi
+  if ! grep -Eq '^## ' "$tmpl"; then
+    errors+=("$rel is missing section headings")
+  fi
+  if ! grep -Fq "$rel" "$README"; then
+    errors+=("README template table is missing path: $rel")
+  fi
+done
+
+for plan_ref in \
+  'PRD-TEMPLATE.md' \
+  'ISSUE-TEMPLATE.md' \
+  'PRODUCT-TEMPLATE.md' \
+  'DESIGN-TEMPLATE.md'
+do
+  if ! grep -Fq "$plan_ref" "$PLAN_SKILL"; then
+    errors+=("skills/loom-plan/SKILL.md is missing template reference: $plan_ref")
+  fi
+done
+
+for loop_ref in \
+  'STATE-TEMPLATE.md' \
+  'SAFETY-TEMPLATE.md'
+do
+  if ! grep -Fq "$loop_ref" "$LOOP_SKILL"; then
+    errors+=("skills/loom-loop/SKILL.md is missing template reference: $loop_ref")
+  fi
+done
 
 # AGENTS managed block and loom-init managed block template must stay identical.
 tmp_agents="$(mktemp)"
