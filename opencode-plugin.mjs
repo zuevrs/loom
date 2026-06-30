@@ -29,11 +29,20 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility.
 - Non-trivial logic leaves one runnable check before done.
 
+## Invariants
+
+- Router is active: map intent → ritual skill before acting.
+- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Maker/checker separation: Implement never self-approves.
+- Denylist paths → ready-for-human, never unattended Implement.
+- No verify digest → no done.
+
 ## Router
 
 Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain) | loom-loop (loops).
 
-Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
+Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.
+Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
 
 export default async ({ client } = {}) => {
   return {
