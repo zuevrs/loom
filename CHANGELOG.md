@@ -5,6 +5,14 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ## [Unreleased]
 
 ### Added
+- _None yet_
+
+### Changed
+- _None yet_
+
+## [0.2.7] - 2026-06-30
+
+### Added
 - README `Prerequisites & Troubleshooting` section for install UX
 
 ### Changed
@@ -130,7 +138,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/zuevrs/loom/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/zuevrs/loom/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/zuevrs/loom/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/zuevrs/loom/compare/v0.2.3...v0.2.4
