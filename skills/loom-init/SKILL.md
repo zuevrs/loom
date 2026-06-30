@@ -40,7 +40,7 @@ One safe, idempotent project setup: managed block, `.loom/`, host shims — then
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.2.1 -->
+<!-- loom:begin version=v0.2.2 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
