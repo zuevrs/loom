@@ -10,6 +10,47 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ### Changed
 - _None yet_
 
+## [0.2.8] - 2026-06-30
+
+### Highlights
+
+- Canonical invariant source with cross-adapter drift checks
+- Loop runner (`run-loop`) with redaction, kill switch, and GHA reference workflow
+- Full public docs pack: glossary, security, authoring, headless loops, install evidence template
+- Skill section contract enforced by CI
+
+### Added
+- `hooks/invariants.cjs` as canonical invariant source for hooks and drift checks
+- `docs/glossary.md`, `docs/security.md`, `docs/authoring.md`, `docs/loop-headless.md`
+- `docs/evidence/HOST-INSTALL.md` maintainer install evidence template
+- `scripts/smoke`, `scripts/run-loop`, `scripts/redact-output.sh`, and `scripts/check-skill-template-contract`
+- GitHub Actions reference workflow `.github/workflows/loom-loop.yml`
+- README Loom is/is-not boundaries, glossary/security links, and loop prompt examples
+
+### Changed
+- Sub-agent hook reads `loomRole` from stdin JSON (Claude/Codex/Cursor parity)
+- Managed block includes explicit Invariants section aligned with pre-LLM hook
+- All discipline injection surfaces aligned via `invariants.cjs` import or phrase parity
+- Skills completed to ADR-0091 section contract (`plan-grill`, `warp-sharpen`, implement/verify failure modes)
+- `loom-loop` documents ADR-0084 mini pipeline; config template adds `issue_selector` / `output_target`
+- CI, CONTRIBUTING, RELEASE, and doc canaries extended for new checks
+- RELEASE checklist now requires ADR-0062 upgrade blocks and host-install evidence template
+
+### Migration steps
+
+- Re-run `loom-init` in active projects after upgrading to refresh managed block Invariants section
+- Loop configs: add `issue_selector` and `output_target` when creating new `.loom/loops/*.yaml` files
+
+### Adapter impacts
+
+- OpenCode and OMP now import `hooks/invariants.cjs` instead of duplicating invariant text
+- Claude/Codex sub-agent hook accepts `loomRole` in stdin JSON (aligns with Cursor)
+
+### Safety changes
+
+- Loop runner output redaction for common token/password patterns
+- Kill switch and headless invocation documented in `docs/security.md` and `docs/loop-headless.md`
+
 ## [0.2.7] - 2026-06-30
 
 ### Added
@@ -145,7 +186,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/zuevrs/loom/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/zuevrs/loom/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/zuevrs/loom/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/zuevrs/loom/compare/v0.2.4...v0.2.5
