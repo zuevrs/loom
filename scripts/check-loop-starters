@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# loom: loop starter canary — validates loops/*.md shape and catalog sync
+# Exit: 0 clean, 1 drift detected
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+LOOPS_DIR="$ROOT/loops"
+LOOP_SKILL="$ROOT/skills/loom-loop/SKILL.md"
+errors=()
+
+if [ ! -d "$LOOPS_DIR" ] || [ ! -f "$LOOP_SKILL" ]; then
+  echo '{"status":"skip","message":"No loops/ directory or loom-loop skill found"}'
+  exit 0
+fi
+
+required_sections=(
+  "## id"
+  "## goal"
+  "## mode"
+  "## trigger"
+  "## ritual action"
+  "## objective gate"
+  "## hard stops"
+  "## safety ref"
+  "## output"
+  "## human gate"
+  "## shape invariants"
+)
+
+for file in "$LOOPS_DIR"/*.md; do
+  [ -f "$file" ] || continue
+  name="$(basename "$file" .md)"
+
+  for section in "${required_sections[@]}"; do
+    if ! grep -Fq "$section" "$file"; then
+      errors+=("$name: missing required section '$section'")
+    fi
+  done
+
+  id_line="$(grep -E '^`[^`]+`$' "$file" | head -1 || true)"
+  declared_id="$(echo "$id_line" | tr -d '`')"
+  if [ -z "$declared_id" ]; then
+    errors+=("$name: could not parse declared id")
+  elif [ "$declared_id" != "$name" ]; then
+    errors+=("$name: declared id '$declared_id' does not match filename")
+  fi
+
+  mode="$(awk '
+    /^## mode$/ {in_mode=1; next}
+    in_mode && NF {print; exit}
+  ' "$file")"
+  if [ "$mode" != "discovery" ] && [ "$mode" != "execution" ]; then
+    errors+=("$name: mode must be discovery|execution (got '$mode')")
+  fi
+
+  inv_count="$(grep -E '^[0-9]+\. \*\*' "$file" | wc -l | tr -d ' ')"
+  if [ -z "$inv_count" ] || [ "$inv_count" -lt 7 ]; then
+    errors+=("$name: shape invariants should include at least 7 numbered entries")
+  fi
+
+  row="$(grep -F "| \`$name\` |" "$LOOP_SKILL" | head -1 || true)"
+  if [ -z "$row" ]; then
+    errors+=("$name: missing from loom-loop starter catalog table")
+  else
+    catalog_mode="$(echo "$row" | awk -F'|' '{gsub(/^ +| +$/,"",$3); print $3}')"
+    if [ "$catalog_mode" != "$mode" ]; then
+      errors+=("$name: catalog mode '$catalog_mode' does not match file mode '$mode'")
+    fi
+
+    catalog_trigger_col="$(echo "$row" | awk -F'|' '{gsub(/^ +| +$/,"",$4); print $4}')"
+    catalog_trigger="$(echo "$catalog_trigger_col" | sed -nE 's/.*`([^`]+)`.*/\1/p')"
+    trigger_line="$(awk '
+      /^## trigger$/ {in_trigger=1; next}
+      in_trigger && NF {print; exit}
+    ' "$file")"
+    file_trigger="$(echo "$trigger_line" | sed -nE 's/.*cron `([^`]+)`.*/\1/p')"
+
+    if [ -z "$catalog_trigger" ]; then
+      errors+=("$name: catalog trigger is missing backticked cron value")
+    elif [ -z "$file_trigger" ]; then
+      errors+=("$name: file trigger line is missing cron value")
+    elif [ "$catalog_trigger" != "$file_trigger" ]; then
+      errors+=("$name: catalog trigger '$catalog_trigger' does not match file trigger '$file_trigger'")
+    fi
+  fi
+done
+
+while IFS= read -r catalog_id; do
+  [ -z "$catalog_id" ] && continue
+  if [ ! -f "$LOOPS_DIR/$catalog_id.md" ]; then
+    errors+=("starter catalog references missing file: loops/$catalog_id.md")
+  fi
+done < <(awk -F'`' '/^\| `[^`]+` \|/ {print $2}' "$LOOP_SKILL")
+
+if [ ${#errors[@]} -eq 0 ]; then
+  echo '{"status":"clean","message":"Loop starter checks passed"}'
+  exit 0
+fi
+
+echo "{"
+echo '  "status": "drift",'
+echo '  "errors": ['
+for i in "${!errors[@]}"; do
+  comma=","
+  [ "$i" -eq "$((${#errors[@]} - 1))" ] && comma=""
+  echo "    \"${errors[$i]}\"$comma"
+done
+echo '  ]'
+echo "}"
+exit 1
