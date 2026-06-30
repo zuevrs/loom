@@ -4,6 +4,8 @@ description: Configure and apply objective-driven loops. Setup writes config; ap
 disable-model-invocation: true
 ---
 
+**No unattended run without explicit approval and kill switch.**
+
 ## Goal
 
 Safe loop lifecycle: configure under `.loom/loops/`, then apply on runner only after prechecks and explicit user approval.
@@ -27,7 +29,7 @@ Two modes — **setup** (default entry) and **apply** (after setup + user approv
 - Dry-run precheck evidence
 - Handoff prompt for apply mode
 
-### Questionnaire (one question at a time)
+### Questionnaire (one question at a time, recommended answer with each)
 
 1. **Goal + starter** — `objective-nightly` (execution) or `discovery-daily` (discovery), or custom
 2. **Mode** — `discovery` or `execution`
@@ -41,76 +43,9 @@ Two modes — **setup** (default entry) and **apply** (after setup + user approv
 
 ### Write artifacts
 
-**Loop config** (`.loom/loops/<starter-id>.yaml`):
+Templates for all artifacts → [`TEMPLATES.md`](TEMPLATES.md). Read it before writing config/safety/state files.
 
-```yaml
-schema_version: 1
-starter_id: objective-nightly
-mode: execution
-rollout_mode: report-only
-base_branch: main
-trigger:
-  type: schedule
-  cron: "0 2 * * *"
-objective_gate:
-  type: script
-  command: "<project test/lint command>"
-limits:
-  max_iterations: 3
-  max_run_minutes: 30
-  max_auto_actions_per_run: 3
-  cooldown_minutes: 60
-  low_acceptance_threshold: 0.5
-safety_policy_path: .loom/SAFETY.md
-state_path: .loom/STATE.md
-human_owner: "<name>"
-```
-
-**SAFETY template** (`.loom/SAFETY.md`):
-
-```markdown
-# Loom loop safety policy
-
-## Denylist paths
-- `.env`, `.env.*`, `**/secrets/**`, `**/credentials/**`
-- auth, payments, billing, infra config (extend per project)
-
-## Human-gate required actions
-- merge to default branch, publish/release, credential changes, denylist paths
-
-## Auto-merge policy
-- Default: **disabled**
-
-## Kill switch
-- `LOOM_LOOPS_ENABLED` must be `true` for unattended runs
-```
-
-**STATE template** (`.loom/STATE.md`):
-
-```markdown
-# Loop state — <starter-id>
-
-## Goal
-
-## Current mode
-report-only | assisted | unattended
-
-## Active items
-
-## Run log
-<!-- rolling last 20 entries -->
-
-## Acceptance metrics
-- accepted_changes / rejected_changes / accepted_change_rate
-
-## Post-Run Critique
-<!-- Each run appends: what was noisy/wrong, what to adjust next cycle -->
-<!-- If entries pile up unresolved across 3+ runs → ready-for-human tuning issue -->
-
-## Needs-human
-```
-
-### Setup verify
+### Setup done when
 
 - Objective gate is machine-checkable (pass/fail command identified)
 - `.loom/SAFETY.md` + `.loom/STATE.md` present
@@ -128,6 +63,11 @@ report-only | assisted | unattended
 - `.loom/SAFETY.md`
 - Runner credentials if needed (`GITHUB_TOKEN`, `LOOM_LOOPS_ENABLED`)
 
+### Principles
+
+- **Push right** — defer the human checkpoint as far as it will go. Do maximal work before involving the human; they are asked once, late, with everything prepared.
+- **Brief** — what a checkpoint presents: a tight, decision-ready summary (what was produced, why, link to artifact). The human reads a brief, not raw output.
+
 ### Process
 
 1. **Enforce safety** — read `.loom/SAFETY.md`; confirm denylist + human-gate rules loaded. Block if file missing or unreadable.
@@ -135,10 +75,10 @@ report-only | assisted | unattended
 3. Run prechecks: auth/access, kill switch state (default expect `false`), objective gate command identified.
 4. Present apply plan; request **explicit** confirmation.
 5. Apply to runner (enable workflow, set repo variable, or document manual path).
-6. Capture evidence; report status + next action.
+6. Capture evidence; report status + next action as a **brief** (not raw log).
 7. **Post-run critique** — append to `.loom/STATE.md` § Post-Run Critique: false positives, missed items, prompt/policy adjustments needed.
 
-### Apply verify
+### Apply done when
 
 - User explicitly approved apply
 - Evidence captured (log/comment/artifact)
@@ -148,7 +88,7 @@ report-only | assisted | unattended
 
 ## Starter catalog
 
-Default loops live in `loops/` at repo root. Each is a markdown file following ADR-0029 shape.
+Default loops live in `loops/` at repo root. Each is a markdown file following the standard loop shape.
 
 | Loop | Mode | Default trigger |
 |---|---|---|
@@ -165,9 +105,9 @@ Users can add custom loops following the same shape (see `loops/*.md` for refere
 
 When user describes a loop intent that doesn't match existing ones:
 
-1. Grill: what's the objective gate? (must be machine-checkable)
+1. Scope interview: what's the objective gate? (must be machine-checkable)
 2. Determine mode: discovery or execution
-3. Write `loops/<custom-id>.md` following the ADR-0029 shape (copy from nearest existing loop)
+3. Write `loops/<custom-id>.md` following the standard shape (copy from nearest existing loop)
 4. Required sections: id, goal, mode, trigger, ritual action, objective gate, hard stops, safety ref, output, human gate, shape invariants
 5. Confirm with user before writing
 6. Then proceed to setup questionnaire as normal
