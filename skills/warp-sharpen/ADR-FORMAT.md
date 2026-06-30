@@ -1,13 +1,27 @@
 # ADR Format
 
-ADRs live in `docs/adr/` as `NNNN-slug.md`. Create the directory lazily.
+ADRs live in `docs/adr/` as `NNNN-slug.md`. Create the directory lazily. Number = highest existing + 1.
 
 ```md
-# {Short title}
+# ADR-NNNN: {Short decision title}
 
-{1-3 sentences: context, decision, why.}
+## Status
+Accepted | Superseded by ADR-NNNN | Amended by ADR-NNNN
+
+## Context
+{Why this decision came up — the forces at play.}
+
+## Decision
+{What we chose and its key constraints.}
+
+## Why
+{The reasoning — what trade-off we made and why this side wins.}
+
+## Notes
+- {Amendments, links to related ADRs, future considerations.}
 ```
 
-Offer an ADR only when all three hold: hard to reverse, surprising without context, real trade-off with alternatives.
-
-Optional when valuable: Status, Considered Options, Consequences. Number = highest existing + 1.
+Offer an ADR only when **all three** hold:
+1. Hard to reverse — cost of changing your mind later is meaningful
+2. Surprising without context — a future reader will wonder why
+3. Real trade-off — genuine alternatives existed and you picked one for specific reasons
