@@ -10,4 +10,5 @@ jobs:
           node-version: 20
       - run: node tests/hooks.test.mjs
       - run: scripts/check-drift
+      - run: scripts/check-doc-consistency
       - run: scripts/check-loop-config

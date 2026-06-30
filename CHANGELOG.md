@@ -18,9 +18,12 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - `loom-loop`: starter discoverability note for symlinked installs
 - `loom-plan`: EXECUTION-ORDER.md clarification in templates section
 - `check-loop-config`: CI exit code documentation
+- `check-doc-consistency`: docs canary for README commands and managed-block/invariant alignment
 
 ### Changed
 - README host matrix: Codex now shows commands support
+- Aligned invariant wording across managed block and pre-LLM hook (`No verify digest → no done`, traits reference)
+- README host matrix now includes a legend for hooks/discipline shorthand
 
 ## [0.2.0] - 2026-06-30
 
