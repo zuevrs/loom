@@ -1,7 +1,9 @@
 ---
 name: loom-verify
-description: Fresh checker — Spec + Standards in parallel. Use after loom-implement and before declaring completion.
+description: Fresh checker — Spec + Standards in parallel. Use automatically after any implementation completes (including direct small-fix), before declaring done or marking an issue complete.
 ---
+
+**Judge only. Never fix.**
 
 ## Goal
 
@@ -69,7 +71,7 @@ Status effects: **APPROVE** → set issue `Status: done`. **REJECT** → no auto
 | "I'll fix it myself in verify" | Verify judges; hand back to implement |
 | "Approve with known gap" | REJECT or ESCALATE_HUMAN with explicit debt marker |
 
-## Verification
+## Done when
 
 - Both sub-agents ran in parallel (or documented host limitation)
 - Digest has all required sections
