@@ -45,6 +45,13 @@ Follow conventional commits: `feat(scope):`, `fix(scope):`, `docs:`, `chore:`, `
 
 Keep messages product-facing. Describe what changed for users, not internal mechanics.
 
+## Changelog discipline
+
+- Add new release notes under `## [Unreleased]` only.
+- During release cut: move curated bullets from `Unreleased` into a new `## [X.Y.Z] - YYYY-MM-DD` section and tag in the same batch.
+- Keep `Unreleased` placeholders after each release.
+- Follow [`RELEASE.md`](RELEASE.md) for the end-to-end release checklist.
+
 ## Adding a ritual or trait
 
 - One `SKILL.md` under `skills/<slug>/`.

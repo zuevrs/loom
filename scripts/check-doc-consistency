@@ -8,13 +8,19 @@ README="$ROOT/README.md"
 AGENTS="$ROOT/AGENTS.md"
 INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
 PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
+CHANGELOG="$ROOT/CHANGELOG.md"
+RELEASE_DOC="$ROOT/RELEASE.md"
+PKG_JSON="$ROOT/package.json"
+CONTRIBUTING_DOC="$ROOT/CONTRIBUTING.md"
 
 errors=()
 
-if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PRELLM_HOOK" ]; then
+if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ]; then
   echo '{"status":"skip","message":"Required docs/hook files are missing"}'
   exit 0
 fi
+
+pkg_version="$(grep '\"version\"' "$PKG_JSON" 2>/dev/null | head -1 | sed 's/.*: *\"//' | sed 's/\".*//' || true)"
 
 # README: Codex install/uninstall commands must match current CLI verbs.
 if ! grep -Fq 'codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom' "$README"; then
@@ -40,6 +46,25 @@ if ! grep -Fq 'If installed via `clawhub`' "$README"; then
 fi
 if ! grep -Fq 'If installed via `install-agents-skills`' "$README"; then
   errors+=("README OpenClaw uninstall should describe install-agents-skills path")
+fi
+if ! grep -Fq '## Upgrade' "$README"; then
+  errors+=("README is missing required Upgrade section")
+fi
+if ! grep -Fq '## [Unreleased]' "$CHANGELOG"; then
+  errors+=("CHANGELOG is missing required [Unreleased] section")
+fi
+if ! grep -Fq '[Unreleased]: https://github.com/zuevrs/loom/compare/' "$CHANGELOG"; then
+  errors+=("CHANGELOG is missing compare link for [Unreleased]")
+fi
+expected_unreleased_link="[Unreleased]: https://github.com/zuevrs/loom/compare/v${pkg_version}...HEAD"
+if [ -n "$pkg_version" ] && ! grep -Fq "$expected_unreleased_link" "$CHANGELOG"; then
+  errors+=("CHANGELOG [Unreleased] compare link must target v${pkg_version}...HEAD")
+fi
+if [ -n "$pkg_version" ] && ! grep -Fq "[${pkg_version}]:" "$CHANGELOG"; then
+  errors+=("CHANGELOG compare links are missing [${pkg_version}] entry")
+fi
+if ! grep -Fq '[`RELEASE.md`](RELEASE.md)' "$CONTRIBUTING_DOC"; then
+  errors+=("CONTRIBUTING is missing release checklist link to RELEASE.md")
 fi
 
 # AGENTS managed block and loom-init managed block template must stay identical.
