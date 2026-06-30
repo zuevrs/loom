@@ -23,9 +23,9 @@ Before writing code, stop at the first rung that holds:
 ```
 skills/          ← canonical ritual and trait skills (SKILL.md each)
   loom-plan/     ← includes PRD, ISSUE, PRODUCT, DESIGN templates
-  loom-loop/     ← includes STATE, SAFETY templates + TEMPLATES.md
 hooks/           ← lifecycle hooks (CJS, plugin-tier hosts)
-loops/           ← loop starter catalog (markdown)
+rules/           ← OMP TTSR rules (plugin root convention)
+agents/          ← OMP custom verify agents (plugin root convention)
 scripts/         ← install scripts for script-tier hosts
 commands/        ← slash command definitions
 tests/           ← hook tests and canaries
@@ -42,12 +42,9 @@ tests/           ← hook tests and canaries
    Or individually:
    ```bash
    node tests/hooks.test.mjs
-   node tests/loop-checks.test.mjs
    bash scripts/check-drift
    bash scripts/check-doc-consistency
    bash scripts/check-installers
-   bash scripts/check-loop-starters
-   bash scripts/check-loop-config
    bash scripts/check-skill-template-contract
    bash scripts/check-template-sections
    ```
@@ -74,24 +71,13 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - Register in `hermes-plugin/`, `kiro-agent.json`, and `scripts/check-drift`.
 - Add to install scripts if user-facing.
 
-## Adding a loop starter
-
-- One markdown file under `loops/`.
-- Follow the loop starter shape (see `skills/loom-loop/TEMPLATES.md`).
-- `scripts/check-loop-starters` validates `loops/*.md` starter shape and starter catalog sync.
-- `scripts/check-loop-config` validates generated loop configs in `.loom/loops/*.yaml`.
-
 ## Tests
 
 - `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
-- `tests/loop-checks.test.mjs` — fixture tests for loop canary scripts.
 - `scripts/check-drift` — adapter drift canary.
 - `scripts/check-doc-consistency` — user-facing docs drift canary (README/install facts, changelog links, command-set parity, template inventory + references).
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
-- `scripts/check-loop-starters` — loop starter shape + starter catalog sync canary.
-- `scripts/check-loop-config` — generated loop config schema + state/safety consistency canary.
 - `scripts/check-skill-template-contract` — skill section contract canary (ADR-0091).
 - `scripts/check-template-sections` — user-artifact template section contract canary.
 - `scripts/smoke` — runs all structural checks (ADR-0040).
-- `scripts/run-loop` — loop runner entrypoint with `--dry-run` (ADR-0079).
 - CI runs these checks on every push.

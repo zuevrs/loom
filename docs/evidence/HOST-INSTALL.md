@@ -20,11 +20,11 @@ Template for ADR-0091 release gate. Fill one row per supported host before taggi
 
 | Host | Native install | Post-install check |
 |------|----------------|-------------------|
-| Claude Code | `/install-plugin zuevrs/loom` | 3 hooks in plugin; `loom-init` in test project |
+| Claude Code | `/install-plugin zuevrs/loom` | 3 lifecycle hooks + Stop enforcement in plugin; `loom-init` in test project |
 | Codex | `codex plugin add loom@loom` | hooks + commands registered |
-| Cursor | `~/.loom/scripts/install-cursor` | 3 hooks in `~/.cursor/hooks.json`; skills symlinked |
+| Cursor | `~/.loom/scripts/install-cursor` | 4 hooks in `~/.cursor/hooks.json` (incl. stop gate); skills symlinked |
 | Pi | `pi install git:github.com/zuevrs/loom` | skills load; discipline in session |
-| OMP | `omp plugin install git:github.com/zuevrs/loom` | extension + skills |
+| OMP | `omp plugin install git:github.com/zuevrs/loom` | extension (session_start + before_agent_start + session_stop) + TTSR rules + verify agents; `omp plugin doctor loom` clean |
 | OpenCode | `opencode plugin github:zuevrs/loom` | system transform injection |
 | Droid | `droid plugin install zuevrs/loom` | `.claude-plugin/` format loads |
 | Windsurf | `install-windsurf` | skills symlinked |
@@ -39,4 +39,4 @@ Before `git tag vX.Y.Z`:
 
 1. All rows filled or explicitly marked N/A with reason
 2. `bash scripts/smoke` green on release commit
-3. At least one E2E path documented: local loop dry-run + one plugin-native host smoke
+3. At least one E2E path documented: one plugin-native host smoke

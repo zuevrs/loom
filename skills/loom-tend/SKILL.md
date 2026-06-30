@@ -39,7 +39,7 @@ Keep the warp current and debts from rotting — without inventing feature scope
    ```bash
    rg -l "Status: ready-for-agent" .loom/
    ```
-   Cross-reference with git log — if the acceptance criteria commit exists, mark `done`.
+   Cross-reference with git log — if the acceptance criteria commit exists and a `## Verify` section is present, mark `done`. If no `## Verify` exists, run `loom-verify` first (enforcement gate requires it).
 
 4. **Comprehension** — remind to read shipped diffs / spot-check gates when relevant.
    - After a burst of implement sessions: have you read what shipped?

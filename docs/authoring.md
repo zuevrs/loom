@@ -27,7 +27,6 @@ Every `skills/<name>/SKILL.md` must include:
 Co-locate with the skill that materializes them:
 
 - Plan → PRD, Issue, PRODUCT, DESIGN
-- Loop → STATE, SAFETY, config shape in `TEMPLATES.md`
 
 Follow ADR contracts (Matt core + Addy guards for PRD; vertical slice for issues).
 
@@ -43,7 +42,16 @@ Three plugin-tier hooks:
 
 Sub-agent role field: **`loomRole`** (`maker`, `spec-checker`, `standards-checker`).
 
-## Drift discipline
+## Enforcement
+
+Verify-before-done logic lives in `hooks/stop-gate-logic.cjs` (single source):
+
+- **Stop-hook hosts** — `loom-stop-gate.sh` delegates to the shared module
+- **OMP** — `omp-extension.mjs` `session_stop` handler uses the same module
+- **OMP TTSR** — `rules/` stream reminder (soft layer)
+- **OMP agents** — `agents/` custom verify checkers (invoke via `task` tool)
+
+Do not duplicate gate logic elsewhere.
 
 After changing canonical behavior:
 
@@ -56,4 +64,4 @@ After changing canonical behavior:
 - **ponytail** — lazy ladder, thin adapters, drift canary
 - **mattpocock** — user-invoked implement/plan skills, model-invoked verify
 - **addyosmani** — PRD scope/quality gates
-- **loop-engineering** — objective gate, human gate, STATE ledger, stop-and-ask on ambiguity
+- **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection (ADR-0096)

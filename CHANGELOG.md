@@ -5,10 +5,63 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ## [Unreleased]
 
 ### Added
-- _None yet_
+- `hooks/stop-gate-logic.cjs` — shared verify-before-done gate for Stop hook and OMP `session_stop`
+- OMP `session_stop` handler in `omp-extension.mjs` — hard gate parity with Claude/Codex/Cursor
+- README "Loom + OMP (maximum synergy)" section — workflow guide with Plan Mode, goal, advisor, custom agents
 
 ### Changed
-- _None yet_
+- `loom-stop-gate.sh` delegates to shared stop-gate-logic module
+- OMP rules/agents moved to plugin root `rules/` and `agents/` (OMP discovery convention)
+- `loom-verify` documents OMP verify via `task` tool (`agent: "loom-verify-spec"`, not `@mention`)
+- Glossary: verify signal, TTSR as reminder layer
+- OMP enforcement table: `Stop+TTSR+agents`
+
+## [0.3.0] - 2026-06-30
+
+### Highlights
+
+- Host-native enforcement layer (ADR-0100): verify-before-done enforced at runtime via Stop hooks and TTSR rules
+- Loop functionality removed (ADR-0101): delegate to host-native goal/loop features
+- Leaner core: five rituals, two traits, three hooks, host-native enforcement
+
+### Breaking changes
+
+- Removed `loom-loop` ritual, `loops/` catalog, `scripts/run-loop`, and all loop-related checks
+- Removed `docs/security.md` and `docs/loop-headless.md` (safety info now in README)
+- Router no longer includes `loom-loop`; invocation policy lists five rituals
+
+### Added
+- `hooks/loom-stop-gate.sh` — Stop hook for Claude Code, Codex, Cursor (blocks done without verify)
+- `rules/loom-verify-before-done.md` — OMP TTSR rule (plugin root)
+- `agents/loom-verify-spec.md` — OMP custom spec checker
+- `agents/loom-verify-standards.md` — OMP custom standards checker
+- ADR-0100 (host-native enforcement) and ADR-0101 (loop removed) decisions documented
+- README "Host-Native Enforcement" section with per-host mechanism table
+- `package.json` `omp.rules` and `omp.agents` fields for OMP auto-discovery
+- `Stop` hook in `claude-codex-hooks.json`
+- Enforcement row in "What each host gets" table
+
+### Changed
+- README rewritten: loop sections removed, enforcement section added, safety section simplified
+- Glossary updated: loop terms removed, enforcement terms added
+- CONTRIBUTING/RELEASE simplified: loop checks removed
+- Managed block (AGENTS.md, loom-init template) drops `loom-loop` from router and invocation policy
+- `check-drift` skill list drops `loom-loop`
+- `check-doc-consistency` removes all loop-related assertions
+- `check-template-sections` removes STATE/SAFETY template checks
+
+### Migration steps
+
+- If you used `loom-loop` or `.loom/loops/*.yaml`: migrate to your host's native goal/loop feature (e.g., `omp goal`, `claude /loop`, `codex /goal`, Cursor cloud agents). Loom discipline is active regardless.
+- Re-run `loom-init` in active projects to refresh managed block to v0.3.0.
+- Delete orphaned files: `.loom/STATE.md`, `.loom/loops/` (if present). Keep `.loom/SAFETY.md` if you use the denylist — it is optional, not orphaned.
+
+### Adapter impacts
+
+- All adapters bumped to 0.3.0
+- `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json` gain Stop hook via shared hooks file
+- `hermes-plugin/plugin.yaml` drops `loom-loop` from commands/skills lists
+- `package.json` OMP section adds `rules` and `agents` auto-discovery fields
 
 ## [0.2.8] - 2026-06-30
 
@@ -186,7 +239,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zuevrs/loom/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/zuevrs/loom/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/zuevrs/loom/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/zuevrs/loom/compare/v0.2.5...v0.2.6
