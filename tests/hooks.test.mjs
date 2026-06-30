@@ -65,4 +65,18 @@ function run(script, env = {}) {
   ok(parsed.user_message.includes("spec-checker"), "loomRole overrides default");
 }
 
-console.log("✔ All hook tests passed");
+// --- Adapter smoke imports ---
+
+// opencode-plugin.mjs exports a function
+{
+  const mod = await import(resolve(__dirname, "..", "opencode-plugin.mjs"));
+  ok(typeof mod.default === "function", "opencode-plugin exports default function");
+}
+
+// omp-extension.mjs exports a function
+{
+  const mod = await import(resolve(__dirname, "..", "omp-extension.mjs"));
+  ok(typeof mod.default === "function", "omp-extension exports default function");
+}
+
+console.log("✔ All hook and adapter tests passed");
