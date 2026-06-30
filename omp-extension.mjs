@@ -12,7 +12,7 @@ import { resolve } from "node:path";
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.2.7";
+const MANAGED_BLOCK_VERSION = "v0.2.8";
 
 const DISCIPLINE = `${PRE_LLM}
 
