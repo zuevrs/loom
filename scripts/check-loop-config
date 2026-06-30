@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # loom: loop config drift check — validates config ↔ state ↔ safety consistency
-# Exit: 0 healthy, 1 critical (missing files), 2 warning (drift)
+# Exit codes: 0 healthy, 1 critical (missing files), 2 warning (drift)
+# NOTE: In CI, non-zero exits fail the step. Use `|| true` or
+#       `continue-on-error: true` if you want warnings to be non-blocking.
 set -euo pipefail
 
 ROOT="${1:-.}"

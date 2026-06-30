@@ -101,6 +101,8 @@ Default loops live in `loops/` at repo root. Each is a markdown file following t
 
 Users can add custom loops following the same shape (see `loops/*.md` for reference).
 
+> **Starter discoverability:** The table above is self-sufficient for setup. For detailed shape invariants of each starter, read `loops/<id>.md` at the Loom install root (plugin directory for native hosts; `~/.loom/` for script-based installs). `check-loop-config` validates `starter_id` references against this directory.
+
 ### Creating a custom loop
 
 When user describes a loop intent that doesn't match existing ones:

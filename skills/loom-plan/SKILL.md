@@ -75,6 +75,7 @@ Use co-located template files when creating project artifacts:
 - Issue → [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md)
 - PRODUCT.md → [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) (first adoption only)
 - DESIGN.md → [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) (user-facing UI projects only)
+- EXECUTION-ORDER.md → flat numbered list: `NN-slug.md` per line, respecting `Blocked by` graph (no template needed)
 
 ## Hard stops
 
