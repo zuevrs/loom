@@ -24,6 +24,14 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Confirm before project writes in setup/apply flows.
 - Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
 
+### Invariants
+
+- Router is active: map intent → ritual skill before acting.
+- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Maker/checker separation: Implement never self-approves.
+- Denylist paths → ready-for-human, never unattended Implement.
+- Traits (model-invoked from Plan): plan-grill, warp-sharpen.
+
 ### Router
 
 Map intent to ritual skills:

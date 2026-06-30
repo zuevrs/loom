@@ -6,21 +6,17 @@
 // Hook factory: (pi: HookAPI) => void
 
 import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
+
+const require = createRequire(import.meta.url);
+const { PRE_LLM } = require("./hooks/invariants.cjs");
 
 const MANAGED_BLOCK_VERSION = "v0.2.7";
 
-const DISCIPLINE = `# Loom invariants (session guard)
+const DISCIPLINE = `${PRE_LLM}
 
-- Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
-- One issue at a time; fresh session per issue for Implement.
-- Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.
-- No verify digest → no done.
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
+- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.`;
 
 function findProjectRoot() {
   let dir = process.env.PI_PROJECT_DIR || process.cwd();

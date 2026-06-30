@@ -4,15 +4,6 @@
 
 "use strict";
 
-const INVARIANTS = `# Loom invariants (pre-turn guard)
+const { PRE_LLM } = require("./invariants.cjs");
 
-- Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
-- One issue at a time; fresh session per issue for Implement.
-- Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
-- No verify digest → no done.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen.`;
-
-process.stdout.write(INVARIANTS + "\n");
+process.stdout.write(PRE_LLM + "\n");
