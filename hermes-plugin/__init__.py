@@ -24,8 +24,7 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 - Denylist paths → ready-for-human, never unattended Implement.
 - No verify digest → no done.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen."""
+- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
 
 ROLES = {
     "maker": "Ship one vertical slice. Do not self-approve. Leave runnable check.",
@@ -36,7 +35,6 @@ ROLES = {
 SKILL_NAMES = [
     "loom-init", "loom-plan", "loom-implement",
     "loom-verify", "loom-tend",
-    "plan-grill", "warp-sharpen",
 ]
 
 RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]

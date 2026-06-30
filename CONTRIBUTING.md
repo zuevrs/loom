@@ -21,7 +21,7 @@ Before writing code, stop at the first rung that holds:
 ## Structure
 
 ```
-skills/          ← canonical ritual and trait skills (SKILL.md each)
+skills/          ← canonical ritual skills (SKILL.md each)
   loom-plan/     ← includes PRD, ISSUE, PRODUCT, DESIGN templates
 hooks/           ← lifecycle hooks (CJS, plugin-tier hosts)
 rules/           ← OMP TTSR rules (plugin root convention)
@@ -63,7 +63,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - Keep `Unreleased` placeholders after each release.
 - Follow [`RELEASE.md`](RELEASE.md) for the end-to-end release checklist.
 
-## Adding a ritual or trait
+## Adding a ritual
 
 - [`docs/authoring.md`](docs/authoring.md) — maintainer skill/hook authoring guide.
 - One `SKILL.md` under `skills/<slug>/`.

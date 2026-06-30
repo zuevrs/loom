@@ -22,7 +22,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - No verify digest → no done.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.
-- Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
+- Match the user's language for project content; ritual names and `loom:` markers stay English.
 
 ### Invariants
 
@@ -30,7 +30,6 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Human gate: never auto-merge, auto-publish, or bypass denylist.
 - Maker/checker separation: Implement never self-approves.
 - Denylist paths → ready-for-human, never unattended Implement.
-- Traits (model-invoked from Plan): plan-grill, warp-sharpen.
 
 ### Router
 
@@ -54,7 +53,6 @@ Map intent to ritual skills:
 ### Invocation policy
 
 - User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`
-- Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
 - Model-invoked (ritual): `loom-verify` (after every Implement completion)
 
 ### Session state

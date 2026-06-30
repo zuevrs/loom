@@ -10,6 +10,11 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - README "Loom + OMP (maximum synergy)" section — workflow guide with Plan Mode, goal, advisor, custom agents
 
 ### Changed
+- Traits removed: `plan-grill` and `warp-sharpen` folded inline into `loom-plan`
+- `EXECUTION-ORDER.md` removed from Plan outputs; issue order via `Blocked by` only
+- `loom-init` no longer writes Cursor shim; managed block trimmed (no traits, no internal ADR refs)
+- Hermes/Kiro adapters updated for five-skill surface
+- `check-drift` / `check-doc-consistency` / `check-skill-template-contract` aligned to five rituals
 - `loom-stop-gate.sh` delegates to shared stop-gate-logic module
 - OMP rules/agents moved to plugin root `rules/` and `agents/` (OMP discovery convention)
 - `loom-verify` documents OMP verify via `task` tool (`agent: "loom-verify-spec"`, not `@mention`)

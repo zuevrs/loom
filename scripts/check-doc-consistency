@@ -131,6 +131,8 @@ template_paths=(
   "skills/loom-plan/ISSUE-TEMPLATE.md"
   "skills/loom-plan/PRODUCT-TEMPLATE.md"
   "skills/loom-plan/DESIGN-TEMPLATE.md"
+  "skills/loom-plan/CONTEXT-FORMAT.md"
+  "skills/loom-plan/ADR-FORMAT.md"
 )
 
 for rel in "${template_paths[@]}"; do
@@ -154,7 +156,9 @@ for plan_ref in \
   'PRD-TEMPLATE.md' \
   'ISSUE-TEMPLATE.md' \
   'PRODUCT-TEMPLATE.md' \
-  'DESIGN-TEMPLATE.md'
+  'DESIGN-TEMPLATE.md' \
+  'CONTEXT-FORMAT.md' \
+  'ADR-FORMAT.md'
 do
   if ! grep -Fq "$plan_ref" "$PLAN_SKILL"; then
     errors+=("skills/loom-plan/SKILL.md is missing template reference: $plan_ref")
@@ -197,9 +201,6 @@ if ! grep -Fq 'No verify digest' "$INIT_SKILL"; then
 fi
 if ! grep -Fq 'No verify digest' "$INVARIANTS_SRC"; then
   errors+=("hooks/invariants.cjs missing 'No verify digest' invariant")
-fi
-if ! grep -Fq 'Traits (model-invoked from Plan): plan-grill, warp-sharpen.' "$INVARIANTS_SRC"; then
-  errors+=("hooks/invariants.cjs missing traits reference")
 fi
 if ! grep -Fq 'require("./invariants.cjs")' "$PRELLM_HOOK" && ! grep -Fq "require('./invariants.cjs')" "$PRELLM_HOOK"; then
   errors+=("hooks/loom-pre-llm.cjs must require hooks/invariants.cjs")
