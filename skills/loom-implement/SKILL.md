@@ -65,6 +65,16 @@ Before writing code, stop at the **first rung that holds**:
 - Verification failed → issue stays not-`done`.
 - **No verify digest → no done.** Runnable checks passing is necessary but not sufficient.
 
+## Failure modes
+
+| Symptom | Response |
+|---|---|
+| Blocked dependency unresolved | Stop; do not implement |
+| Denylist path in issue scope | Set `ready-for-human`; stop |
+| Verification command fails | Fix or stop; never mark done |
+| User asks to skip verify | Refuse; document host limitation if truly blocked |
+| Scope creep mid-issue | Cut to new issue; stay on one slice |
+
 ## Anti-rationalization
 
 | Excuse | Reality |
