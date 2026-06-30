@@ -23,7 +23,7 @@ const ROLES = {
 };
 
 function run() {
-  // ponytail: role from env or default to maker
+  // loom: role from env or default to maker
   const role = (process.env.LOOM_SUBAGENT_ROLE || "maker").toLowerCase();
   const manifest = ROLES[role] || ROLES.maker;
 

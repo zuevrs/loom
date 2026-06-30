@@ -66,7 +66,7 @@ function run() {
     "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
   ].join("\n");
 
-  // ponytail: output format varies by host — Claude reads plain stdout
+  // loom: output format varies by host — Claude reads plain stdout
   process.stdout.write(output + "\n");
 }
 

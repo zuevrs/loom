@@ -74,7 +74,7 @@ export default function loomExtension(pi) {
         "",
         "Map intent → loom-init | loom-plan | loom-implement | loom-verify | loom-tend | loom-loop.",
       ];
-      // ponytail: OMP injects hook stdout into session context
+      // loom: OMP injects hook stdout into session context
       process.stdout.write(lines.join("\n") + "\n");
     } catch {
       // best effort — never break session start
