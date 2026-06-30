@@ -25,19 +25,19 @@ Keep the warp current and debts from rotting — without inventing feature scope
 ## Process
 
 1. **Warp audit** — CONTEXT/ADRs (+ PRODUCT/DESIGN when present) match the codebase.
-   - `grep -r` for terms defined in CONTEXT.md — any code using a rejected synonym?
+   - Use `rg` for terms defined in CONTEXT.md — any code using a rejected synonym?
    - ADRs marked Accepted that describe behavior the code no longer implements?
    - PRODUCT.md anti-references that have crept back in?
 
 2. **`loom:` debt** — surface `loom:` markers; pay down or re-mark with owner and upgrade path.
    ```bash
-   grep -rn "loom:" --include="*.ts" --include="*.js" --include="*.py" .
+   rg -n "loom:" --glob "*.{ts,js,py}" .
    ```
    For each marker: is the ceiling still acceptable? Has the upgrade path become cheap?
 
 3. **Stale issues** — `ready-for-agent` that are already done or merged; fix status drift.
    ```bash
-   grep -rl "Status: ready-for-agent" .loom/
+   rg -l "Status: ready-for-agent" .loom/
    ```
    Cross-reference with git log — if the acceptance criteria commit exists, mark `done`.
 

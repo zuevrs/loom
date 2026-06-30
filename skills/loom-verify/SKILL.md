@@ -22,7 +22,7 @@ Structured digest (below). On dual pass → issue `Status: done`. On fail → us
 ## Process
 
 1. Pin fixed point; confirm diff is non-empty.
-2. Spawn **two parallel checker sub-agents** (separate context — `Task` or host equivalent):
+2. Spawn **two parallel checker sub-agents** (separate context — `Subagent` tool or host equivalent):
    - **Spec**: does change satisfy issue + PRD? Quote spec lines for findings. Pass `loomRole: "spec-checker"` in spawn data.
    - **Standards**: warp + discipline floor — conventions, runnable check exists and passes. Pass `loomRole: "standards-checker"` in spawn data.
 3. Neither checker fixes work — judges only.
