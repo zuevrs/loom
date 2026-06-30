@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # loom: install agent + skills for Kiro CLI
-# 1. Creates symlinks in ~/.kiro/skills/ for loom skill directories
+# 1. Creates symlinks in ~/.kiro/skills/ for all Loom skill directories
 # 2. Copies loom agent config to ~/.kiro/agents/
 set -euo pipefail
 
@@ -14,8 +14,8 @@ echo "Kiro skills:"
 mkdir -p "$SKILLS_TARGET"
 
 installed=0
-for skill_dir in "$SKILLS_DIR"/loom-*/; do
-  [ -d "$skill_dir" ] || continue
+for skill_dir in "$SKILLS_DIR"/*/; do
+  [ -f "${skill_dir}SKILL.md" ] || continue
   skill_name=$(basename "$skill_dir")
   target="$SKILLS_TARGET/$skill_name"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # loom: install skills for Windsurf IDE
-# Creates symlinks in ~/.codeium/windsurf/skills/ pointing to loom skill directories.
+# Creates symlinks in ~/.codeium/windsurf/skills/ pointing to all Loom skill directories.
 # Windsurf discovers skills from ~/.codeium/windsurf/skills/ (global) and .windsurf/skills/ (project).
 set -euo pipefail
 
@@ -12,8 +12,8 @@ mkdir -p "$TARGET_DIR"
 
 echo "Windsurf skills:"
 installed=0
-for skill_dir in "$SKILLS_DIR"/loom-*/; do
-  [ -d "$skill_dir" ] || continue
+for skill_dir in "$SKILLS_DIR"/*/; do
+  [ -f "${skill_dir}SKILL.md" ] || continue
   skill_name=$(basename "$skill_dir")
   target="$TARGET_DIR/$skill_name"
 
