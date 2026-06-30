@@ -4,6 +4,8 @@ description: Configure a project for Loom after global install. Use when Loom is
 disable-model-invocation: true
 ---
 
+**Confirm before every write.**
+
 ## Goal
 
 One safe, idempotent project setup: managed block, `.loom/`, host shims — then hand off to `loom-plan`.
@@ -57,32 +59,47 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Non-trivial logic leaves one runnable check before `done`.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.
+- Match the user's language for project warp/issues; ritual names and `loom:` markers stay English (ADR-0026).
 
 ### Router
 
 Map intent to ritual skills:
 
 - setup/install/project wiring → `loom-init`
-- planning/grilling/prd/issues/slicing → `loom-plan`
+- planning/scope/prd/issues/slicing → `loom-plan`
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
 - loop configuration and apply → `loom-loop`
 
-**Scope routing:** small fix → `loom-implement`; multi-session → `loom-plan` first; fresh session per issue for Implement.
+**Scope routing:**
 
-**Ambiguous active build:** list `ready-for-agent` issues under `.loom/*/issues/` and ask one clarifying question.
+- Small single-session fix → `loom-implement` directly.
+- Multi-session or inbound underspecified work → `loom-plan` first.
+- **Fresh session per issue** for Implement — PRD + one issue only.
+- Domain breadth (security/perf/CI) → recommend host-native skills; do not fold into Loom core.
+
+**Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
 
 ### Invocation policy
 
-- User-invoked: `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
-- `loom-verify` must run before considering implementation complete.
+- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
+- Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
+- Model-invoked (ritual): `loom-verify` (after every Implement completion)
+
+### Session state
+
+Before acting, reconstruct state from:
+
+- active PRD and issue cards under `.loom/`
+- project docs and ADRs
+- current issue status and blocker graph
 
 ### Status vocabulary
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
-After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.md` → `ready-for-human`.
+After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.md` → `ready-for-human`, never unattended Implement.
 <!-- loom:end -->
 ```
 
@@ -122,7 +139,7 @@ Small fix → implement directly. Ambiguous build → list ready-for-agent, ask 
 | User declines confirm | No writes; report what would have changed |
 | Major version mismatch | Warn-and-continue with explicit refresh guidance |
 
-## Verification
+## Done when
 
 - Managed block present and well-formed
 - `.loom/` exists
