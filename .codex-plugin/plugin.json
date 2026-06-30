@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
   "author": {
     "name": "zuevrs",
@@ -9,7 +9,7 @@
   "homepage": "https://github.com/zuevrs/loom",
   "repository": "https://github.com/zuevrs/loom",
   "license": "MIT",
-  "keywords": ["agent", "harness", "skills", "loops", "discipline"],
+  "keywords": ["agent", "harness", "skills", "enforcement", "discipline"],
   "skills": "./skills/",
   "commands": "./commands/",
   "hooks": "./hooks/claude-codex-hooks.json"

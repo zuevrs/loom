@@ -7,7 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const MANAGED_BLOCK_VERSION = "v0.2.8";
+const MANAGED_BLOCK_VERSION = "v0.3.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -48,8 +48,6 @@ function run() {
     pointers.push(`.loom/: ${loomDir}/`);
     const safety = path.join(loomDir, "SAFETY.md");
     if (fs.existsSync(safety)) pointers.push(`SAFETY: ${safety}`);
-    const state = path.join(loomDir, "STATE.md");
-    if (fs.existsSync(state)) pointers.push(`STATE: ${state}`);
   }
 
   if (pointers.length === 0) {

@@ -1,5 +1,5 @@
 name: loom
-version: 0.2.8
+version: 0.3.0
 description: Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.
 author: zuevrs
 provides_hooks:
@@ -10,14 +10,12 @@ provides_commands:
   - loom-plan
   - loom-implement
   - loom-verify
-  - loom-loop
   - loom-init
   - loom-tend
 provides_skills:
   - loom-plan
   - loom-implement
   - loom-verify
-  - loom-loop
   - loom-init
   - loom-tend
   - plan-grill

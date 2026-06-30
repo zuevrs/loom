@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.2.8
+// loom — OpenCode plugin adapter. Version: 0.3.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -33,13 +33,14 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Mark intentional shortcuts with loom: comments (ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before done.
+- No verify digest → no done.
 - Confirm before project writes in setup/apply flows.
 
 ${PRE_LLM}
 
 ## Router
 
-Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain) | loom-loop (loops).
+Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
 
 Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
 

@@ -40,7 +40,7 @@ One safe, idempotent project setup: managed block, `.loom/`, host shims — then
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.2.8 -->
+<!-- loom:begin version=v0.3.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -79,7 +79,6 @@ Map intent to ritual skills:
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
-- loop configuration and apply → `loom-loop`
 
 **Scope routing:**
 
@@ -92,7 +91,7 @@ Map intent to ritual skills:
 
 ### Invocation policy
 
-- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
+- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`
 - Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
 - Model-invoked (ritual): `loom-verify` (after every Implement completion)
 
@@ -127,7 +126,7 @@ Lazy senior dev: the best code is the code you never wrote.
 
 Discipline ladder (first rung that holds): YAGNI → reuse → stdlib → platform → dep → one line → minimum.
 
-Route intent: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain) | loom-loop (loops).
+Route intent: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
 
 Small fix → implement directly. Ambiguous build → list ready-for-agent, ask one question.
 ```

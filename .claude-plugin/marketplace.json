@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "loom",
-      "description": "Plan, implement, verify, tend — with loops and lifecycle hooks.",
+      "description": "Plan, implement, verify, tend — with enforcement hooks and discipline.",
       "source": "./",
       "category": "productivity"
     }
