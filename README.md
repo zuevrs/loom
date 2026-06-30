@@ -2,7 +2,7 @@
 
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-**What it does:** installs a discipline ladder, a set of ritual skills (plan → implement → verify → tend), lifecycle hooks, and a seed catalog of scheduled loops into any supported agent host.
+**What it does:** installs a discipline ladder, six ritual skills, two Plan traits, lifecycle hooks, and a seed catalog of scheduled loops into any supported agent host.
 
 **Why:** cold agents guess intent, over-engineer, skip verification, and lose context between sessions. Loom closes these gaps with on-disk conventions — no runtime engine, no lock-in.
 
@@ -48,11 +48,20 @@ Then run **`loom-init`** in each project to write the managed block.
 | Skill | Purpose |
 |---|---|
 | `loom-init` | Project setup: managed block, `.loom/`, host shims |
-| `loom-plan` | Grill → PRD + issue pack |
+| `loom-plan` | Scope interview → PRD + issue pack |
 | `loom-implement` | Ship one issue with minimal diff |
 | `loom-verify` | Fresh checker: Spec + Standards in parallel |
 | `loom-tend` | Warp maintenance, stale issues, capture learning |
 | `loom-loop` | Configure and apply scheduled loops |
+
+## Traits
+
+Model-invoked skills that rituals call for reusable behavior — not standalone commands.
+
+| Trait | Called from | Purpose |
+|---|---|---|
+| `plan-grill` | Plan | Relentless one-question-at-a-time scope interview with recommended answers |
+| `warp-sharpen` | Plan | Sharpen glossary, challenge terms, offer ADRs sparingly |
 
 ## Hooks
 
@@ -112,11 +121,11 @@ Add your own loops: copy any file in `loops/`, follow the shape (objective gate,
 | Pi | `pi uninstall git:github.com/zuevrs/loom` |
 | OMP | `omp plugin uninstall loom` |
 | OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
-| Cursor | Remove `loom-*` symlinks from `~/.agents/skills/`; remove hooks from `~/.cursor/hooks.json` |
-| Windsurf | Remove `loom-*` symlinks from `~/.codeium/windsurf/skills/` |
-| Kiro | `rm ~/.kiro/agents/loom.json`; remove `loom-*` from `~/.kiro/skills/` |
+| Cursor | Remove Loom skill symlinks from `~/.agents/skills/` (`loom-*`, `plan-grill`, `warp-sharpen`); remove hooks from `~/.cursor/hooks.json` |
+| Windsurf | Remove Loom skill symlinks from `~/.codeium/windsurf/skills/` |
+| Kiro | `rm ~/.kiro/agents/loom.json`; remove Loom skill symlinks from `~/.kiro/skills/` |
 | Hermes | `rm -rf ~/.hermes/plugins/loom` |
-| Cline/Droid/OpenClaw | Remove symlinks from `~/.agents/skills/loom-*` |
+| Cline/Droid/OpenClaw | Remove Loom skill symlinks from `~/.agents/skills/` |
 
 In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGENTS.md` and delete `.loom/` if present.
 
