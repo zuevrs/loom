@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.2.8 -->
+<!-- loom:begin version=v0.3.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -41,7 +41,6 @@ Map intent to ritual skills:
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
-- loop configuration and apply → `loom-loop`
 
 **Scope routing:**
 
@@ -54,7 +53,7 @@ Map intent to ritual skills:
 
 ### Invocation policy
 
-- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`, `loom-loop`
+- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-implement`, `loom-tend`
 - Model-invoked (traits): `plan-grill`, `warp-sharpen` (during Plan)
 - Model-invoked (ritual): `loom-verify` (after every Implement completion)
 

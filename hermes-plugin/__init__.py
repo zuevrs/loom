@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.2.8"
+MANAGED_BLOCK_VERSION = "v0.3.0"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -35,7 +35,7 @@ ROLES = {
 
 SKILL_NAMES = [
     "loom-init", "loom-plan", "loom-implement",
-    "loom-verify", "loom-tend", "loom-loop",
+    "loom-verify", "loom-tend",
     "plan-grill", "warp-sharpen",
 ]
 
@@ -73,9 +73,6 @@ def _build_context_pointers(root: Path) -> str:
         safety = loom_dir / "SAFETY.md"
         if safety.exists():
             lines.append(f"SAFETY: {safety}")
-        state = loom_dir / "STATE.md"
-        if state.exists():
-            lines.append(f"STATE: {state}")
 
     if len(lines) == 2:
         lines.append("No Loom project detected. Run loom-init to set up this project.")
