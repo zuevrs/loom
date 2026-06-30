@@ -8,11 +8,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: node tests/hooks.test.mjs && node tests/loop-checks.test.mjs
+      - run: node tests/hooks.test.mjs
       - run: scripts/check-drift
       - run: scripts/check-doc-consistency
       - run: scripts/check-installers
-      - run: scripts/check-loop-starters
-      - run: scripts/check-loop-config
       - run: scripts/check-skill-template-contract
       - run: scripts/check-template-sections

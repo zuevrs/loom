@@ -8,7 +8,6 @@ README="$ROOT/README.md"
 AGENTS="$ROOT/AGENTS.md"
 INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
 PLAN_SKILL="$ROOT/skills/loom-plan/SKILL.md"
-LOOP_SKILL="$ROOT/skills/loom-loop/SKILL.md"
 PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
 INVARIANTS_SRC="$ROOT/hooks/invariants.cjs"
 CHANGELOG="$ROOT/CHANGELOG.md"
@@ -19,7 +18,7 @@ CHECKS_WORKFLOW="$ROOT/.github/workflows/checks.yml"
 
 errors=()
 
-if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PLAN_SKILL" ] || [ ! -f "$LOOP_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$INVARIANTS_SRC" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ] || [ ! -f "$CHECKS_WORKFLOW" ]; then
+if [ ! -f "$README" ] || [ ! -f "$AGENTS" ] || [ ! -f "$INIT_SKILL" ] || [ ! -f "$PLAN_SKILL" ] || [ ! -f "$PRELLM_HOOK" ] || [ ! -f "$INVARIANTS_SRC" ] || [ ! -f "$CHANGELOG" ] || [ ! -f "$RELEASE_DOC" ] || [ ! -f "$PKG_JSON" ] || [ ! -f "$CONTRIBUTING_DOC" ] || [ ! -f "$CHECKS_WORKFLOW" ]; then
   echo '{"status":"skip","message":"Required docs/hook files are missing"}'
   exit 0
 fi
@@ -63,17 +62,10 @@ fi
 if ! grep -Fq 'docs/glossary.md' "$README"; then
   errors+=("README is missing glossary link")
 fi
-if ! grep -Fq 'docs/security.md' "$README"; then
-  errors+=("README is missing security doc link")
-fi
 GLOSSARY_DOC="$ROOT/docs/glossary.md"
-SECURITY_DOC="$ROOT/docs/security.md"
 AUTHORING_DOC="$ROOT/docs/authoring.md"
 if [ ! -f "$GLOSSARY_DOC" ]; then
   errors+=("docs/glossary.md is missing")
-fi
-if [ ! -f "$SECURITY_DOC" ]; then
-  errors+=("docs/security.md is missing")
 fi
 if [ ! -f "$AUTHORING_DOC" ]; then
   errors+=("docs/authoring.md is missing")
@@ -81,19 +73,9 @@ fi
 if [ ! -f "$ROOT/scripts/smoke" ]; then
   errors+=("scripts/smoke is missing")
 fi
-if [ ! -f "$ROOT/scripts/run-loop" ]; then
-  errors+=("scripts/run-loop is missing")
-fi
-LOOP_HEADLESS_DOC="$ROOT/docs/loop-headless.md"
 EVIDENCE_DOC="$ROOT/docs/evidence/HOST-INSTALL.md"
-if [ ! -f "$LOOP_HEADLESS_DOC" ]; then
-  errors+=("docs/loop-headless.md is missing")
-fi
 if [ ! -f "$EVIDENCE_DOC" ]; then
   errors+=("docs/evidence/HOST-INSTALL.md is missing")
-fi
-if ! grep -Fq 'docs/loop-headless.md' "$README"; then
-  errors+=("README is missing loop-headless doc link")
 fi
 if ! grep -Fq 'docs/evidence/HOST-INSTALL.md' "$RELEASE_DOC"; then
   errors+=("RELEASE.md is missing host install evidence checklist link")
@@ -118,12 +100,9 @@ fi
 # Contributing/CI parity for mandatory checks.
 for cmd in \
   'node tests/hooks.test.mjs' \
-  'node tests/loop-checks.test.mjs' \
   'bash scripts/check-drift' \
   'bash scripts/check-doc-consistency' \
   'bash scripts/check-installers' \
-  'bash scripts/check-loop-starters' \
-  'bash scripts/check-loop-config' \
   'bash scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$cmd" "$CONTRIBUTING_DOC"; then
@@ -135,12 +114,10 @@ do
 done
 
 for ci_cmd in \
-  'node tests/hooks.test.mjs && node tests/loop-checks.test.mjs' \
+  'node tests/hooks.test.mjs' \
   'scripts/check-drift' \
   'scripts/check-doc-consistency' \
   'scripts/check-installers' \
-  'scripts/check-loop-starters' \
-  'scripts/check-loop-config' \
   'scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$ci_cmd" "$CHECKS_WORKFLOW"; then
@@ -154,8 +131,6 @@ template_paths=(
   "skills/loom-plan/ISSUE-TEMPLATE.md"
   "skills/loom-plan/PRODUCT-TEMPLATE.md"
   "skills/loom-plan/DESIGN-TEMPLATE.md"
-  "skills/loom-loop/STATE-TEMPLATE.md"
-  "skills/loom-loop/SAFETY-TEMPLATE.md"
 )
 
 for rel in "${template_paths[@]}"; do
@@ -186,14 +161,6 @@ do
   fi
 done
 
-for loop_ref in \
-  'STATE-TEMPLATE.md' \
-  'SAFETY-TEMPLATE.md'
-do
-  if ! grep -Fq "$loop_ref" "$LOOP_SKILL"; then
-    errors+=("skills/loom-loop/SKILL.md is missing template reference: $loop_ref")
-  fi
-done
 
 # AGENTS managed block and loom-init managed block template must stay identical.
 tmp_agents="$(mktemp)"

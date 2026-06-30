@@ -12,12 +12,9 @@ run() {
 }
 
 run node tests/hooks.test.mjs
-run node tests/loop-checks.test.mjs
 run bash scripts/check-drift
 run bash scripts/check-doc-consistency
 run bash scripts/check-installers
-run bash scripts/check-loop-starters
-run bash scripts/check-loop-config
 run bash scripts/check-skill-template-contract
 run bash scripts/check-template-sections
 

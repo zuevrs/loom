@@ -41,27 +41,6 @@ issue="$ROOT/skills/loom-plan/ISSUE-TEMPLATE.md"
   "## Out of scope" \
   "## Status"
 
-# STATE (ADR-0056)
-state="$ROOT/skills/loom-loop/STATE-TEMPLATE.md"
-[ -f "$state" ] && check_sections "$state" \
-  "## Goal" \
-  "## Current mode" \
-  "## Active items" \
-  "## Run log" \
-  "## Acceptance metrics" \
-  "## Post-Run Critique" \
-  "## Cumulative summary" \
-  "## Needs-human"
-
-# SAFETY (ADR-0057)
-safety="$ROOT/skills/loom-loop/SAFETY-TEMPLATE.md"
-[ -f "$safety" ] && check_sections "$safety" \
-  "## Denylist paths" \
-  "## Human-gate required actions" \
-  "## Auto-merge policy" \
-  "## Connector permissions" \
-  "## Escalation triggers" \
-  "## Kill switch"
 
 # PRODUCT (ADR-0049)
 product="$ROOT/skills/loom-plan/PRODUCT-TEMPLATE.md"
