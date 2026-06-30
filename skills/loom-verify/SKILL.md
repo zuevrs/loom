@@ -63,6 +63,16 @@ Status effects: **APPROVE** → set issue `Status: done`. **REJECT** → no auto
 - Do not downgrade blockers to style notes.
 - Do not fix code during verify.
 
+## Failure modes
+
+| Symptom | Response |
+|---|---|
+| Empty diff | Stop; pin fixed point and confirm scope |
+| Host cannot spawn sub-agents | Sequential Spec then Standards; document in digest |
+| Sub-agents unavailable | ESCALATE_HUMAN with explicit limitation |
+| Conflicting spec vs standards | REJECT with both cited |
+| Checker tries to fix | Stop checker; re-run with role manifest |
+
 ## Anti-rationalization
 
 | Excuse | Reality |

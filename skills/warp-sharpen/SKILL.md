@@ -3,9 +3,13 @@ name: warp-sharpen
 description: Sharpen project vocabulary and warp during Plan. Use when terms need pinning or architectural decisions arise.
 ---
 
-Actively build and sharpen the domain model as you design — not just read `CONTEXT.md`.
+## Goal
 
-## During the session
+Keep the warp (CONTEXT, ADRs) aligned with decisions as they crystallize during Plan — durable memory, not chat-only clarity.
+
+## Process
+
+Actively build and sharpen the domain model as you design — not just read `CONTEXT.md`.
 
 - **Challenge glossary** — when a term conflicts with `CONTEXT.md`, call it out.
 - **Sharpen fuzzy language** — propose precise canonical terms.
@@ -17,3 +21,14 @@ Actively build and sharpen the domain model as you design — not just read `CON
 `CONTEXT.md` is glossary only — no implementation details, no specs, no scratchpad.
 
 Create files lazily: first term → create `CONTEXT.md`; first ADR → create `docs/adr/`.
+
+## Hard stops
+
+- Do not batch glossary updates — capture inline as terms resolve.
+- Do not write ADRs for reversible or obvious choices.
+- Do not put implementation specs in CONTEXT.md.
+
+## Done when
+
+- Terms used in the upcoming PRD match CONTEXT (or CONTEXT was updated with user approval)
+- Any new ADR captures a genuine trade-off, not ceremony

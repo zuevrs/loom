@@ -3,13 +3,19 @@ name: plan-grill
 description: Interview relentlessly about scope and design. Use when loom-plan clarifies intent or scope is underspecified.
 ---
 
-Interview relentlessly about every aspect of the plan until shared understanding. Walk down each branch of the design tree, resolving dependencies one-by-one. **For each question, provide your recommended answer.**
+## Goal
+
+Reach shared understanding of scope through a relentless one-question-at-a-time interview before any PRD or issue materialization.
+
+## Process
+
+Interview every aspect of the plan until clarity holds. Walk down each branch of the design tree, resolving dependencies one-by-one. **For each question, provide your recommended answer.**
 
 Ask **one question at a time**. Wait for feedback before the next. Multiple questions at once is bewildering.
 
 If a question can be answered by exploring the codebase, **explore the codebase instead** of asking.
 
-## Question patterns
+### Question patterns
 
 Start broad, narrow to specifics:
 
@@ -35,3 +41,8 @@ Start broad, narrow to specifics:
 | "User seems impatient, skip remaining questions" | One more question now saves a bad PRD later |
 | "I already know what they want" | You know what YOU would build — ask what THEY need |
 | "This is obvious, no interview needed" | Obvious scope still needs boundary confirmation |
+
+## Done when
+
+- User explicitly confirmed readiness to materialize artifacts
+- Scope boundaries, seams, and ordering are clear enough for a coherent PRD
