@@ -27,46 +27,10 @@ state_path: .loom/STATE.md
 human_owner: "<name>"
 ```
 
-## SAFETY template (`.loom/SAFETY.md`)
+## SAFETY template
 
-```markdown
-# Loom loop safety policy
+Use [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md) when creating `.loom/SAFETY.md`.
 
-## Denylist paths
-- `.env`, `.env.*`, `**/secrets/**`, `**/credentials/**`
-- auth, payments, billing, infra config (extend per project)
+## STATE template
 
-## Human-gate required actions
-- merge to default branch, publish/release, credential changes, denylist paths
-
-## Auto-merge policy
-- Default: **disabled**
-
-## Kill switch
-- `LOOM_LOOPS_ENABLED` must be `true` for unattended runs
-```
-
-## STATE template (`.loom/STATE.md`)
-
-```markdown
-# Loop state — <starter-id>
-
-## Goal
-
-## Current mode
-report-only | assisted | unattended
-
-## Active items
-
-## Run log
-<!-- rolling last 20 entries -->
-
-## Acceptance metrics
-- accepted_changes / rejected_changes / accepted_change_rate
-
-## Post-Run Critique
-<!-- Each run appends: what was noisy/wrong, what to adjust next cycle -->
-<!-- If entries pile up unresolved across 3+ runs → ready-for-human tuning issue -->
-
-## Needs-human
-```
+Use [`STATE-TEMPLATE.md`](STATE-TEMPLATE.md) when creating `.loom/STATE.md`.
