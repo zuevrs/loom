@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # loom: install skills + hooks for Cursor IDE
-# 1. Creates symlinks in ~/.agents/skills/ → loom skill directories
+# 1. Creates symlinks in ~/.agents/skills/ → all Loom skill directories
 # 2. Merges loom hooks into ~/.cursor/hooks.json
 # Cursor discovers skills from ~/.agents/skills/ and hooks from ~/.cursor/hooks.json.
 set -euo pipefail
@@ -16,8 +16,8 @@ echo "Skills:"
 mkdir -p "$TARGET_DIR"
 
 installed=0
-for skill_dir in "$SKILLS_DIR"/loom-*/; do
-  [ -d "$skill_dir" ] || continue
+for skill_dir in "$SKILLS_DIR"/*/; do
+  [ -f "${skill_dir}SKILL.md" ] || continue
   skill_name=$(basename "$skill_dir")
   target="$TARGET_DIR/$skill_name"
 
