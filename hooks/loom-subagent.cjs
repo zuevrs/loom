@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// loom: sub-agent-spawn hook (ADR-0044, ADR-0059)
+// loom: sub-agent-spawn hook
 // Attaches role manifest. Enforces checker no-auto-fix policy.
 
 "use strict";

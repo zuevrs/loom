@@ -43,7 +43,7 @@ Finding is actionable when: coverage delta is measurable (numeric drop below thr
 
 Human decides which coverage gaps are worth fixing. No auto-generated tests without review.
 
-## shape invariants (ADR-0029)
+## shape invariants
 
 1. **Objective gate** — numeric coverage delta or missing test for public API
 2. **Hard stops** — caps above

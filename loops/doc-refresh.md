@@ -42,7 +42,7 @@ Finding is actionable when: specific broken link, reference to deleted symbol, o
 
 Human reviews each doc update proposal. No auto-merge on documentation changes.
 
-## shape invariants (ADR-0029)
+## shape invariants
 
 1. **Objective gate** — deterministic staleness check (broken link, missing symbol); not subjective quality
 2. **Hard stops** — caps above
@@ -54,4 +54,4 @@ Human reviews each doc update proposal. No auto-merge on documentation changes.
 
 ## note
 
-This is a non-code starter. Objective gate exception per ADR-0029: deterministic link/reference check replaces test/build gate.
+This is a non-code loop. Objective gate exception: deterministic link/reference check replaces test/build gate.

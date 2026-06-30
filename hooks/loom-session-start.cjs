@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// loom: session-start hook (ADR-0044, ADR-0059)
+// loom: session-start hook
 // Non-mutating. Syncs context pointers and checks managed-block version.
 
 "use strict";

@@ -42,7 +42,7 @@ Finding is actionable when: CVE exists + fix version available + no breaking cha
 
 Human approves each upgrade before `ready-for-agent`. No auto-merge. Breaking changes always escalate.
 
-## shape invariants (ADR-0029)
+## shape invariants
 
 1. **Objective gate** — CVE + fix version must exist; advisory-only = needs-info
 2. **Hard stops** — caps above

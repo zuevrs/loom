@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// loom: sub-agent-spawn hook for Cursor (ADR-0044, ADR-0059)
+// loom: sub-agent-spawn hook for Cursor
 // Returns JSON with role constraint as user_message.
 
 "use strict";

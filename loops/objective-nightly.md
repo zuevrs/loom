@@ -52,7 +52,7 @@ Verify digest is supplemental — gate failure stops the loop iteration.
 - `human_owner` required in loop config
 - Denylist paths → `ready-for-human`, never unattended Implement
 
-## shape invariants (ADR-0029)
+## shape invariants
 
 1. **Objective gate** — script/test/linter pass-fail; Ralph Wiggum guard: if gate is vague, stop and ask
 2. **Hard stops** — caps above; no unbounded runs
