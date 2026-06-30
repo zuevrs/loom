@@ -1,0 +1,33 @@
+name: loom-loop
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: loom-loop
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      LOOM_LOOPS_ENABLED: ${{ vars.LOOM_LOOPS_ENABLED || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run Loom loop (dry-run when kill switch off)
+        run: |
+          if [ "$LOOM_LOOPS_ENABLED" = "true" ]; then
+            bash scripts/run-loop
+          else
+            bash scripts/run-loop --dry-run || true
+            echo "LOOM_LOOPS_ENABLED is false — dry-run only. Set repo variable to enable."
+          fi

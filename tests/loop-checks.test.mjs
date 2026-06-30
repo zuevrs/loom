@@ -187,6 +187,11 @@ limits:
   max_auto_actions_per_run: 3
   cooldown_minutes: 60
   low_acceptance_threshold: 0.5
+issue_selector:
+  status: ready-for-agent
+output_target:
+  type: log
+  path: .loom/STATE.md
 safety_policy_path: .loom/SAFETY.md
 state_path: .loom/STATE.md
 human_owner: "dev"

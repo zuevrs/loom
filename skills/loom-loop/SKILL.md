@@ -12,6 +12,8 @@ Safe loop lifecycle: configure under `.loom/loops/`, then apply on runner only a
 
 Two modes — **setup** (default entry) and **apply** (after setup + user approval).
 
+**Setup internal pipeline (ADR-0084):** mini Plan (grill intent) → mini Implement (write config/SAFETY/STATE) → mini Verify (contract + safety + objective gate) before handoff to apply.
+
 ---
 
 ## Mode: setup
@@ -136,3 +138,8 @@ Each run rereads CONTEXT, relevant ADRs, PRODUCT when present.
 | Config already exists | Diff + confirm overwrite |
 | Remote runner unavailable | Manual apply path; still write config |
 | Low acceptance rate | Degrade to report-only + open tuning issue |
+
+## Done when
+
+- **Setup:** config + SAFETY + STATE written; objective gate machine-checkable; user confirmed; dry-run plan presented
+- **Apply:** user explicitly approved; runner enabled or manual path documented; evidence captured

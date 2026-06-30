@@ -73,6 +73,15 @@ for config in "$LOOPS_DIR"/*.yaml "$LOOPS_DIR"/*.yml; do
     fi
   done
 
+  if ! grep -q '^issue_selector' "$config" 2>/dev/null; then
+    errors+=("$name: missing issue_selector")
+    score=$((score - 10))
+  fi
+  if ! grep -q '^output_target' "$config" 2>/dev/null; then
+    errors+=("$name: missing output_target")
+    score=$((score - 10))
+  fi
+
   # Check safety_policy_path
   safety_path=$(grep 'safety_policy_path' "$config" 2>/dev/null | head -1 | sed 's/.*: *//' | tr -d '"' | tr -d "'" || true)
   if [ -n "$safety_path" ]; then
