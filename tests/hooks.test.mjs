@@ -75,6 +75,66 @@ function run(script, env = {}) {
   ok(parsed.user_message.includes("spec-checker"), "loomRole overrides default");
 }
 
+// --- Stop gate tests ---
+
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+{
+  const stopGate = resolve(__dirname, "..", "hooks", "loom-stop-gate.sh");
+  const tmp = mkdtempSync(join(tmpdir(), "loom-stop-test-"));
+  const issueDir = join(tmp, ".loom", "feat", "issues");
+  mkdirSync(issueDir, { recursive: true });
+
+  // Case 1: done without ## Verify → should block (exit 1)
+  writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
+  try {
+    execFileSync("bash", [stopGate], { cwd: tmp, timeout: 5000 });
+    ok(false, "stop-gate should have exited non-zero for done without verify");
+  } catch (e) {
+    strictEqual(e.status, 1, "stop-gate blocks done without ## Verify");
+  }
+
+  // Case 2: done with ## Verify → should pass (exit 0)
+  writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Verify\n\nAPPROVE — 2026-06-30\n\n## Status\n\nStatus: done\n");
+  const out2 = execFileSync("bash", [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000 });
+  ok(out2 === "" || !out2.includes("BLOCKED"), "stop-gate allows done with ## Verify");
+
+  // Case 3: not done → should pass regardless
+  writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: ready-for-agent\n");
+  execFileSync("bash", [stopGate], { cwd: tmp, timeout: 5000 });
+
+  rmSync(tmp, { recursive: true });
+}
+
+// --- stop-gate-logic.cjs (shared module) ---
+
+import { createRequire } from "node:module";
+const requireCjs = createRequire(import.meta.url);
+const { findUnverifiedDoneIssues, check } = requireCjs(
+  resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
+);
+
+{
+  const tmp = mkdtempSync(join(tmpdir(), "loom-stop-logic-"));
+  const issueDir = join(tmp, ".loom", "feat", "issues");
+  mkdirSync(issueDir, { recursive: true });
+
+  writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "finds done without verify");
+  strictEqual(check(tmp), 1, "check exits block");
+
+  writeFileSync(
+    join(issueDir, "001.md"),
+    "# Test\n\n## Verify\n\nAPPROVE\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 0, "allows done with verify");
+  strictEqual(check(tmp), 0, "check exits allow");
+
+  rmSync(tmp, { recursive: true });
+}
+
 // --- Adapter smoke imports ---
 
 // opencode-plugin.mjs exports a function

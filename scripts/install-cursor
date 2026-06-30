@@ -17,7 +17,7 @@ if [ ! -d "$SKILLS_DIR" ]; then
   echo "ERROR: skills/ directory not found at $SKILLS_DIR" >&2
   exit 2
 fi
-for f in loom-session-start.cjs loom-pre-llm.cjs loom-subagent-cursor.cjs; do
+for f in loom-session-start.cjs loom-pre-llm.cjs loom-subagent-cursor.cjs loom-stop-gate.sh; do
   if [ ! -f "$HOOKS_DIR/$f" ]; then
     echo "ERROR: hook source missing: $HOOKS_DIR/$f" >&2
     exit 2
@@ -74,6 +74,7 @@ mkdir -p "$(dirname "$HOOKS_FILE")"
 SESSION_CMD="node $HOOKS_DIR/loom-session-start.cjs"
 PRELLM_CMD="node $HOOKS_DIR/loom-pre-llm.cjs"
 SUBAGENT_CMD="node $HOOKS_DIR/loom-subagent-cursor.cjs"
+STOP_CMD="bash $HOOKS_DIR/loom-stop-gate.sh"
 
 if [ ! -f "$HOOKS_FILE" ]; then
   cat > "$HOOKS_FILE" << HOOKSEOF
@@ -82,7 +83,8 @@ if [ ! -f "$HOOKS_FILE" ]; then
   "hooks": {
     "sessionStart": [{"command": "$SESSION_CMD", "timeout": 5}],
     "beforeSubmitPrompt": [{"command": "$PRELLM_CMD", "timeout": 3}],
-    "subagentStart": [{"command": "$SUBAGENT_CMD", "timeout": 3}]
+    "subagentStart": [{"command": "$SUBAGENT_CMD", "timeout": 3}],
+    "stop": [{"command": "$STOP_CMD", "timeout": 5}]
   }
 }
 HOOKSEOF
@@ -98,6 +100,9 @@ else
   fi
   if ! grep -q "loom-subagent-cursor" "$HOOKS_FILE" 2>/dev/null; then
     missing+=("subagentStart: {\"command\": \"$SUBAGENT_CMD\", \"timeout\": 3}")
+  fi
+  if ! grep -q "loom-stop-gate" "$HOOKS_FILE" 2>/dev/null; then
+    missing+=("stop: {\"command\": \"$STOP_CMD\", \"timeout\": 5}")
   fi
 
   if [ ${#missing[@]} -eq 0 ]; then
