@@ -1,5 +1,13 @@
 # Contributing to Loom
 
+## Local setup
+
+```bash
+git clone https://github.com/zuevrs/loom.git && cd loom
+node --version  # requires Node 20+
+bash scripts/smoke  # verify green
+```
+
 ## The Discipline
 
 Before writing code, stop at the first rung that holds:
@@ -41,6 +49,7 @@ tests/           ← hook tests and canaries
    bash scripts/check-loop-starters
    bash scripts/check-loop-config
    bash scripts/check-skill-template-contract
+   bash scripts/check-template-sections
    ```
 4. Open a PR with a clear description of what and why.
 
@@ -82,6 +91,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `scripts/check-loop-starters` — loop starter shape + starter catalog sync canary.
 - `scripts/check-loop-config` — generated loop config schema + state/safety consistency canary.
 - `scripts/check-skill-template-contract` — skill section contract canary (ADR-0091).
+- `scripts/check-template-sections` — user-artifact template section contract canary.
 - `scripts/smoke` — runs all structural checks (ADR-0040).
 - `scripts/run-loop` — loop runner entrypoint with `--dry-run` (ADR-0079).
 - CI runs these checks on every push.

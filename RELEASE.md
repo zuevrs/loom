@@ -41,10 +41,13 @@ Update these files to `X.Y.Z`:
 - `.claude-plugin/plugin.json`
 - `.codex-plugin/plugin.json`
 - `hermes-plugin/plugin.yaml`
+- `hermes-plugin/__init__.py` (`MANAGED_BLOCK_VERSION`)
 - `AGENTS.md` managed block marker (`vX.Y.Z`)
 - `skills/loom-init/SKILL.md` managed block marker (`vX.Y.Z`)
 - `hooks/loom-session-start.cjs` (`MANAGED_BLOCK_VERSION`)
 - `omp-extension.mjs` (`MANAGED_BLOCK_VERSION`)
+- `kiro-agent.json` (`"version"`)
+- `opencode-plugin.mjs` (header comment `Version: X.Y.Z`)
 
 ## 4) Run checks
 
@@ -57,6 +60,7 @@ bash scripts/check-installers
 bash scripts/check-loop-starters
 bash scripts/check-loop-config
 bash scripts/check-skill-template-contract
+bash scripts/check-template-sections
 bash scripts/smoke
 ```
 
