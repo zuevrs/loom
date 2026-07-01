@@ -143,10 +143,20 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
 }
 
-// omp-extension.mjs exports a function
+// omp-extension.mjs exports a function + plan overlay wiring
 {
   const mod = await import(resolve(__dirname, "..", "omp-extension.mjs"));
   ok(typeof mod.default === "function", "omp-extension exports default function");
+
+  // Fake `pi` captures the before_agent_start handler; assert the plan overlay
+  // is injected and points at the installed loom-plan skill (single source).
+  const handlers = {};
+  mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
+  ok(typeof handlers.before_agent_start === "function", "registers before_agent_start");
+  const res = handlers.before_agent_start({ systemPrompt: "BASE" });
+  ok(res && res.systemPrompt.startsWith("BASE"), "overlay appends to base system prompt");
+  ok(res.systemPrompt.includes("Loom plan overlay (OMP plan mode only)"), "plan overlay injected");
+  ok(res.systemPrompt.includes("skills/loom-plan/SKILL.md"), "overlay points at installed loom-plan skill");
 }
 
 console.log("✔ All hook and adapter tests passed");

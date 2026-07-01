@@ -7,7 +7,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 ### Added
 - `hooks/stop-gate-logic.cjs` — shared verify-before-done gate for Stop hook and OMP `session_stop`
 - OMP `session_stop` handler in `omp-extension.mjs` — hard gate parity with Claude/Codex/Cursor
-- README "Loom + OMP (maximum synergy)" section — workflow guide with Plan Mode, goal, advisor, custom agents
+- OMP plan overlay in `omp-extension.mjs` — native `/plan` is Loom-powered (grill one-at-a-time, Approach as vertical slices, `.loom/` pack materialized on approve), model-gated and pointing at the installed `loom-plan` skill
+- README "Loom as native OMP plan" subsection — two plan entry points and the upstream plan-mode-API / Headroom limitations
 
 ### Changed
 - Traits removed: `plan-grill` and `warp-sharpen` folded inline into `loom-plan`

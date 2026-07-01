@@ -137,7 +137,7 @@ cd your-project && omp
 
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
-| **Plan** | `loom-plan` → PRD + issues | **Plan Mode** (`/plan`) | OMP blocks write tools during planning; Loom produces structured `.loom/` artifacts |
+| **Plan** | `loom-plan` → PRD + issues | **Plan Mode** (`/plan`) | Native `/plan` is Loom-powered via the plan overlay — OMP's read-only sandbox + approve gate, Loom's grill + slices + `.loom/` pack (see below) |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
@@ -148,13 +148,24 @@ cd your-project && omp
 
 | OMP command/feature | Use with Loom when… |
 |---------------------|---------------------|
-| **`/plan`** | Starting a feature — enforce read-only planning, then Loom writes PRD/issues |
+| **`/plan`** | Starting a feature — native plan mode, Loom-powered by the plan overlay (grill one-at-a-time, Approach as slices, `.loom/` pack on approve) |
 | **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
 | **Advisor** | Long implement sessions — continuous review while Loom scopes one issue |
 | **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
 | **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
+
+### Loom as native OMP plan
+
+On OMP you get **two** plan entry points:
+
+- **`/loom-plan`** (command) — runs the `loom-plan` skill directly: grill → write `.loom/` PRD + issues. No read-only sandbox.
+- **`/plan`** (OMP native) — Loom-powered by the **plan overlay** in `omp-extension.mjs`. You keep OMP's read-only sandbox and `resolve` → approve → execute gate; the overlay layers Loom rules on top: interview one question at a time, structure **Approach** as named vertical slices (each a future `.loom/` issue with its own verification), and make the first post-approval step materialize `.loom/<slug>/PRD.md` + issues before implementing and verifying.
+
+The overlay is injected every turn and gated by the model (it activates only when plan mode is active). This is the best of both: OMP's enforcement + Loom's grill, slices, warp vocabulary, and verify handoff.
+
+**Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode — no plan-mode API is exposed to extensions. So `/loom-plan` cannot wrap and turn on the sandbox; the native-plan experience requires the user to run `/plan`. A first-class `/loom-plan` that enters the sandbox is blocked on an upstream OMP change. Also, plan content passed to the execution session can be lost if it is compacted (Headroom) rather than read from the on-disk plan file. Both are tracked upstream in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ### Example session
 
