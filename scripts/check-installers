@@ -6,46 +6,45 @@ set -euo pipefail
 ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
 errors=()
 
-required_scripts=(
-  "scripts/install-cursor"
-  "scripts/install-windsurf"
-  "scripts/install-kiro"
-  "scripts/install-agents-skills"
-)
+# Node installer is the single source of install logic; bash scripts are thin wrappers.
+installer="$ROOT/scripts/install.mjs"
+if [ ! -f "$installer" ]; then
+  errors+=("missing installer: scripts/install.mjs")
+else
+  if ! node --check "$installer" 2>/dev/null; then
+    errors+=("scripts/install.mjs has invalid syntax")
+  fi
+  for contract in '".agents", "skills"' '".cursor", "hooks.json"' '".codeium", "windsurf", "skills"' '".kiro", "skills"' '".kiro", "agents"' 'stop-gate-logic'; do
+    if ! grep -Fq "$contract" "$installer"; then
+      errors+=("install.mjs target contract drifted: $contract")
+    fi
+  done
+fi
 
-for rel in "${required_scripts[@]}"; do
+wrappers=(
+  "scripts/install-cursor:--cursor"
+  "scripts/install-windsurf:--windsurf"
+  "scripts/install-kiro:--kiro"
+  "scripts/install-agents-skills:--agents"
+)
+for pair in "${wrappers[@]}"; do
+  rel="${pair%%:*}"
+  flag="${pair##*:}"
   file="$ROOT/$rel"
   if [ ! -f "$file" ]; then
-    errors+=("missing installer script: $rel")
+    errors+=("missing installer wrapper: $rel")
     continue
   fi
   if [ ! -x "$file" ]; then
-    errors+=("installer script is not executable: $rel")
+    errors+=("installer wrapper is not executable: $rel")
   fi
   if ! bash -n "$file"; then
-    errors+=("installer script has invalid bash syntax: $rel")
+    errors+=("installer wrapper has invalid bash syntax: $rel")
+  fi
+  if ! grep -Fq "install.mjs\" $flag" "$file"; then
+    errors+=("$rel must delegate to install.mjs $flag")
   fi
 done
-
-# Key target contracts.
-if ! grep -Fq 'TARGET_DIR="$HOME/.agents/skills"' "$ROOT/scripts/install-agents-skills" 2>/dev/null; then
-  errors+=("install-agents-skills target dir contract drifted")
-fi
-if ! grep -Fq 'HOOKS_FILE="$HOME/.cursor/hooks.json"' "$ROOT/scripts/install-cursor" 2>/dev/null; then
-  errors+=("install-cursor hooks file contract drifted")
-fi
-if ! grep -Fq 'TARGET_DIR="$HOME/.codeium/windsurf/skills"' "$ROOT/scripts/install-windsurf" 2>/dev/null; then
-  errors+=("install-windsurf target dir contract drifted")
-fi
-if ! grep -Fq 'SKILLS_TARGET="$HOME/.kiro/skills"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
-  errors+=("install-kiro skills target contract drifted")
-fi
-if ! grep -Fq 'AGENT_TARGET="$HOME/.kiro/agents"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
-  errors+=("install-kiro agent target contract drifted")
-fi
-if ! grep -Fq 'stop-gate-logic' "$ROOT/scripts/install-cursor" 2>/dev/null; then
-  errors+=("install-cursor missing stop-gate enforcement hook")
-fi
 if ! grep -Fq '"Stop"' "$ROOT/hooks/claude-codex-hooks.json" 2>/dev/null; then
   errors+=("claude-codex-hooks.json missing Stop enforcement hook")
 fi
