@@ -4,6 +4,27 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-02
+
+Install-lifecycle release: the v0.8.0 audit found a hook that had been silently dead for two releases — this release makes that class of failure visible and closes the lifecycle (install → update → doctor → uninstall).
+
+### Highlights
+
+- **`install.mjs --doctor`** — one command that diagnoses every detected install surface and changes nothing: hook entries point at existing files, skill links unbroken (copies flagged as drift-prone), current project's managed block matches the installed version, node version. Every failure prints its exact fix command. Exit 0 = healthy. Script-host parity with `omp plugin doctor loom`.
+- **`install.mjs --uninstall --<host>`** — removes loom skill links, loom hook entries, and the Kiro agent; foreign hooks and files untouched; idempotent. README uninstall rows for script hosts now point at it instead of manual steps.
+- **Windows CI now exercises the installer itself** — the `check-windows` job runs install → doctor → uninstall → doctor in a temp `USERPROFILE` on `windows-latest` (junction links, `hooks.json`, real FS), turning the README's Windows claim into per-push evidence.
+
+### Added
+
+- README **Upgrade** section: doctor as the verification step, plus why (the dead-Stop-gate story); `omp plugin doctor loom` on the plugin path
+- README OMP: `omp goal` example now carries the fresh-sub-agent-per-issue contract (was drifting from the skill's batch rule); headless checker roles documented (`LOOM_ROLE=spec-checker omp -p`)
+- `loom-tend`: two new audit steps — managed-block staleness (recommend `loom-init`/`--doctor`) and leftover `.loom/grills/` digests (offer plan handoff or archival)
+- Tests: doctor exits 1 on stale entries and 0 after repair, uninstall preserves foreign hooks and is idempotent, plus contract tests on the new docs
+
+### Migration steps
+
+- None — additive. After upgrading: `node ~/.loom/scripts/install.mjs --doctor`.
+
 ## [0.8.0] - 2026-07-02
 
 Upstream re-audit release: the three reference repos were re-pinned and their new commits distilled. One reversal of a v0.7.0 call, one Windows bug class fixed before it was ever reported, one live installer bug found and fixed.
@@ -392,7 +413,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/zuevrs/loom/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/zuevrs/loom/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/zuevrs/loom/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/zuevrs/loom/compare/v0.5.0...v0.6.0
