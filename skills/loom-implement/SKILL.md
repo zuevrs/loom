@@ -30,18 +30,17 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 
 ## Process
 
-1. Read issue + PRD. **Stop** if any `Blocked by` is unresolved.
-2. Check `.loom/SAFETY.md` denylist — if issue touches denylisted paths, set `ready-for-human` and stop.
-3. Climb the **discipline ladder** — first rung that holds (below).
-4. Prefer deletion over addition.
-5. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
-6. Make the smallest change satisfying acceptance criteria.
-7. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
-8. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
-9. Leave **one runnable check** (proportional).
-10. Run issue verification commands; capture output in issue comment.
-11. Write `## Log` into the issue file (before `## Status`) — 3–5 bullets: key decisions, deviations from the issue as written, open questions. This is the maker's claim; the checker compares it against the actual diff, and the next session inherits it instead of re-deriving intent.
-12. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
+1. Read issue + PRD. **Stop** if any `Blocked by` is unresolved. Issue marked `ready-for-human` → not yours; stop.
+2. Climb the **discipline ladder** — first rung that holds (below).
+3. Prefer deletion over addition.
+4. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
+5. Make the smallest change satisfying acceptance criteria.
+6. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
+7. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
+8. Leave **one runnable check** (proportional).
+9. Run issue verification commands; capture output in issue comment.
+10. Write `## Log` into the issue file (before `## Status`) — 3–5 bullets: key decisions, deviations from the issue as written, open questions. This is the maker's claim; the checker compares it against the actual diff, and the next session inherits it instead of re-deriving intent.
+11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
 
 ## Discipline ladder
 
@@ -66,7 +65,6 @@ Before writing code, stop at the **first rung that holds**:
 - One issue at a time.
 - No unrelated refactors.
 - Never auto-commit unless user asked.
-- Denylist path touched → `ready-for-human`.
 - Verification failed → issue stays not-`done`.
 - **No verify digest → no done.** Runnable checks passing is necessary but not sufficient.
 
@@ -75,7 +73,7 @@ Before writing code, stop at the **first rung that holds**:
 | Symptom | Response |
 |---|---|
 | Blocked dependency unresolved | Stop; do not implement |
-| Denylist path in issue scope | Set `ready-for-human`; stop |
+| Issue marked `ready-for-human` | Not agent work; stop |
 | Verification command fails | Fix or stop; never mark done |
 | User asks to skip verify | Refuse; document host limitation if truly blocked |
 | Scope creep mid-issue | Cut to new issue; stay on one slice |

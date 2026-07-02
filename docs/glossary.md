@@ -48,4 +48,4 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
-After Verify APPROVE → write `## Verify` section, then set `Status: done`. Denylist paths → `ready-for-human`.
+After Verify APPROVE → write `## Verify` section, then set `Status: done`. Work needing human judgement → `ready-for-human`.

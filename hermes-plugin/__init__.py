@@ -13,15 +13,14 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.7.0"
+MANAGED_BLOCK_VERSION = "v0.8.0"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
 - Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Human gate: never auto-merge, never auto-publish.
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
 - No verify digest → no done.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).
 - Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
@@ -68,9 +67,6 @@ def _build_context_pointers(root: Path) -> str:
     loom_dir = root / ".loom"
     if loom_dir.is_dir():
         lines.append(f".loom/: {loom_dir}/")
-        safety = loom_dir / "SAFETY.md"
-        if safety.exists():
-            lines.append(f"SAFETY: {safety}")
 
     if len(lines) == 2:
         lines.append("No Loom project detected. Run loom-init to set up this project.")

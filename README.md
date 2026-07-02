@@ -95,7 +95,7 @@ When upgrading Loom, use this flow:
 
 | Skill | Purpose |
 |---|---|
-| `loom-init` | Project setup: managed block, `.loom/`, denylist offer (`.loom/SAFETY.md`) |
+| `loom-init` | Project setup: managed block, `.loom/` |
 | `loom-plan` | Scope interview → PRD + issue pack |
 | `loom-grill` | Freeform brainstorm on any topic (even non-project) → one digest file, no PRD/issues/docs |
 | `loom-implement` | Ship one issue with minimal diff |
@@ -276,7 +276,7 @@ In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGE
 
 - Hooks are non-mutating — they never edit files.
 - Enforcement hooks block only at the Stop gate — they cannot modify your code.
-- Denylist paths (auth, payments, secrets) require human approval.
+- Work needing human judgement (auth, payments, secrets) is routed `ready-for-human` at planning time.
 - No auto-merge, no auto-publish, no silent self-rewrite.
 - `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 

@@ -19,7 +19,6 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 
 - Managed Loom block in `AGENTS.md` (`<!-- loom:begin version=vX.Y.Z -->` … `<!-- loom:end -->`)
 - Empty `.loom/` directory
-- `.loom/SAFETY.md` denylist (offered; from [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md))
 - Completion summary
 
 ## Process
@@ -30,7 +29,6 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-   - Offer `.loom/SAFETY.md` from [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md) — the denylist the router and Implement check; skip freely ("no denylist" is a valid answer), never overwrite an existing one
 5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
 6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`.
 7. If nothing needed: `No changes needed` + what was checked.
@@ -40,7 +38,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.7.0 -->
+<!-- loom:begin version=v0.8.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -65,9 +63,8 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 ### Invariants
 
 - Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Human gate: never auto-merge, never auto-publish.
 - Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
 
 ### Router
 
@@ -111,7 +108,7 @@ Before acting, reconstruct state from:
 Transitions: unlabeled → `needs-triage`; from there → `needs-info` (back to `needs-triage` when the reporter replies), `ready-for-agent`, `ready-for-human`, or `wontfix`.
 One category (bug/chore/feature/refactor/docs) + one state per issue; conflicting states → flag and ask.
 
-After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.md` → `ready-for-human`, never unattended Implement.
+After Verify passes → issue `Status: done`. Work that needs human judgement (auth, payments, irreversible migrations) → `ready-for-human` at slicing time.
 <!-- loom:end -->
 ```
 
@@ -134,6 +131,5 @@ After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.
 
 - Managed block present and well-formed
 - `.loom/` exists
-- `.loom/SAFETY.md` offered (created or explicitly declined)
 - User content outside delimiters untouched
 - Summary printed (or `No changes needed`)

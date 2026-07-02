@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.7.0";
+const MANAGED_BLOCK_VERSION = "v0.8.0";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -58,8 +58,6 @@ function buildContextPointers(root) {
   const loomDir = resolve(root, ".loom");
   if (existsSync(loomDir)) {
     pointers.push(`.loom/: ${loomDir}/`);
-    const safety = resolve(loomDir, "SAFETY.md");
-    if (existsSync(safety)) pointers.push(`SAFETY: ${safety}`);
   }
 
   return pointers;

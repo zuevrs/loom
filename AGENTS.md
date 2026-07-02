@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.7.0 -->
+<!-- loom:begin version=v0.8.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -27,9 +27,8 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 ### Invariants
 
 - Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Human gate: never auto-merge, never auto-publish.
 - Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
 
 ### Router
 
@@ -73,5 +72,5 @@ Before acting, reconstruct state from:
 Transitions: unlabeled → `needs-triage`; from there → `needs-info` (back to `needs-triage` when the reporter replies), `ready-for-agent`, `ready-for-human`, or `wontfix`.
 One category (bug/chore/feature/refactor/docs) + one state per issue; conflicting states → flag and ask.
 
-After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.md` → `ready-for-human`, never unattended Implement.
+After Verify passes → issue `Status: done`. Work that needs human judgement (auth, payments, irreversible migrations) → `ready-for-human` at slicing time.
 <!-- loom:end -->

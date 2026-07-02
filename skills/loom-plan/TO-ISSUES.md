@@ -25,7 +25,7 @@ Each approved slice → `.loom/<feature-slug>/issues/<NN>-<slug>.md` via [`ISSUE
 
 - `Status: ready-for-agent`, acceptance criteria, and a deterministic verification command in every issue.
 - Order follows `Blocked by` fields (blockers get lower numbers); no separate execution-order file.
-- Denylist paths from `.loom/SAFETY.md` → `ready-for-human` instead.
+- Work that needs human judgement (auth, payments, irreversible migrations, credential surfaces) → `Status: ready-for-human` instead.
 
 Recommend host-native skills when scope touches security/perf/CI — do not fold into Loom core.
 

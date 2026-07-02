@@ -4,10 +4,9 @@
 const PRE_LLM = `# Loom invariants (pre-turn guard)
 
 - Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, auto-publish, or bypass denylist.
+- Human gate: never auto-merge, never auto-publish.
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
-- Denylist paths → ready-for-human, never unattended Implement.
 - No verify digest → no done.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).`;
 
@@ -16,7 +15,6 @@ const REQUIRED_PHRASES = [
   "Router is active",
   "never auto-merge",
   "Maker/checker separation",
-  "Denylist paths",
   "No verify digest",
 ];
 
