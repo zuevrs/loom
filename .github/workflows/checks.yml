@@ -23,3 +23,17 @@ jobs:
         with:
           node-version: 20
       - run: node tests/hooks.test.mjs
+      # Installer smoke on a real Windows FS: junction links, hooks.json, doctor, uninstall.
+      # Evidence run for the README host-status ledger (docs/evidence/HOST-INSTALL.md).
+      - name: installer smoke (temp USERPROFILE)
+        shell: pwsh
+        run: |
+          $env:USERPROFILE = Join-Path $env:RUNNER_TEMP "loom-home"
+          New-Item -ItemType Directory -Force -Path $env:USERPROFILE | Out-Null
+          node scripts/install.mjs --cursor
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/install.mjs --doctor
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/install.mjs --uninstall --cursor
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/install.mjs --doctor
