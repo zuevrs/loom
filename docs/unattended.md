@@ -11,7 +11,7 @@ An unattended run picks up work a human already scoped — a `Status: ready-for-
 3. **Verify still runs.** `loom-verify` (Spec + Standards) before the PR. Runner can't spawn sub-agents → sequential checkers, limitation documented in the digest.
 4. **Blockers surface as draft PRs.** `needs-info`, scope-creep stubs, a red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — status and question written into the issue file, draft PR opened with whatever exists, blocker named first in the description. Silent death is the only forbidden exit.
 5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
-6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout (Actions `timeout-minutes`, the host's token budget) as the outer bound. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
+6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout as the outer bound — every transport has one: Actions `timeout-minutes`, Codex `/goal`'s budget cap, Cursor `/loop`'s stop condition ("stop after N ticks") and Automations' schedule, the host's token budget elsewhere. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
 
 ## Two tiers of recipes
 
@@ -56,9 +56,23 @@ The Stop-hook script is a plain CLI: `node hooks/stop-gate-logic.cjs <repo-root>
 
 Adjust the path to wherever your Loom clone lives (the installer's default is `~/.loom`; a vendored copy inside the repo works too).
 
-### Cursor (Background Agents / Automations)
+### Codex (`/goal`)
+
+Codex Goal Mode (CLI v0.128.0+, GA 2026-05) is a natural carrier for the issue lane — one durable objective, runtime continuation across restarts and pauses, `pause/resume/clear` controls:
+
+```text
+/goal Work through the Status: ready-for-agent issues in .loom/<pack>/ one at a time,
+following loom-implement § Unattended mode: dedicated branch, verify before PR, PR per issue.
+Stop when none remain or a blocker surfaces (draft PR, blocker named).
+```
+
+Set the goal's budget cap as the outer bound — that is the runaway brake for a multi-hour run.
+
+### Cursor (Background Agents / Automations / `/loop`)
 
 Create an Automation or launch a Background Agent with the recipe file as the prompt (attach or paste it). Cursor's agents already work branch-and-PR-shaped, which matches the contract; set the schedule in the Automation for recurring runs.
+
+For a **local** recurring cadence there is also the `/loop` skill (Cursor 3.5+): `/loop 1d run recipes/docs-drift.md` re-runs a discovery recipe on a schedule inside your session. Know its shape: it is a scheduler, not a goal runtime — it dies when the app closes, and its cost bound is whatever stop condition you give it (tick count, "stop after N runs"). Persistent schedules belong to Automations.
 
 ### OMP
 

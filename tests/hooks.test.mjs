@@ -739,4 +739,14 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(read("README.md").includes("CI gate"), "enforcement matrix points hook-less hosts at the CI gate");
 }
 
+// v0.12.1 — runner modes: Codex /goal and Cursor /loop wired into the unattended lane
+{
+  const unattended = readFileSync(resolve(__dirname, "..", "docs", "unattended.md"), "utf8");
+  ok(unattended.includes("Codex (`/goal`)"), "unattended doc wires Codex goal mode");
+  ok(unattended.includes("budget cap"), "goal wiring names the budget brake");
+  ok(unattended.includes("`/loop`"), "unattended doc wires Cursor /loop for local cadence");
+  ok(unattended.includes("it is a scheduler, not a goal runtime"), "loop's ephemerality stated honestly");
+  ok(unattended.includes("timeout-minutes"), "runaway protection names native knobs per transport");
+}
+
 console.log("✔ All hook and adapter tests passed");
