@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-07-02
+
+Upstream deep-mine: a debugging discipline Loom never had, a shape for research, and runaway semantics for the unattended lane.
+
+### Added
+
+- **`loom-implement/DIAGNOSE.md`** — the debugging phase file (same pattern as `TDD.md`; bug/perf issues route there from the process). The discipline is feedback-loop-first: one already-run **red-capable** command (asserts the user's exact symptom, deterministic, fast, agent-runnable) is required before any hypothesis — reading code to build a theory without it is the exact failure the file forbids. Then: minimise the repro to load-bearing elements, 3–5 ranked falsifiable hypotheses (a single one anchors), one-variable probes with a greppable `[DEBUG-…]` tag, regression test **before** the fix at a correct seam (no correct seam is itself a finding), and a final sweep — zero tag hits, throwaway harnesses gone, the winning hypothesis written into `## Log`
+- **Research shape** in the Plan grill and `loom-grill` — primary sources over write-ups (follow a claim to the source that owns it), delegate reading to a background/sub-agent when the host has one (the interview never stalls), and findings that shaped a decision persist with citations (`.loom/research/YYYY-MM-DD-<slug>.md` or inline in the PRD)
+- **Runaway protection** in the unattended lane — recipes are single-pass (no retry loop inside a run), the runner's native budget/timeout is the outer bound, and the stagnation rule: the same error twice in a row means stop through the draft-PR path — never a third identical attempt
+
 ## [0.10.0] - 2026-07-02
 
 The unattended lane: Loom still ships no runner — your host already has one — but background agents now get a contract and a recipe catalog instead of a shrug. Plus seven ritual upgrades from a strength/weakness grill of plan/implement/verify.
@@ -462,7 +472,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/zuevrs/loom/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/zuevrs/loom/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/zuevrs/loom/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/zuevrs/loom/compare/v0.9.0...v0.9.1

@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.10.0";
+const MANAGED_BLOCK_VERSION = "v0.11.0";
 
 const INVARIANTS = `${PRE_LLM}
 
