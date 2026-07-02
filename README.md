@@ -81,15 +81,17 @@ Then run **`loom-init`** in each project to write the managed block.
 When upgrading Loom, use this flow:
 
 1. **Global Loom install**
-   - Plugin-native hosts: re-run the install command from the table above for your host.
+   - Plugin-native hosts: re-run the install command from the table above for your host. On OMP, `omp plugin doctor loom` confirms the plugin is healthy after the update.
    - Script-based hosts:
      - `git -C ~/.loom pull --ff-only`
-     - re-run the installer (`node ~/.loom/scripts/install.mjs --<host>` or the matching `install-*` wrapper)
+     - re-run the installer (`node ~/.loom/scripts/install.mjs --<host>`) — it repairs its own stale entries (renamed hooks, moved paths) and never touches foreign config
      - Hermes: ensure the plugin symlink still points to `~/.loom/hermes-plugin` and plugin is enabled.
 2. **Per project**
    - Run `loom-init` in active repos to refresh managed block version when prompted.
 3. **Verification**
-   - Run your normal quality checks and confirm no managed-block version mismatch warnings remain.
+   - `node ~/.loom/scripts/install.mjs --doctor` — checks hook entries point at existing files, skill links aren't broken, and the current project's managed block matches the installed version; prints the exact fix for anything wrong, changes nothing. Exit 0 = healthy.
+
+A dead hook is silent — the session just runs without enforcement. Run `--doctor` after every upgrade; it exists because a renamed hook file once left the Stop gate dead for two releases before anyone noticed.
 
 ## Skills
 
@@ -180,6 +182,8 @@ cd your-project && omp
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
 | **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
+| **`LOOM_ROLE=spec-checker omp -p "…"`** | Headless checker — the Loom extension injects that role's constraint (judge only, quote spec, no fixes) into the system prompt; same for `standards-checker` and `maker` |
+| **`omp plugin doctor loom`** | After every plugin update — confirms extension, rules, and agents all load |
 
 ### Planning on OMP
 
@@ -197,11 +201,12 @@ Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual 
 > Implement issue 002-token-refresh        # → next ready-for-agent issue
 ```
 
-For unattended multi-issue runs:
+For unattended multi-issue runs — the prompt carries the fresh-session contract (each issue gets a clean sub-agent with PRD + that one issue, so context never accumulates across issues):
 
 ```
-omp goal "Work through .loom/jwt-auth/issues/ in order. One issue per iteration.
-Run loom-implement then loom-verify before marking done."
+omp goal "Work through .loom/jwt-auth/issues/ in order. For each issue spawn a
+fresh sub-agent with the PRD and that single issue only — never chain issues in
+one context. Each sub-agent runs loom-implement then loom-verify before done."
 ```
 
 ## Templates
@@ -262,13 +267,13 @@ Loom rituals work everywhere; verify-before-done is **hard-enforced** only on St
 | Pi | `pi uninstall git:github.com/zuevrs/loom` |
 | OMP | `omp plugin uninstall loom` |
 | OpenCode | Remove `"github:zuevrs/loom"` from `opencode.json` |
-| Cursor | Remove Loom skill symlinks from `~/.agents/skills/` (`loom-*`); remove hooks from `~/.cursor/hooks.json` |
-| Windsurf | Remove Loom skill symlinks from `~/.codeium/windsurf/skills/` |
-| Kiro | `rm ~/.kiro/agents/loom.json`; remove Loom skill symlinks from `~/.kiro/skills/` |
+| Cursor | `node ~/.loom/scripts/install.mjs --uninstall --cursor` (removes skill links + loom hook entries; foreign hooks untouched) |
+| Windsurf | `node ~/.loom/scripts/install.mjs --uninstall --windsurf` |
+| Kiro | `node ~/.loom/scripts/install.mjs --uninstall --kiro` |
 | Hermes | `rm -rf ~/.hermes/plugins/loom` |
 | Droid | `droid plugin uninstall loom` |
-| Cline | Remove Loom skill symlinks from `~/.agents/skills/` |
-| OpenClaw | If installed via `clawhub`, remove Loom via clawhub plugin manager. If installed via `install-agents-skills`, remove Loom skill symlinks from `~/.agents/skills/`. |
+| Cline | `node ~/.loom/scripts/install.mjs --uninstall --agents` |
+| OpenClaw | If installed via `clawhub`, remove Loom via clawhub plugin manager. If installed via `install-agents-skills`: `node ~/.loom/scripts/install.mjs --uninstall --agents`. |
 
 In all cases: remove `<!-- loom:begin -->…<!-- loom:end -->` from project `AGENTS.md` and delete `.loom/` if present.
 

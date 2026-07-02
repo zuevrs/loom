@@ -41,11 +41,15 @@ Keep the warp current and debts from rotting — without inventing feature scope
    ```
    Cross-reference with git log — if the acceptance criteria commit exists and a `## Verify` section is present, mark `done`. If no `## Verify` exists, run `loom-verify` first (enforcement gate requires it).
 
-4. **Comprehension** — remind to read shipped diffs / spot-check gates when relevant.
+4. **Install freshness** — the AGENTS.md managed block version vs the installed Loom version (session-start warnings, or `<!-- loom:begin version=… -->` directly). Stale → recommend `loom-init`; on script hosts also `node ~/.loom/scripts/install.mjs --doctor`.
+
+5. **Grill digests** — `.loom/grills/*.md` that never became scope. For each: still relevant → offer handoff to `loom-plan`; dead → propose archiving (user approves deletion).
+
+6. **Comprehension** — remind to read shipped diffs / spot-check gates when relevant.
    - After a burst of implement sessions: have you read what shipped?
    - Any test flaking that hints at misunderstood behavior?
 
-5. **Capture learning** — if a run surfaced a durable pattern, ask whether to record in warp or project `skills/`; human approves before any write.
+7. **Capture learning** — if a run surfaced a durable pattern, ask whether to record in warp or project `skills/`; human approves before any write.
 
 When capture-learning approves a project skill: create `skills/<name>/SKILL.md` (minimal, domain-specific, not a duplicate of Loom rituals).
 
