@@ -15,6 +15,7 @@ const ROLES = {
 
 let input = "";
 process.stdin.on("data", (d) => (input += d));
+process.stdin.on("error", () => {});
 process.stdin.on("end", () => {
   let role = "maker";
   try {
@@ -25,4 +26,10 @@ process.stdin.on("end", () => {
   const message = ROLES[role] || ROLES.maker;
   const output = { permission: "allow", user_message: message };
   process.stdout.write(JSON.stringify(output) + "\n");
+});
+
+// Non-blocking hook: never block a spawn on hook failure.
+process.on("uncaughtException", () => {
+  process.stdout.write(JSON.stringify({ permission: "allow" }) + "\n");
+  process.exit(0);
 });

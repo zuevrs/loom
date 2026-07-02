@@ -1,4 +1,4 @@
-// loom: verify-before-done gate — shared by Stop hook (bash) and OMP session_stop
+// loom: verify-before-done gate — invoked directly as the Stop hook (node) and by OMP session_stop
 "use strict";
 
 const { existsSync, readdirSync, readFileSync } = require("node:fs");
@@ -41,7 +41,7 @@ function findUnverifiedDoneIssues(root) {
   return blocked;
 }
 
-/** Exit 0 = allow, 1 = block. Used by loom-stop-gate.sh */
+/** Exit 0 = allow, 1 = block. Invoked directly: `node stop-gate-logic.cjs [root]` */
 function check(root) {
   const blocked = findUnverifiedDoneIssues(root);
   if (blocked.length === 0) return 0;

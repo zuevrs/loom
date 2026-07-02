@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-session-start.cjs\"; exit 0",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-session-start.cjs\"",
             "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-session-start.cjs\"",
             "timeout": 5,
             "statusMessage": "Loading Loom context..."
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-pre-llm.cjs\"; exit 0",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-pre-llm.cjs\"",
             "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-pre-llm.cjs\"",
             "timeout": 3
           }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-subagent.cjs\"; exit 0",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-subagent.cjs\"",
             "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-subagent.cjs\"",
             "timeout": 3
           }
@@ -43,8 +43,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/loom-stop-gate.sh\"",
-            "commandWindows": "bash \"%CLAUDE_PLUGIN_ROOT%\\hooks\\loom-stop-gate.sh\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate-logic.cjs\"",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\stop-gate-logic.cjs\"",
             "timeout": 5,
             "statusMessage": "Checking verify-before-done gate..."
           }

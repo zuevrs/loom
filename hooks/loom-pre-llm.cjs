@@ -4,6 +4,10 @@
 
 "use strict";
 
-const { PRE_LLM } = require("./invariants.cjs");
-
-process.stdout.write(PRE_LLM + "\n");
+// Non-blocking hook: never fail the turn over an injection error.
+try {
+  const { PRE_LLM } = require("./invariants.cjs");
+  process.stdout.write(PRE_LLM + "\n");
+} catch {
+  process.exitCode = 0;
+}

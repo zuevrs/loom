@@ -70,4 +70,9 @@ function run() {
   process.stdout.write(output + "\n");
 }
 
-run();
+// Non-blocking hook: a role-manifest error must not break sub-agent spawn.
+try {
+  run();
+} catch {
+  process.exitCode = 0;
+}

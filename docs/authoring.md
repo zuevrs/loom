@@ -45,7 +45,7 @@ Sub-agent role field: **`loomRole`** (`maker`, `spec-checker`, `standards-checke
 
 Verify-before-done logic lives in `hooks/stop-gate-logic.cjs` (single source):
 
-- **Stop-hook hosts** — `loom-stop-gate.sh` delegates to the shared module
+- **Stop-hook hosts** — `stop-gate-logic.cjs` is invoked directly (`node hooks/stop-gate-logic.cjs`)
 - **OMP** — `omp-extension.mjs` `session_stop` handler uses the same module
 - **OMP TTSR** — `rules/` stream reminder (soft layer)
 - **OMP agents** — `agents/` custom verify checkers (invoke via `task` tool)

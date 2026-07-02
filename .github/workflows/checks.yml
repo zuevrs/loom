@@ -14,3 +14,12 @@ jobs:
       - run: scripts/check-installers
       - run: scripts/check-skill-template-contract
       - run: scripts/check-template-sections
+  # Hooks are pure Node — prove it on Windows (canaries are bash dev-tooling, ubuntu-only).
+  check-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tests/hooks.test.mjs

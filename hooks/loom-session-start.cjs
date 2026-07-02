@@ -7,7 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const MANAGED_BLOCK_VERSION = "v0.3.0";
+const MANAGED_BLOCK_VERSION = "v0.4.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -68,4 +68,9 @@ function run() {
   process.stdout.write(output + "\n");
 }
 
-run();
+// Non-blocking hook: never fail the session over a context-pointer error.
+try {
+  run();
+} catch {
+  process.exitCode = 0;
+}

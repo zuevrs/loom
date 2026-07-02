@@ -43,16 +43,19 @@ fi
 if ! grep -Fq 'AGENT_TARGET="$HOME/.kiro/agents"' "$ROOT/scripts/install-kiro" 2>/dev/null; then
   errors+=("install-kiro agent target contract drifted")
 fi
-if ! grep -Fq 'loom-stop-gate' "$ROOT/scripts/install-cursor" 2>/dev/null; then
+if ! grep -Fq 'stop-gate-logic' "$ROOT/scripts/install-cursor" 2>/dev/null; then
   errors+=("install-cursor missing stop-gate enforcement hook")
 fi
 if ! grep -Fq '"Stop"' "$ROOT/hooks/claude-codex-hooks.json" 2>/dev/null; then
   errors+=("claude-codex-hooks.json missing Stop enforcement hook")
 fi
+if grep -Fq 'bash' "$ROOT/hooks/claude-codex-hooks.json" 2>/dev/null; then
+  errors+=("claude-codex-hooks.json must not depend on bash (hooks are pure Node)")
+fi
 
 # Enforcement artifacts exist and are non-empty
-if [ ! -x "$ROOT/hooks/loom-stop-gate.sh" ]; then
-  errors+=("hooks/loom-stop-gate.sh missing or not executable")
+if [ ! -f "$ROOT/hooks/stop-gate-logic.cjs" ]; then
+  errors+=("hooks/stop-gate-logic.cjs missing")
 fi
 if ! ls "$ROOT/rules/"*.md >/dev/null 2>&1; then
   errors+=("rules/ has no .md files (OMP TTSR convention)")
