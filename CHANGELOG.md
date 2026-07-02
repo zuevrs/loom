@@ -4,6 +4,27 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-02
+
+The unattended lane: Loom still ships no runner — your host already has one — but background agents now get a contract and a recipe catalog instead of a shrug. Plus seven ritual upgrades from a strength/weakness grill of plan/implement/verify.
+
+### Added
+
+- **Unattended mode** in `loom-implement` — the human gate moves to the PR: work in a dedicated branch (commits there are expected; "never auto-commit" is an attended-mode rule), never push the default branch or merge, finish = PR carrying the verify digest, `## Log`, and open questions. Every blocker (`needs-info`, scope-creep stub, red baseline, wrong-PRD discovery, ESCALATE_HUMAN) exits as a **draft PR** with the blocker named — dying mid-run without a report is the only forbidden exit
+- **`docs/unattended.md`** — the lane contract plus wiring for GitHub Actions cron + headless CLIs (`claude -p`, `codex exec`, `omp -p`), Cursor Background Agents/Automations, OMP goal, and autonomous frameworks; includes the two-tier recipe model and a "what NOT to automate" note
+- **`recipes/`** — five maintenance recipes in two tiers. Discovery (read-only on code, output = `needs-triage` stubs + report): `docs-drift`, `dep-audit`, `smell-sweep`. Change (full implement + verify lane → PR): `coverage-raise` (one module per run, behavioral tests at the seam, discovered bugs become stubs not fixes), `dead-code` (deletion only with proof; published API never removed unattended)
+- **PRD `## Assumptions` section** — every load-bearing guess the user did not confirm, as a reviewable one-line list; Implement treats unconfirmed entries as "ask before relying"
+- **Pre-flight baseline** in implement — run the project's existing checks before touching code; inherited failures go in `## Log`, a red verification path stops the run
+- **Question calibration** in implement — "never invent a load-bearing decision silently" now binds the maker too: PRD first, then ask (attended) or `needs-info` (unattended)
+- **Re-plan contract** — an issue whose acceptance criteria contradict reality (wrong, not underspecified) stops the run; the fix is a Plan re-entry, never a silent workaround
+- **External research in the grill** — before grilling a technology choice, check current docs with the host's research tools; a recommendation built on stale training data is a silent invention
+- **Default objective gates in verify** — the repo's own lint/typecheck/test commands run when they exist, not only gates listed in the issue/PRD
+- **ESCALATE_HUMAN specified** — must carry what needs the human, what's missing, and the consequence of inaction; persisted into the issue's `## Verify` section, delivered as a draft PR when unattended
+
+### Migration
+
+No breaking changes. Recipes are opt-in files — copy the ones you want into your project or point your runner at your Loom clone.
+
 ## [0.9.2] - 2026-07-02
 
 Quality grill over the skills, templates, and hooks themselves — one enforcement bypass, one invisible-verdict hole, and assorted rot.
@@ -441,7 +462,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/zuevrs/loom/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/zuevrs/loom/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/zuevrs/loom/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/zuevrs/loom/compare/v0.8.0...v0.9.0
