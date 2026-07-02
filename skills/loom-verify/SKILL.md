@@ -25,10 +25,11 @@ Structured digest (below). On dual pass → issue `Status: done`. On fail → us
 2. Spawn **two parallel checker sub-agents** (separate context — `Subagent` tool or host equivalent):
    - **Spec**: does change satisfy issue + PRD? Quote spec lines for findings. Pass `loomRole: "spec-checker"` in spawn data.
    - **Standards**: warp + discipline floor — conventions, runnable check exists and passes. Pass `loomRole: "standards-checker"` in spawn data.
-   - **OMP:** spawn custom agents via `task` tool with `agent: "loom-verify-spec"` and `agent: "loom-verify-standards"`. Run both; aggregate JSON verdicts into the digest.
-3. Neither checker fixes work — judges only.
-4. Aggregate digest; blocking findings first.
-5. Run objective quality gates listed in issue/PRD when applicable.
+   - **Named checker agents:** if the host ships pre-configured checker agents (e.g. OMP plugin agents `loom-verify-spec` / `loom-verify-standards`), **attempt them once per session** — never assume unavailability without one recorded attempt. Record the outcome (found / not found) in Sub-agent evidence and reuse it for every subsequent verify in the session. On not-found, fall back to generic sub-agents with the checker manifests inlined.
+3. **Wait without spamming.** Checkers take tens of seconds. Prefer the host's blocking wait; if only polling is available, space polls out (~15s or more) and do useful aggregation work between them — no empty rapid-fire polls.
+4. Neither checker fixes work — judges only.
+5. Aggregate digest; blocking findings first.
+6. Run objective quality gates listed in issue/PRD when applicable.
 
 ## Output format
 
@@ -48,6 +49,7 @@ APPROVE | REJECT | ESCALATE_HUMAN
 ## Sub-agent evidence
 - Spec sub-agent: invoked (yes/no) | tool/host used
 - Standards sub-agent: invoked (yes/no) | tool/host used
+- Named checker agents: attempted this session (yes/no) → found / not found (reused from first attempt)
 - If host cannot spawn parallel sub-agents: document limitation; run sequential checks in separate context windows
 
 ## Risk/Scope notes
@@ -94,6 +96,7 @@ This section is the enforcement signal: Stop hooks and OMP `session_stop` check 
 | "Looks fine, skip sub-agents" | Parallel Spec+Standards is mandatory |
 | "I'll fix it myself in verify" | Verify judges; hand back to implement |
 | "Approve with known gap" | REJECT or ESCALATE_HUMAN with explicit debt marker |
+| "Named agents probably aren't discoverable — straight to fallback" | One recorded attempt per session first; assumption is not evidence |
 
 ## Host limitations
 
@@ -109,8 +112,8 @@ For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), 
 
 ### OMP verify workflow
 
-1. Try spawn via `task` tool: `agent: "loom-verify-spec"` and `agent: "loom-verify-standards"` (plugin ships both in `agents/`).
-2. If either agent is not found: fall back to sequential sub-agents with `loomRole: "spec-checker"` / `"standards-checker"`, or host `reviewer`.
+1. First verify of the session: try spawn via `task` tool with `agent: "loom-verify-spec"` and `agent: "loom-verify-standards"` (plugin ships both in `agents/`). Record found/not-found in Sub-agent evidence; reuse the answer for the rest of the session.
+2. If not found: fall back to parallel generic `task` sub-agents with the checker manifests inlined (`loomRole: "spec-checker"` / `"standards-checker"`), or host `reviewer`.
 3. Aggregate structured verdicts into the digest above.
 4. On APPROVE: write `## Verify` into the issue file, then set `Status: done`.
 5. `session_stop` blocks turn completion if any issue is `done` without `## Verify`.

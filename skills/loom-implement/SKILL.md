@@ -17,6 +17,10 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 - Project conventions (git style, test/lint commands)
 - **Fresh session:** PRD + this issue only
 
+## Batch mode ("do all the issues", host goal/loop features)
+
+Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only the chain order and verify verdicts. Chaining issues inside one context is the fallback **only when the host cannot spawn sub-agents** — note the limitation in the issue comment. Either way: dependency order, one issue at a time, `loom-verify` after each.
+
 ## Outputs
 
 - Code/doc changes scoped to the issue
@@ -32,7 +36,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 4. Prefer deletion over addition.
 5. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
 6. Make the smallest change satisfying acceptance criteria.
-7. **TDD when cheap:** red → green → refactor for logic-heavy changes; skip for trivial/doc edits.
+7. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
 8. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
 9. Leave **one runnable check** (proportional).
 10. Run issue verification commands; capture output in issue comment.
@@ -84,6 +88,7 @@ Before writing code, stop at the **first rung that holds**:
 | "Skip verify for tiny change" | Verify runs on every implement completion — no yield without digest |
 | "Tests pass, we're done" | Tests ≠ verify; maker/checker split is mandatory |
 | "I'll batch commits/issues" | One issue, one slice, one verify |
+| "Batch run — I'll chain all issues in my context" | Spawn a fresh sub-agent per issue; chain only if the host can't spawn sub-agents |
 | "This abstraction will help later" | No abstractions nobody asked for |
 
 ## Done when
