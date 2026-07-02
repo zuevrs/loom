@@ -4,6 +4,21 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-07-03
+
+Recipes learn the attended lane, tend learns to graduate audits into recipes, and the checker manifests get a drift canary.
+
+### Added
+
+- **Attended recipe runs** — every recipe now adapts when a human invokes it in chat: same task and hard stops, findings to the chat, stubs written directly, no branch/PR ceremony. `docs/unattended.md` documents the chat invocation ("run `~/.loom/recipes/dep-audit.md`")
+- **Recipe check in `loom-tend`** — an audit that recurs tend after tend graduates to a scheduled recipe; tend knows recipe stubs land in `.loom/maintenance/issues/` and sweeps them with the other stale issues. The router (managed block, init template, opencode, kiro) routes "recurring audit on a schedule" to `recipes/`
+- **Init summary names the maintenance pair** — `loom-tend` for interactive upkeep, scheduled recipes for the recurring audits
+- **Checker-manifest drift canary** — `check-drift` compares the prompt bodies of `agents/*.md` (OMP dialect) and `.claude-plugin/agents/*.md` (Claude dialect); frontmatter legitimately differs, the body must not. Verified red on both tail and mid-body drift
+
+### Migration
+
+Managed block gains one router line — run `loom-init` (or the installer) to refresh it.
+
 ## [0.12.1] - 2026-07-02
 
 Runner modes: the unattended lane learns the two transports that shipped in May 2026.
@@ -496,7 +511,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/zuevrs/loom/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/zuevrs/loom/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/zuevrs/loom/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/zuevrs/loom/compare/v0.10.0...v0.11.0
