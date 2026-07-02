@@ -21,6 +21,12 @@ Install-lifecycle release: the v0.8.0 audit found a hook that had been silently 
 - `loom-tend`: two new audit steps — managed-block staleness (recommend `loom-init`/`--doctor`) and leftover `.loom/grills/` digests (offer plan handoff or archival)
 - Tests: doctor exits 1 on stale entries and 0 after repair, uninstall preserves foreign hooks and is idempotent, plus contract tests on the new docs
 
+### Changed
+
+- Loom ownership of hook entries is by exact hook filename (current + historical), never by substring — a foreign `node /opt/acme/loom-backup/run.js` stays foreign on install and uninstall
+- Uninstall refuses to delete a directory squatting on a loom skill name unless its `SKILL.md` declares the loom skill — no data loss on name collisions
+- Doctor: stale managed block is a failure (with fix), not a warning; node floor aligned to the documented 20+
+
 ### Migration steps
 
 - None — additive. After upgrading: `node ~/.loom/scripts/install.mjs --doctor`.

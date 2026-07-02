@@ -38,8 +38,25 @@ const IS_WIN = process.platform === "win32";
 const LOOM_VERSION = JSON.parse(readFileSync(join(LOOM_ROOT, "package.json"), "utf8")).version;
 
 // The installer owns these: loom hook entries and loom-* skill links.
-const isLoomEntry = (h) =>
-  typeof h?.command === "string" && /loom-|stop-gate-logic/.test(h.command);
+// Ownership by exact hook filename (current + historical), never by substring —
+// a foreign command like `node /opt/acme/loom-backup/run.js` must stay foreign.
+const LOOM_HOOK_FILES = new Set([
+  "loom-session-start.cjs",
+  "loom-pre-llm.cjs",
+  "loom-subagent-cursor.cjs",
+  "loom-subagent.cjs",
+  "stop-gate-logic.cjs",
+  "loom-stop-gate.sh", // removed in v0.4.0; still recognized so stale entries get repaired
+  "loom-stop-gate.cjs",
+]);
+const isLoomEntry = (h) => {
+  if (typeof h?.command !== "string") return false;
+  return h.command
+    .replaceAll('"', "")
+    .trim()
+    .split(/\s+/)
+    .some((token) => LOOM_HOOK_FILES.has(basename(token)));
+};
 const loomSkillNames = () =>
   readdirSync(SKILLS_DIR).filter((e) => existsSync(join(SKILLS_DIR, e, "SKILL.md")));
 const SKILL_TARGETS = {
@@ -199,8 +216,8 @@ function doctor() {
   console.log(`Loom doctor — v${LOOM_VERSION} at ${LOOM_ROOT}\n`);
 
   const nodeMajor = Number(process.versions.node.split(".")[0]);
-  if (nodeMajor >= 18) okLine(`node v${process.versions.node}`);
-  else failLine(`node v${process.versions.node} is too old for the hooks`, "install Node 18+");
+  if (nodeMajor >= 20) okLine(`node v${process.versions.node}`);
+  else failLine(`node v${process.versions.node} is too old for the hooks`, "install Node 20+");
 
   // Cursor hooks — every loom entry must point at an existing file.
   const hooksFile = join(HOME, ".cursor", "hooks.json");
@@ -282,7 +299,7 @@ function doctor() {
     const m = readFileSync(agentsMd, "utf8").match(/<!-- loom:begin version=v([^\s]+)/);
     if (!m) warnLine(`managed block: none in ${agentsMd} — run loom-init if this project should use Loom`);
     else if (m[1] === LOOM_VERSION) okLine(`managed block: v${m[1]} (current project)`);
-    else warnLine(`managed block v${m[1]} != installed v${LOOM_VERSION} — run loom-init in this project`);
+    else failLine(`managed block v${m[1]} != installed v${LOOM_VERSION} in ${agentsMd}`, "run loom-init in this project to refresh the managed block");
   }
 
   console.log(`\n${problems.length} failure(s), ${warnings.length} warning(s)`);
@@ -298,11 +315,21 @@ function uninstall(host) {
   const skillDir = SKILL_TARGETS[host];
   for (const name of loomSkillNames()) {
     const dest = join(skillDir, name);
-    if (isSymlink(dest) || existsSync(dest)) {
-      rmSync(dest, { recursive: true, force: true });
-      console.log(`  ✓ removed ${dest}`);
-      removed += 1;
+    if (!isSymlink(dest) && !existsSync(dest)) continue;
+    // Guard against name collisions: install skips pre-existing foreign paths, so
+    // uninstall must not delete them. A link is ours; a copy is ours only if its
+    // SKILL.md declares the loom skill name.
+    const isOurs =
+      isSymlink(dest) ||
+      (existsSync(join(dest, "SKILL.md")) &&
+        readFileSync(join(dest, "SKILL.md"), "utf8").includes(`name: ${name}`));
+    if (!isOurs) {
+      console.log(`  ⚠ ${dest} left in place (not recognized as loom's)`);
+      continue;
     }
+    rmSync(dest, { recursive: true, force: true });
+    console.log(`  ✓ removed ${dest}`);
+    removed += 1;
   }
 
   if (host === "cursor") {

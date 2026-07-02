@@ -37,3 +37,4 @@ jobs:
           node scripts/install.mjs --uninstall --cursor
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node scripts/install.mjs --doctor
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

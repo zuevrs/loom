@@ -388,6 +388,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
       stop: [
         { command: "bash /old/.loom/hooks/loom-stop-gate.sh", timeout: 5 },
         { command: "node /home/user/my-own-hook.js", timeout: 2 },
+        // foreign despite the loom- substring in its path — ownership is by hook filename
+        { command: "node /opt/acme/loom-backup/run.js", timeout: 2 },
       ],
     },
   };
@@ -405,6 +407,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(stopCmds.some((c) => c.includes("stop-gate-logic.cjs")), "stale stop entry rewritten to current hook");
   ok(!stopCmds.some((c) => c.includes("loom-stop-gate.sh")), "removed .sh hook no longer referenced");
   ok(stopCmds.some((c) => c.includes("my-own-hook.js")), "foreign hook preserved");
+  ok(stopCmds.some((c) => c.includes("loom-backup/run.js")), "loom-substring foreign hook preserved on install");
   ok(updated.hooks.sessionStart.some((h) => h.command.includes("loom-session-start.cjs") && !h.command.includes("/old/")), "stale session-start path rewritten");
   ok(updated.hooks.beforeSubmitPrompt && updated.hooks.subagentStart, "missing events added");
 
@@ -413,13 +416,21 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   strictEqual(healthy.code, 0, `doctor exits 0 after install (got: ${healthy.out})`);
   ok(healthy.out.includes("0 failure(s)"), "doctor reports zero failures");
 
+  // a foreign dir squatting on a loom skill name: install skips it, uninstall must not delete it
+  const squatter = join(tmpHome, ".agents", "skills", "loom-tend");
+  rmSync(squatter, { recursive: true, force: true });
+  mkdirSync(squatter, { recursive: true });
+  writeFileSync(join(squatter, "notes.txt"), "mine");
+
   // uninstall removes only what loom owns
   runInstaller(["--uninstall", "--cursor"]);
   const after = JSON.parse(readFileSync(join(cursorDir, "hooks.json"), "utf8"));
   const remaining = Object.values(after.hooks).flat().map((h) => h.command);
   ok(remaining.some((c) => c.includes("my-own-hook.js")), "uninstall preserves foreign hooks");
-  ok(!remaining.some((c) => c.includes("loom-") || c.includes("stop-gate-logic")), "uninstall removes all loom entries");
+  ok(remaining.some((c) => c.includes("loom-backup/run.js")), "loom-substring foreign hook survives uninstall");
+  ok(!remaining.some((c) => c.includes("/hooks/loom-") || c.includes("stop-gate-logic")), "uninstall removes all loom entries");
   ok(!existsSync(join(tmpHome, ".agents", "skills", "loom-plan")), "uninstall removes loom skill links");
+  ok(existsSync(join(squatter, "notes.txt")), "uninstall leaves foreign dir with a loom skill name");
   const again = runInstaller(["--uninstall", "--cursor"]);
   ok(again.out.includes("Nothing to remove"), "uninstall is idempotent");
   rmSync(tmpHome, { recursive: true, force: true });
