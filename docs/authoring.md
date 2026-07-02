@@ -39,7 +39,7 @@ Three plugin-tier hooks:
 2. `pre-LLM` — invariant guard only
 3. `sub-agent-spawn` — role manifest; checker no-auto-fix
 
-Sub-agent role field: **`loomRole`** (`maker`, `spec-checker`, `standards-checker`).
+Sub-agent role field: **`loomRole`** (`maker`, `spec-checker`, `standards-checker`, `researcher`).
 
 ## Enforcement
 

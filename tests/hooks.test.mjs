@@ -657,12 +657,41 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   writeFileSync(join(issueDir, "003.md"), "# C\n\n## Status\n\nStatus: done\n");
   writeFileSync(join(tmp, ".loom", "grills", "2026-07-01-x.md"), "# grill\n");
 
+  // Gate-rule parity: a second appended "Status: done" line (not the first Status token)
+  // is exactly what the real stop gate blocks — the snapshot must pre-warn on it too.
+  writeFileSync(
+    join(issueDir, "004.md"),
+    "# D\n\n## Status\n\nStatus: ready-for-agent\n\n## Log\n\nStatus: done\n"
+  );
+
   const snap = stateSnapshot(tmp);
   ok(snap.includes("auth: "), "snapshot groups by pack");
-  ok(snap.includes("1 ready-for-agent") && snap.includes("1 needs-info"), "snapshot counts statuses");
+  ok(snap.includes("1 needs-info"), "snapshot counts statuses");
   ok(snap.includes("needs-info awaiting answers: 002.md"), "snapshot names needs-info issues");
   ok(snap.includes("done without APPROVE") && snap.includes("003.md"), "snapshot pre-warns the stop gate");
+  ok(snap.includes("004.md"), "snapshot uses the gate's done-anywhere rule, not first-Status-line");
   ok(snap.includes("grill digests: 1"), "snapshot counts leftover grill digests");
+
+  // Hermes Python mirror must produce the same warnings for the same tree (executed, not grep).
+  try {
+    const py = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        tmp,
+      ],
+      { encoding: "utf8", timeout: 10000 }
+    );
+    for (const marker of ["auth: ", "002.md", "003.md", "004.md", "grill digests: 1"]) {
+      ok(py.includes(marker), `hermes snapshot parity: ${marker}`);
+    }
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e; // no python3 on this runner → skip parity exec
+  }
 
   // Session-start hook carries the snapshot (cwd = project root, AGENTS.md marks it).
   writeFileSync(join(tmp, "AGENTS.md"), "<!-- loom:begin version=v0.12.0 -->\n<!-- loom:end -->\n");
@@ -696,6 +725,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   ok(read("omp-extension.mjs").includes("researcher"), "OMP extension knows the researcher role");
   ok(read("hermes-plugin/__init__.py").includes("researcher"), "hermes knows the researcher role");
+  ok(read("docs/authoring.md").includes("`researcher`"), "authoring doc enumerates the researcher role");
   ok(read("hermes-plugin/__init__.py").includes("_state_snapshot"), "hermes mirrors the state snapshot");
   ok(read("skills/loom-plan/GRILL.md").includes('loomRole: "researcher"'), "grill passes the researcher role");
   ok(read("skills/loom-grill/SKILL.md").includes('loomRole: "researcher"'), "loom-grill passes the researcher role");

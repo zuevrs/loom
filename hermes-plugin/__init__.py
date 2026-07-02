@@ -75,7 +75,8 @@ def _state_snapshot(root: Path) -> "str | None":
             counts[status] = counts.get(status, 0) + 1
             if status == "needs-info":
                 needs_info.append(f.name)
-            if status == "done" and not any(
+            # Same rule as the real gate (isDoneWithoutVerify): done anywhere, not just first Status line.
+            if re.search(r"^Status:\s*done\b", text, re.M) and not any(
                 re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
                 for s in re.split(r"^(?=## )", text, flags=re.M)
             ):
