@@ -4,26 +4,28 @@
 const { existsSync, readdirSync, readFileSync } = require("node:fs");
 const { join, basename } = require("node:path");
 
-function collectIssuePaths(loomDir) {
-  const paths = [];
-  if (!existsSync(loomDir)) return paths;
+/** @returns {Record<string, string[]>} pack name → issue paths */
+function collectIssuesByPack(loomDir) {
+  const packs = {};
+  if (!existsSync(loomDir)) return packs;
 
-  const flat = join(loomDir, "issues");
-  if (existsSync(flat)) {
-    for (const f of readdirSync(flat)) {
-      if (f.endsWith(".md")) paths.push(join(flat, f));
+  const add = (pack, dir) => {
+    if (!existsSync(dir)) return;
+    for (const f of readdirSync(dir)) {
+      if (!f.endsWith(".md")) continue;
+      (packs[pack] = packs[pack] || []).push(join(dir, f));
     }
-  }
+  };
 
+  add("(root)", join(loomDir, "issues"));
   for (const entry of readdirSync(loomDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const issues = join(loomDir, entry.name, "issues");
-    if (!existsSync(issues)) continue;
-    for (const f of readdirSync(issues)) {
-      if (f.endsWith(".md")) paths.push(join(issues, f));
-    }
+    if (entry.isDirectory()) add(entry.name, join(loomDir, entry.name, "issues"));
   }
-  return paths;
+  return packs;
+}
+
+function collectIssuePaths(loomDir) {
+  return Object.values(collectIssuesByPack(loomDir)).flat();
 }
 
 function isDoneWithoutVerify(content) {
@@ -35,6 +37,69 @@ function isDoneWithoutVerify(content) {
     if (/^## Verify\b/.test(section) && /^APPROVE\b/m.test(section)) return false;
   }
   return true;
+}
+
+function issueStatus(content) {
+  const text = content.replace(/<!--[\s\S]*?-->/g, "");
+  const m = text.match(/^Status:\s*(\S+)/m);
+  return m ? m[1] : "unknown";
+}
+
+const listNames = (paths) =>
+  paths
+    .slice(0, 5)
+    .map((p) => basename(p))
+    .join(", ") + (paths.length > 5 ? `, +${paths.length - 5} more` : "");
+
+/**
+ * Deterministic .loom state digest for session-start injection.
+ * @returns {string|null} null when the project has no .loom/
+ */
+function stateSnapshot(root) {
+  const loomDir = join(root, ".loom");
+  const packs = collectIssuesByPack(loomDir);
+  const lines = [];
+  const needsInfo = [];
+  const unverifiedDone = [];
+
+  for (const [pack, paths] of Object.entries(packs)) {
+    const counts = {};
+    for (const p of paths) {
+      const content = readFileSync(p, "utf8");
+      const status = issueStatus(content);
+      counts[status] = (counts[status] || 0) + 1;
+      if (status === "needs-info") needsInfo.push(p);
+      if (isDoneWithoutVerify(content)) unverifiedDone.push(p);
+    }
+    const summary = Object.entries(counts)
+      .map(([s, n]) => `${n} ${s}`)
+      .join(", ");
+    lines.push(`${pack}: ${summary}`);
+  }
+
+  if (needsInfo.length) {
+    lines.push(`needs-info awaiting answers: ${listNames(needsInfo)}`);
+  }
+  if (unverifiedDone.length) {
+    lines.push(
+      `⚠️ done without APPROVE (stop gate will block): ${listNames(unverifiedDone)}`
+    );
+  }
+
+  const grillsDir = join(loomDir, "grills");
+  if (existsSync(grillsDir)) {
+    const grills = readdirSync(grillsDir)
+      .filter((f) => f.endsWith(".md"))
+      .sort();
+    if (grills.length) {
+      lines.push(
+        `grill digests: ${grills.length} (latest: ${grills[grills.length - 1]})`
+      );
+    }
+  }
+
+  if (!lines.length) return null;
+  return ["## .loom state", ...lines].join("\n");
 }
 
 /** @returns {string[]} absolute paths of issues blocking stop */
@@ -58,7 +123,12 @@ function check(root) {
   return 1;
 }
 
-module.exports = { findUnverifiedDoneIssues, isDoneWithoutVerify, check };
+module.exports = {
+  findUnverifiedDoneIssues,
+  isDoneWithoutVerify,
+  stateSnapshot,
+  check,
+};
 
 if (require.main === module) {
   process.exit(check(process.argv[2] || process.cwd()));

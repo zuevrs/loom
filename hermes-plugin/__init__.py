@@ -30,6 +30,7 @@ ROLES = {
     "maker": "Ship one vertical slice. Do not self-approve. Leave runnable check.",
     "spec-checker": "Judge against issue + PRD only. Quote spec lines. Do not fix code.",
     "standards-checker": "Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
+    "researcher": "Read primary sources, not summaries. Cite every claim with its source. Do not modify code.",
 }
 
 SKILL_NAMES = [
@@ -46,6 +47,56 @@ def _find_project_root():
         if (parent / "AGENTS.md").exists():
             return parent
     return cwd
+
+
+# loom: Python mirror of stateSnapshot in hooks/stop-gate-logic.cjs — keep the two in sync.
+def _state_snapshot(root: Path) -> "str | None":
+    import re
+
+    loom_dir = root / ".loom"
+    candidates = []
+    if loom_dir.is_dir():
+        candidates.append(((loom_dir / "issues"), "(root)"))
+        candidates.extend((d / "issues", d.name) for d in loom_dir.iterdir() if d.is_dir())
+
+    packs = {}
+    for issues_dir, pack in candidates:
+        files = sorted(issues_dir.glob("*.md")) if issues_dir.is_dir() else []
+        if files:
+            packs[pack] = files
+
+    lines, needs_info, unverified = [], [], []
+    for pack, files in packs.items():
+        counts = {}
+        for f in files:
+            text = re.sub(r"<!--[\s\S]*?-->", "", f.read_text())
+            m = re.search(r"^Status:\s*(\S+)", text, re.M)
+            status = m.group(1) if m else "unknown"
+            counts[status] = counts.get(status, 0) + 1
+            if status == "needs-info":
+                needs_info.append(f.name)
+            if status == "done" and not any(
+                re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
+                for s in re.split(r"^(?=## )", text, flags=re.M)
+            ):
+                unverified.append(f.name)
+        summary = ", ".join(f"{n} {s}" for s, n in counts.items())
+        lines.append(f"{pack}: {summary}")
+
+    def _cap(names):
+        head = ", ".join(names[:5])
+        return head + (f", +{len(names) - 5} more" if len(names) > 5 else "")
+
+    if needs_info:
+        lines.append(f"needs-info awaiting answers: {_cap(needs_info)}")
+    if unverified:
+        lines.append(f"⚠️ done without APPROVE (stop gate will block): {_cap(unverified)}")
+
+    grills = sorted((loom_dir / "grills").glob("*.md")) if (loom_dir / "grills").is_dir() else []
+    if grills:
+        lines.append(f"grill digests: {len(grills)} (latest: {grills[-1].name})")
+
+    return "## .loom state\n" + "\n".join(lines) if lines else None
 
 
 def _build_context_pointers(root: Path) -> str:
@@ -72,7 +123,11 @@ def _build_context_pointers(root: Path) -> str:
     if len(lines) == 2:
         lines.append("No Loom project detected. Run loom-init to set up this project.")
 
-    lines.extend(["", "Keep discipline + router active. Reconstruct state from .loom/ before acting."])
+    snapshot = _state_snapshot(root)
+    if snapshot:
+        lines.extend(["", snapshot, "", "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."])
+    else:
+        lines.extend(["", "Keep discipline + router active. Reconstruct state from .loom/ before acting."])
     return "\n".join(lines)
 
 

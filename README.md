@@ -126,7 +126,7 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 | **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) | Blocks agent stop if issues marked done without verify digest |
 | **Cursor** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) + managed rules | Same verify gate via hook + rule-file injection |
 | **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |
-| **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills only; verify contract holds by convention |
+| **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills; add the [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check) (`node hooks/stop-gate-logic.cjs`) to block done-without-APPROVE at PR level |
 
 **OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if the issue's `## Verify` section has no APPROVE line, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
 
@@ -186,7 +186,7 @@ cd your-project && omp
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
 | **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
-| **`LOOM_ROLE=spec-checker omp -p "…"`** | Headless checker — the Loom extension injects that role's constraint (judge only, quote spec, no fixes) into the system prompt; same for `standards-checker` and `maker` |
+| **`LOOM_ROLE=spec-checker omp -p "…"`** | Headless checker — the Loom extension injects that role's constraint (judge only, quote spec, no fixes) into the system prompt; same for `standards-checker`, `maker`, and `researcher` (primary sources, cite every claim, no code changes) |
 | **`omp plugin doctor loom`** | After every plugin update — confirms extension, rules, and agents all load |
 
 ### Planning on OMP

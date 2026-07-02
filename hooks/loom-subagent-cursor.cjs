@@ -11,6 +11,8 @@ const ROLES = {
     "Loom role: spec-checker. Judge against issue + PRD only. Quote spec lines. Do not fix code.",
   "standards-checker":
     "Loom role: standards-checker. Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
+  researcher:
+    "Loom role: researcher. Read primary sources, not summaries. Cite every claim with its source. Do not modify code.",
 };
 
 let input = "";

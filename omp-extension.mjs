@@ -12,7 +12,10 @@ import { resolve } from "node:path";
 
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
-const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
+const {
+  findUnverifiedDoneIssues,
+  stateSnapshot,
+} = require("./hooks/stop-gate-logic.cjs");
 
 const MANAGED_BLOCK_VERSION = "v0.11.0";
 
@@ -24,6 +27,8 @@ const ROLES = {
   maker: "Ship one vertical slice. Do not self-approve. Leave runnable check.",
   "spec-checker": "Judge against issue + PRD only. Quote spec lines. Do not fix code.",
   "standards-checker": "Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
+  researcher:
+    "Read primary sources, not summaries. Cite every claim with its source. Do not modify code.",
 };
 
 function findProjectRoot() {
@@ -68,12 +73,16 @@ export default function loomExtension(pi) {
     try {
       const root = findProjectRoot();
       const pointers = buildContextPointers(root);
+      const snapshot = stateSnapshot(root);
       const lines = [
         "# Loom session context",
         "",
         ...pointers,
+        ...(snapshot ? ["", snapshot] : []),
         "",
-        "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
+        snapshot
+          ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
+          : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
       ];
       process.stdout.write(lines.join("\n") + "\n");
     } catch {

@@ -46,6 +46,16 @@ jobs:
 
 Same shape for `codex exec "$(cat …)"` and `omp -p --approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
 
+### The verify gate as a CI check
+
+The Stop-hook script is a plain CLI: `node hooks/stop-gate-logic.cjs <repo-root>` exits 1 and names the offenders when any `.loom/` issue is `Status: done` without an APPROVE line in its `## Verify` section. Wire it as a PR check and the gate holds even for hosts with no runtime hooks (Windsurf, Kiro, Cline, OpenClaw — and any unattended runner):
+
+```yaml
+      - run: node ~/.loom/hooks/stop-gate-logic.cjs .   # fails the PR on done-without-APPROVE
+```
+
+Adjust the path to wherever your Loom clone lives (the installer's default is `~/.loom`; a vendored copy inside the repo works too).
+
 ### Cursor (Background Agents / Automations)
 
 Create an Automation or launch a Background Agent with the recipe file as the prompt (attach or paste it). Cursor's agents already work branch-and-PR-shaped, which matches the contract; set the schedule in the Automation for recurring runs.

@@ -643,4 +643,65 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(ci.includes("installer smoke"), "Windows CI exercises the installer end to end");
 }
 
+// v0.12.0 — agent wrapping: state snapshot, researcher role, CI gate
+{
+  const { stateSnapshot } = requireCjs(
+    resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
+  );
+  const tmp = mkdtempSync(join(tmpdir(), "loom-snapshot-"));
+  const issueDir = join(tmp, ".loom", "auth", "issues");
+  mkdirSync(issueDir, { recursive: true });
+  mkdirSync(join(tmp, ".loom", "grills"), { recursive: true });
+  writeFileSync(join(issueDir, "001.md"), "# A\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(issueDir, "002.md"), "# B\n\n## Status\n\nStatus: needs-info\n");
+  writeFileSync(join(issueDir, "003.md"), "# C\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(tmp, ".loom", "grills", "2026-07-01-x.md"), "# grill\n");
+
+  const snap = stateSnapshot(tmp);
+  ok(snap.includes("auth: "), "snapshot groups by pack");
+  ok(snap.includes("1 ready-for-agent") && snap.includes("1 needs-info"), "snapshot counts statuses");
+  ok(snap.includes("needs-info awaiting answers: 002.md"), "snapshot names needs-info issues");
+  ok(snap.includes("done without APPROVE") && snap.includes("003.md"), "snapshot pre-warns the stop gate");
+  ok(snap.includes("grill digests: 1"), "snapshot counts leftover grill digests");
+
+  // Session-start hook carries the snapshot (cwd = project root, AGENTS.md marks it).
+  writeFileSync(join(tmp, "AGENTS.md"), "<!-- loom:begin version=v0.12.0 -->\n<!-- loom:end -->\n");
+  const sessionOut = execFileSync(
+    process.execPath,
+    [resolve(__dirname, "..", "hooks", "loom-session-start.cjs")],
+    { cwd: tmp, encoding: "utf8", timeout: 5000 }
+  );
+  ok(sessionOut.includes("## .loom state"), "session-start injects the state snapshot");
+  ok(sessionOut.includes("read the issue files before acting"), "snapshot is advisory, files stay canonical");
+
+  rmSync(tmp, { recursive: true });
+
+  const empty = mkdtempSync(join(tmpdir(), "loom-snapshot-empty-"));
+  strictEqual(stateSnapshot(empty), null, "no .loom → no snapshot");
+  rmSync(empty, { recursive: true });
+
+  // Researcher role resolves in both spawn hooks.
+  for (const [script, marker] of [
+    ["loom-subagent.cjs", "primary sources"],
+    ["loom-subagent-cursor.cjs", "researcher"],
+  ]) {
+    const out = execFileSync(
+      process.execPath,
+      [resolve(__dirname, "..", "hooks", script)],
+      { input: JSON.stringify({ loomRole: "researcher" }), encoding: "utf8", timeout: 5000 }
+    );
+    ok(out.includes(marker), `${script} injects the researcher constraint`);
+  }
+
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  ok(read("omp-extension.mjs").includes("researcher"), "OMP extension knows the researcher role");
+  ok(read("hermes-plugin/__init__.py").includes("researcher"), "hermes knows the researcher role");
+  ok(read("hermes-plugin/__init__.py").includes("_state_snapshot"), "hermes mirrors the state snapshot");
+  ok(read("skills/loom-plan/GRILL.md").includes('loomRole: "researcher"'), "grill passes the researcher role");
+  ok(read("skills/loom-grill/SKILL.md").includes('loomRole: "researcher"'), "loom-grill passes the researcher role");
+
+  ok(read("docs/unattended.md").includes("verify gate as a CI check"), "unattended doc wires the CI gate");
+  ok(read("README.md").includes("CI gate"), "enforcement matrix points hook-less hosts at the CI gate");
+}
+
 console.log("✔ All hook and adapter tests passed");

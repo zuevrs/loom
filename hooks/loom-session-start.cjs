@@ -6,6 +6,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { stateSnapshot } = require("./stop-gate-logic.cjs");
 
 const MANAGED_BLOCK_VERSION = "v0.11.0";
 
@@ -54,12 +55,17 @@ function run() {
     );
   }
 
+  const snapshot = stateSnapshot(root);
+
   const output = [
     "# Loom session context",
     "",
     ...pointers,
+    ...(snapshot ? ["", snapshot] : []),
     "",
-    "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
+    snapshot
+      ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
+      : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
   ].join("\n");
 
   // loom: output format varies by host — Claude reads plain stdout

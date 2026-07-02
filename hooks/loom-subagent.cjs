@@ -20,6 +20,11 @@ const ROLES = {
     constraint:
       "Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
   },
+  researcher: {
+    allowed: ["read"],
+    constraint:
+      "Read primary sources, not summaries. Cite every claim with its source. Do not modify code.",
+  },
 };
 
 function resolveRole(input) {
