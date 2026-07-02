@@ -1,12 +1,14 @@
 # Loom
 
+[![checks](https://github.com/zuevrs/loom/actions/workflows/checks.yml/badge.svg)](https://github.com/zuevrs/loom/actions/workflows/checks.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-**What it does:** installs a discipline ladder, five ritual skills, lifecycle hooks, and host-native enforcement into any supported agent host.
+**What it does:** installs a discipline ladder, six ritual skills, lifecycle hooks, and host-native enforcement into any supported agent host.
 
 **Why:** cold agents guess intent, over-engineer, skip verification, and lose context between sessions. Loom closes these gaps with on-disk conventions — no runtime engine, no lock-in.
 
-**Loom is:** a markdown-native harness — discipline ladder, five rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
+**Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
 
 **Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service.
 
@@ -14,16 +16,18 @@ See [`docs/glossary.md`](docs/glossary.md) for terms.
 
 ## Install
 
+**Status legend** (kept honest, see [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md)): **verified** = exercised in live sessions or CI; **implemented** = built against the host's official plugin/skill docs, not yet verified end-to-end — reports welcome.
+
 **Plugin-native hosts** (no clone needed):
 
-| Host | Command |
-|------|---------|
-| Claude Code | `/install-plugin zuevrs/loom` |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` |
-| Pi | `pi install git:github.com/zuevrs/loom` |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` |
-| OpenCode | `opencode plugin github:zuevrs/loom` |
-| Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) |
+| Host | Command | Status |
+|------|---------|--------|
+| Claude Code | `/install-plugin zuevrs/loom` | implemented |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | implemented |
+| Pi | `pi install git:github.com/zuevrs/loom` | implemented |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` | **verified** (live sessions) |
+| OpenCode | `opencode plugin github:zuevrs/loom` | implemented |
+| Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) | implemented |
 
 **Script-based hosts** (clone first):
 
@@ -31,32 +35,32 @@ See [`docs/glossary.md`](docs/glossary.md) for terms.
 git clone https://github.com/zuevrs/loom ~/.loom
 ```
 
-| Host | Command |
-|------|---------|
-| Cursor | `~/.loom/scripts/install-cursor` (skills + hooks) |
-| Windsurf | `~/.loom/scripts/install-windsurf` |
-| Kiro | `~/.loom/scripts/install-kiro` |
-| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` |
-| Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) |
-| OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` |
+The installer is pure Node — on Windows run it directly (`node ~/.loom/scripts/install.mjs --cursor`), no Git Bash needed.
+
+| Host | Command | Status |
+|------|---------|--------|
+| Cursor | `~/.loom/scripts/install-cursor` (skills + hooks) | **verified** (live sessions) |
+| Windsurf | `~/.loom/scripts/install-windsurf` | implemented |
+| Kiro | `~/.loom/scripts/install-kiro` | implemented |
+| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` | implemented |
+| Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) | implemented |
+| OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` | implemented |
 
 ## Prerequisites & Troubleshooting
 
 ### Prerequisites
 
 - Git (for script-based install and upgrades via `~/.loom` clone).
-- Node.js available on `PATH` — the only hook runtime (all hooks are pure Node, no bash).
-- Symlink support in your shell environment for script-based installers.
+- Node.js available on `PATH` — the only runtime for hooks **and** the installer (no bash required).
 
 ### Windows
 
 - **Marketplace hosts** (Claude Code, Codex, Pi, OMP, OpenCode, Droid): work out of the box — plugin managers handle install, and all hooks run on plain Node (CI-verified on `windows-latest`).
-- **Script-based hosts** (Cursor, Windsurf, Kiro, Cline, OpenClaw): the installers are bash — run them from **Git Bash** (or WSL), and enable Windows **Developer Mode** so `ln -s` can create symlinks without elevation.
-- A native Node installer replacing the bash scripts is on the backlog.
+- **Script-based hosts** (Cursor, Windsurf, Kiro, Cline, OpenClaw): run the Node installer from any shell — `node ~/.loom/scripts/install.mjs --cursor` (or `--windsurf` / `--kiro` / `--agents`). Skills are linked as directory junctions (no admin rights or Developer Mode needed); if linking is unavailable the installer copies instead and tells you to re-run it after updates.
 
 ### Common issues
 
-- **`path exists and is not a symlink` during install scripts**
+- **`path exists (skipping)` during install**
   - A conflicting path already exists in the target skills directory. Move/remove the conflicting path, then re-run installer.
 - **Hooks not taking effect in Cursor/Claude/Codex**
   - Confirm hook entries exist in host config and restart the host session.
@@ -80,7 +84,7 @@ When upgrading Loom, use this flow:
    - Plugin-native hosts: re-run the install command from the table above for your host.
    - Script-based hosts:
      - `git -C ~/.loom pull --ff-only`
-     - re-run your host installer script (`install-cursor`, `install-windsurf`, `install-kiro`, or `install-agents-skills`)
+     - re-run the installer (`node ~/.loom/scripts/install.mjs --<host>` or the matching `install-*` wrapper)
      - Hermes: ensure the plugin symlink still points to `~/.loom/hermes-plugin` and plugin is enabled.
 2. **Per project**
    - Run `loom-init` in active repos to refresh managed block version when prompted.
@@ -93,8 +97,9 @@ When upgrading Loom, use this flow:
 |---|---|
 | `loom-init` | Project setup: managed block, `.loom/` |
 | `loom-plan` | Scope interview → PRD + issue pack |
+| `loom-grill` | Freeform brainstorm on any topic (even non-project) → one digest file, no PRD/issues/docs |
 | `loom-implement` | Ship one issue with minimal diff |
-| `loom-verify` | Fresh checker: Spec + Standards in parallel |
+| `loom-verify` | Fresh checker: Spec + Standards in parallel. Auto-invoked by `loom-implement` — you rarely call it; invoke directly only for ad-hoc review of an arbitrary diff |
 | `loom-tend` | Warp maintenance, stale issues, capture learning |
 
 ## Hooks
@@ -146,6 +151,7 @@ cd your-project && omp
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
 | **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
+| **Brainstorm** | `/loom-grill` any topic → one digest file | — | Relentless interview without the PRD machinery; hand the digest to `/loom-plan` if it becomes scope |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
@@ -165,7 +171,7 @@ cd your-project && omp
 
 ### Planning on OMP
 
-Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility; ADR-0099).
+Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
 
 **Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
@@ -208,12 +214,15 @@ Templates are co-located with the skills that use them:
 | Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 3 | — | yes | ext |
 | Enforcement | Stop | Stop | — | Stop+TTSR+agents | — | Stop+rule | — | — | — | — | Stop | — |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
+| Status | impl | impl | impl | **verified** | impl | **verified** | impl | impl | impl | impl | impl | impl |
 
 Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn (or OMP: session_start + before_agent_start + session_stop), `2` = session-start + per-turn (extension), `config` = host config-driven hook, `ext` = extension callback, `—` = no hook primitive.
 
 Legend: `Enforcement` → `Stop` = Stop hook / session_stop gate, `Stop+TTSR+agents` = session_stop + TTSR reminder + custom verify agents, `Stop+rule` = Stop hook + managed rule file.
 
 Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
+
+Legend: `Status` → `verified` = exercised in live sessions or CI (hook logic itself is CI-tested on Linux + Windows for every host); `impl` = implemented against the host's official docs, not yet verified end-to-end — evidence ledger in [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md), reports welcome.
 
 **Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. OMP ships session_start + before_agent_start + session_stop via extension; Hermes ships session-start + per-turn + subagent; script-tier hosts rely on AGENTS.md managed block.
 

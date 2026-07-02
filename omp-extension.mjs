@@ -1,7 +1,7 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
 // session_start: context pointers. before_agent_start: invariants + role. session_stop: verify gate.
-// Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn — ADR-0099);
+// Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
 // Loom planning in OMP is the /loom-plan command only.
 //
 // Ref: can1357/oh-my-pi extensibility/extensions/types.ts
@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.4.0";
+const MANAGED_BLOCK_VERSION = "v0.5.0";
 
 const INVARIANTS = `${PRE_LLM}
 

@@ -4,6 +4,36 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-02
+
+### Highlights
+
+- New ritual **`loom-grill`** — freeform brainstorm interview on any topic (even non-project): same one-question-per-`ask` discipline as the Plan grill, zero project docs, output is a single digest file (default `.loom/grills/YYYY-MM-DD-<slug>.md`, path confirmed before write) with an optional handoff to `loom-plan`
+- **Cross-platform Node installer** `scripts/install.mjs` (no dependencies) — `--cursor` / `--windsurf` / `--kiro` / `--agents`; symlink with junction fallback on Windows, copy fallback when linking is unavailable; closes [#1](https://github.com/zuevrs/loom/issues/1)
+- **Honest host status**: README host tables gain a Status column (`verified` = live sessions/CI, `implemented` = built per host docs, not yet verified end-to-end) backed by the `docs/evidence/HOST-INSTALL.md` ledger
+- Public docs and commit history scrubbed of internal design-note references — the repo is fully self-contained
+
+### Added
+
+- `skills/loom-grill/` + `commands/loom-grill.md`; router, invocation policy, glossary, Hermes/Kiro/OpenCode adapters, and drift canaries updated for the six-ritual surface
+- `scripts/install.mjs` — single source of install logic; `install-cursor` / `install-windsurf` / `install-kiro` / `install-agents-skills` are now thin wrappers around it
+- `SECURITY.md` and CI/license badges in the README
+
+### Changed
+
+- `loom-verify` repositioned: auto-invoked by `loom-implement` in the normal flow; call directly for ad-hoc two-axis review of any diff (branch, PR, another agent's changes)
+- Managed block updated (router + invocation policy) — block version is now `v0.5.0`
+- README Windows guidance: script hosts no longer need Git Bash or Developer Mode — run the Node installer from any shell
+
+### Migration steps
+
+- Re-run `loom-init` in projects to refresh the managed block to `v0.5.0`
+- Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer (wrappers still work; `node ~/.loom/scripts/install.mjs --<host>` on Windows)
+
+### Adapter impacts
+
+- All adapters bumped to 0.5.0; Hermes/Kiro/OpenCode skill lists gain `loom-grill`
+
 ## [0.4.0] - 2026-07-02
 
 ### Highlights
@@ -17,7 +47,7 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - Traits removed: `plan-grill` and `warp-sharpen` (shipped in 0.3.0) folded inline into `loom-plan`
 - `hooks/loom-stop-gate.sh` removed — Stop hooks must invoke `node hooks/stop-gate-logic.cjs` directly
-- All OMP plan-mode patching withdrawn — native `/plan` is stock OMP; Loom planning on OMP is `/loom-plan` only (ADR-0099 superseded)
+- All OMP plan-mode patching withdrawn — native `/plan` is stock OMP; Loom planning on OMP is `/loom-plan` only
 - Managed block content changed (triage transitions, batch-mode fresh-session rule) — block version is now `v0.4.0`
 
 ### Migration steps
@@ -43,8 +73,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - README **Windows** subsection: marketplace hosts work out of the box; script installers need Git Bash + Developer Mode; Node installer tracked in [#1](https://github.com/zuevrs/loom/issues/1)
 
 ### Changed
-- `loom-plan` grill rewritten for depth (mattpocock re-distill): exit on **every decision-tree branch resolved + explicit user go** (not "enough for a coherent PRD"); materialize is pure synthesis (no re-interview, mirrors `to-prd`); CONTEXT/ADR captured inline as decisions crystallize (full `domain-modeling` discipline inlined — challenge glossary / sharpen language / edge-case scenarios / cross-reference code / CONTEXT inline / ADR on the 3-part test); no silent invention of load-bearing decisions; Pocock phase order with user gates: **grill → [go] → PRD → [confirm] → issues + granularity quiz** (ADR-0047, ADR-0013 amended)
-- `omp-extension.mjs` injects invariants/role and the `session_stop` verify gate only — **all OMP plan-mode patching withdrawn** (append overlay, then `context`-event cadence rewrite): live GLM runs circumvented the patch (question arrays through one `ask` call, skipped gates) while string-matching OMP's bundle stayed brittle; native `/plan` is stock OMP, Loom planning is `/loom-plan` (ADR-0099 superseded)
+- `loom-plan` grill rewritten for depth (mattpocock re-distill): exit on **every decision-tree branch resolved + explicit user go** (not "enough for a coherent PRD"); materialize is pure synthesis (no re-interview, mirrors `to-prd`); CONTEXT/ADR captured inline as decisions crystallize (full `domain-modeling` discipline inlined — challenge glossary / sharpen language / edge-case scenarios / cross-reference code / CONTEXT inline / ADR on the 3-part test); no silent invention of load-bearing decisions; Pocock phase order with user gates: **grill → [go] → PRD → [confirm] → issues + granularity quiz**
+- `omp-extension.mjs` injects invariants/role and the `session_stop` verify gate only — **all OMP plan-mode patching withdrawn** (append overlay, then `context`-event cadence rewrite): live GLM runs circumvented the patch (question arrays through one `ask` call, skipped gates) while string-matching OMP's bundle stayed brittle; native `/plan` is stock OMP, Loom planning is `/loom-plan`
 - Traits removed: `plan-grill` and `warp-sharpen` folded inline into `loom-plan`
 - `EXECUTION-ORDER.md` removed from Plan outputs; issue order via `Blocked by` only
 - `loom-init` no longer writes Cursor shim; managed block trimmed (no traits, no internal ADR refs)
@@ -69,8 +99,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Highlights
 
-- Host-native enforcement layer (ADR-0100): verify-before-done enforced at runtime via Stop hooks and TTSR rules
-- Loop functionality removed (ADR-0101): delegate to host-native goal/loop features
+- Host-native enforcement layer: verify-before-done enforced at runtime via Stop hooks and TTSR rules
+- Loop functionality removed: delegate to host-native goal/loop features
 - Leaner core: five rituals, two traits, three hooks, host-native enforcement
 
 ### Breaking changes
@@ -84,7 +114,7 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - `rules/loom-verify-before-done.md` — OMP TTSR rule (plugin root)
 - `agents/loom-verify-spec.md` — OMP custom spec checker
 - `agents/loom-verify-standards.md` — OMP custom standards checker
-- ADR-0100 (host-native enforcement) and ADR-0101 (loop removed) decisions documented
+- Host-native enforcement and loop-removal decisions documented
 - README "Host-Native Enforcement" section with per-host mechanism table
 - `package.json` `omp.rules` and `omp.agents` fields for OMP auto-discovery
 - `Stop` hook in `claude-codex-hooks.json`
@@ -133,10 +163,10 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Sub-agent hook reads `loomRole` from stdin JSON (Claude/Codex/Cursor parity)
 - Managed block includes explicit Invariants section aligned with pre-LLM hook
 - All discipline injection surfaces aligned via `invariants.cjs` import or phrase parity
-- Skills completed to ADR-0091 section contract (`plan-grill`, `warp-sharpen`, implement/verify failure modes)
-- `loom-loop` documents ADR-0084 mini pipeline; config template adds `issue_selector` / `output_target`
+- Skills completed to the shared section contract (`plan-grill`, `warp-sharpen`, implement/verify failure modes)
+- `loom-loop` documents the mini pipeline; config template adds `issue_selector` / `output_target`
 - CI, CONTRIBUTING, RELEASE, and doc canaries extended for new checks
-- RELEASE checklist now requires ADR-0062 upgrade blocks and host-install evidence template
+- RELEASE checklist now requires upgrade blocks and host-install evidence template
 
 ### Migration steps
 
@@ -288,7 +318,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/zuevrs/loom/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zuevrs/loom/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zuevrs/loom/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/zuevrs/loom/compare/v0.2.7...v0.2.8
