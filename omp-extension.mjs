@@ -17,7 +17,7 @@ const {
   stateSnapshot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.11.0";
+const MANAGED_BLOCK_VERSION = "v0.12.0";
 
 const INVARIANTS = `${PRE_LLM}
 

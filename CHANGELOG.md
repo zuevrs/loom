@@ -4,6 +4,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-07-02
+
+Agent-wrapping grill: the hooks stop being static — they now read project state — and the role vocabulary catches up with what the skills already delegate.
+
+### Added
+
+- **Session-start state snapshot** — the session-start hook, OMP `session_start`, and the Hermes plugin now inject a deterministic `.loom` digest instead of only telling the agent to go read it: per-pack status counts, `needs-info` issues awaiting answers, a done-without-APPROVE pre-warning (the same rule the stop gate enforces, shared code), and leftover grill digests. Lists cap at 5 names; no `.loom` → no snapshot, the old pointer line stays. The Python mirror in Hermes is pinned by an executed JS↔Python parity test
+- **`researcher` role** — fourth `loomRole` next to `maker`/`spec-checker`/`standards-checker`, on every surface (both spawn hooks, OMP extension, Hermes): read primary sources not summaries, cite every claim with its source, no code changes. The Plan grill and `loom-grill` now pass it when delegating research to a background sub-agent
+- **The verify gate as a CI check** — `node hooks/stop-gate-logic.cjs <root>` documented as a PR check in `docs/unattended.md`; the README enforcement matrix points hook-less hosts (Windsurf, Kiro, Cline, OpenClaw — and Hermes, which has no stop event) at it instead of "verify contract holds by convention"
+
+### Fixed
+
+- `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` versions were stuck at 0.9.1 since v0.10.0 — the drift canary caught it in CI; both now track the release version again
+
 ## [0.11.0] - 2026-07-02
 
 Upstream deep-mine: a debugging discipline Loom never had, a shape for research, and runaway semantics for the unattended lane.
@@ -472,7 +486,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/zuevrs/loom/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/zuevrs/loom/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/zuevrs/loom/compare/v0.9.2...v0.10.0
 [0.9.2]: https://github.com/zuevrs/loom/compare/v0.9.1...v0.9.2
