@@ -607,6 +607,26 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(/ESCALATE_HUMAN — \{date\}/.test(verify), "escalation persisted into the issue file");
 }
 
+// v0.11.0 — diagnose phase file, research shape, runaway semantics
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  const diagnose = read("skills/loom-implement/DIAGNOSE.md");
+  ok(diagnose.includes("Red-capable"), "diagnose demands a red-capable loop");
+  ok(diagnose.includes("No red-capable command → no hypothesis phase"), "diagnose forbids theory before loop");
+  ok(diagnose.includes("3–5 ranked hypotheses"), "diagnose ranks falsifiable hypotheses");
+  ok(diagnose.includes("[DEBUG-"), "diagnose tags probes for one-grep cleanup");
+  ok(diagnose.includes("before the fix"), "regression test precedes the fix");
+  ok(read("skills/loom-implement/SKILL.md").includes("DIAGNOSE.md"), "implement routes bugs to DIAGNOSE.md");
+
+  ok(read("skills/loom-plan/GRILL.md").includes("primary sources over write-ups"), "grill research uses primary sources");
+  ok(read("skills/loom-plan/GRILL.md").includes(".loom/research/"), "research findings persist with citations");
+  ok(read("skills/loom-grill/SKILL.md").includes("primary sources"), "loom-grill researches primary sources");
+
+  ok(read("docs/unattended.md").includes("Runaway protection"), "unattended doc has runaway semantics");
+  ok(read("docs/unattended.md").includes("same error twice in a row means stop"), "stagnation rule: no third identical attempt");
+}
+
 // v0.9.0 — install lifecycle closed: doctor + uninstall documented, tend knows both rot types
 {
   const { readFileSync: rf } = await import("node:fs");

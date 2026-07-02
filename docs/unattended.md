@@ -11,6 +11,7 @@ An unattended run picks up work a human already scoped — a `Status: ready-for-
 3. **Verify still runs.** `loom-verify` (Spec + Standards) before the PR. Runner can't spawn sub-agents → sequential checkers, limitation documented in the digest.
 4. **Blockers surface as draft PRs.** `needs-info`, scope-creep stubs, a red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — status and question written into the issue file, draft PR opened with whatever exists, blocker named first in the description. Silent death is the only forbidden exit.
 5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
+6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout (Actions `timeout-minutes`, the host's token budget) as the outer bound. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
 
 ## Two tiers of recipes
 

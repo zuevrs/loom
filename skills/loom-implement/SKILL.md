@@ -47,6 +47,7 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 6. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
 7. Make the smallest change satisfying acceptance criteria.
 8. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
+   **Bug or perf regression instead of a feature?** Read [`DIAGNOSE.md`](DIAGNOSE.md) and follow it — feedback loop first, no hypothesis without a red-capable command.
 9. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
 10. Leave **one runnable check** (proportional).
 11. Run issue verification commands; capture output in issue comment.

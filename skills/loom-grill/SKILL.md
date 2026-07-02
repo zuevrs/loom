@@ -22,7 +22,7 @@ Sharpen the user's thinking on any topic through a relentless interview, then co
 
 ## Process
 
-1. Confirm the topic in one sentence; if the topic touches the repo, explore code/docs first — ask only what exploration cannot answer.
+1. Confirm the topic in one sentence; if the topic touches the repo, explore code/docs first — ask only what exploration cannot answer. Topic hinges on external facts (a library, an API, a market)? Research **primary sources** with the host's tools — delegate to a background/sub-agent when the host has one, and keep grilling while it reads; cited findings land in the digest.
 2. Interview relentlessly, same discipline as the Plan grill:
    - **One `ask` call = exactly ONE question.** Never batch; each answer branches the next question.
    - **Recommend an answer** with every question — which option you'd pick and why, listed first.

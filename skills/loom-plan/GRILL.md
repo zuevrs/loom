@@ -12,6 +12,8 @@ Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) an
 
 The same applies **outside the repo**: before grilling a technology choice (library, API, protocol), check the current docs with the host's research tools (web search, docs MCP) when available. A recommendation built on stale training data is a silent invention; a question the ecosystem already answers wastes the user's turn. Research informs the recommendation — the user still decides.
 
+Research discipline when you do it: **primary sources over write-ups** — official docs, source code, specs; follow a claim to the source that owns it. When the host can spawn a background/sub-agent, delegate the reading and keep grilling — don't stall the interview. Findings that shaped a decision are persisted with citations (a `.loom/research/YYYY-MM-DD-<slug>.md` note, or inline in the PRD's Implementation Decisions with links) — "some blog said so" is not provenance a future session can check.
+
 ## Interview rules
 
 Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Do NOT stop at "enough for a coherent PRD" — that lower bar is exactly what produces shallow plans. You never self-declare "enough"; the interview ends only when the user signals shared understanding and gives an explicit go.
