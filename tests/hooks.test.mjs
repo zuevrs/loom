@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { strictEqual, ok } from "node:assert";
 import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const hooksDir = resolve(__dirname, "..", "hooks");
@@ -146,13 +146,13 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
 // opencode-plugin.mjs exports a function
 {
-  const mod = await import(resolve(__dirname, "..", "opencode-plugin.mjs"));
+  const mod = await import(pathToFileURL(resolve(__dirname, "..", "opencode-plugin.mjs")).href);
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
 }
 
 // omp-extension.mjs — invariants + verify gate only; NO plan-mode patching (withdrawn, ADR-0099)
 {
-  const mod = await import(resolve(__dirname, "..", "omp-extension.mjs"));
+  const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
   ok(typeof mod.default === "function", "omp-extension exports default function");
 
   const handlers = {};
