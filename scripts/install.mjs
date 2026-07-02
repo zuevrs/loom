@@ -115,15 +115,37 @@ function installCursorHooks() {
     console.log(`  ✓ Created ${hooksFile} with loom hooks\n`);
     return;
   }
-  const existing = readFileSync(hooksFile, "utf8");
-  const missing = Object.entries(entries).filter(([, v]) => !existing.includes(v.marker));
-  if (missing.length === 0) {
-    console.log(`  ✓ Loom hooks already in ${hooksFile}\n`);
+
+  // The installer owns loom entries: replace stale ones (renamed/removed hook files
+  // from older versions), leave foreign hooks untouched.
+  const isLoomEntry = (h) =>
+    typeof h?.command === "string" && /loom-|stop-gate-logic/.test(h.command);
+  let json;
+  try {
+    // Strip UTF-8 BOM some editors/shells prepend — breaks JSON.parse
+    json = JSON.parse(readFileSync(hooksFile, "utf8").replace(/^\uFEFF/, ""));
+  } catch {
+    console.log(`  ⚠ ${hooksFile} is not valid JSON — fix it, then add entries manually:`);
+    for (const [k, v] of Object.entries(entries)) console.log(`    ${k}: ${JSON.stringify(v.entry)}`);
+    console.log("");
     return;
   }
-  console.log(`  ⚠ ${hooksFile} exists. Add missing entries manually:`);
-  for (const [k, v] of missing) console.log(`    ${k}: ${JSON.stringify(v.entry)}`);
-  console.log("");
+  json.hooks = json.hooks || {};
+  let changed = false;
+  for (const [event, { entry }] of Object.entries(entries)) {
+    const current = Array.isArray(json.hooks[event]) ? json.hooks[event] : [];
+    const foreign = current.filter((h) => !isLoomEntry(h));
+    const loom = current.filter(isLoomEntry);
+    if (loom.length === 1 && JSON.stringify(loom[0]) === JSON.stringify(entry)) continue;
+    json.hooks[event] = [...foreign, entry];
+    changed = true;
+  }
+  if (!changed) {
+    console.log(`  ✓ Loom hooks already current in ${hooksFile}\n`);
+    return;
+  }
+  writeFileSync(hooksFile, `${JSON.stringify(json, null, 2)}\n`);
+  console.log(`  ✓ Updated loom entries in ${hooksFile} (foreign hooks untouched)\n`);
 }
 
 function installKiroAgent() {

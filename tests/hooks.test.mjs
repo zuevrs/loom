@@ -75,6 +75,36 @@ function run(script, env = {}) {
   ok(parsed.user_message.includes("spec-checker"), "loomRole overrides default");
 }
 
+// BOM regression — PowerShell prepends a BOM when piping; it must not silently drop the role
+{
+  for (const [script, probe] of [["loom-subagent.cjs", "standards-checker"], ["loom-subagent-cursor.cjs", "spec-checker"]]) {
+    const out = execFileSync("node", [resolve(hooksDir, script)], {
+      encoding: "utf8",
+      input: "\uFEFF" + JSON.stringify({ loomRole: probe }),
+      timeout: 5000,
+    });
+    ok(out.includes(probe), `${script}: BOM-prefixed JSON still resolves the role`);
+  }
+}
+
+// Windows-freeze regression — a never-closing stdin pipe must not hang the subagent hooks
+// (shell wrappers can swallow EOF; the hook must self-exit on the fallback timer with the role recovered)
+{
+  const { spawn } = await import("node:child_process");
+  for (const script of ["loom-subagent.cjs", "loom-subagent-cursor.cjs"]) {
+    const child = spawn("node", [resolve(hooksDir, script)], { stdio: ["pipe", "pipe", "pipe"] });
+    let out = "";
+    child.stdout.on("data", (d) => (out += d));
+    child.stdin.write(JSON.stringify({ loomRole: "spec-checker" })); // no end() — EOF never arrives
+    const code = await new Promise((res, rej) => {
+      const t = setTimeout(() => { child.kill(); rej(new Error(`${script} hung on open stdin`)); }, 4000);
+      child.on("exit", (c) => { clearTimeout(t); res(c); });
+    });
+    strictEqual(code, 0, `${script} self-exits with stdin still open`);
+    ok(out.includes("spec-checker"), `${script} recovered the role from un-terminated stdin`);
+  }
+}
+
 // --- Stop gate tests ---
 
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
@@ -302,7 +332,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill command exists");
 }
 
-// v0.7.0 — routing negative examples, SAFETY template, implement Log handoff
+// v0.7.0 — routing negative examples, implement Log handoff
 {
   const { readFileSync: rf } = await import("node:fs");
   const skillsDir = resolve(__dirname, "..", "skills");
@@ -326,13 +356,6 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(doc.includes("**Confusable pairs:**"), "managed block disambiguates confusable ritual pairs");
   }
 
-  // SAFETY.md — advertised in three skills; template + init offer make it usable
-  const safetyTpl = rf(resolve(skillsDir, "loom-init", "SAFETY-TEMPLATE.md"), "utf8");
-  ok(safetyTpl.includes("## Denylist"), "SAFETY template has a Denylist section");
-  ok(safetyTpl.includes("`.loom/SAFETY.md`"), "SAFETY template denylists itself");
-  ok(initSkill.includes("SAFETY-TEMPLATE.md"), "init offers the SAFETY template");
-  ok(initSkill.includes("never overwrite an existing one"), "init never overwrites an existing SAFETY.md");
-
   // implement Log — maker's claim survives the session; verify checks it against the diff
   const impl = rf(resolve(skillsDir, "loom-implement", "SKILL.md"), "utf8");
   const verify = rf(resolve(skillsDir, "loom-verify", "SKILL.md"), "utf8");
@@ -342,6 +365,69 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(verify.includes("Issue `## Log` when present"), "verify reads the Log as input");
   ok(verify.includes("flag undeclared deviations"), "verify flags deviations missing from the Log");
   ok(issueTpl.includes("## Log"), "issue template documents the Log slot");
+}
+
+// installer regression — stale loom entries (removed/renamed hook files) get rewritten,
+// foreign hooks survive untouched
+{
+  const tmpHome = mkdtempSync(join(tmpdir(), "loom-install-test-"));
+  const cursorDir = join(tmpHome, ".cursor");
+  mkdirSync(cursorDir, { recursive: true });
+  const stale = {
+    version: 1,
+    hooks: {
+      sessionStart: [{ command: "node /old/.loom/hooks/loom-session-start.cjs", timeout: 5 }],
+      stop: [
+        { command: "bash /old/.loom/hooks/loom-stop-gate.sh", timeout: 5 },
+        { command: "node /home/user/my-own-hook.js", timeout: 2 },
+      ],
+    },
+  };
+  writeFileSync(join(cursorDir, "hooks.json"), JSON.stringify(stale, null, 2));
+  execFileSync("node", [resolve(__dirname, "..", "scripts", "install.mjs"), "--cursor"], {
+    encoding: "utf8",
+    env: { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome },
+    timeout: 30000,
+  });
+  const updated = JSON.parse(readFileSync(join(cursorDir, "hooks.json"), "utf8"));
+  const stopCmds = updated.hooks.stop.map((h) => h.command);
+  ok(stopCmds.some((c) => c.includes("stop-gate-logic.cjs")), "stale stop entry rewritten to current hook");
+  ok(!stopCmds.some((c) => c.includes("loom-stop-gate.sh")), "removed .sh hook no longer referenced");
+  ok(stopCmds.some((c) => c.includes("my-own-hook.js")), "foreign hook preserved");
+  ok(updated.hooks.sessionStart.some((h) => h.command.includes("loom-session-start.cjs") && !h.command.includes("/old/")), "stale session-start path rewritten");
+  ok(updated.hooks.beforeSubmitPrompt && updated.hooks.subagentStart, "missing events added");
+  rmSync(tmpHome, { recursive: true, force: true });
+}
+
+// v0.8.0 — denylist removed (loop-era vestige); ready-for-human is set at slicing time
+{
+  const { readFileSync: rf, readdirSync } = await import("node:fs");
+  const surfaces = [
+    "AGENTS.md",
+    "skills/loom-init/SKILL.md",
+    "skills/loom-implement/SKILL.md",
+    "skills/loom-plan/TO-ISSUES.md",
+    "hooks/invariants.cjs",
+    "hooks/loom-session-start.cjs",
+    "hermes-plugin/__init__.py",
+    "kiro-agent.json",
+    "omp-extension.mjs",
+    "agents/loom-verify-standards.md",
+    ".claude-plugin/agents/loom-verify-standards.md",
+    "README.md",
+  ];
+  for (const f of surfaces) {
+    const body = rf(resolve(__dirname, "..", f), "utf8");
+    ok(!/SAFETY\.md|denylist/i.test(body), `${f} carries no denylist/SAFETY.md vestige`);
+  }
+  ok(!existsSync(resolve(__dirname, "..", "skills", "loom-init", "SAFETY-TEMPLATE.md")), "SAFETY template removed");
+  const toIssues = rf(resolve(__dirname, "..", "skills", "loom-plan", "TO-ISSUES.md"), "utf8");
+  ok(toIssues.includes("ready-for-human"), "slicing still routes human-judgement work to ready-for-human");
+
+  // ponytail parity — all six ritual commands ship
+  const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
+  const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md"];
+  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships exactly the six rituals (got: ${cmds.join(", ")})`);
 }
 
 console.log("✔ All hook and adapter tests passed");
