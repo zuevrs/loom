@@ -4,6 +4,23 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-02
+
+### Highlights
+
+- **Checker model tiers** — verify's two checkers default to the host's fast/cheap tier, expressed in each host's own language, never a hardcoded model name; the user's host config always wins, and the tier used is recorded in the digest
+
+### Added
+
+- `.claude-plugin/agents/loom-verify-spec.md` + `loom-verify-standards.md` (Claude agent format, `model: haiku`, smell baseline mirrored) wired via the explicit `agents` key in `.claude-plugin/plugin.json` — named checkers with a pinned fast tier now work on Claude Code and Droid, not just OMP
+- `loom-verify` checker-model-tier rule: named manifests pin the tier (OMP `fast` / Claude `haiku`); generic spawns pick the host's fast tier when the interface exposes model selection; otherwise inherit — recorded in Sub-agent evidence
+- README **Checker models** table — how the tier is set and overridden per host (OMP roles, Claude agent override, Cursor Task `model` param, OpenCode `opencode.json`, inherit elsewhere)
+- Tests: tier rule, Claude/OMP frontmatter pins, plugin wiring, 12-smell baseline parity between the two standards-checker dialects
+
+### Migration steps
+
+- No managed-block content change — re-run `loom-init` only to silence the version-lag warning
+
 ## [0.5.0] - 2026-07-02
 
 ### Highlights
@@ -318,7 +335,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/zuevrs/loom/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/zuevrs/loom/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zuevrs/loom/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zuevrs/loom/compare/v0.2.8...v0.3.0

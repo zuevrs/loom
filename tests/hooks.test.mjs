@@ -261,6 +261,29 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   }
 }
 
+// checker model tiers — semantic tier per host dialect, smell-baseline parity between dialects
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const verify = rf(resolve(__dirname, "..", "skills", "loom-verify", "SKILL.md"), "utf8");
+  const ompSpec = rf(resolve(__dirname, "..", "agents", "loom-verify-spec.md"), "utf8");
+  const ompStd = rf(resolve(__dirname, "..", "agents", "loom-verify-standards.md"), "utf8");
+  const claudeSpec = rf(resolve(__dirname, "..", ".claude-plugin", "agents", "loom-verify-spec.md"), "utf8");
+  const claudeStd = rf(resolve(__dirname, "..", ".claude-plugin", "agents", "loom-verify-standards.md"), "utf8");
+  const claudePlugin = rf(resolve(__dirname, "..", ".claude-plugin", "plugin.json"), "utf8");
+
+  ok(verify.includes("Checker model tier"), "verify documents the checker model tier rule");
+  ok(verify.includes("user's host config always wins"), "user config beats the tier default");
+  ok(verify.includes("Checker model tier: fast/cheap tier"), "digest records the tier used");
+  ok(ompSpec.includes("model: fast") && ompStd.includes("model: fast"), "OMP checkers pin the fast tier");
+  ok(claudeSpec.includes("model: haiku") && claudeStd.includes("model: haiku"), "Claude checkers pin the haiku tier");
+  ok(JSON.parse(claudePlugin).agents === "./.claude-plugin/agents/", "plugin.json wires the Claude agents dir explicitly");
+
+  // smell baseline parity between the two standards-checker dialects
+  const smellNames = (ompStd.match(/^- \*\*[^*]+\*\* — .*→/gm) || []).map((s) => s.match(/\*\*([^*]+)\*\*/)[1]);
+  ok(smellNames.length === 12, "OMP standards checker carries 12 smells");
+  for (const s of smellNames) ok(claudeStd.includes(s), `Claude standards checker carries ${s}`);
+}
+
 // loom-grill — freeform brainstorm contract: one digest file, no project docs, routed everywhere
 {
   const { readFileSync: rf } = await import("node:fs");

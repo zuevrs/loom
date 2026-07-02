@@ -64,3 +64,4 @@ After changing canonical behavior:
 - **mattpocock** — user-invoked implement/plan skills, model-invoked verify
 - **addyosmani** — PRD scope/quality gates
 - **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection
+- **checker model tiers** — semantic tier per host dialect, never a hardcoded model name: root `agents/` is OMP format (`model: fast`), `.claude-plugin/agents/` is Claude format (`model: haiku`). The explicit `agents` key in `.claude-plugin/plugin.json` keeps Claude Code away from the OMP-format files. Keep the standards checker's smell baseline identical in both files (drift canary compares them)

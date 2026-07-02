@@ -26,6 +26,7 @@ Structured digest (below). On dual pass → issue `Status: done`. On fail → us
    - **Spec**: does change satisfy issue + PRD? Quote spec lines for findings. Pass `loomRole: "spec-checker"` in spawn data.
    - **Standards**: warp + discipline floor — conventions, runnable check exists and passes. Pass `loomRole: "standards-checker"` in spawn data.
    - **Named checker agents:** if the host ships pre-configured checker agents (e.g. OMP plugin agents `loom-verify-spec` / `loom-verify-standards`), **attempt them once per session** — never assume unavailability without one recorded attempt. Record the outcome (found / not found) in Sub-agent evidence and reuse it for every subsequent verify in the session. On not-found, fall back to generic sub-agents with the checker manifests inlined.
+   - **Checker model tier:** checkers run on the host's **fast/cheap tier** when a model can be chosen — named checker manifests already pin it (OMP `model: fast`, Claude `model: haiku`); when spawning generic sub-agents through an interface that exposes model selection, pick the host's fast/cheap tier yourself. The **user's host config always wins** (model roles, redefined agents, user rules); when no tier is discernible, inherit the session model. Record the tier used in Sub-agent evidence either way.
 3. **Wait without spamming.** Checkers take tens of seconds. Prefer the host's blocking wait; if only polling is available, space polls out (~15s or more) and do useful aggregation work between them — no empty rapid-fire polls.
 4. Neither checker fixes work — judges only.
 5. Aggregate digest; blocking findings first.
@@ -50,6 +51,7 @@ APPROVE | REJECT | ESCALATE_HUMAN
 - Spec sub-agent: invoked (yes/no) | tool/host used
 - Standards sub-agent: invoked (yes/no) | tool/host used
 - Named checker agents: attempted this session (yes/no) → found / not found (reused from first attempt)
+- Checker model tier: fast/cheap tier | inherited session model | user-configured (which)
 - If host cannot spawn parallel sub-agents: document limitation; run sequential checks in separate context windows
 
 ## Risk/Scope notes

@@ -132,6 +132,18 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 
 **Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without a `## Verify` section, the hook fails and the agent must run `loom-verify` first.
 
+### Checker models
+
+Verify's two checkers default to the host's **fast/cheap tier** — judging is cheaper than making. Loom never hardcodes a model name; it declares the tier in the host's own language, and **your host config always wins**. The tier actually used is recorded in the verify digest (Sub-agent evidence).
+
+| Host | How the tier is set | How you override |
+|------|--------------------|------------------|
+| OMP | plugin agents carry `model: fast` | your OMP model-roles config defines what `fast` means |
+| Claude Code / Droid | plugin agents carry `model: haiku` | redefine the agent in `.claude/agents/` (project level wins) or set `model: inherit` |
+| Cursor | skill rule — spawn picks a fast/cheap slug via the Task `model` param | a user rule pinning sub-agent models wins |
+| OpenCode | inherit by default | define checker agents with models in `opencode.json` |
+| Codex and others | inherit the session model (no per-sub-agent model API today) | switch the session model before verify |
+
 For scheduled/CI work, use your host's native goal/loop feature (e.g., `omp goal`, `claude /loop`, `codex /goal`, Cursor cloud agents) with Loom discipline active — the enforcement hooks keep the agent honest regardless of invocation mode.
 
 ## Loom + OMP (maximum synergy)
