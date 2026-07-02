@@ -4,6 +4,32 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-02
+
+Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awesome-harness-engineering) audit. No new runtime mechanisms — prose, one template, and an honest ledger of what was deliberately skipped.
+
+### Highlights
+
+- **Skill routing negative examples** — every ritual description now says when *not* to use it, and the managed-block router disambiguates the confusable pairs (Plan↔Grill, Verify↔Implement); first-party OpenAI data puts this kind of change at 73%→85% routing accuracy
+- **`.loom/SAFETY.md` is now usable** — the denylist was advertised in three skills with no template and no setup path; `loom-init` now offers it from `SAFETY-TEMPLATE.md` (the template denylists itself)
+- **Implement `## Log` handoff** — the maker writes 3–5 bullets (decisions, deviations, open questions) into the issue file before verify; the checker compares the claim against the actual diff and flags undeclared deviations; the next session inherits intent instead of re-deriving it
+
+### Added
+
+- `skills/loom-init/SAFETY-TEMPLATE.md` + init offer step (never overwrites an existing `SAFETY.md`; declining is a valid answer)
+- `## Log` slot in the issue template; implement step 11 + done-when; verify reads it as input
+- **Confusable pairs** line in the managed-block router
+- Tests: negative-example regex per skill description, SAFETY template contract, Log write/read contract
+
+### Deliberately skipped (recorded in the maintainer ledger)
+
+- **PreToolUse denylist runtime gate** — blockable file-edit hooks exist on 2 of 9 hosts, bash writes bypass any such gate, and no live run has ever created a `SAFETY.md`; a mechanism guarding an unused file on a minority of hosts is over-engineering today. Revisit on the first real denylist incident.
+- Sandboxes, memory systems, observability/tracing, meta-harness optimization, eval harnesses — host/infra layer, not a markdown discipline harness's job (evals stay deferred per the existing benchmarks decision)
+
+### Migration steps
+
+- Re-run `loom-init` to refresh the managed block (router gains the Confusable pairs line) and to get the `SAFETY.md` offer
+
 ## [0.6.0] - 2026-07-02
 
 ### Highlights
@@ -335,7 +361,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/zuevrs/loom/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/zuevrs/loom/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/zuevrs/loom/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zuevrs/loom/compare/v0.3.0...v0.4.0
