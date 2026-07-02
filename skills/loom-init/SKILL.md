@@ -38,7 +38,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.12.0 -->
+<!-- loom:begin version=v0.12.1 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.

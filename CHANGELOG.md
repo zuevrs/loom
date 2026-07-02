@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-07-02
+
+Runner modes: the unattended lane learns the two transports that shipped in May 2026.
+
+### Added
+
+- **Codex `/goal` wiring** in `docs/unattended.md` — goal mode (CLI v0.128.0+, GA 2026-05) as a carrier for the issue lane: one durable objective, runtime continuation across restarts, budget cap as the runaway brake; example goal prompt follows the `loom-implement` § Unattended mode contract
+- **Cursor `/loop` wiring** — local recurring cadence for discovery recipes (`/loop 1d run recipes/docs-drift.md`), honestly framed: a scheduler, not a goal runtime — dies when the app closes; persistent schedules stay with Automations
+- **Runaway protection names the native budget knob per transport** — Actions `timeout-minutes`, `/goal` budget cap, `/loop` stop condition, Automations schedule, host token budget elsewhere
+
 ## [0.12.0] - 2026-07-02
 
 Agent-wrapping grill: the hooks stop being static — they now read project state — and the role vocabulary catches up with what the skills already delegate.
@@ -486,7 +496,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/zuevrs/loom/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/zuevrs/loom/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/zuevrs/loom/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/zuevrs/loom/compare/v0.9.2...v0.10.0

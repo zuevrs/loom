@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.12.0"
+MANAGED_BLOCK_VERSION = "v0.12.1"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
