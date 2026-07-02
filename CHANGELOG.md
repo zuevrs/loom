@@ -4,23 +4,66 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-02
+
+### Highlights
+
+- `loom-plan` rebuilt as **phase files** (thin `SKILL.md` router + self-contained `GRILL.md` / `TO-PRD.md` / `TO-ISSUES.md`) — mattpocock composition parity under one entry point, with grill rules distilled from live runs
+- Reference-parity closures: `loom-implement/TDD.md` (Pocock `tdd`), Fowler **smell baseline** in the Standards checker (Pocock `code-review`), prototype exception in templates, triage transitions in the managed block
+- **Batch mode** for implement (fresh sub-agent per issue) + verify discovery/wait rules — distilled from the first full goal-mode lifecycle run
+- Hooks are now **pure Node** — `loom-stop-gate.sh` removed, Windows works without Git Bash (CI-verified on `windows-latest`)
+
+### Breaking changes
+
+- Traits removed: `plan-grill` and `warp-sharpen` (shipped in 0.3.0) folded inline into `loom-plan`
+- `hooks/loom-stop-gate.sh` removed — Stop hooks must invoke `node hooks/stop-gate-logic.cjs` directly
+- All OMP plan-mode patching withdrawn — native `/plan` is stock OMP; Loom planning on OMP is `/loom-plan` only (ADR-0099 superseded)
+- Managed block content changed (triage transitions, batch-mode fresh-session rule) — block version is now `v0.4.0`
+
+### Migration steps
+
+- Re-run `loom-init` in projects to refresh the managed block to `v0.4.0`
+- If a host config references `loom-stop-gate.sh`, re-run the host installer (or point the Stop hook at `node hooks/stop-gate-logic.cjs`)
+- If you invoked traits directly, use `/loom-plan` — the discipline now lives inside its phase files
+
 ### Added
 - `hooks/stop-gate-logic.cjs` — shared verify-before-done gate for Stop hook and OMP `session_stop`
 - OMP `session_stop` handler in `omp-extension.mjs` — hard gate parity with Claude/Codex/Cursor
-- OMP plan overlay in `omp-extension.mjs` — native `/plan` is Loom-powered (grill one-at-a-time, Approach as vertical slices, `.loom/` pack materialized on approve), model-gated and pointing at the installed `loom-plan` skill
-- README "Loom as native OMP plan" subsection — two plan entry points and the upstream plan-mode-API / Headroom limitations
+- `loom-plan` PRD template gains **Seams** and **Testing Decisions** sections + an extensive-user-stories mandate (mattpocock `to-prd` parity)
+- `loom-plan` restructured into **phase files** (progressive disclosure, mattpocock composition parity under one entry point): `SKILL.md` is a thin router; `GRILL.md` / `TO-PRD.md` / `TO-ISSUES.md` are self-contained phases read at their gates. New grill rules from live-run failures: one `ask` call = exactly ONE question (no question arrays), interruptions/"continue" resume the grill instead of shrinking it, ADRs offered (never silent), no silent tech-approach invention; each CONTEXT term written **before the next question** (never batched at the gate); CONTEXT/ADR in the **project language from the first write**
+- `loom-implement/TDD.md` — Pocock `tdd` distill read at step 7 for non-trivial logic: good test = behavioral spec at the PRD's pre-agreed seams (no new seams during implement), anti-patterns (implementation-coupled / tautological / horizontal slicing → vertical tracer bullets), loop rules (red before green, one slice, refactoring belongs to verify)
+- `agents/loom-verify-standards.md` gains the fixed **Fowler smell baseline** (12 smells, what-it-is → how-to-fix) with two binding rules: documented repo standard overrides; every smell is a judgement call, never a hard violation (mattpocock `code-review` Standards-axis parity)
+- PRD + issue templates: **prototype exception** to the no-snippets rule — a decision-rich snippet from a prototype (state machine, schema, type shape) is inlined; it is the decision, not a reference
+- Managed block Status vocabulary gains **triage transitions** (unlabeled → `needs-triage` → `needs-info`/`ready-for-*`/`wontfix`; `needs-info` returns on reply) and the one-category + one-state rule (mattpocock `triage` distill, state machine itself skipped as YAGNI for Loom's profile)
+- `loom-implement` **Batch mode** section (distilled from the first full goal-mode lifecycle run): "do all the issues" spawns one fresh implement sub-agent per issue (PRD + that issue — same contract as fresh session); chaining in one context is a documented fallback only when the host cannot spawn sub-agents. Managed block fresh-session rule extended accordingly
+- `loom-verify`: named checker agents (e.g. OMP plugin agents) must be **attempted once per session** — outcome recorded in Sub-agent evidence and reused; assumed unavailability forbidden. New host-neutral **wait rule**: prefer blocking waits, space polls ~15s+, no empty rapid-fire polling
+- `loom-plan/GRILL.md`: the interview itself runs in the user's language (questions, options, recommendations — no English duplicates); technical terms and ritual names stay as-is
+- README "Planning on OMP" subsection — `/loom-plan` three-phase ritual; native `/plan` left stock; upstream plan-mode-API limitation
+- CI job `check-windows` (`windows-latest`) proving the Node hook suite cross-platform
+- README **Windows** subsection: marketplace hosts work out of the box; script installers need Git Bash + Developer Mode; Node installer tracked in [#1](https://github.com/zuevrs/loom/issues/1)
 
 ### Changed
+- `loom-plan` grill rewritten for depth (mattpocock re-distill): exit on **every decision-tree branch resolved + explicit user go** (not "enough for a coherent PRD"); materialize is pure synthesis (no re-interview, mirrors `to-prd`); CONTEXT/ADR captured inline as decisions crystallize (full `domain-modeling` discipline inlined — challenge glossary / sharpen language / edge-case scenarios / cross-reference code / CONTEXT inline / ADR on the 3-part test); no silent invention of load-bearing decisions; Pocock phase order with user gates: **grill → [go] → PRD → [confirm] → issues + granularity quiz** (ADR-0047, ADR-0013 amended)
+- `omp-extension.mjs` injects invariants/role and the `session_stop` verify gate only — **all OMP plan-mode patching withdrawn** (append overlay, then `context`-event cadence rewrite): live GLM runs circumvented the patch (question arrays through one `ask` call, skipped gates) while string-matching OMP's bundle stayed brittle; native `/plan` is stock OMP, Loom planning is `/loom-plan` (ADR-0099 superseded)
 - Traits removed: `plan-grill` and `warp-sharpen` folded inline into `loom-plan`
 - `EXECUTION-ORDER.md` removed from Plan outputs; issue order via `Blocked by` only
 - `loom-init` no longer writes Cursor shim; managed block trimmed (no traits, no internal ADR refs)
 - Hermes/Kiro adapters updated for five-skill surface
 - `check-drift` / `check-doc-consistency` / `check-skill-template-contract` aligned to five rituals
-- `loom-stop-gate.sh` delegates to shared stop-gate-logic module
+- Non-blocking hooks (`session-start`, `pre-llm`, `subagent`) wrap in try/catch and always exit 0 — no shell-level `exit` tricks; hooks JSON is bash-free on both platforms
 - OMP rules/agents moved to plugin root `rules/` and `agents/` (OMP discovery convention)
 - `loom-verify` documents OMP verify via `task` tool (`agent: "loom-verify-spec"`, not `@mention`)
 - Glossary: verify signal, TTSR as reminder layer
-- OMP enforcement table: `Stop+TTSR+agents`
+- OMP enforcement table: `Stop+TTSR+agents`; README matrix now lists every host honestly (Droid Stop hook; Windsurf/Kiro/Hermes/Cline/OpenClaw — no runtime stop-gate, discipline by convention)
+
+### Removed
+- `hooks/loom-stop-gate.sh` (bash wrapper) — hosts invoke `stop-gate-logic.cjs` directly
+
+### Adapter impacts
+
+- `.claude-plugin` / `.codex-plugin` hooks JSON: Stop hook command changed to `node .../stop-gate-logic.cjs`; `commandWindows` now works without Git Bash
+- `install-cursor` writes the node Stop command into `~/.cursor/hooks.json`
+- OMP/Hermes/Kiro/OpenCode adapters: version bump only
 
 ## [0.3.0] - 2026-06-30
 
@@ -245,7 +288,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/zuevrs/loom/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zuevrs/loom/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/zuevrs/loom/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/zuevrs/loom/compare/v0.2.6...v0.2.7

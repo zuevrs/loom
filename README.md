@@ -45,8 +45,14 @@ git clone https://github.com/zuevrs/loom ~/.loom
 ### Prerequisites
 
 - Git (for script-based install and upgrades via `~/.loom` clone).
-- Node.js available on `PATH` for hook scripts (`loom-session-start`, `loom-pre-llm`, `loom-subagent`).
+- Node.js available on `PATH` — the only hook runtime (all hooks are pure Node, no bash).
 - Symlink support in your shell environment for script-based installers.
+
+### Windows
+
+- **Marketplace hosts** (Claude Code, Codex, Pi, OMP, OpenCode, Droid): work out of the box — plugin managers handle install, and all hooks run on plain Node (CI-verified on `windows-latest`).
+- **Script-based hosts** (Cursor, Windsurf, Kiro, Cline, OpenClaw): the installers are bash — run them from **Git Bash** (or WSL), and enable Windows **Developer Mode** so `ln -s` can create symlinks without elevation.
+- A native Node installer replacing the bash scripts is on the backlog.
 
 ### Common issues
 
@@ -110,8 +116,10 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 | Host | Mechanism | What it enforces |
 |------|-----------|-----------------|
 | **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) | Hard gate at turn end + stream reminder + verify agents via `task` tool |
-| **Claude Code / Codex** | `Stop` hook (`hooks/loom-stop-gate.sh`) | Blocks agent stop if issues marked done without verify digest |
-| **Cursor** | `Stop` hook (`hooks/loom-stop-gate.sh`) + managed rules | Same verify gate via hook + rule-file injection |
+| **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) | Blocks agent stop if issues marked done without verify digest |
+| **Cursor** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) + managed rules | Same verify gate via hook + rule-file injection |
+| **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |
+| **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills only; verify contract holds by convention |
 
 **OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if `## Verify` is missing, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
 
@@ -137,7 +145,7 @@ cd your-project && omp
 
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
-| **Plan** | `loom-plan` → PRD + issues | **Plan Mode** (`/plan`) | Native `/plan` is Loom-powered via the plan overlay — OMP's read-only sandbox + approve gate, Loom's grill + slices + `.loom/` pack (see below) |
+| **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
@@ -148,7 +156,6 @@ cd your-project && omp
 
 | OMP command/feature | Use with Loom when… |
 |---------------------|---------------------|
-| **`/plan`** | Starting a feature — native plan mode, Loom-powered by the plan overlay (grill one-at-a-time, Approach as slices, `.loom/` pack on approve) |
 | **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
 | **Advisor** | Long implement sessions — continuous review while Loom scopes one issue |
 | **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
@@ -156,21 +163,16 @@ cd your-project && omp
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
 | **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
 
-### Loom as native OMP plan
+### Planning on OMP
 
-On OMP you get **two** plan entry points:
+Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility; ADR-0099).
 
-- **`/loom-plan`** (command) — runs the `loom-plan` skill directly: grill → write `.loom/` PRD + issues. No read-only sandbox.
-- **`/plan`** (OMP native) — Loom-powered by the **plan overlay** in `omp-extension.mjs`. You keep OMP's read-only sandbox and `resolve` → approve → execute gate; the overlay layers Loom rules on top: interview one question at a time, structure **Approach** as named vertical slices (each a future `.loom/` issue with its own verification), and make the first post-approval step materialize `.loom/<slug>/PRD.md` + issues before implementing and verifying.
-
-The overlay is injected every turn and gated by the model (it activates only when plan mode is active). This is the best of both: OMP's enforcement + Loom's grill, slices, warp vocabulary, and verify handoff.
-
-**Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode — no plan-mode API is exposed to extensions. So `/loom-plan` cannot wrap and turn on the sandbox; the native-plan experience requires the user to run `/plan`. A first-class `/loom-plan` that enters the sandbox is blocked on an upstream OMP change. Also, plan content passed to the execution session can be lost if it is compacted (Headroom) rather than read from the on-disk plan file. Both are tracked upstream in [oh-my-pi](https://github.com/can1357/oh-my-pi).
+**Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ### Example session
 
 ```
-> Plan JWT auth feature                    # → loom-plan (+ optional /plan for tool enforcement)
+> Plan JWT auth feature                    # → /loom-plan (grill → PRD → issues)
 > Implement issue 001-auth-endpoint        # → loom-implement
 > Verify                                   # → task: loom-verify-spec + loom-verify-standards
 > (agent writes ## Verify, sets Status: done)

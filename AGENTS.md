@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.3.0 -->
+<!-- loom:begin version=v0.4.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -45,7 +45,7 @@ Map intent to ritual skills:
 
 - Small single-session fix → `loom-implement` directly.
 - Multi-session or inbound underspecified work → `loom-plan` first.
-- **Fresh session per issue** for Implement — PRD + one issue only.
+- **Fresh session per issue** for Implement — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue.
 - Domain breadth (security/perf/CI) → recommend host-native skills; do not fold into Loom core.
 
 **Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
@@ -66,6 +66,9 @@ Before acting, reconstruct state from:
 ### Status vocabulary
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
+
+Transitions: unlabeled → `needs-triage`; from there → `needs-info` (back to `needs-triage` when the reporter replies), `ready-for-agent`, `ready-for-human`, or `wontfix`.
+One category (bug/chore/feature/refactor/docs) + one state per issue; conflicting states → flag and ask.
 
 After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.md` → `ready-for-human`, never unattended Implement.
 <!-- loom:end -->

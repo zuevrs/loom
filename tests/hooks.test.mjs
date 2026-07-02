@@ -77,12 +77,13 @@ function run(script, env = {}) {
 
 // --- Stop gate tests ---
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 {
-  const stopGate = resolve(__dirname, "..", "hooks", "loom-stop-gate.sh");
+  // Invoked exactly as the hosts invoke it: `node stop-gate-logic.cjs` with cwd = project root.
+  const stopGate = resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs");
   const tmp = mkdtempSync(join(tmpdir(), "loom-stop-test-"));
   const issueDir = join(tmp, ".loom", "feat", "issues");
   mkdirSync(issueDir, { recursive: true });
@@ -90,7 +91,7 @@ import { join } from "node:path";
   // Case 1: done without ## Verify → should block (exit 1)
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
   try {
-    execFileSync("bash", [stopGate], { cwd: tmp, timeout: 5000 });
+    execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000 });
     ok(false, "stop-gate should have exited non-zero for done without verify");
   } catch (e) {
     strictEqual(e.status, 1, "stop-gate blocks done without ## Verify");
@@ -98,14 +99,20 @@ import { join } from "node:path";
 
   // Case 2: done with ## Verify → should pass (exit 0)
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Verify\n\nAPPROVE — 2026-06-30\n\n## Status\n\nStatus: done\n");
-  const out2 = execFileSync("bash", [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000 });
+  const out2 = execFileSync(process.execPath, [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000 });
   ok(out2 === "" || !out2.includes("BLOCKED"), "stop-gate allows done with ## Verify");
 
   // Case 3: not done → should pass regardless
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: ready-for-agent\n");
-  execFileSync("bash", [stopGate], { cwd: tmp, timeout: 5000 });
+  execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000 });
 
   rmSync(tmp, { recursive: true });
+
+  // Hooks JSON must be pure Node — no bash anywhere (Windows parity).
+  const hooksJson = readFileSync(resolve(__dirname, "..", "hooks", "claude-codex-hooks.json"), "utf8");
+  ok(!hooksJson.includes("bash"), "claude-codex-hooks.json is bash-free");
+  ok(hooksJson.includes("stop-gate-logic.cjs"), "Stop hook invokes stop-gate-logic.cjs directly");
+  ok(!existsSync(resolve(__dirname, "..", "hooks", "loom-stop-gate.sh")), "loom-stop-gate.sh removed");
 }
 
 // --- stop-gate-logic.cjs (shared module) ---
@@ -143,20 +150,115 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
 }
 
-// omp-extension.mjs exports a function + plan overlay wiring
+// omp-extension.mjs — invariants + verify gate only; NO plan-mode patching (withdrawn, ADR-0099)
 {
   const mod = await import(resolve(__dirname, "..", "omp-extension.mjs"));
   ok(typeof mod.default === "function", "omp-extension exports default function");
 
-  // Fake `pi` captures the before_agent_start handler; assert the plan overlay
-  // is injected and points at the installed loom-plan skill (single source).
   const handlers = {};
   mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
+
   ok(typeof handlers.before_agent_start === "function", "registers before_agent_start");
   const res = handlers.before_agent_start({ systemPrompt: "BASE" });
-  ok(res && res.systemPrompt.startsWith("BASE"), "overlay appends to base system prompt");
-  ok(res.systemPrompt.includes("Loom plan overlay (OMP plan mode only)"), "plan overlay injected");
-  ok(res.systemPrompt.includes("skills/loom-plan/SKILL.md"), "overlay points at installed loom-plan skill");
+  ok(res && res.systemPrompt.startsWith("BASE"), "before_agent_start appends to base prompt");
+  ok(res.systemPrompt.includes("Loom invariants"), "invariants injected");
+  ok(!res.systemPrompt.includes("Loom grill"), "no grill overlay in system prompt");
+
+  strictEqual(handlers.context, undefined, "no context handler — native /plan left untouched");
+  ok(typeof handlers.session_stop === "function", "registers session_stop verify gate");
+}
+
+// loom-plan phase files — thin router + self-contained phases with ordered gates
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const skillDir = resolve(__dirname, "..", "skills", "loom-plan");
+  const skill = rf(resolve(skillDir, "SKILL.md"), "utf8");
+  const grill = rf(resolve(skillDir, "GRILL.md"), "utf8");
+  const toPrd = rf(resolve(skillDir, "TO-PRD.md"), "utf8");
+  const toIssues = rf(resolve(skillDir, "TO-ISSUES.md"), "utf8");
+
+  ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("TO-ISSUES.md"), "router points at all three phases");
+  ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
+  ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
+  ok(grill.includes("Interruptions never shrink the grill"), "grill has interruption-resume rule");
+  ok(grill.includes("Write `CONTEXT.md` inline"), "grill writes CONTEXT inline");
+  ok(grill.includes("before asking the next question"), "grill writes each term before the next question, not batched");
+  ok(grill.includes("Project language from the first write"), "grill writes CONTEXT/ADR in project language immediately");
+  ok(grill.includes("The interview runs in the user's language"), "grill interview itself runs in the user's language");
+  ok(grill.includes("Offer an ADR"), "grill offers ADRs, never silent");
+  ok(toPrd.includes("Do NOT re-interview"), "to-prd is pure synthesis");
+  ok(toPrd.includes("explicit user confirmation"), "to-prd has PRD confirmation gate");
+  ok(toIssues.includes("Quiz the user"), "to-issues quizzes granularity");
+  ok(toIssues.includes("Do NOT write issue files before approval"), "to-issues writes only after approval");
+}
+
+// loom-implement TDD phase file — Pocock tdd distill at pre-agreed seams
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const implDir = resolve(__dirname, "..", "skills", "loom-implement");
+  const skill = rf(resolve(implDir, "SKILL.md"), "utf8");
+  const tdd = rf(resolve(implDir, "TDD.md"), "utf8");
+
+  ok(skill.includes("TDD.md"), "implement step 7 routes to TDD.md");
+  ok(tdd.includes("behavior through public interfaces"), "TDD.md defines a good test behaviorally");
+  ok(tdd.includes("Do not invent new seams during implement"), "TDD.md pins seams to the PRD");
+  for (const anti of ["Implementation-coupled", "Tautological", "Horizontal slicing"]) {
+    ok(tdd.includes(anti), `TDD.md carries anti-pattern: ${anti}`);
+  }
+  ok(tdd.includes("Red before green"), "TDD.md keeps red-before-green rule");
+  ok(tdd.includes("Refactoring is not part of the loop"), "TDD.md pushes refactoring out of the loop");
+}
+
+// batch mode + verify discovery/wait — distilled from the first full goal-mode lifecycle run
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const impl = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
+  const verify = rf(resolve(__dirname, "..", "skills", "loom-verify", "SKILL.md"), "utf8");
+  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
+  const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
+
+  ok(impl.includes("## Batch mode"), "implement documents batch mode");
+  ok(impl.includes("one fresh implement sub-agent per issue"), "batch mode spawns fresh sub-agent per issue");
+  ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
+  for (const doc of [agents, initSkill]) {
+    ok(doc.includes("in batch/goal runs spawn a fresh sub-agent per issue"), "managed block extends fresh-session rule to batch runs");
+  }
+  ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
+  ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
+  ok(verify.includes("Wait without spamming"), "verify has host-neutral wait rule");
+  ok(verify.includes("Named checker agents: attempted this session"), "digest records named-agent attempt outcome");
+}
+
+// standards checker — Fowler smell baseline with binding rules
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const agent = rf(resolve(__dirname, "..", "agents", "loom-verify-standards.md"), "utf8");
+
+  ok(agent.includes("The repo overrides"), "smell baseline: repo standard wins");
+  ok(agent.includes("Always a judgement call"), "smell baseline: heuristic, not hard violation");
+  const smells = [
+    "Mysterious Name", "Duplicated Code", "Feature Envy", "Data Clumps",
+    "Primitive Obsession", "Repeated Switches", "Shotgun Surgery", "Divergent Change",
+    "Speculative Generality", "Message Chains", "Middle Man", "Refused Bequest",
+  ];
+  for (const s of smells) ok(agent.includes(s), `smell baseline carries: ${s}`);
+}
+
+// templates — prototype exception to the no-snippets rule; managed block — triage transitions
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const planDir = resolve(__dirname, "..", "skills", "loom-plan");
+  const prd = rf(resolve(planDir, "PRD-TEMPLATE.md"), "utf8");
+  const issue = rf(resolve(planDir, "ISSUE-TEMPLATE.md"), "utf8");
+  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
+  const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
+
+  ok(prd.includes("decision-rich snippet from a prototype"), "PRD template has prototype exception");
+  ok(issue.includes("decision-rich snippet from a prototype"), "issue template has prototype exception");
+  for (const doc of [agents, initSkill]) {
+    ok(doc.includes("Transitions: unlabeled"), "managed block documents triage transitions");
+    ok(doc.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "managed block enforces one category + one state");
+  }
 }
 
 console.log("✔ All hook and adapter tests passed");
