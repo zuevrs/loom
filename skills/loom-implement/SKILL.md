@@ -1,6 +1,6 @@
 ---
 name: loom-implement
-description: Implement a single issue from the active Loom pack. Use when a specific issue is ready and unblocked.
+description: Implement a single issue from the active Loom pack. Use when a specific issue is ready and unblocked. Not for scoping new work (loom-plan), status/warp upkeep (loom-tend), or judging a finished change (loom-verify).
 disable-model-invocation: true
 ---
 
@@ -40,7 +40,8 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 8. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
 9. Leave **one runnable check** (proportional).
 10. Run issue verification commands; capture output in issue comment.
-11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
+11. Write `## Log` into the issue file (before `## Status`) — 3–5 bullets: key decisions, deviations from the issue as written, open questions. This is the maker's claim; the checker compares it against the actual diff, and the next session inherits it instead of re-deriving intent.
+12. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
 
 ## Discipline ladder
 
@@ -95,5 +96,6 @@ Before writing code, stop at the **first rung that holds**:
 
 - Issue verification commands pass
 - Runnable check exists and passes
+- `## Log` written into the issue file (decisions, deviations, open questions)
 - **`loom-verify` digest produced** with Verdict + Sub-agent evidence (or documented host limitation)
 - Issue not marked `Status: done` until verify APPROVE

@@ -1,6 +1,6 @@
 ---
 name: loom-tend
-description: Keep warp and issue state current. Use for maintenance between implementation steps — not feature building.
+description: Keep warp and issue state current. Use for maintenance between implementation steps — not feature building (loom-implement), not planning new scope (loom-plan).
 disable-model-invocation: true
 ---
 

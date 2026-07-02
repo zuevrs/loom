@@ -302,4 +302,46 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill command exists");
 }
 
+// v0.7.0 — routing negative examples, SAFETY template, implement Log handoff
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const skillsDir = resolve(__dirname, "..", "skills");
+  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
+  const initSkill = rf(resolve(skillsDir, "loom-init", "SKILL.md"), "utf8");
+
+  // every skill description names when NOT to use it (OpenAI eval-skills: negative examples lift routing accuracy)
+  const notFor = {
+    "loom-init": /[Nn]ot for planning/,
+    "loom-plan": /Not for freeform brainstorming/,
+    "loom-grill": /Not for planning buildable work/,
+    "loom-implement": /Not for scoping new work/,
+    "loom-verify": /not for fixing findings/,
+    "loom-tend": /not feature building/,
+  };
+  for (const [skill, re] of Object.entries(notFor)) {
+    const desc = rf(resolve(skillsDir, skill, "SKILL.md"), "utf8").match(/^description: (.*)$/m)[1];
+    ok(re.test(desc), `${skill} description carries a negative example`);
+  }
+  for (const doc of [agents, initSkill]) {
+    ok(doc.includes("**Confusable pairs:**"), "managed block disambiguates confusable ritual pairs");
+  }
+
+  // SAFETY.md — advertised in three skills; template + init offer make it usable
+  const safetyTpl = rf(resolve(skillsDir, "loom-init", "SAFETY-TEMPLATE.md"), "utf8");
+  ok(safetyTpl.includes("## Denylist"), "SAFETY template has a Denylist section");
+  ok(safetyTpl.includes("`.loom/SAFETY.md`"), "SAFETY template denylists itself");
+  ok(initSkill.includes("SAFETY-TEMPLATE.md"), "init offers the SAFETY template");
+  ok(initSkill.includes("never overwrite an existing one"), "init never overwrites an existing SAFETY.md");
+
+  // implement Log — maker's claim survives the session; verify checks it against the diff
+  const impl = rf(resolve(skillsDir, "loom-implement", "SKILL.md"), "utf8");
+  const verify = rf(resolve(skillsDir, "loom-verify", "SKILL.md"), "utf8");
+  const issueTpl = rf(resolve(skillsDir, "loom-plan", "ISSUE-TEMPLATE.md"), "utf8");
+  ok(impl.includes("Write `## Log` into the issue file"), "implement writes the Log before verify");
+  ok(impl.includes("`## Log` written into the issue file"), "Log is part of implement done-when");
+  ok(verify.includes("Issue `## Log` when present"), "verify reads the Log as input");
+  ok(verify.includes("flag undeclared deviations"), "verify flags deviations missing from the Log");
+  ok(issueTpl.includes("## Log"), "issue template documents the Log slot");
+}
+
 console.log("✔ All hook and adapter tests passed");

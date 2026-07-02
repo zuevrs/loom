@@ -24,6 +24,8 @@
 
 - ...
 
+<!-- Implement appends `## Log` here on completion: key decisions, deviations from this issue, open questions. Verify appends `## Verify` on APPROVE. -->
+
 ## Status
 
 Status: ready-for-agent

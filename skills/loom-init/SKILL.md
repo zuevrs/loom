@@ -1,6 +1,6 @@
 ---
 name: loom-init
-description: Configure a project for Loom after global install. Use when Loom is installed on host but the current repo is not initialized.
+description: Configure a project for Loom after global install. Use when Loom is installed on host but the current repo is not initialized. One-time setup only — not for planning features (loom-plan) or refreshing project docs (loom-tend).
 disable-model-invocation: true
 ---
 
@@ -19,6 +19,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 
 - Managed Loom block in `AGENTS.md` (`<!-- loom:begin version=vX.Y.Z -->` … `<!-- loom:end -->`)
 - Empty `.loom/` directory
+- `.loom/SAFETY.md` denylist (offered; from [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md))
 - Completion summary
 
 ## Process
@@ -29,6 +30,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
+   - Offer `.loom/SAFETY.md` from [`SAFETY-TEMPLATE.md`](SAFETY-TEMPLATE.md) — the denylist the router and Implement check; skip freely ("no denylist" is a valid answer), never overwrite an existing one
 5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
 6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`.
 7. If nothing needed: `No changes needed` + what was checked.
@@ -38,7 +40,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.6.0 -->
+<!-- loom:begin version=v0.7.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -77,6 +79,8 @@ Map intent to ritual skills:
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
+
+**Confusable pairs:** wants PRD/issues → Plan, no docs wanted → Grill; judging a change → Verify, fixing its findings → Implement.
 
 **Scope routing:**
 
@@ -130,5 +134,6 @@ After Verify passes → issue `Status: done`. Denylist paths from `.loom/SAFETY.
 
 - Managed block present and well-formed
 - `.loom/` exists
+- `.loom/SAFETY.md` offered (created or explicitly declined)
 - User content outside delimiters untouched
 - Summary printed (or `No changes needed`)

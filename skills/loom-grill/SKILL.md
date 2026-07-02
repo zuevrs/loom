@@ -1,6 +1,6 @@
 ---
 name: loom-grill
-description: Freeform brainstorm grill on any topic — no PRD, no issues, no project docs. Use when the user wants to think something through out loud (even unrelated to the repo) and walk away with a single digest file of the session.
+description: Freeform brainstorm grill on any topic — no PRD, no issues, no project docs. Use when the user wants to think something through out loud (even unrelated to the repo) and walk away with a single digest file of the session. Not for planning buildable work — when the user wants a PRD and issues, that is loom-plan.
 disable-model-invocation: true
 ---
 

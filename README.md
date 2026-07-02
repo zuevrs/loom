@@ -95,7 +95,7 @@ When upgrading Loom, use this flow:
 
 | Skill | Purpose |
 |---|---|
-| `loom-init` | Project setup: managed block, `.loom/` |
+| `loom-init` | Project setup: managed block, `.loom/`, denylist offer (`.loom/SAFETY.md`) |
 | `loom-plan` | Scope interview → PRD + issue pack |
 | `loom-grill` | Freeform brainstorm on any topic (even non-project) → one digest file, no PRD/issues/docs |
 | `loom-implement` | Ship one issue with minimal diff |

@@ -1,6 +1,6 @@
 ---
 name: loom-verify
-description: Fresh checker — Spec + Standards in parallel. Use automatically after any implementation completes (including direct small-fix), before declaring done or marking an issue complete.
+description: Fresh checker — Spec + Standards in parallel. Use automatically after any implementation completes (including direct small-fix), before declaring done or marking an issue complete. Judge only — not for fixing findings (hand back to loom-implement) or general code cleanup.
 ---
 
 **Judge only. Never fix.**
@@ -13,6 +13,7 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 
 - Issue + PRD (spec source)
 - Diff since issue start (`git diff <base>...HEAD` or user-fixed point)
+- Issue `## Log` when present — the maker's claimed decisions/deviations; check claims against the actual diff, and flag undeclared deviations
 - Standards sources: ADRs, CONTEXT, project conventions
 
 ## Outputs
