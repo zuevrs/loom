@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.4.0"
+MANAGED_BLOCK_VERSION = "v0.5.0"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -33,8 +33,8 @@ ROLES = {
 }
 
 SKILL_NAMES = [
-    "loom-init", "loom-plan", "loom-implement",
-    "loom-verify", "loom-tend",
+    "loom-init", "loom-plan", "loom-grill",
+    "loom-implement", "loom-verify", "loom-tend",
 ]
 
 RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]

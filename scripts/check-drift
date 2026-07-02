@@ -69,7 +69,7 @@ if [ -f "$opencode" ] && [ -n "$pkg_version" ]; then
 fi
 
 # Check all skills referenced in AGENTS.md router exist
-for skill in loom-init loom-plan loom-implement loom-verify loom-tend; do
+for skill in loom-init loom-plan loom-grill loom-implement loom-verify loom-tend; do
   if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then
     errors+=("router references $skill but skills/$skill/SKILL.md missing")
   fi

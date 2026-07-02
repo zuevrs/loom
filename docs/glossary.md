@@ -22,9 +22,11 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 ## Rituals
 
-**Ritual** — Named flow: Init, Plan, Implement, Verify, Tend.
+**Ritual** — Named flow: Init, Plan, Grill, Implement, Verify, Tend.
 
 **Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
+
+**Grill** — Freeform brainstorm interview on any topic (even non-project); output is one digest file, never PRD/issues/docs.
 
 **Implement** — Ship one issue with minimal diff; leave one runnable check.
 

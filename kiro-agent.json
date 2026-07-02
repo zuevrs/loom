@@ -1,13 +1,14 @@
 {
   "name": "loom",
-  "version": "0.4.0",
-  "description": "Skills-first harness — lazy senior dev discipline + rituals (plan, implement, verify, tend)",
-  "prompt": "Always keep Loom discipline and router active. Lazy senior dev: the best code is the code you never wrote. Before writing code, stop at the first rung that holds: YAGNI → reuse → stdlib → platform → dep → one line → minimum. Router is active: map intent → ritual skill before acting. Human gate: never auto-merge, auto-publish, or bypass denylist. Maker/checker separation: Implement never self-approves. Denylist paths → ready-for-human, never unattended Implement. No verify digest → no done. Map intent: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain). Small fix → implement directly. Multi-session → plan first. Fresh session per issue.",
+  "version": "0.5.0",
+  "description": "Skills-first harness — lazy senior dev discipline + rituals (plan, grill, implement, verify, tend)",
+  "prompt": "Always keep Loom discipline and router active. Lazy senior dev: the best code is the code you never wrote. Before writing code, stop at the first rung that holds: YAGNI → reuse → stdlib → platform → dep → one line → minimum. Router is active: map intent → ritual skill before acting. Human gate: never auto-merge, auto-publish, or bypass denylist. Maker/checker separation: Implement never self-approves. Denylist paths → ready-for-human, never unattended Implement. No verify digest → no done. Map intent: loom-init (setup) | loom-plan (plan) | loom-grill (freeform brainstorm, one digest file) | loom-implement (build) | loom-verify (check) | loom-tend (maintain). Small fix → implement directly. Multi-session → plan first. Fresh session per issue.",
   "tools": ["read", "write", "shell", "web", "subagent"],
   "resources": [
     "file://AGENTS.md",
     "skill://.kiro/skills/loom-init/SKILL.md",
     "skill://.kiro/skills/loom-plan/SKILL.md",
+    "skill://.kiro/skills/loom-grill/SKILL.md",
     "skill://.kiro/skills/loom-implement/SKILL.md",
     "skill://.kiro/skills/loom-verify/SKILL.md",
     "skill://.kiro/skills/loom-tend/SKILL.md"

@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.4.0
+// loom — OpenCode plugin adapter. Version: 0.5.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -40,7 +40,7 @@ ${PRE_LLM}
 
 ## Router
 
-Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
+Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-grill (freeform brainstorm, one digest file) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
 
 Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
 

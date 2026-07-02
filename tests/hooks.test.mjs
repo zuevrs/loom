@@ -150,7 +150,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
 }
 
-// omp-extension.mjs — invariants + verify gate only; NO plan-mode patching (withdrawn, ADR-0099)
+// omp-extension.mjs — invariants + verify gate only; NO plan-mode patching (withdrawn)
 {
   const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
   ok(typeof mod.default === "function", "omp-extension exports default function");
@@ -259,6 +259,24 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(doc.includes("Transitions: unlabeled"), "managed block documents triage transitions");
     ok(doc.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "managed block enforces one category + one state");
   }
+}
+
+// loom-grill — freeform brainstorm contract: one digest file, no project docs, routed everywhere
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const grill = rf(resolve(__dirname, "..", "skills", "loom-grill", "SKILL.md"), "utf8");
+  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
+  const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
+
+  ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
+  ok(grill.includes("One `ask` call = exactly ONE question"), "loom-grill keeps one-question discipline");
+  ok(grill.includes("NEVER write PRD, issues, `CONTEXT.md`, or ADRs"), "loom-grill forbids project-doc writes");
+  ok(grill.includes(".loom/grills/"), "loom-grill documents default digest path");
+  ok(grill.includes("confirms the path"), "digest written only after path confirmation");
+  for (const doc of [agents, initSkill]) {
+    ok(doc.includes("loom-grill"), "managed block routes loom-grill");
+  }
+  ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill command exists");
 }
 
 console.log("✔ All hook and adapter tests passed");
