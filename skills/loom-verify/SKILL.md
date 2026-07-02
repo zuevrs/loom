@@ -18,7 +18,7 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 
 ## Outputs
 
-Structured digest (below). On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop.
+Structured digest (below), persisted into the issue's `## Verify` section on **every** verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop; the written REJECT line is what the next fresh session inherits.
 
 ## Process
 
@@ -60,19 +60,20 @@ APPROVE | REJECT | ESCALATE_HUMAN
 ## Recommended next action
 ```
 
-Status effects: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → no auto status change.
+Status effects: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change.
 
 ## Issue file write-back (enforcement contract)
 
-After APPROVE, append a `## Verify` section to the issue file (before `## Status`):
+**Every verdict is persisted** — append to the issue's `## Verify` section (before `## Status`; create the section on first attempt). The verdict line starts with the verdict word:
 
 ```markdown
 ## Verify
 
+REJECT — {date} — blockers: {one line per blocker, semicolon-separated}
 APPROVE — {date} — spec pass, standards pass
 ```
 
-This section is the enforcement signal: Stop hooks and OMP `session_stop` check for `## Verify` before allowing `Status: done`. OMP also injects a TTSR reminder when you write `Status: done` mid-stream. Without this section, the agent is blocked from completing.
+Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status: done` only when a `## Verify` section contains a line starting with `APPROVE`; (2) memory — the digest in chat dies with the session, so a REJECT that isn't written back is invisible to the next fresh session, which would re-derive the same mistake. OMP also injects a TTSR reminder when you write `Status: done` mid-stream.
 
 ## Hard stops
 
@@ -118,12 +119,12 @@ For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), 
 1. First verify of the session: try spawn via `task` tool with `agent: "loom-verify-spec"` and `agent: "loom-verify-standards"` (plugin ships both in `agents/`). Record found/not-found in Sub-agent evidence; reuse the answer for the rest of the session.
 2. If not found: fall back to parallel generic `task` sub-agents with the checker manifests inlined (`loomRole: "spec-checker"` / `"standards-checker"`), or host `reviewer`.
 3. Aggregate structured verdicts into the digest above.
-4. On APPROVE: write `## Verify` into the issue file, then set `Status: done`.
-5. `session_stop` blocks turn completion if any issue is `done` without `## Verify`.
+4. Write the verdict line into the issue's `## Verify` section; on APPROVE also set `Status: done`.
+5. `session_stop` blocks turn completion if any issue is `done` without an APPROVE line in `## Verify`.
 
 ## Done when
 
 - Both sub-agents ran in parallel (or documented host limitation with sequential fallback)
 - Digest has all required sections
 - Checks executed section lists commands with pass/fail
-- On APPROVE: `## Verify` section written into issue file (enforcement gate requires it)
+- Verdict line written into the issue's `## Verify` section — every attempt, REJECT included (the gate requires an APPROVE line for `done`)

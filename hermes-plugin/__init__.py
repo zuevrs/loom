@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.9.1"
+MANAGED_BLOCK_VERSION = "v0.9.2"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -22,6 +22,7 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
+- Work needing human judgement → ready-for-human at slicing time.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).
 - Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
 

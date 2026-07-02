@@ -8,6 +8,7 @@ const PRE_LLM = `# Loom invariants (pre-turn guard)
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
+- Work needing human judgement → ready-for-human at slicing time.
 - Mark shortcuts with loom: comments (ceiling + upgrade path).`;
 
 /** Load-bearing phrases every discipline injection must include. */

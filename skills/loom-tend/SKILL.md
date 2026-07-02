@@ -39,7 +39,9 @@ Keep the warp current and debts from rotting — without inventing feature scope
    ```bash
    rg -l "Status: ready-for-agent" .loom/
    ```
-   Cross-reference with git log — if the acceptance criteria commit exists and a `## Verify` section is present, mark `done`. If no `## Verify` exists, run `loom-verify` first (enforcement gate requires it).
+   Cross-reference with git log — if the acceptance criteria commit exists and the `## Verify` section carries an APPROVE line, mark `done`. Without one, run `loom-verify` first (enforcement gate requires it).
+
+   Same sweep for triage stubs: `needs-triage` (scope creep captured by Implement) → route to `loom-plan` or `wontfix` with the user; `needs-info` → surface the written question to the user, flip back to `ready-for-agent` once answered.
 
 4. **Install freshness** — the AGENTS.md managed block version vs the installed Loom version (session-start warnings, or `<!-- loom:begin version=… -->` directly). Stale → recommend `loom-init`; on script hosts also `node ~/.loom/scripts/install.mjs --doctor`.
 

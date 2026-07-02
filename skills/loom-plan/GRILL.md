@@ -4,7 +4,7 @@ Resolve EVERY branch of the decision tree with the user, capturing the domain in
 
 ## Inbound triage (when applicable)
 
-Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-paragraph brief before the interview.
+Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-paragraph brief before the interview. Inbound includes stubs left by Implement — issues sitting at `Status: needs-triage` (captured scope creep) or `needs-info` (an answered question flips it back to `ready-for-agent`); triage them here.
 
 ## Explore before asking
 

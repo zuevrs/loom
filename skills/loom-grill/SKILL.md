@@ -31,7 +31,7 @@ Sharpen the user's thinking on any topic through a relentless interview, then co
    - **The interview runs in the user's language** — questions, options, recommendations; technical terms stay as-is.
    - **Interruptions never shrink the grill** — after a drop or "continue": restate the last unanswered question and resume.
 3. Track the brainstorm as you go: branches explored, decisions and leanings, rejected options with reasons, open questions.
-4. **Exit gate** — when the user says stop ("хватит", "compile", "wrap up", or equivalent):
+4. **Exit gate** — when the user says stop ("that's enough", "compile", "wrap up", or the equivalent in their language):
    - Propose the digest path (default `.loom/grills/YYYY-MM-DD-<slug>.md`, folder created lazily; suggest another location if there is no project here) and let the user change it.
    - After path confirmation, write ONE file: topic, context, branches explored, decisions/leanings with reasoning, rejected options, open questions, next steps.
 5. **Handoff** — if the brainstorm crystallised into buildable scope, offer `loom-plan` with the digest as input. Offer only; never auto-start.

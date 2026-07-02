@@ -128,11 +128,11 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 | **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |
 | **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills only; verify contract holds by convention |
 
-**OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if `## Verify` is missing, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
+**OMP users:** Three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if the issue's `## Verify` section has no APPROVE line, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
 
 **Known OMP limitation:** Some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work. See [issue tracker](https://github.com/zuevrs/loom/issues) for status.
 
-**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without a `## Verify` section, the hook fails and the agent must run `loom-verify` first.
+**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook fails and the agent must run `loom-verify` first.
 
 ### Checker models
 

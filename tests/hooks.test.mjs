@@ -172,6 +172,99 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   rmSync(tmp, { recursive: true });
 }
 
+// --- v0.9.2: gate cannot be satisfied by comments/prose; verdict must be APPROVE ---
+
+{
+  const tmp = mkdtempSync(join(tmpdir(), "loom-stop-verdict-"));
+  const issueDir = join(tmp, ".loom", "feat", "issues");
+  mkdirSync(issueDir, { recursive: true });
+  const issue = join(issueDir, "001.md");
+
+  // Regression: an issue rendered from the REAL current template, flipped to done,
+  // must block — whatever slot comments the template carries (v0.7.0 bypass).
+  const template = readFileSync(
+    resolve(__dirname, "..", "skills", "loom-plan", "ISSUE-TEMPLATE.md"),
+    "utf8"
+  );
+  writeFileSync(issue, template.replace("Status: ready-for-agent", "Status: done"));
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "issue from current template + done blocks");
+
+  // Belt and braces: even a comment spelling out both markers cannot satisfy the gate.
+  writeFileSync(
+    issue,
+    "# T\n\n<!-- ## Verify\nAPPROVE — fake -->\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "markers inside HTML comment do not count");
+
+  // REJECT persisted but no APPROVE → still blocked (prose mention of APPROVE mid-line included).
+  writeFileSync(
+    issue,
+    "# T\n\n## Verify\n\nREJECT — 2026-07-02 — blockers: no check; cannot APPROVE yet\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "REJECT-only verify section blocks done");
+
+  // Attempt history REJECT → APPROVE passes.
+  writeFileSync(
+    issue,
+    "# T\n\n## Verify\n\nREJECT — 2026-07-01 — blockers: x\nAPPROVE — 2026-07-02 — spec pass, standards pass\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 0, "REJECT-then-APPROVE history passes");
+
+  // Anchoring: "Status: done" mid-line in prose is not a done status.
+  writeFileSync(
+    issue,
+    "# T\n\n## Log\n- user said Status: done comes after review\n\n## Status\n\nStatus: ready-for-agent\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 0, "mid-line status prose is ignored");
+
+  rmSync(tmp, { recursive: true });
+
+  // Template never reintroduces bare marker literals outside comments (gate strips comments anyway).
+  const stripped = template.replace(/<!--[\s\S]*?-->/g, "");
+  ok(!/^## Verify/m.test(stripped), "template has no real ## Verify heading");
+}
+
+// --- v0.9.2: verdict persistence + status wiring contracts ---
+
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("Every verdict is persisted"), "verify persists REJECT too");
+  ok(/REJECT — \{date\}/.test(verify), "verify documents REJECT write-back format");
+  ok(verify.includes("line starting with `APPROVE`"), "verify documents APPROVE-line gate contract");
+
+  // Every enforcement surface states the APPROVE contract — a ## Verify section alone is not enough.
+  ok(read("omp-extension.mjs").includes("APPROVE verify digest"), "OMP session_stop message names APPROVE");
+  ok(
+    read("rules/loom-verify-before-done.md").includes("line starting with `APPROVE`"),
+    "TTSR rule requires the APPROVE line"
+  );
+
+  const implement = read("skills/loom-implement/SKILL.md");
+  ok(implement.includes("resolved means the blocker is `Status: done`"), "blocked-by semantics defined");
+  ok(implement.includes("`wontfix` blocker does NOT unblock"), "wontfix blocker stops implement");
+  ok(implement.includes("Status: needs-triage"), "scope creep writes needs-triage stub");
+  ok(implement.includes("Status: needs-info"), "unanswerable question flips to needs-info");
+  ok(implement.includes("run by the **orchestrator**"), "batch mode: orchestrator owns verify");
+
+  ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
+  ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
+
+  // Dialect parity: ready-for-human invariant present everywhere discipline is injected.
+  for (const p of ["hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
+    ok(read(p).includes("ready-for-human"), `${p} carries ready-for-human invariant`);
+  }
+  ok(
+    read("hooks/loom-subagent-cursor.cjs").includes("warp + discipline + conventions"),
+    "cursor standards-checker role matches generic hook"
+  );
+
+  // Rot regressions: no numbered cross-reference, no non-English literal in public skills.
+  ok(!read("skills/loom-implement/TDD.md").includes("step 7"), "TDD.md drops numbered step ref");
+  ok(!/хватит/.test(read("skills/loom-grill/SKILL.md")), "grill skill has no non-English literals");
+}
+
 // --- Adapter smoke imports ---
 
 // opencode-plugin.mjs exports a function
@@ -364,7 +457,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("`## Log` written into the issue file"), "Log is part of implement done-when");
   ok(verify.includes("Issue `## Log` when present"), "verify reads the Log as input");
   ok(verify.includes("flag undeclared deviations"), "verify flags deviations missing from the Log");
-  ok(issueTpl.includes("## Log"), "issue template documents the Log slot");
+  // No literal "## Log" / "## Verify" markers here — a template literal is what bypassed the stop gate in v0.7.0.
+  ok(issueTpl.includes("appends a Log section"), "issue template documents the Log slot");
+  ok(issueTpl.includes("appends its verdict section"), "issue template documents the Verify slot");
 }
 
 // installer lifecycle — stale entries rewritten, doctor catches/clears, uninstall owns its files
@@ -372,9 +467,11 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const installMjs = resolve(__dirname, "..", "scripts", "install.mjs");
   const tmpHome = mkdtempSync(join(tmpdir(), "loom-install-test-"));
   const env = { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome };
+  // cwd pinned to tmpHome: doctor scans the current project's AGENTS.md, and the
+  // suite must not depend on whatever project it happens to be launched from.
   const runInstaller = (args) => {
     try {
-      return { out: execFileSync("node", [installMjs, ...args], { encoding: "utf8", env, timeout: 30000 }), code: 0 };
+      return { out: execFileSync("node", [installMjs, ...args], { encoding: "utf8", env, cwd: tmpHome, timeout: 30000 }), code: 0 };
     } catch (e) {
       return { out: `${e.stdout || ""}${e.stderr || ""}`, code: e.status };
     }

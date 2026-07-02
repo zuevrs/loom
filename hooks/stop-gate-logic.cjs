@@ -27,8 +27,13 @@ function collectIssuePaths(loomDir) {
 }
 
 function isDoneWithoutVerify(content) {
-  if (!/Status:.*done/.test(content)) return false;
-  if (/## Verify/.test(content)) return false;
+  // HTML comments don't count — templates carry slot comments that mention the markers.
+  const text = content.replace(/<!--[\s\S]*?-->/g, "");
+  if (!/^Status:\s*done\b/m.test(text)) return false;
+  // Verified = a real "## Verify" section whose digest line starts with APPROVE.
+  for (const section of text.split(/^(?=## )/m)) {
+    if (/^## Verify\b/.test(section) && /^APPROVE\b/m.test(section)) return false;
+  }
   return true;
 }
 
@@ -47,7 +52,7 @@ function check(root) {
   if (blocked.length === 0) return 0;
   for (const p of blocked) {
     process.stderr.write(
-      `BLOCKED: ${basename(p)} marked done without verify digest. Run loom-verify.\n`
+      `BLOCKED: ${basename(p)} marked done without an APPROVE verify digest. Run loom-verify.\n`
     );
   }
   return 1;

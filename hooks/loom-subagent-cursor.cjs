@@ -10,7 +10,7 @@ const ROLES = {
   "spec-checker":
     "Loom role: spec-checker. Judge against issue + PRD only. Quote spec lines. Do not fix code.",
   "standards-checker":
-    "Loom role: standards-checker. Judge against warp + discipline. Run quality gates. Do not fix code.",
+    "Loom role: standards-checker. Judge against warp + discipline + conventions. Run quality gates. Do not fix code.",
 };
 
 let input = "";

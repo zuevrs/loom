@@ -19,7 +19,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
-Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only the chain order and verify verdicts. Chaining issues inside one context is the fallback **only when the host cannot spawn sub-agents** — note the limitation in the issue comment. Either way: dependency order, one issue at a time, `loom-verify` after each.
+Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only the chain order and verify verdicts. Chaining issues inside one context is the fallback **only when the host cannot spawn sub-agents** — note the limitation in the issue comment. Either way: dependency order, one issue at a time, `loom-verify` after each — run by the **orchestrator** between sub-agents (sub-agents usually cannot spawn checker sub-sub-agents; the implement sub-agent then yields without a digest and notes that in `## Log`).
 
 ## Outputs
 
@@ -30,7 +30,7 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 
 ## Process
 
-1. Read issue + PRD. **Stop** if any `Blocked by` is unresolved. Issue marked `ready-for-human` → not yours; stop.
+1. Read issue + PRD. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
 2. Climb the **discipline ladder** — first rung that holds (below).
 3. Prefer deletion over addition.
 4. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
@@ -40,7 +40,7 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 8. Leave **one runnable check** (proportional).
 9. Run issue verification commands; capture output in issue comment.
 10. Write `## Log` into the issue file (before `## Status`) — 3–5 bullets: key decisions, deviations from the issue as written, open questions. This is the maker's claim; the checker compares it against the actual diff, and the next session inherits it instead of re-deriving intent.
-11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). On APPROVE, verify writes `## Verify` into the issue file — this is the enforcement signal.
+11. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). Verify writes its verdict into the issue's `## Verify` section — the APPROVE line there is the enforcement signal.
 
 ## Discipline ladder
 
@@ -76,7 +76,8 @@ Before writing code, stop at the **first rung that holds**:
 | Issue marked `ready-for-human` | Not agent work; stop |
 | Verification command fails | Fix or stop; never mark done |
 | User asks to skip verify | Refuse; document host limitation if truly blocked |
-| Scope creep mid-issue | Cut to new issue; stay on one slice |
+| Scope creep mid-issue | Write a stub issue — `Status: needs-triage`, three lines (what surfaced, why out of scope, parent issue), no planning — and stay on one slice |
+| Question only the user can answer, mid-issue | Set the issue `Status: needs-info`, write the question into the issue file, stop |
 
 ## Anti-rationalization
 

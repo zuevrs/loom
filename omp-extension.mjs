@@ -14,7 +14,7 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const { findUnverifiedDoneIssues } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.9.1";
+const MANAGED_BLOCK_VERSION = "v0.9.2";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -106,7 +106,7 @@ export default function loomExtension(pi) {
       const names = blocked.map((p) => p.split("/").pop()).join(", ");
       return {
         continue: true,
-        additionalContext: `BLOCKED: ${names} marked done without ## Verify. Run loom-verify, write the ## Verify section into the issue file, then retry.`,
+        additionalContext: `BLOCKED: ${names} marked done without an APPROVE verify digest. Run loom-verify, write its verdict (a line starting with APPROVE) into the issue's ## Verify section, then retry.`,
       };
     } catch {
       return undefined;

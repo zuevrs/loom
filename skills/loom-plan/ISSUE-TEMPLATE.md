@@ -24,7 +24,7 @@
 
 - ...
 
-<!-- Implement appends `## Log` here on completion: key decisions, deviations from this issue, open questions. Verify appends `## Verify` on APPROVE. -->
+<!-- Implement appends a Log section here on completion: key decisions, deviations from this issue, open questions. Verify appends its verdict section (every attempt — APPROVE and REJECT both). -->
 
 ## Status
 
