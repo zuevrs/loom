@@ -367,10 +367,18 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(issueTpl.includes("## Log"), "issue template documents the Log slot");
 }
 
-// installer regression — stale loom entries (removed/renamed hook files) get rewritten,
-// foreign hooks survive untouched
+// installer lifecycle — stale entries rewritten, doctor catches/clears, uninstall owns its files
 {
+  const installMjs = resolve(__dirname, "..", "scripts", "install.mjs");
   const tmpHome = mkdtempSync(join(tmpdir(), "loom-install-test-"));
+  const env = { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome };
+  const runInstaller = (args) => {
+    try {
+      return { out: execFileSync("node", [installMjs, ...args], { encoding: "utf8", env, timeout: 30000 }), code: 0 };
+    } catch (e) {
+      return { out: `${e.stdout || ""}${e.stderr || ""}`, code: e.status };
+    }
+  };
   const cursorDir = join(tmpHome, ".cursor");
   mkdirSync(cursorDir, { recursive: true });
   const stale = {
@@ -384,11 +392,14 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     },
   };
   writeFileSync(join(cursorDir, "hooks.json"), JSON.stringify(stale, null, 2));
-  execFileSync("node", [resolve(__dirname, "..", "scripts", "install.mjs"), "--cursor"], {
-    encoding: "utf8",
-    env: { ...process.env, HOME: tmpHome, USERPROFILE: tmpHome },
-    timeout: 30000,
-  });
+
+  // doctor sees the dead stop-gate class of bug and names the fix
+  const sick = runInstaller(["--doctor"]);
+  strictEqual(sick.code, 1, "doctor exits 1 on stale hook entries");
+  ok(sick.out.includes("fix:"), "doctor prints a fix command");
+
+  // install repairs; foreign hook survives
+  runInstaller(["--cursor"]);
   const updated = JSON.parse(readFileSync(join(cursorDir, "hooks.json"), "utf8"));
   const stopCmds = updated.hooks.stop.map((h) => h.command);
   ok(stopCmds.some((c) => c.includes("stop-gate-logic.cjs")), "stale stop entry rewritten to current hook");
@@ -396,6 +407,21 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(stopCmds.some((c) => c.includes("my-own-hook.js")), "foreign hook preserved");
   ok(updated.hooks.sessionStart.some((h) => h.command.includes("loom-session-start.cjs") && !h.command.includes("/old/")), "stale session-start path rewritten");
   ok(updated.hooks.beforeSubmitPrompt && updated.hooks.subagentStart, "missing events added");
+
+  // doctor is clean after install
+  const healthy = runInstaller(["--doctor"]);
+  strictEqual(healthy.code, 0, `doctor exits 0 after install (got: ${healthy.out})`);
+  ok(healthy.out.includes("0 failure(s)"), "doctor reports zero failures");
+
+  // uninstall removes only what loom owns
+  runInstaller(["--uninstall", "--cursor"]);
+  const after = JSON.parse(readFileSync(join(cursorDir, "hooks.json"), "utf8"));
+  const remaining = Object.values(after.hooks).flat().map((h) => h.command);
+  ok(remaining.some((c) => c.includes("my-own-hook.js")), "uninstall preserves foreign hooks");
+  ok(!remaining.some((c) => c.includes("loom-") || c.includes("stop-gate-logic")), "uninstall removes all loom entries");
+  ok(!existsSync(join(tmpHome, ".agents", "skills", "loom-plan")), "uninstall removes loom skill links");
+  const again = runInstaller(["--uninstall", "--cursor"]);
+  ok(again.out.includes("Nothing to remove"), "uninstall is idempotent");
   rmSync(tmpHome, { recursive: true, force: true });
 }
 
@@ -428,6 +454,22 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
   const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md"];
   ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships exactly the six rituals (got: ${cmds.join(", ")})`);
+}
+
+// v0.9.0 — install lifecycle closed: doctor + uninstall documented, tend knows both rot types
+{
+  const { readFileSync: rf } = await import("node:fs");
+  const readme = rf(resolve(__dirname, "..", "README.md"), "utf8");
+  ok(readme.includes("--doctor"), "README documents the doctor");
+  ok(readme.includes("--uninstall --cursor"), "README uninstall rows use the installer");
+  ok(readme.includes("fresh sub-agent with the PRD and that single issue"), "goal example carries the per-issue sub-agent contract");
+  ok(readme.includes("LOOM_ROLE=spec-checker"), "headless checker role documented");
+  ok(readme.includes("omp plugin doctor loom"), "OMP post-update doctor documented");
+  const tend = rf(resolve(__dirname, "..", "skills", "loom-tend", "SKILL.md"), "utf8");
+  ok(tend.includes("Install freshness"), "tend audits managed-block staleness");
+  ok(tend.includes(".loom/grills/"), "tend audits leftover grill digests");
+  const ci = rf(resolve(__dirname, "..", ".github", "workflows", "checks.yml"), "utf8");
+  ok(ci.includes("installer smoke"), "Windows CI exercises the installer end to end");
 }
 
 console.log("✔ All hook and adapter tests passed");
