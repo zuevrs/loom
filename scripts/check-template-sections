@@ -19,7 +19,7 @@ check_sections() {
   done
 }
 
-# PRD (ADR-0054: Matt core + Addy guards)
+# PRD (Matt core + Addy guards)
 prd="$ROOT/skills/loom-plan/PRD-TEMPLATE.md"
 [ -f "$prd" ] && check_sections "$prd" \
   "## Problem" \
@@ -31,7 +31,7 @@ prd="$ROOT/skills/loom-plan/PRD-TEMPLATE.md"
   "## Quality Gates" \
   "## Risks / Rollout"
 
-# Issue (ADR-0055: vertical slice)
+# Issue (vertical slice contract)
 issue="$ROOT/skills/loom-plan/ISSUE-TEMPLATE.md"
 [ -f "$issue" ] && check_sections "$issue" \
   "## What to build" \
@@ -42,14 +42,14 @@ issue="$ROOT/skills/loom-plan/ISSUE-TEMPLATE.md"
   "## Status"
 
 
-# PRODUCT (ADR-0049)
+# PRODUCT
 product="$ROOT/skills/loom-plan/PRODUCT-TEMPLATE.md"
 [ -f "$product" ] && check_sections "$product" \
   "## What is this?" \
   "## Who is it for?" \
   "## Why does it exist?"
 
-# DESIGN (ADR-0043)
+# DESIGN
 design="$ROOT/skills/loom-plan/DESIGN-TEMPLATE.md"
 [ -f "$design" ] && check_sections "$design" \
   "## Tokens" \

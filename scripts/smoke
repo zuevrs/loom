@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# loom: structural smoke — no LLM, runs all maintainer checks (ADR-0040)
+# loom: structural smoke — no LLM, runs all maintainer checks
 # Exit: 0 pass, 1 drift/failure, 3 execution error
 set -euo pipefail
 

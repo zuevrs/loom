@@ -77,7 +77,7 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `scripts/check-drift` — adapter drift canary.
 - `scripts/check-doc-consistency` — user-facing docs drift canary (README/install facts, changelog links, command-set parity, template inventory + references).
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
-- `scripts/check-skill-template-contract` — skill section contract canary (ADR-0091).
+- `scripts/check-skill-template-contract` — skill section contract canary.
 - `scripts/check-template-sections` — user-artifact template section contract canary.
-- `scripts/smoke` — runs all structural checks (ADR-0040).
+- `scripts/smoke` — runs all structural checks.
 - CI runs these checks on every push.

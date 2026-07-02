@@ -21,7 +21,7 @@ If uncertain between patch vs minor, prefer **minor** and document the reasoning
 
 1. Move curated bullets from `## [Unreleased]` into a new section:
    - `## [X.Y.Z] - YYYY-MM-DD`
-2. Under each release section, include ADR-0062 upgrade blocks (omit empty blocks):
+2. Under each release section, include the upgrade blocks (omit empty blocks):
    - `### Highlights`
    - `### Breaking changes` (if any)
    - `### Migration steps`

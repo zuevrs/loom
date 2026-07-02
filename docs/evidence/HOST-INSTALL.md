@@ -1,6 +1,6 @@
 # Host install evidence (maintainers)
 
-Template for ADR-0091 release gate. Fill one row per supported host before tagging a release. Store completed copies in your maintainer ledger (not required in user projects).
+Release-gate template. Fill one row per supported host before tagging a release. Store completed copies in your maintainer ledger (not required in user projects). This ledger is the source of truth for the **Status** column in the README host tables.
 
 ## Checklist per host
 

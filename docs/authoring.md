@@ -63,4 +63,4 @@ After changing canonical behavior:
 - **ponytail** — lazy ladder, thin adapters, drift canary
 - **mattpocock** — user-invoked implement/plan skills, model-invoked verify
 - **addyosmani** — PRD scope/quality gates
-- **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection (ADR-0096)
+- **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection

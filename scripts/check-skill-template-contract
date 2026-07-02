@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# loom: skill section contract canary (ADR-0091)
+# loom: skill section contract canary
 # Exit: 0 clean, 1 drift detected
 set -euo pipefail
 
