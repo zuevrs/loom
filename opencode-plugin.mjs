@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.7.0
+// loom — OpenCode plugin adapter. Version: 0.8.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:

@@ -4,6 +4,37 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-02
+
+Upstream re-audit release: the three reference repos were re-pinned and their new commits distilled. One reversal of a v0.7.0 call, one Windows bug class fixed before it was ever reported, one live installer bug found and fixed.
+
+### Highlights
+
+- **Denylist removed** (reverses the v0.7.0 `SAFETY-TEMPLATE.md`) — the denylist was a vestige of the unattended-loop era (loops were removed in v0.3.0): no live run ever created the file, every issue already passes a human gate at planning, and "this needs a human" is a planner judgement at slicing time, not a path list. `Status: ready-for-human` and the human gate (never auto-merge, never auto-publish) stay.
+- **Windows hook hardening** (distilled from upstream fixes) — both sub-agent hooks now survive shell wrappers that swallow stdin EOF (done-flag + 1s `unref()` fallback instead of a blocking read) and strip the UTF-8 BOM PowerShell prepends before `JSON.parse`; previously a BOM silently downgraded a checker to the maker role
+- **Installer owns its entries** — `install.mjs --cursor` now parses `hooks.json` and rewrites stale loom entries (e.g. the `loom-stop-gate.sh` path removed in v0.4.0) while leaving foreign hooks untouched; found live: a config still calling the deleted `.sh` hook two releases later, meaning the Stop gate was silently dead on that machine
+
+### Removed
+
+- `skills/loom-init/SAFETY-TEMPLATE.md`, the init offer step, implement's denylist check, and every denylist/SAFETY mention across skills, hooks, adapters, agents, README, and glossary
+- `Denylist paths` invariant from the pre-turn guard (`invariants.cjs`, hermes, kiro)
+
+### Changed
+
+- Human-judgement work (auth, payments, irreversible migrations) is routed `Status: ready-for-human` at slicing time (`TO-ISSUES.md`); implement stops on issues so marked
+- `hooks/loom-subagent.cjs` and `hooks/loom-subagent-cursor.cjs`: non-blocking stdin with BOM strip and fallback timer
+- `scripts/install.mjs`: BOM-safe `hooks.json` parse; stale loom entries replaced in place; invalid JSON gets an explicit warning instead of a silent skip
+
+### Added
+
+- Tests: never-closing-stdin regression (hook must self-exit with the role recovered), BOM regression, installer stale-entry rewrite (foreign hooks preserved), no-denylist-vestige sweep, exact six-command canary
+
+### Migration steps
+
+- Re-run `loom-init` to refresh the managed block (denylist invariants drop out)
+- Re-run `node scripts/install.mjs --cursor` — it now repairs stale hook entries automatically
+- If you created a `.loom/SAFETY.md`, it is no longer read; mark human-only issues `Status: ready-for-human` at planning instead
+
 ## [0.7.0] - 2026-07-02
 
 Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awesome-harness-engineering) audit. No new runtime mechanisms — prose, one template, and an honest ledger of what was deliberately skipped.
@@ -361,7 +392,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/zuevrs/loom/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/zuevrs/loom/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/zuevrs/loom/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/zuevrs/loom/compare/v0.4.0...v0.5.0
