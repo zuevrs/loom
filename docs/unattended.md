@@ -1,0 +1,66 @@
+# Unattended lane — background agents on Loom issues
+
+Loom ships no runner (see ADR history: host-native execution won). Every host already knows how to run an agent unattended — background agents, cloud agents, cron + headless CLI, autonomous frameworks. What they need from Loom is a **contract** so an unwatched run stays safe, and **recipes** for the recurring maintenance work worth automating.
+
+## The contract
+
+An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). The rules (canonical text: `loom-implement` § Unattended mode):
+
+1. **Branch, not trunk.** All work happens in a dedicated branch. Commits there are expected. Pushing to the default branch or merging is never the agent's call.
+2. **PR is the exit for anything written.** A run that produced changes — code or stub issues — ends in a pull request: diff, verify digest, issue `## Log`, open questions in the description. The human gate that attended mode puts in the chat moves to PR review. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
+3. **Verify still runs.** `loom-verify` (Spec + Standards) before the PR. Runner can't spawn sub-agents → sequential checkers, limitation documented in the digest.
+4. **Blockers surface as draft PRs.** `needs-info`, scope-creep stubs, a red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — status and question written into the issue file, draft PR opened with whatever exists, blocker named first in the description. Silent death is the only forbidden exit.
+5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
+
+## Two tiers of recipes
+
+| Tier | Writes | Ends in | Risk |
+|---|---|---|---|
+| **Discovery** — audit, report | Only `needs-triage` stub issues (+ a report in the PR/issue) | PR with stubs, or an issue comment | Read-only on code; safe on any cadence |
+| **Change** — modify code | Code, through the full contract above | Reviewed PR | Runs the whole implement + verify lane |
+
+Start with discovery recipes; graduate a task to the change tier once its PRs come back boring.
+
+Catalog: [`recipes/`](../recipes/) — `docs-drift`, `dep-audit`, `smell-sweep` (discovery); `coverage-raise`, `dead-code` (change). Recipes live in the Loom repo — copy the ones you use into your project (or `cat` them from your Loom clone, e.g. `~/.loom/recipes/`) so the runner can read them.
+
+Stub issues from recipes that run outside a feature pack go to `.loom/maintenance/issues/` — a plain pack that exists only as a triage inbox; `loom-tend` sweeps it like any other.
+
+## Host wiring
+
+The recipe file is the prompt. Point your runner at it.
+
+### GitHub Actions (cron + headless CLI)
+
+```yaml
+on:
+  schedule: [{ cron: "0 6 * * 1" }]  # weekly
+jobs:
+  loom-recipe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: claude -p "$(cat recipes/docs-drift.md)"   # or: codex exec / omp -p --approve
+        env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
+```
+
+Same shape for `codex exec "$(cat …)"` and `omp -p --approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
+
+### Cursor (Background Agents / Automations)
+
+Create an Automation or launch a Background Agent with the recipe file as the prompt (attach or paste it). Cursor's agents already work branch-and-PR-shaped, which matches the contract; set the schedule in the Automation for recurring runs.
+
+### OMP
+
+```bash
+omp goal "Run the recipe in recipes/dep-audit.md. Follow loom-implement § Unattended mode: branch, verify, PR."
+```
+
+Headless checker roles work here too: `LOOM_ROLE=spec-checker omp -p "…"`.
+
+### Autonomous frameworks (OpenClaw, Hermes, and friends)
+
+Any framework that can run an agent with a prompt file and git access can run a recipe — the contract is prose, not an API. Wire the recipe as the task prompt and make the framework's "done" condition be "PR opened". Loom's Hermes plugin injects the discipline automatically; on other frameworks confirm the managed block (`AGENTS.md`) is in the agent's context.
+
+## What NOT to automate
+
+Work needing human judgement (auth, payments, irreversible migrations) is `ready-for-human` — the planner already routed it away from agents. Don't feed it back through a cron job. And never wire a runner to merge its own PRs; the moment review becomes a rubber stamp, every gate upstream of it is theater.

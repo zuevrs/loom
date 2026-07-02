@@ -31,7 +31,7 @@ Recommend host-native skills when scope touches security/perf/CI — do not fold
 
 ## Done when (whole ritual)
 
-- Every load-bearing decision is confirmed by the user or recorded as an explicit assumption
+- Every load-bearing decision is confirmed by the user or recorded in the PRD's Assumptions section
 - User stories are extensive; Testing Decisions and seams recorded in the PRD
 - Every issue has a verification command and acceptance criteria
 - PRD has in/out scope and quality gates

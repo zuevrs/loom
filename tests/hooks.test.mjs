@@ -322,7 +322,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const skill = rf(resolve(implDir, "SKILL.md"), "utf8");
   const tdd = rf(resolve(implDir, "TDD.md"), "utf8");
 
-  ok(skill.includes("TDD.md"), "implement step 7 routes to TDD.md");
+  ok(skill.includes("TDD.md"), "implement TDD step routes to TDD.md");
   ok(tdd.includes("behavior through public interfaces"), "TDD.md defines a good test behaviorally");
   ok(tdd.includes("Do not invent new seams during implement"), "TDD.md pins seams to the PRD");
   for (const anti of ["Implementation-coupled", "Tautological", "Horizontal slicing"]) {
@@ -562,6 +562,49 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
   const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md"];
   ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships exactly the six rituals (got: ${cmds.join(", ")})`);
+}
+
+// v0.10.0 — unattended lane + recipes + ritual upgrades (a–g)
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  // Unattended contract lives in the implement skill and the doc, and they agree.
+  const impl = read("skills/loom-implement/SKILL.md");
+  ok(impl.includes("## Unattended mode"), "implement has the unattended section");
+  ok(impl.includes("Never push to the default branch, never merge"), "unattended: merge stays human");
+  ok(impl.includes("draft PR"), "unattended: blockers exit as draft PRs");
+  ok(impl.includes("Pre-flight baseline"), "implement runs baseline before code");
+  ok(impl.includes("Never invent a load-bearing decision silently"), "implement carries question calibration");
+  ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
+
+  const doc = read("docs/unattended.md");
+  for (const phrase of ["Branch, not trunk", "PR is the exit", "Verify still runs", "draft PR"]) {
+    ok(doc.includes(phrase), `unattended doc states: ${phrase}`);
+  }
+  ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
+
+  // Recipe catalog: five files, valid tier frontmatter, discovery never edits code.
+  const tiers = { "docs-drift": "discovery", "dep-audit": "discovery", "smell-sweep": "discovery", "coverage-raise": "change", "dead-code": "change" };
+  for (const [name, tier] of Object.entries(tiers)) {
+    const recipe = read(`recipes/${name}.md`);
+    ok(recipe.startsWith("---"), `${name} has frontmatter`);
+    ok(recipe.includes(`tier: ${tier}`), `${name} is ${tier} tier`);
+    ok(recipe.includes("docs/unattended.md"), `${name} cites the contract`);
+    ok(/cadence: (daily|weekly|monthly)/.test(recipe), `${name} suggests a cadence`);
+    if (tier === "discovery") ok(recipe.includes("do not modify code"), `${name} is read-only on code`);
+  }
+  ok(read("README.md").includes("docs/unattended.md"), "README points at the unattended lane");
+
+  // Plan upgrades: Assumptions section + external research.
+  ok(read("skills/loom-plan/PRD-TEMPLATE.md").includes("## Assumptions"), "PRD template has Assumptions");
+  ok(read("skills/loom-plan/TO-PRD.md").includes("Assumptions"), "TO-PRD routes gaps into Assumptions");
+  ok(read("skills/loom-plan/GRILL.md").includes("outside the repo"), "grill researches beyond the repo");
+
+  // Verify upgrades: default objective gates + escalation spec.
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("repo's own lint/typecheck/test commands"), "verify runs repo-native gates by default");
+  ok(verify.includes("ESCALATE_HUMAN is a deliverable"), "escalation carries content and a channel");
+  ok(/ESCALATE_HUMAN — \{date\}/.test(verify), "escalation persisted into the issue file");
 }
 
 // v0.9.0 — install lifecycle closed: doctor + uninstall documented, tend knows both rot types

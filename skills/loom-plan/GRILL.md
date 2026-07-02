@@ -10,6 +10,8 @@ Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-pa
 
 Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. If exploration (`read`/`grep`/`glob`) can answer a question, explore instead of asking. Ask only what code cannot tell you: intent, preferences, scope edges, trade-offs.
 
+The same applies **outside the repo**: before grilling a technology choice (library, API, protocol), check the current docs with the host's research tools (web search, docs MCP) when available. A recommendation built on stale training data is a silent invention; a question the ecosystem already answers wastes the user's turn. Research informs the recommendation — the user still decides.
+
 ## Interview rules
 
 Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Do NOT stop at "enough for a coherent PRD" — that lower bar is exactly what produces shallow plans. You never self-declare "enough"; the interview ends only when the user signals shared understanding and gives an explicit go.

@@ -31,7 +31,7 @@ Structured digest (below), persisted into the issue's `## Verify` section on **e
 3. **Wait without spamming.** Checkers take tens of seconds. Prefer the host's blocking wait; if only polling is available, space polls out (~15s or more) and do useful aggregation work between them — no empty rapid-fire polls.
 4. Neither checker fixes work — judges only.
 5. Aggregate digest; blocking findings first.
-6. Run objective quality gates listed in issue/PRD when applicable.
+6. Run objective quality gates: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE.
 
 ## Output format
 
@@ -61,6 +61,8 @@ APPROVE | REJECT | ESCALATE_HUMAN
 ```
 
 Status effects: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change.
+
+**ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. Delivery: attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue plus a **draft PR** whose description leads with the escalation (see loom-implement § Unattended mode). Issue status stays untouched.
 
 ## Issue file write-back (enforcement contract)
 

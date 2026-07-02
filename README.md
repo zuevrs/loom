@@ -148,6 +148,10 @@ Verify's two checkers default to the host's **fast/cheap tier** — judging is c
 
 For scheduled/CI work, use your host's native goal/loop feature (e.g., `omp goal`, `claude /loop`, `codex /goal`, Cursor cloud agents) with Loom discipline active — the enforcement hooks keep the agent honest regardless of invocation mode.
 
+## Unattended lane (background agents, cron, autonomous frameworks)
+
+Loom ships no runner — your host already has one (background agents, cloud agents, cron + headless CLI, OpenClaw/Hermes-style frameworks). What Loom adds is the **contract** that keeps an unwatched run safe — dedicated branch, verify before PR, blockers exit as draft PRs, never merge — and a **recipe catalog** for recurring maintenance: [`recipes/`](recipes/) has three discovery recipes that only file `needs-triage` stubs (`docs-drift`, `dep-audit`, `smell-sweep`) and two change recipes that go through the full implement + verify lane (`coverage-raise`, `dead-code`). Wiring for GitHub Actions, Cursor, OMP, and friends: [`docs/unattended.md`](docs/unattended.md).
+
 ## Loom + OMP (maximum synergy)
 
 Loom owns **what** to build (PRD, issues, verify contract). OMP owns **how** the agent runs (enforcement, orchestration, review). They complement — not compete.
