@@ -739,6 +739,29 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(read("README.md").includes("CI gate"), "enforcement matrix points hook-less hosts at the CI gate");
 }
 
+// v0.13.0 — recipes attended lane, tend recipe check, manifest drift canary
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  for (const r of ["docs-drift", "dep-audit", "smell-sweep", "coverage-raise", "dead-code"]) {
+    ok(read(`recipes/${r}.md`).includes("Running attended"), `${r} adapts to attended runs`);
+  }
+  ok(read("docs/unattended.md").includes("also run **attended**"), "unattended doc explains chat invocation");
+
+  const tend = read("skills/loom-tend/SKILL.md");
+  ok(tend.includes("Recipe check"), "tend offers graduating recurring audits to recipes");
+  ok(tend.includes(".loom/maintenance/issues/"), "tend knows the recipe stub inbox");
+
+  const routerLine = "recurring audit on a schedule";
+  ok(read("AGENTS.md").includes(routerLine), "managed block routes recurring audits to recipes");
+  ok(read("skills/loom-init/SKILL.md").includes(routerLine), "init template carries the recipes route");
+  ok(read("opencode-plugin.mjs").includes("Recurring audits"), "opencode router mentions recipes");
+  ok(read("kiro-agent.json").includes("Recurring audits"), "kiro router mentions recipes");
+  ok(read("skills/loom-init/SKILL.md").includes("scheduled recipes"), "init summary names the maintenance pair");
+
+  ok(read("scripts/check-drift").includes("checker manifest body drift"), "drift canary compares manifest bodies");
+}
+
 // v0.12.1 — runner modes: Codex /goal and Cursor /loop wired into the unattended lane
 {
   const unattended = readFileSync(resolve(__dirname, "..", "docs", "unattended.md"), "utf8");

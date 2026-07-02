@@ -8,6 +8,8 @@ cadence: weekly
 
 You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code or lockfiles** — your diff contains only `.loom/` stub issues and your report.
 
+Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
+
 ## Task
 
 1. Run the ecosystem's native audit (`npm audit`, `pip-audit`, `cargo audit`, `govulncheck` — whatever the repo's manifests call for). Capture the raw output.

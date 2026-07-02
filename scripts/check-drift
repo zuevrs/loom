@@ -84,6 +84,27 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   fi
 done
 
+# Checker manifests exist in two dialects (agents/ = OMP-style, .claude-plugin/agents/ = Claude-style).
+# Frontmatter legitimately differs (model tier names, tool names); the prompt BODY must not drift.
+for m in "$ROOT"/agents/*.md; do
+  [ -f "$m" ] || continue
+  cc="$ROOT/.claude-plugin/agents/$(basename "$m")"
+  if [ ! -f "$cc" ]; then
+    errors+=("$(basename "$m") has no .claude-plugin/agents/ counterpart")
+    continue
+  fi
+  if ! node -e '
+    const fs = require("fs");
+    const body = (p) => fs.readFileSync(p, "utf8")
+      .replace(/^---[\s\S]*?\n---\n/, "")
+      .replace(/^Reply with a structured verdict[^\n]*$/m, "")
+      .replace(/\n{2,}/g, "\n").trim();
+    process.exit(body(process.argv[1]) === body(process.argv[2]) ? 0 : 1);
+  ' "$m" "$cc"; then
+    errors+=("checker manifest body drift: agents/$(basename "$m") vs .claude-plugin/agents/$(basename "$m")")
+  fi
+done
+
 # Load-bearing invariant phrases must appear in all discipline injection surfaces.
 invariant_targets=(
   "$ROOT/hooks/invariants.cjs"

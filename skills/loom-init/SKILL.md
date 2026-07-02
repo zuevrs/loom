@@ -30,7 +30,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
 5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
-6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`.
+6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
 7. If nothing needed: `No changes needed` + what was checked.
 
 ### Managed block to write
@@ -76,6 +76,7 @@ Map intent to ritual skills:
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
+- recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
 
 **Confusable pairs:** wants PRD/issues → Plan, no docs wanted → Grill; judging a change → Verify, fixing its findings → Implement.
 

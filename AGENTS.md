@@ -40,6 +40,7 @@ Map intent to ritual skills:
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
+- recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
 
 **Confusable pairs:** wants PRD/issues → Plan, no docs wanted → Grill; judging a change → Verify, fixing its findings → Implement.
 

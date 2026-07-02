@@ -8,6 +8,8 @@ cadence: weekly
 
 You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
 
+Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
+
 ## Task
 
 1. Read `CONTEXT.md`, `docs/adr/` (or the project's ADR location), `PRODUCT.md` and `DESIGN.md` when present.

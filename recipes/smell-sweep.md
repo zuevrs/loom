@@ -8,6 +8,8 @@ cadence: monthly
 
 You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
 
+Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
+
 ## Task
 
 1. Pick the sweep surface: files with the most churn since the last sweep (`git log --since` + change counts), capped at ~20 files. Not the whole repo.

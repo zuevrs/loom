@@ -40,7 +40,7 @@ ${PRE_LLM}
 
 ## Router
 
-Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-grill (freeform brainstorm, one digest file) | loom-implement (build) | loom-verify (check) | loom-tend (maintain).
+Map intent to ritual skills: loom-init (setup) | loom-plan (plan) | loom-grill (freeform brainstorm, one digest file) | loom-implement (build) | loom-verify (check) | loom-tend (maintain). Recurring audits → recipes/ (docs/unattended.md).
 
 Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
 

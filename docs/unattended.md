@@ -24,6 +24,8 @@ Start with discovery recipes; graduate a task to the change tier once its PRs co
 
 Catalog: [`recipes/`](../recipes/) — `docs-drift`, `dep-audit`, `smell-sweep` (discovery); `coverage-raise`, `dead-code` (change). Recipes live in the Loom repo — copy the ones you use into your project (or `cat` them from your Loom clone, e.g. `~/.loom/recipes/`) so the runner can read them.
 
+Recipes are plain prompts, so they also run **attended**: ask the agent in chat to read and execute one (e.g. "run `~/.loom/recipes/dep-audit.md`"). Each recipe carries the adaptation — same task and hard stops, but findings go to the chat and the branch/PR exit is skipped, because the human gate is sitting right there.
+
 Stub issues from recipes that run outside a feature pack go to `.loom/maintenance/issues/` — a plain pack that exists only as a triage inbox; `loom-tend` sweeps it like any other.
 
 ## Host wiring

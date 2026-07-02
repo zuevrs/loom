@@ -8,6 +8,8 @@ cadence: weekly
 
 You are running unattended. Contract: `docs/unattended.md` — dedicated branch, commits allowed, `loom-verify` before the PR, never merge. Change tier: this run modifies test code (and only test code).
 
+Running attended (a human asked for this in chat)? Same task, discipline, and verify — but the human gates the diff in chat; skip the branch/PR exit unless they ask for one.
+
 ## Task
 
 1. **Pre-flight baseline:** run the test suite. Already red → stop, open a draft PR reporting the failures; don't build on a red base.

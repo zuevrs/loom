@@ -8,6 +8,8 @@ cadence: monthly
 
 You are running unattended. Contract: `docs/unattended.md` — dedicated branch, commits allowed, `loom-verify` before the PR, never merge. Change tier: this run deletes code. Deletion over addition is the discipline — but only with proof.
 
+Running attended (a human asked for this in chat)? Same task, discipline, and verify — but the human gates the diff in chat; skip the branch/PR exit unless they ask for one.
+
 ## Task
 
 1. **Pre-flight baseline:** run the full check suite. Already red → stop, draft PR with the report.
