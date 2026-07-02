@@ -4,6 +4,24 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-07-02
+
+Quality grill over the skills, templates, and hooks themselves — one enforcement bypass, one invisible-verdict hole, and assorted rot.
+
+### Fixed
+
+- **Stop gate could be bypassed by the issue template itself** — the v0.7.0 slot comment in `ISSUE-TEMPLATE.md` contained a literal `## Verify`, which the gate's substring check matched: every issue created from the template passed the "done without verify" check with no verify at all. The gate now strips HTML comments, requires `Status: done` at line start, and — new contract — requires the `## Verify` section to carry a line starting with `APPROVE`. The template comment is reworded to carry no marker literals, and regression tests render the real template and assert it blocks
+- **REJECT verdicts are no longer invisible** — verify persisted only APPROVE into the issue file, so a REJECT lived and died with the chat session and the next fresh session re-derived the same mistake. Every verdict is now written into the issue's `## Verify` section (`REJECT — {date} — blockers: …`); the gate distinguishes them because `done` needs the APPROVE line. All enforcement surfaces (Stop hook message, OMP `session_stop`, TTSR rule, README, glossary) state the APPROVE contract
+- **Stale numbered cross-reference** — `TDD.md` cited "§Process step 7", which the v0.8.0 renumbering had silently turned into step 6; the reference is now unnumbered so renumbering can't rot it again
+- **Non-English literal in a public skill** — `loom-grill` listed a Russian stop-word as an example; replaced with neutral English plus "the equivalent in their language"
+- **Dialect drift** — the Cursor sub-agent hook's standards-checker role said "warp + discipline" while the generic hook said "warp + discipline + conventions"; aligned. The ready-for-human slicing invariant now also appears in `invariants.cjs` PRE_LLM, the Hermes DISCIPLINE block, and the Kiro agent prompt
+
+### Added
+
+- **needs-triage / needs-info are now produced, not just defined** — the status vocabulary documented both but no ritual ever set them. Implement now writes a three-line stub issue (`Status: needs-triage`) when scope creep surfaces instead of vaguely "cutting a new issue", and flips its own issue to `needs-info` (question written into the file) when only the user can answer; Plan's inbound triage and Tend's status sweep consume both
+- **Blocked-by semantics defined** — resolved means the blocker is `Status: done`; a `wontfix` blocker does not unblock (the dependent issue may need re-scoping — stop and ask)
+- **Batch-mode verify ownership** — the orchestrator runs `loom-verify` between implement sub-agents; sub-agents (which usually cannot spawn checker sub-sub-agents) yield without a digest and note that in `## Log`
+
 ## [0.9.1] - 2026-07-02
 
 Post-release checker findings on the new lifecycle verbs, fixed same day.
@@ -423,7 +441,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/zuevrs/loom/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/zuevrs/loom/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/zuevrs/loom/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/zuevrs/loom/compare/v0.7.0...v0.8.0
