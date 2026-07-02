@@ -1,0 +1,48 @@
+# Phase 3 — Issues (vertical slices)
+
+Entry condition: the user confirmed the PRD. If not, STOP — return to `TO-PRD.md`.
+
+## Draft slices
+
+Break the PRD into **tracer-bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end — NOT a horizontal slice of one layer.
+
+- Each slice delivers a narrow but COMPLETE path through every layer and is demoable/verifiable on its own.
+- Any prefactoring goes first — "make the change easy, then make the easy change."
+
+## Quiz the user
+
+Present the proposed breakdown as a numbered list. For each slice: **Title**, **Blocked by**, **User stories covered**. Ask:
+
+- Does the granularity feel right? (too coarse / too fine)
+- Are the dependency relationships correct?
+- Should any slices be merged or split further?
+
+Iterate until the user approves the breakdown. Do NOT write issue files before approval.
+
+## Write
+
+Each approved slice → `.loom/<feature-slug>/issues/<NN>-<slug>.md` via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md):
+
+- `Status: ready-for-agent`, acceptance criteria, and a deterministic verification command in every issue.
+- Order follows `Blocked by` fields (blockers get lower numbers); no separate execution-order file.
+- Denylist paths from `.loom/SAFETY.md` → `ready-for-human` instead.
+
+Recommend host-native skills when scope touches security/perf/CI — do not fold into Loom core.
+
+## Done when (whole ritual)
+
+- Every load-bearing decision is confirmed by the user or recorded as an explicit assumption
+- User stories are extensive; Testing Decisions and seams recorded in the PRD
+- Every issue has a verification command and acceptance criteria
+- PRD has in/out scope and quality gates
+- Issue `Blocked by` graph is consistent; no issue marked `done` at Plan time
+- User passed both gates: confirmed the PRD, then approved the slices
+- CONTEXT terms match PRD vocabulary
+
+## Anti-rationalization
+
+| Excuse | Reality |
+|---|---|
+| "Slices are obvious, skip the quiz" | The quiz IS the gate — granularity and dependencies are the user's call. |
+| "Write issues first, quiz after" | Nothing is written before the breakdown is approved. |
+| "One big issue is simpler" | Tracer bullets: thin, end-to-end, independently verifiable. |
