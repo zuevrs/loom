@@ -67,6 +67,11 @@ function finish() {
   }
 }
 
+// Non-blocking hook: never break a spawn on hook failure.
+process.on("uncaughtException", () => {
+  process.exit(0);
+});
+
 if (process.stdin.isTTY) {
   // No piped payload — env/default resolution only.
   finish();

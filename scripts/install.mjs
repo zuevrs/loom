@@ -98,10 +98,10 @@ function installCursorHooks() {
   }
   const cmd = (f) => `node ${join(HOOKS_DIR, f)}`;
   const entries = {
-    sessionStart: { marker: "loom-session-start", entry: { command: cmd("loom-session-start.cjs"), timeout: 5 } },
-    beforeSubmitPrompt: { marker: "loom-pre-llm", entry: { command: cmd("loom-pre-llm.cjs"), timeout: 3 } },
-    subagentStart: { marker: "loom-subagent-cursor", entry: { command: cmd("loom-subagent-cursor.cjs"), timeout: 3 } },
-    stop: { marker: "stop-gate-logic", entry: { command: cmd("stop-gate-logic.cjs"), timeout: 5 } },
+    sessionStart: { entry: { command: cmd("loom-session-start.cjs"), timeout: 5 } },
+    beforeSubmitPrompt: { entry: { command: cmd("loom-pre-llm.cjs"), timeout: 3 } },
+    subagentStart: { entry: { command: cmd("loom-subagent-cursor.cjs"), timeout: 3 } },
+    stop: { entry: { command: cmd("stop-gate-logic.cjs"), timeout: 5 } },
   };
 
   console.log("Hooks:");
