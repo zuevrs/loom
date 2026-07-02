@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-07-02
+
+Post-release checker findings on the new lifecycle verbs, fixed same day.
+
+### Fixed
+
+- **Ownership is by exact hook filename, never by substring** — a foreign hook whose path merely contains `loom-` (e.g. `node /opt/acme/loom-backup/run.js`) was classified as loom-owned and could be rewritten on install or deleted on uninstall; now current + historical loom hook filenames are matched exactly, with regression tests for both paths
+- **Uninstall collision guard** — a directory squatting on a loom skill name (which install correctly skips) could be deleted by uninstall; it is now left in place unless its `SKILL.md` declares the loom skill
+- **Doctor strictness** — a stale managed block is a failure with a fix line, not a warning (matches the documented "exit 0 = healthy"); node floor aligned to the documented 20+; Windows CI propagates the final doctor exit code
+
 ## [0.9.0] - 2026-07-02
 
 Install-lifecycle release: the v0.8.0 audit found a hook that had been silently dead for two releases — this release makes that class of failure visible and closes the lifecycle (install → update → doctor → uninstall).
@@ -20,12 +30,6 @@ Install-lifecycle release: the v0.8.0 audit found a hook that had been silently 
 - README OMP: `omp goal` example now carries the fresh-sub-agent-per-issue contract (was drifting from the skill's batch rule); headless checker roles documented (`LOOM_ROLE=spec-checker omp -p`)
 - `loom-tend`: two new audit steps — managed-block staleness (recommend `loom-init`/`--doctor`) and leftover `.loom/grills/` digests (offer plan handoff or archival)
 - Tests: doctor exits 1 on stale entries and 0 after repair, uninstall preserves foreign hooks and is idempotent, plus contract tests on the new docs
-
-### Changed
-
-- Loom ownership of hook entries is by exact hook filename (current + historical), never by substring — a foreign `node /opt/acme/loom-backup/run.js` stays foreign on install and uninstall
-- Uninstall refuses to delete a directory squatting on a loom skill name unless its `SKILL.md` declares the loom skill — no data loss on name collisions
-- Doctor: stale managed block is a failure (with fix), not a warning; node floor aligned to the documented 20+
 
 ### Migration steps
 
@@ -419,7 +423,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/zuevrs/loom/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/zuevrs/loom/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/zuevrs/loom/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/zuevrs/loom/compare/v0.6.0...v0.7.0
