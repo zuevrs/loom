@@ -684,7 +684,12 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
         resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
         tmp,
       ],
-      { encoding: "utf8", timeout: 10000 }
+      {
+        encoding: "utf8",
+        timeout: 10000,
+        // Windows Python defaults stdout to cp1252, which can't encode the snapshot's ⚠️.
+        env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      }
     );
     for (const marker of ["auth: ", "002.md", "003.md", "004.md", "grill digests: 1"]) {
       ok(py.includes(marker), `hermes snapshot parity: ${marker}`);
