@@ -4,6 +4,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.4] - 2026-07-04
+
+Session-speed round, grounded in field-run turn counts: of 94 agent turns on one issue, ~15 were pure waste — 8 serial single-file reads during bootup (all five issue cards read in full to pick one) and 6 consecutive no-op polls waiting for checkers. All fixes are prose; the next field run measures them.
+
+### Changed
+
+- **Bootup is one batch** — `loom-implement` step 1: PRD + your issue card + blockers' status lines in one batch of parallel reads, not one file per turn. Not told which issue? Trust the snapshot's `next up:` pointer; no snapshot → grep `Status:` across cards. Full sibling-card reads are banned — the fresh-context contract (PRD + this issue) was being violated silently
+- **The wait is work time** — `loom-verify` step 3: prefer the host's blocking wait; while checkers run, do the verify session's own remaining work — run the objective gates and pre-assemble the digest frame so checker verdicts drop into prepared slots
+- **Shared checker briefing** — `loom-verify` step 2: write the checker context once to a scratch file outside the worktree (`$TMPDIR` / host scratch), hand both spawns the same reference plus their axis; codifies a field-run maker's improvisation (two hand-copied prompts drift; scratch outside the repo keeps the judged diff clean)
+
+### Migration
+
+Nothing to do.
+
 ## [0.16.3] - 2026-07-03
 
 Field run round 3: issue 02 implemented in a fresh session — and the whole session ran with the Loom extension **silently dead** (the plugin had been hot-swapped under a long-running OMP process minutes earlier). The discipline held anyway, carried entirely by the managed block and skills — the layered design's first live validation — but witness and the `session_stop` gate simply did not exist that session, and nothing said so. Three fixes.
@@ -661,7 +675,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.3...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.4...HEAD
+[0.16.4]: https://github.com/zuevrs/loom/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/zuevrs/loom/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/zuevrs/loom/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/zuevrs/loom/compare/v0.16.0...v0.16.1

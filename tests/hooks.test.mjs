@@ -348,7 +348,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   }
   ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
   ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
-  ok(verify.includes("Wait without spamming"), "verify has host-neutral wait rule");
+  ok(verify.includes("Prefer the host's blocking wait"), "verify has host-neutral wait rule");
   ok(verify.includes("Named checker agents: attempted this session"), "digest records named-agent attempt outcome");
 }
 
@@ -1416,6 +1416,21 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   const verify = read("skills/loom-verify/SKILL.md");
   ok(verify.includes("An APPROVE vouches only for the diff it judged"), "loom-verify scopes APPROVE to the judged diff");
   ok(verify.includes("Post-verify delta"), "loom-verify names the post-verify delta log format");
+}
+
+// v0.16.4 — session-speed fixes: batched bootup, next-up trust, wait-is-work, shared checker briefing
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const impl = read("skills/loom-implement/SKILL.md");
+  ok(impl.includes("one batch of parallel reads, not one file per turn"), "implement bootup requires batched reads");
+  ok(/next up:.*pointer names it/.test(impl), "implement trusts the snapshot next-up pointer");
+  ok(/no snapshot → grep `Status:`/.test(impl), "implement falls back to grepping statuses, not full card reads");
+  ok(impl.includes("Never read sibling issue cards in full"), "implement forbids full sibling card reads");
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("**Shared briefing:**"), "verify codifies the shared checker briefing");
+  ok(/scratch file outside the repo worktree/.test(verify), "briefing scratch lives outside the worktree");
+  ok(verify.includes("The wait is work time."), "verify turns the checker wait into work time");
+  ok(/pre-assemble the digest frame/.test(verify), "verify pre-assembles the digest during the wait");
 }
 
 console.log("✔ All hook and adapter tests passed");
