@@ -42,6 +42,7 @@ if (!version) {
 }
 
 let failed = false;
+let previousVersion = null;
 for (const [file, pattern] of CARRIERS) {
   const path = resolve(ROOT, file);
   const content = readFileSync(path, "utf8");
@@ -52,6 +53,7 @@ for (const [file, pattern] of CARRIERS) {
     failed = true;
     continue;
   }
+  if (file === "CHANGELOG.md") previousVersion = m[1];
   const updated = content.replace(re, m[0].replace(m[1], version));
   const line = `${m[1]} -> ${version}  ${file}`;
   if (dry) {
@@ -67,6 +69,24 @@ for (const [file, pattern] of CARRIERS) {
 if (failed) {
   process.stderr.write("carrier drifted from its pattern — fix the list above\n");
   process.exit(1);
+}
+
+// The doc-consistency canary also wants a [x.y.z] compare link per release
+// heading — insert it under [Unreleased] if missing (v0.16.1 shipped without).
+{
+  const path = resolve(ROOT, "CHANGELOG.md");
+  const content = readFileSync(path, "utf8");
+  const hasLink = content.includes(`\n[${version}]: `);
+  if (!hasLink && previousVersion && previousVersion !== version) {
+    const unreleased = new RegExp(`(\\[Unreleased\\]: [^\\n]+\\n)`);
+    const link = `[${version}]: https://github.com/zuevrs/loom/compare/v${previousVersion}...v${version}\n`;
+    if (dry) {
+      process.stdout.write(`would insert: [${version}] compare link\n`);
+    } else {
+      writeFileSync(path, content.replace(unreleased, `$1${link}`));
+      process.stdout.write(`inserted: [${version}] compare link\n`);
+    }
+  }
 }
 if (!dry) {
   process.stdout.write("done — now run: bash scripts/check-drift && bash scripts/smoke\n");
