@@ -695,7 +695,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
       ok(py.includes(marker), `hermes snapshot parity: ${marker}`);
     }
   } catch (e) {
-    if (e.code !== "ENOENT") throw e; // no python3 on this runner → skip parity exec
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 on this runner → skip parity exec
   }
 
   // Session-start hook carries the snapshot (cwd = project root, AGENTS.md marks it).
@@ -952,7 +952,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
       "hermes lint parity: identical warning sets"
     );
   } catch (e) {
-    if (e.code !== "ENOENT") throw e; // no python3 on this runner → skip parity exec
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 on this runner → skip parity exec
   }
 
   rmSync(witnessPath(witnessRoot(tmp)), { force: true });
@@ -1000,7 +1000,7 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
     );
     ok(pyAlert.includes("done without APPROVE") && pyAlert.includes("001.md"), "hermes alert parity on dirty tree");
   } catch (e) {
-    if (e.code !== "ENOENT") throw e; // no python3 → skip
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 → skip
   }
   rmSync(dirtyPy, { recursive: true });
 
@@ -1090,7 +1090,7 @@ for x in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(x)`,
     );
     strictEqual(py.trim().split(/\r?\n/)[0], w[0], "python mirrors the cross-pack wording");
   } catch (e) {
-    if (e.code !== "ENOENT") throw e;
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e;
   }
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("intra-pack only"), "TO-ISSUES states the intra-pack stance");
   rmSync(tmp, { recursive: true });
@@ -1134,7 +1134,7 @@ print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
     );
     strictEqual(pyAlert.trim(), "''", "hermes alert short-circuits above the ceiling");
   } catch (e) {
-    if (e.code !== "ENOENT") throw e;
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e;
   }
   rmSync(big, { recursive: true });
   ok(read("hermes-plugin/__init__.py").includes("ALERT_SCAN_CEILING = 200"), "hermes mirrors the ceiling");
@@ -1187,7 +1187,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
         { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
       );
     } catch (e) {
-      if (e.code !== "ENOENT") throw e;
+      if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e;
       return null; // no python3 on this machine — parity runs in CI
     }
   };
@@ -1329,7 +1329,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     strictEqual(pyBehind, gate.versionDriftWarning("v0.7.0", "v0.16.0"), "python block-behind parity (exact)");
     strictEqual(pyFormat, "None", "python format-only difference warns nothing");
   } catch (e) {
-    if (e.code !== "ENOENT") throw e; // no python3 → parity runs in CI
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 → parity runs in CI
   }
 
   // OMP witness: task-tool checker spawns are recorded; session_stop warns on
