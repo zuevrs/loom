@@ -4,6 +4,26 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-07-03
+
+Session resumability: a session killed mid-implement changes no status and files no report — until now the only recovery was manual archaeology. The snapshot becomes a resume point.
+
+### Added
+
+- **Next-up pointer** — each pack line in the session-start snapshot ends with `— next up: <issue>`: the lowest-numbered unblocked `ready-for-agent` issue (blockers must be `done`; `wontfix` does not unblock, same rule as `loom-implement` step 1). The dual of the v0.14.1 session handoff — the handoff names the next issue at session END, the snapshot names it at session START, so a fresh or crashed-and-restarted session knows exactly where to pick up
+- **Rework-pending flag** — issues whose last `## Verify` verdict is REJECT (and status isn't done/wontfix) surface as `rework pending (last verdict REJECT): … — read its ## Verify before re-implementing`; an APPROVE in a later Verify section clears it. No more picking up a rejected issue as if it were untouched
+- **Dirty-tree breadcrumb** — `working tree: N uncommitted change(s) — possibly interrupted work` via `git status --porcelain` (timeout-guarded, failure-silent: no git / not a repo / slow repo → no line, never a broken session start)
+
+All three in both mirrors (Node hooks + Hermes plugin), executed JS↔Python parity on shared fixtures.
+
+### Changed
+
+- **Log as you go** (`loom-implement` step 12) — `## Log` bullets are appended at the moment a decision, deviation, or open question happens, not composed at the end; a crash leaves the trace in the issue file instead of in the lost context. Step 12 becomes re-read-and-trim; the issue template comment carries the same contract
+
+### Migration
+
+Nothing to do — run `loom-init` when the session-start warning appears to refresh the managed block version.
+
 ## [0.14.2] - 2026-07-03
 
 Seam sweep: five small holes left after the v0.14.0/v0.14.1 rounds — a state-machine ambiguity, a release-chore bug class, a hot-path ceiling, and two hygiene lines.
@@ -567,7 +587,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/zuevrs/loom/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/zuevrs/loom/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/zuevrs/loom/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/zuevrs/loom/compare/v0.13.0...v0.14.0
