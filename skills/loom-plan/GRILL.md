@@ -35,7 +35,7 @@ The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.
 - **Invent edge-case scenarios.** Stress-test domain relationships with concrete scenarios that force the user to be precise about boundaries.
 - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
 - **Write `CONTEXT.md` inline, automatically.** The moment a term is resolved, update the glossary **before asking the next question** — never batch writes at the exit gate. Glossary only, zero implementation detail. ([CONTEXT-FORMAT.md](CONTEXT-FORMAT.md))
-- **Offer an ADR** (ask — never write silently) only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Any missing → skip. ([ADR-FORMAT.md](ADR-FORMAT.md))
+- **Offer an ADR** (ask — never write silently) only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Any missing → skip. Name the real target path (`docs/adr/NNNN-slug.md`) in the offer — don't improvise a location. ([ADR-FORMAT.md](ADR-FORMAT.md))
 - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately. Drafting in English and rewriting later is a defect, not a workflow.
 
 ## The cadence, worked

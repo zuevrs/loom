@@ -1276,4 +1276,12 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(verify.includes("the general contract applies unchanged"), "OMP workflow defers to the general contract");
 }
 
+// v0.16.1 — field-run fixes: citations survive to the write point, ADR offers name the real path
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  ok(read("skills/loom-plan/ADR-FORMAT.md").includes("carry their source links"), "ADR-FORMAT requires source links on research-shaped decisions");
+  ok(read("skills/loom-plan/TO-PRD.md").includes("research-shaped decisions keep their source links"), "TO-PRD restates the citation rule at the write point");
+  ok(read("skills/loom-plan/GRILL.md").includes("Name the real target path (`docs/adr/NNNN-slug.md`)"), "GRILL ADR offer names docs/adr/ path");
+}
+
 console.log("✔ All hook and adapter tests passed");

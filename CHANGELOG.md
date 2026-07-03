@@ -4,6 +4,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-07-03
+
+First field run (a real `loom-init` → `loom-plan` session on a user project) audited end-to-end: 18 single-question asks, inline `CONTEXT.md` writes between questions, both ADRs offered on the 3-part test, research before the stack recommendation, a 6-entry assumptions ledger, and a tracer-bullet first slice. Two leaks found and fixed — both are rules that lived in the grill phase but were violated at the write point.
+
+### Fixed
+
+- **Citations now survive to the write point** — the field run did real web research, then wrote an ADR saying "confirmed by independent sources" with no URL. The citation rule (owned by `GRILL.md` research discipline) is now restated where the writes happen: `ADR-FORMAT.md` names the venues (`## Why` / `## Notes`), `TO-PRD.md` requires research-shaped Implementation Decisions to keep their links
+- **ADR offers name the real path** — the field run's offer text promised `.loom/<slug>/ADRs` while the write correctly landed in `docs/adr/`; the `GRILL.md` offer bullet now requires naming the actual target path (`docs/adr/NNNN-slug.md`)
+
+### Migration
+
+Nothing to do.
+
 ## [0.16.0] - 2026-07-03
 
 Prose quality round: the enforcement mechanics are strong; the prose is what steers the model, and models imitate examples far better than they follow rules. Loom's skills carried zero worked examples until now.
@@ -621,7 +634,7 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.1...HEAD
 [0.16.0]: https://github.com/zuevrs/loom/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/zuevrs/loom/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/zuevrs/loom/compare/v0.14.2...v0.15.0

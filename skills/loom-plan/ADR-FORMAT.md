@@ -21,6 +21,8 @@ Accepted | Superseded by ADR-NNNN | Amended by ADR-NNNN
 - {Amendments, links to related ADRs, future considerations.}
 ```
 
+Research-shaped decisions carry their source links in `## Why` or `## Notes` ([GRILL.md](GRILL.md) research discipline).
+
 Offer an ADR only when **all three** hold:
 1. Hard to reverse — cost of changing your mind later is meaningful
 2. Surprising without context — a future reader will wonder why
