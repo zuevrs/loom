@@ -1013,4 +1013,50 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   ok(read("hermes-plugin/__init__.py").includes("_lint_warnings"), "hermes mirrors the linter");
 }
 
+// v0.14.1 — flow seams: small-fix lane, handoff, two strikes, amendment route, pack archive
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  const impl = read("skills/loom-implement/SKILL.md");
+  ok(impl.includes("## Direct small-fix (no issue file)"), "implement defines the no-issue lane");
+  ok(impl.includes("chat** (attended) or the **PR description"), "small-fix Log/verdict live in chat or PR");
+  ok(impl.includes("Close the session"), "implement ends with the handoff step");
+  ok(impl.includes("Do not start the next issue in this session"), "handoff forbids same-session continuation");
+  ok(impl.includes("Second REJECT from verify with overlapping blockers"), "implement knows the two-strikes stop");
+  ok(impl.includes("amendment route"), "wrong-PRD failure mode points at the amendment route");
+
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("**No issue file**"), "verify defines the no-issue digest deliverable");
+  ok(verify.includes("Two strikes rule"), "verify carries the attended stagnation mirror");
+  ok(verify.includes("loom-plan` § Route scope"), "two-strikes fork names the amendment path");
+
+  const plan = read("skills/loom-plan/SKILL.md");
+  ok(plan.includes("**Amendment**"), "plan has the amendment route");
+  ok(plan.includes("Grill ONLY the delta"), "amendment grills the delta, not the world");
+  ok(plan.includes("## Amendments` section"), "PRD edits leave a dated amendment trail");
+  ok(plan.includes("Re-quiz ONLY the slices the change touches"), "amendment re-quizzes only affected slices");
+  ok(plan.includes("Amendment balloons into new scope"), "ballooning amendment routes to the full ritual");
+
+  ok(read("skills/loom-plan/TO-ISSUES.md").includes("riskiest seam"), "first slice crosses the riskiest seam");
+
+  const tend = read("skills/loom-tend/SKILL.md");
+  ok(tend.includes("Completed packs"), "tend offers pack archiving");
+  ok(tend.includes(".loom/archive/<pack>/"), "archive path named");
+
+  // Behavioral guarantee the tend step relies on: archived packs are invisible
+  // to gate, snapshot, and lint (both scan .loom/*/issues/, one level deep).
+  const { findUnverifiedDoneIssues, stateSnapshot, lintWarnings } = requireCjs(
+    resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
+  );
+  const tmp = mkdtempSync(join(tmpdir(), "loom-archive-"));
+  const arch = join(tmp, ".loom", "archive", "old-pack", "issues");
+  mkdirSync(arch, { recursive: true });
+  writeFileSync(join(arch, "001.md"), "# A\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(arch, "002.md"), "# B\n\n## Status\n\nStatus: typo-status\n");
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 0, "archived done-without-APPROVE never blocks");
+  strictEqual(stateSnapshot(tmp), null, "archived packs stay out of the snapshot");
+  strictEqual(lintWarnings(tmp).length, 0, "archived packs stay out of the lint");
+  rmSync(tmp, { recursive: true });
+}
+
 console.log("✔ All hook and adapter tests passed");

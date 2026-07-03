@@ -30,6 +30,10 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 - `loom-verify` stays mandatory before the PR. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
 - Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — write the status and the question into the issue file, then open a **draft PR** with whatever exists and the blocker named in the description. Silent death is the only forbidden exit.
 
+## Direct small-fix (no issue file)
+
+The router sends small single-session fixes here without a PRD or issue file. The whole process applies **except the file writes have nowhere to go**: `## Log` (step 12) and the verify verdict live in the **chat** (attended) or the **PR description** (unattended) instead of an issue file. Steps that read the issue file read the **user's fix request** instead — it is the spec source for step 1 (nothing to unblock), step 3 (ask the user directly; there is no PRD to consult), and step 11's verification evidence. Step 14's handoff has no pack to point at — skip it. The stop gate has nothing to check — there is no `Status: done` to guard — but the discipline is unchanged: no verify digest → don't declare the fix complete. If the "small fix" grows past one session or sprouts questions only Plan can answer, stop and route to `loom-plan` — that's no longer a small fix.
+
 ## Outputs
 
 - Code/doc changes scoped to the issue
@@ -53,6 +57,7 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 11. Run issue verification commands; capture output in issue comment.
 12. Write `## Log` into the issue file (before `## Status`) — 3–5 bullets: key decisions, deviations from the issue as written, open questions. This is the maker's claim; the checker compares it against the actual diff, and the next session inherits it instead of re-deriving intent.
 13. Run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). Verify writes its verdict into the issue's `## Verify` section — the APPROVE line there is the enforcement signal.
+14. **Close the session.** After `done`, end your report with the handoff line: name the next lowest-numbered unblocked `ready-for-agent` issue (or "pack complete — consider `loom-tend`") and recommend a **fresh session** for it. Do not start the next issue in this session — the fresh-session contract is per issue, and it dies silently the moment you keep going.
 
 ## Discipline ladder
 
@@ -90,7 +95,8 @@ Before writing code, stop at the **first rung that holds**:
 | User asks to skip verify | Refuse; document host limitation if truly blocked |
 | Scope creep mid-issue | Write a stub issue — `Status: needs-triage`, three lines (what surfaced, why out of scope, parent issue), no planning — and stay on one slice |
 | Question only the user can answer, mid-issue | Set the issue `Status: needs-info`, write the question into the issue file, stop |
-| Issue/PRD is wrong, not just underspecified (acceptance criteria contradict reality) | Stop; set `needs-info` naming the contradiction. The fix is a Plan re-entry — PRD amended, dependent issues re-checked — never a silent workaround |
+| Issue/PRD is wrong, not just underspecified (acceptance criteria contradict reality) | Stop; set `needs-info` naming the contradiction. The fix is a Plan re-entry via the **amendment route** (`loom-plan` § Route scope) — never a silent workaround |
+| Second REJECT from verify with overlapping blockers | Stop the loop (two strikes rule, see `loom-verify`); user picks: amend the plan, accept `loom:` debt, or drop |
 
 ## Anti-rationalization
 
@@ -101,6 +107,7 @@ Before writing code, stop at the **first rung that holds**:
 | "Skip verify for tiny change" | Verify runs on every implement completion — no yield without digest |
 | "Tests pass, we're done" | Tests ≠ verify; maker/checker split is mandatory |
 | "I'll batch commits/issues" | One issue, one slice, one verify |
+| "Issue's done, I'll just pick up the next one here" | Fresh session per issue. Hand off with the next-issue line and stop |
 | "Batch run — I'll chain all issues in my context" | Spawn a fresh sub-agent per issue; chain only if the host can't spawn sub-agents |
 | "This abstraction will help later" | No abstractions nobody asked for |
 | "The issue doesn't say — I'll pick something sensible" | Load-bearing gap: PRD first, then ask or `needs-info`. Silent invention is the failure mode |
@@ -110,6 +117,7 @@ Before writing code, stop at the **first rung that holds**:
 
 - Issue verification commands pass
 - Runnable check exists and passes
-- `## Log` written into the issue file (decisions, deviations, open questions)
+- `## Log` written into the issue file (decisions, deviations, open questions) — chat/PR for a direct small-fix
 - **`loom-verify` digest produced** with Verdict + Sub-agent evidence (or documented host limitation)
-- Issue not marked `Status: done` until verify APPROVE
+- Issue not marked `Status: done` until verify APPROVE — for a direct small-fix, completion = the digest in chat/PR (no status to set)
+- Handoff line delivered: next unblocked issue named, fresh session recommended (issue-pack work only)

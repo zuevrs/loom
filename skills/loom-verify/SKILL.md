@@ -20,6 +20,8 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 
 Structured digest (below), persisted into the issue's `## Verify` section on **every** verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop; the written REJECT line is what the next fresh session inherits.
 
+**No issue file** (direct small-fix, ad-hoc diff review): the digest is the deliverable — chat when attended, PR description when unattended. Nothing to write back, no status to set; every other rule (two checkers, evidence, hard stops) applies unchanged.
+
 ## Process
 
 1. Pin fixed point; confirm diff is non-empty.
@@ -61,6 +63,8 @@ APPROVE | REJECT | ESCALATE_HUMAN
 ```
 
 Status effects: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change.
+
+**Two strikes rule** (attended mirror of the unattended stagnation rule): a second REJECT on the same issue whose blockers overlap the first is a stop signal, not a third lap — re-implementing against an unchanged misunderstanding spends checkers to stand still. Present the user the fork explicitly: Plan re-entry (amend the PRD/issue — see `loom-plan` § Route scope), accept the finding as explicit `loom:` debt, or drop the issue. The `## Verify` section already holds both REJECT lines as evidence.
 
 **ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. Delivery: attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue plus a **draft PR** whose description leads with the escalation (see loom-implement § Unattended mode). Issue status stays untouched.
 
@@ -131,4 +135,4 @@ For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), 
 - Both sub-agents ran in parallel (or documented host limitation with sequential fallback)
 - Digest has all required sections
 - Checks executed section lists commands with pass/fail
-- Verdict line written into the issue's `## Verify` section — every attempt, REJECT included (the gate requires an APPROVE line for `done`)
+- Verdict line written into the issue's `## Verify` section — every attempt, REJECT included (the gate requires an APPROVE line for `done`); no issue file → the digest delivered in chat/PR satisfies the write-back

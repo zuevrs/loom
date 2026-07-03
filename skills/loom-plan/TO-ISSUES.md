@@ -8,6 +8,7 @@ Break the PRD into **tracer-bullet** issues. Each issue is a thin vertical slice
 
 - Each slice delivers a narrow but COMPLETE path through every layer and is demoable/verifiable on its own.
 - Any prefactoring goes first — "make the change easy, then make the easy change."
+- **First real slice crosses the riskiest seam** — the integration the PRD's Seams section trusts least (new external API, unproven boundary). If the architecture is going to fail, learn it in slice 1, not slice 5.
 
 ## Quiz the user
 
