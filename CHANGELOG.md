@@ -4,6 +4,26 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-07-03
+
+Enforcement grill: three mechanical upgrades that close real holes — silent `.loom` corruption, forgeable APPROVE lines, and discipline dying at context compaction.
+
+### Added
+
+- **`.loom` linter** (`hooks/stop-gate-logic.cjs`) — deterministic lint over every issue pack: unknown `Status:` values (a typo like `redy-for-agent` silently hides an issue from every scan), missing Status lines, dangling `Blocked by` references, blocker cycles, and `done` issues whose blockers aren't done. Warn-only by design — the only blocking condition remains done-without-APPROVE. Warnings surface in the session-start snapshot (capped at 5 + overflow pointer), the pre-turn alert, CI gate stderr, and the new explicit mode: `node stop-gate-logic.cjs --lint <root>` (always exit 0). Python mirror in the Hermes plugin, pinned by an executed JS↔Python parity test on identical fixtures
+- **Verify witness** — the one lie the gate couldn't catch was an APPROVE line written without ever spawning checkers. Now the sub-agent spawn hooks (Claude Code / Codex / Cursor) and the OMP extension (headless `LOOM_ROLE=…-checker` runs) record every checker spawn to a TTL-24h marker in the OS temp dir (keyed by realpath'd repo root — never written into the repo). The Stop gate warns when an issue was approved recently (file mtime inside the window) with no witnessed checker run; `LOOM_WITNESS=strict` upgrades to a block, `LOOM_WITNESS=off` disables. CI never witness-checks (`CI` env or `--ci` flag) — a fresh runner has no markers by definition. OMP `session_stop` deliberately skips the witness check: in-session `task` spawns don't pass through Loom hooks and would false-warn
+- **Dynamic pre-turn anomaly alert** — session-start injections die at compaction; the per-turn channel now carries a `# Loom alert` block **only when something is wrong** (done-without-APPROVE pending, `needs-info` awaiting answers, lint warnings) and stays byte-for-byte identical when clean. Wired in all three per-turn surfaces: `loom-pre-llm.cjs` (Claude/Codex/Cursor), OMP `before_agent_start`, Hermes `pre_llm_call` (Python mirror, executed parity test)
+
+### Changed
+
+- `loom-verify` documents the witness contract ("The APPROVE is witnessed") — writing the APPROVE line without spawning checkers is now visible
+- `loom-tend` stale-issue sweep starts with the linter instead of eyes-only `rg`
+- README: new "The `.loom` linter" and "The verify witness" sections; hooks table reflects the snapshot/alert/witness duties
+
+### Migration
+
+Nothing to do. New checks are warn-only by default; opt into hard enforcement with `LOOM_WITNESS=strict`. Managed block version bumps — run `loom-init` when the session-start warning appears.
+
 ## [0.13.0] - 2026-07-03
 
 Recipes learn the attended lane, tend learns to graduate audits into recipes, and the checker manifests get a drift canary.
@@ -511,7 +531,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/zuevrs/loom/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/zuevrs/loom/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/zuevrs/loom/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/zuevrs/loom/compare/v0.11.0...v0.12.0
