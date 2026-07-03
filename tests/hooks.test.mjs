@@ -772,4 +772,244 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(unattended.includes("timeout-minutes"), "runaway protection names native knobs per transport");
 }
 
+// v0.14.0 — .loom linter, verify witness, dynamic pre-LLM alert
+{
+  const { spawnSync } = await import("node:child_process");
+  const gate = resolve(hooksDir, "stop-gate-logic.cjs");
+  const {
+    lintWarnings,
+    unwitnessedApproved,
+    recordWitness,
+    witnessRoot,
+    witnessPath,
+  } = requireCjs(gate);
+
+  // --- Linter: every corruption class fires exactly as designed ---
+  const tmp = mkdtempSync(join(tmpdir(), "loom-v014-"));
+  const dir = join(tmp, ".loom", "auth", "issues");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "001-db.md"), "# A\n\n## Blocked by\n\n- None\n\n## Status\n\nStatus: redy-for-agent\n");
+  writeFileSync(join(dir, "002-api.md"), "# B\n\n## Blocked by\n\n- 007\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "003-ui.md"), "# C\n\n## Blocked by\n\n- 004\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "004-x.md"), "# D\n\n## Blocked by\n\n- 003-ui\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "005-y.md"), "# E\n\n## Blocked by\n\n- [db](001-db.md)\n\n## Verify\n\nAPPROVE — ok\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dir, "006-z.md"), "# F\n");
+
+  const warnings = lintWarnings(tmp);
+  ok(warnings.some((w) => w.includes('unknown Status "redy-for-agent"')), "lint catches status typo");
+  ok(warnings.some((w) => w.includes('"007" matches no issue')), "lint catches dangling blocker");
+  ok(warnings.some((w) => w.includes("blocker cycle 003-ui → 004-x → 003-ui")), "lint catches blocker cycle");
+  ok(warnings.some((w) => w.includes('done while blocker "001-db" is not done')), "lint catches done-with-undone-blocker");
+  ok(warnings.some((w) => w.includes("006-z.md: no Status line")), "lint catches missing status");
+  strictEqual(warnings.length, 5, "lint fires once per finding, no noise");
+
+  // Template's "- None" is not a blocker; clean pack lints clean.
+  const clean = mkdtempSync(join(tmpdir(), "loom-v014-clean-"));
+  const cleanDir = join(clean, ".loom", "a", "issues");
+  mkdirSync(cleanDir, { recursive: true });
+  writeFileSync(join(cleanDir, "001.md"), "# A\n\n## Blocked by\n\n- None\n\n## Status\n\nStatus: ready-for-agent\n");
+  strictEqual(lintWarnings(clean).length, 0, "clean pack has zero lint warnings");
+
+  // Snapshot carries lint lines (and so do session-start/OMP/Hermes, which embed it).
+  const { stateSnapshot } = requireCjs(gate);
+  ok(stateSnapshot(tmp).includes("lint: "), "state snapshot embeds lint warnings");
+  ok(!stateSnapshot(clean).includes("lint: "), "clean snapshot carries no lint lines");
+
+  // --lint CLI: prints warnings, always exit 0 (warn-only by design).
+  const lintRun = spawnSync(process.execPath, [gate, "--lint", tmp], { encoding: "utf8" });
+  strictEqual(lintRun.status, 0, "--lint exits 0");
+  ok(lintRun.stdout.includes("5 warning(s)"), "--lint prints the warning count");
+
+  // Gate CLI: lint on stderr never changes the exit code.
+  const gateRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "1" },
+  });
+  strictEqual(gateRun.status, 0, "lint warnings do not block the gate");
+  ok(gateRun.stderr.includes("LINT: "), "gate surfaces lint on stderr");
+
+  // --- Witness: unwitnessed fresh APPROVE warns; strict blocks; witness clears; CI skips ---
+  ok(
+    unwitnessedApproved(tmp).some((p) => p.endsWith("005-y.md")),
+    "fresh APPROVE with no witness is flagged"
+  );
+
+  const warnRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "" },
+  });
+  strictEqual(warnRun.status, 0, "witness default is warn, not block");
+  ok(warnRun.stderr.includes("WITNESS: "), "witness warning names the gap");
+
+  const strictRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "", LOOM_WITNESS: "strict" },
+  });
+  strictEqual(strictRun.status, 1, "LOOM_WITNESS=strict blocks");
+
+  const ciRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "1", LOOM_WITNESS: "strict" },
+  });
+  strictEqual(ciRun.status, 0, "CI runners never witness-check");
+  ok(!ciRun.stderr.includes("WITNESS"), "no witness noise in CI stderr");
+
+  const ciFlagRun = spawnSync(process.execPath, [gate, "--ci", tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "", LOOM_WITNESS: "strict" },
+  });
+  strictEqual(ciFlagRun.status, 0, "--ci flag disables the witness check without CI env");
+  ok(!ciFlagRun.stderr.includes("WITNESS"), "--ci run has no witness noise");
+
+  const offRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "", LOOM_WITNESS: "off" },
+  });
+  strictEqual(offRun.status, 0, "LOOM_WITNESS=off disables the check");
+  ok(!offRun.stderr.includes("WITNESS"), "off mode has no witness noise");
+
+  // Spawning a checker sub-agent through the hook records the witness…
+  execFileSync(process.execPath, [resolve(hooksDir, "loom-subagent.cjs")], {
+    input: JSON.stringify({ loomRole: "spec-checker" }),
+    encoding: "utf8",
+    cwd: tmp,
+    timeout: 5000,
+  });
+  strictEqual(unwitnessedApproved(tmp).length, 0, "witnessed checker spawn clears the warning");
+  const afterRun = spawnSync(process.execPath, [gate, tmp], {
+    encoding: "utf8",
+    env: { ...process.env, CI: "", LOOM_WITNESS: "strict" },
+  });
+  strictEqual(afterRun.status, 0, "strict gate passes once a checker was witnessed");
+
+  // …and the Cursor spawn hook records it too (fresh root so the marker is its own).
+  const cursorTmp = mkdtempSync(join(tmpdir(), "loom-v014-cursor-"));
+  mkdirSync(join(cursorTmp, ".loom"), { recursive: true });
+  execFileSync(process.execPath, [resolve(hooksDir, "loom-subagent-cursor.cjs")], {
+    input: JSON.stringify({ loomRole: "standards-checker" }),
+    encoding: "utf8",
+    cwd: cursorTmp,
+    timeout: 5000,
+  });
+  const { hasFreshWitness } = requireCjs(gate);
+  ok(hasFreshWitness(witnessRoot(cursorTmp)), "cursor spawn hook records the witness");
+  rmSync(witnessPath(witnessRoot(cursorTmp)), { force: true });
+  rmSync(cursorTmp, { recursive: true });
+
+  // Maker spawns must NOT count as verify witnesses.
+  const makerTmp = mkdtempSync(join(tmpdir(), "loom-v014-maker-"));
+  mkdirSync(join(makerTmp, ".loom"), { recursive: true });
+  execFileSync(process.execPath, [resolve(hooksDir, "loom-subagent.cjs")], {
+    input: JSON.stringify({ loomRole: "maker" }),
+    encoding: "utf8",
+    cwd: makerTmp,
+    timeout: 5000,
+  });
+  ok(!hasFreshWitness(witnessRoot(makerTmp)), "maker spawn is not a verify witness");
+  rmSync(makerTmp, { recursive: true });
+
+  // --- Dynamic pre-LLM: silent when clean, alerting when dirty ---
+  const preLlm = resolve(hooksDir, "loom-pre-llm.cjs");
+  const cleanOut = execFileSync(process.execPath, [preLlm], {
+    cwd: clean,
+    encoding: "utf8",
+    timeout: 5000,
+  });
+  ok(!cleanOut.includes("Loom alert"), "pre-LLM stays silent on a clean project");
+  ok(cleanOut.includes("Loom invariants"), "static invariants still present");
+
+  writeFileSync(join(cleanDir, "002.md"), "# B\n\n## Status\n\nStatus: needs-info\n");
+  writeFileSync(join(cleanDir, "003.md"), "# C\n\n## Status\n\nStatus: done\n");
+  const dirtyOut = execFileSync(process.execPath, [preLlm], {
+    cwd: clean,
+    encoding: "utf8",
+    timeout: 5000,
+  });
+  ok(dirtyOut.includes("# Loom alert"), "pre-LLM raises the alert block when dirty");
+  ok(dirtyOut.includes("done without APPROVE") && dirtyOut.includes("003.md"), "alert pre-warns the stop gate");
+  ok(dirtyOut.includes("needs-info awaiting answers") && dirtyOut.includes("002.md"), "alert surfaces needs-info");
+
+  // --- Hermes Python mirror: identical lint warnings for the same tree ---
+  try {
+    const py = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        tmp,
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    const pyWarnings = py.trim().split("\n").sort();
+    const nodeWarnings = warnings.slice().sort();
+    strictEqual(
+      JSON.stringify(pyWarnings),
+      JSON.stringify(nodeWarnings),
+      "hermes lint parity: identical warning sets"
+    );
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e; // no python3 on this runner → skip parity exec
+  }
+
+  rmSync(witnessPath(witnessRoot(tmp)), { force: true });
+  rmSync(tmp, { recursive: true });
+  rmSync(clean, { recursive: true });
+
+  // --- Snapshot caps lint noise at 5 lines + pointer to --lint ---
+  const noisy = mkdtempSync(join(tmpdir(), "loom-v014-noisy-"));
+  const noisyDir = join(noisy, ".loom", "n", "issues");
+  mkdirSync(noisyDir, { recursive: true });
+  for (let i = 1; i <= 7; i++) {
+    writeFileSync(join(noisyDir, `00${i}.md`), `# I${i}\n\n## Status\n\nStatus: typo-${i}\n`);
+  }
+  const noisySnap = stateSnapshot(noisy);
+  strictEqual(
+    (noisySnap.match(/^lint: /gm) || []).length,
+    6,
+    "snapshot caps lint at 5 warnings + overflow pointer"
+  );
+  ok(noisySnap.includes("+2 more"), "overflow line counts the rest");
+  rmSync(noisy, { recursive: true });
+
+  // --- Anomaly alert reaches OMP and Hermes per-turn channels too ---
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  ok(read("omp-extension.mjs").includes("anomalyAlert"), "OMP before_agent_start carries the anomaly alert");
+  ok(read("hermes-plugin/__init__.py").includes("_anomaly_alert"), "hermes pre_llm_call carries the anomaly alert");
+
+  // Hermes alert mirror: executed parity on a dirty tree (same fixture shape as pre-LLM test).
+  const dirtyPy = mkdtempSync(join(tmpdir(), "loom-v014-pyalert-"));
+  const dirtyPyDir = join(dirtyPy, ".loom", "a", "issues");
+  mkdirSync(dirtyPyDir, { recursive: true });
+  writeFileSync(join(dirtyPyDir, "001.md"), "# A\n\n## Status\n\nStatus: done\n");
+  try {
+    const pyAlert = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        dirtyPy,
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    ok(pyAlert.includes("done without APPROVE") && pyAlert.includes("001.md"), "hermes alert parity on dirty tree");
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e; // no python3 → skip
+  }
+  rmSync(dirtyPy, { recursive: true });
+
+  // --- Docs and skills carry the new mechanics ---
+  ok(read("README.md").includes("The `.loom` linter"), "README documents the linter");
+  ok(read("README.md").includes("The verify witness"), "README documents the witness");
+  ok(read("skills/loom-verify/SKILL.md").includes("The APPROVE is witnessed"), "verify skill states the witness contract");
+  ok(read("skills/loom-tend/SKILL.md").includes("--lint"), "tend starts stale-issue sweep with the linter");
+  ok(read("docs/unattended.md").includes("verify-witness check automatically when `CI` is set"), "unattended doc explains CI witness skip");
+  ok(read("hermes-plugin/__init__.py").includes("_lint_warnings"), "hermes mirrors the linter");
+}
+
 console.log("✔ All hook and adapter tests passed");

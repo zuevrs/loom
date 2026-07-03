@@ -1,8 +1,18 @@
 // loom: verify-before-done gate — invoked directly as the Stop hook (node) and by OMP session_stop
+// Also: .loom linter (warn-only) and verify witness (warn-first, LOOM_WITNESS=strict to block).
 "use strict";
 
-const { existsSync, readdirSync, readFileSync } = require("node:fs");
-const { join, basename } = require("node:path");
+const {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+  statSync,
+  realpathSync,
+} = require("node:fs");
+const { join, basename, resolve, dirname } = require("node:path");
+const { tmpdir } = require("node:os");
+const { createHash } = require("node:crypto");
 
 /** @returns {Record<string, string[]>} pack name → issue paths */
 function collectIssuesByPack(loomDir) {
@@ -43,6 +53,212 @@ function issueStatus(content) {
   const text = content.replace(/<!--[\s\S]*?-->/g, "");
   const m = text.match(/^Status:\s*(\S+)/m);
   return m ? m[1] : "unknown";
+}
+
+// ---------------------------------------------------------------------------
+// .loom linter — warn-only. Catches silent state-machine corruption: a typo'd
+// status hides an issue from every scan; a dangling blocker never unblocks.
+// ---------------------------------------------------------------------------
+
+const STATUS_VOCAB = new Set([
+  "needs-triage",
+  "needs-info",
+  "ready-for-agent",
+  "ready-for-human",
+  "done",
+  "wontfix",
+]);
+
+const isDone = (text) => /^Status:\s*done\b/m.test(text); // gate rule: done anywhere
+
+/** @returns {string[]} blocker refs from the "## Blocked by" list ("None" excluded) */
+function blockedRefs(text) {
+  const section = text
+    .split(/^(?=## )/m)
+    .find((s) => /^## Blocked by\b/.test(s));
+  if (!section) return [];
+  const refs = [];
+  for (const line of section.split("\n")) {
+    const m = line.match(/^\s*[-*]\s+(.+?)\s*$/);
+    if (!m) continue;
+    // Markdown link → its target; otherwise the item text itself.
+    const link = m[1].match(/\]\(([^)]+)\)/);
+    const ref = (link ? link[1] : m[1]).replace(/\.md$/, "").trim();
+    if (ref && !/^none$/i.test(ref)) refs.push(ref);
+  }
+  return refs;
+}
+
+/** @returns {string[]} human-readable warnings for one project */
+function lintWarnings(root) {
+  const warnings = [];
+  const packs = collectIssuesByPack(join(root, ".loom"));
+
+  for (const [pack, unsorted] of Object.entries(packs)) {
+    // Sorted walk: readdir order is OS-dependent; cycle trails must be
+    // deterministic or the JS↔Python parity canary flakes.
+    const paths = unsorted.slice().sort();
+    const label = (p) =>
+      pack === "(root)"
+        ? basename(p)
+        : `${pack}/${basename(p)}`;
+
+    // ponytail: blocker refs match sibling files by name-prefix — covers
+    // "001", "001-slug", "001-slug.md" and links; ceiling is ref "001"
+    // matching a hypothetical "0010-…" sibling; upgrade path is exact-id refs.
+    const byName = {};
+    for (const p of paths) byName[basename(p).replace(/\.md$/, "")] = p;
+    const resolveRef = (ref) => {
+      if (byName[ref]) return byName[ref];
+      const hit = Object.keys(byName).find((n) => n.startsWith(ref + "-"));
+      return hit ? byName[hit] : null;
+    };
+
+    const graph = {}; // name → blocker names (resolved only)
+    for (const p of paths) {
+      const raw = readFileSync(p, "utf8");
+      const text = raw.replace(/<!--[\s\S]*?-->/g, "");
+      const name = basename(p).replace(/\.md$/, "");
+
+      const statusLines = [...text.matchAll(/^Status:\s*(\S+)/gm)];
+      if (statusLines.length === 0) {
+        warnings.push(`${label(p)}: no Status line`);
+      }
+      for (const [, s] of statusLines) {
+        if (!STATUS_VOCAB.has(s)) {
+          warnings.push(
+            `${label(p)}: unknown Status "${s}" — invisible to every scan`
+          );
+        }
+      }
+
+      graph[name] = [];
+      for (const ref of blockedRefs(text)) {
+        const target = resolveRef(ref);
+        if (!target) {
+          warnings.push(`${label(p)}: Blocked by "${ref}" matches no issue in pack`);
+          continue;
+        }
+        graph[name].push(basename(target).replace(/\.md$/, ""));
+        const targetText = readFileSync(target, "utf8").replace(
+          /<!--[\s\S]*?-->/g,
+          ""
+        );
+        if (isDone(text) && !isDone(targetText)) {
+          warnings.push(
+            `${label(p)}: done while blocker "${ref}" is not done`
+          );
+        }
+      }
+    }
+
+    // Cycle detection (DFS, three colors); each cycle reported once.
+    const color = {};
+    const walk = (node, trail) => {
+      color[node] = "gray";
+      for (const dep of graph[node] || []) {
+        if (color[dep] === "gray") {
+          const cycle = trail.slice(trail.indexOf(dep)).concat(dep);
+          warnings.push(`${pack}: blocker cycle ${cycle.join(" → ")}`);
+        } else if (!color[dep]) {
+          walk(dep, trail.concat(dep));
+        }
+      }
+      color[node] = "black";
+    };
+    for (const node of Object.keys(graph)) {
+      if (!color[node]) walk(node, [node]);
+    }
+  }
+  return warnings;
+}
+
+// ---------------------------------------------------------------------------
+// Verify witness — anti-fake-APPROVE. Subagent hooks record checker spawns;
+// the gate warns when a fresh done+APPROVE has no witnessed checker run.
+// Warn-first: LOOM_WITNESS=strict blocks, CI/LOOM_WITNESS=off skips.
+// ---------------------------------------------------------------------------
+
+const WITNESS_TTL_MS = 24 * 60 * 60 * 1000;
+
+/** Nearest ancestor with .loom/ (else AGENTS.md, else start) — shared key for hooks + gate. */
+function witnessRoot(start) {
+  let dir = resolve(start || process.cwd());
+  for (let i = 0; i < 20; i++) {
+    if (existsSync(join(dir, ".loom"))) return dir;
+    if (existsSync(join(dir, "AGENTS.md"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return resolve(start || process.cwd());
+}
+
+function witnessPath(root) {
+  // realpath: /var/folders vs /private/var/folders (macOS) must hash identically
+  let canonical;
+  try {
+    canonical = realpathSync(resolve(root));
+  } catch {
+    canonical = resolve(root);
+  }
+  const key = createHash("sha1").update(canonical).digest("hex").slice(0, 12);
+  return join(tmpdir(), `loom-witness-${key}.json`);
+}
+
+/** Append a checker-spawn record. Best-effort — callers never fail on witness errors. */
+function recordWitness(root, role) {
+  const file = witnessPath(root);
+  let entries = [];
+  try {
+    entries = JSON.parse(readFileSync(file, "utf8"));
+    if (!Array.isArray(entries)) entries = [];
+  } catch {
+    // first write or corrupt file — start fresh
+  }
+  const now = Date.now();
+  entries = entries.filter((e) => now - e.ts < WITNESS_TTL_MS);
+  entries.push({ role, ts: now });
+  writeFileSync(file, JSON.stringify(entries));
+}
+
+function hasFreshWitness(root) {
+  try {
+    const entries = JSON.parse(readFileSync(witnessPath(root), "utf8"));
+    const now = Date.now();
+    return entries.some(
+      (e) => /-checker$/.test(e.role) && now - e.ts < WITNESS_TTL_MS
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** @returns {string[]} freshly-approved issue paths with no witnessed checker spawn */
+// loom: witness granularity is per-repo, not per-issue — one checker spawn vouches
+// for every approval inside the TTL window; upgrade path is issue-ids in the marker.
+// loom: mtime is the freshness proxy — a rebase/checkout can touch mtime and cause
+// a one-off false warn (warn-only by default for exactly this reason); upgrade path
+// is git-aware freshness (commit date of the APPROVE line).
+function unwitnessedApproved(root) {
+  root = witnessRoot(root); // same key the subagent hooks record under
+  if (hasFreshWitness(root)) return [];
+  const now = Date.now();
+  const fresh = [];
+  for (const p of collectIssuePaths(join(root, ".loom"))) {
+    const content = readFileSync(p, "utf8");
+    // Approved-done issues only — the done-without-APPROVE case is the main gate's job.
+    if (!isDone(content.replace(/<!--[\s\S]*?-->/g, ""))) continue;
+    if (isDoneWithoutVerify(content)) continue;
+    let mtime;
+    try {
+      mtime = statSync(p).mtimeMs;
+    } catch {
+      continue;
+    }
+    if (now - mtime < WITNESS_TTL_MS) fresh.push(p);
+  }
+  return fresh;
 }
 
 const listNames = (paths) =>
@@ -98,8 +314,27 @@ function stateSnapshot(root) {
     }
   }
 
+  const lint = lintWarnings(root);
+  for (const w of lint.slice(0, 5)) {
+    lines.push(`lint: ${w}`);
+  }
+  if (lint.length > 5) {
+    lines.push(
+      `lint: +${lint.length - 5} more — run \`node stop-gate-logic.cjs --lint\``
+    );
+  }
+
   if (!lines.length) return null;
   return ["## .loom state", ...lines].join("\n");
+}
+
+/** @returns {string[]} issue paths whose (first) status matches */
+function findIssuesByStatus(root, status) {
+  const hits = [];
+  for (const p of collectIssuePaths(join(root, ".loom"))) {
+    if (issueStatus(readFileSync(p, "utf8")) === status) hits.push(p);
+  }
+  return hits;
 }
 
 /** @returns {string[]} absolute paths of issues blocking stop */
@@ -111,25 +346,71 @@ function findUnverifiedDoneIssues(root) {
   return blocked;
 }
 
-/** Exit 0 = allow, 1 = block. Invoked directly: `node stop-gate-logic.cjs [root]` */
-function check(root) {
+/**
+ * Exit 0 = allow, 1 = block. Invoked directly: `node stop-gate-logic.cjs [root]`.
+ * Lint warnings go to stderr but never change the exit code. Witness check is
+ * hook-only (opts.witness): warn by default, block under LOOM_WITNESS=strict,
+ * skip under LOOM_WITNESS=off. CI invocations don't pass opts.witness — a fresh
+ * runner has no witness file and must not warn about it.
+ */
+function check(root, opts = {}) {
+  for (const w of lintWarnings(root)) {
+    process.stderr.write(`LINT: ${w}\n`);
+  }
+
+  let code = 0;
   const blocked = findUnverifiedDoneIssues(root);
-  if (blocked.length === 0) return 0;
   for (const p of blocked) {
     process.stderr.write(
       `BLOCKED: ${basename(p)} marked done without an APPROVE verify digest. Run loom-verify.\n`
     );
   }
-  return 1;
+  if (blocked.length > 0) code = 1;
+
+  // CI runners have no witness file by definition — never witness-check there.
+  const witnessMode = (process.env.LOOM_WITNESS || "warn").toLowerCase();
+  if (opts.witness && witnessMode !== "off" && !process.env.CI) {
+    const unwitnessed = unwitnessedApproved(root);
+    if (unwitnessed.length > 0) {
+      const strict = witnessMode === "strict";
+      process.stderr.write(
+        `${strict ? "BLOCKED" : "WITNESS"}: ${listNames(unwitnessed)} approved recently ` +
+          `but no checker sub-agent spawn was witnessed on this machine. ` +
+          `If loom-verify really ran, its checkers should have been spawned as sub-agents.\n`
+      );
+      if (strict) code = 1;
+    }
+  }
+
+  return code;
 }
 
 module.exports = {
   findUnverifiedDoneIssues,
+  findIssuesByStatus,
   isDoneWithoutVerify,
   stateSnapshot,
+  lintWarnings,
+  recordWitness,
+  hasFreshWitness,
+  unwitnessedApproved,
+  witnessRoot,
+  witnessPath,
   check,
 };
 
 if (require.main === module) {
-  process.exit(check(process.argv[2] || process.cwd()));
+  const args = process.argv.slice(2);
+  const lintOnly = args.includes("--lint");
+  const root = args.find((a) => !a.startsWith("--")) || process.cwd();
+  if (lintOnly) {
+    const warnings = lintWarnings(root);
+    for (const w of warnings) process.stdout.write(`LINT: ${w}\n`);
+    process.stdout.write(
+      warnings.length ? `${warnings.length} warning(s)\n` : "clean\n"
+    );
+    process.exit(0); // lint is warn-only by design
+  }
+  // Hook invocation (Stop hook / manual) — witness applies; CI should use --ci.
+  process.exit(check(root, { witness: !args.includes("--ci") }));
 }

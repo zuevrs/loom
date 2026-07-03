@@ -14,10 +14,14 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const {
   findUnverifiedDoneIssues,
+  findIssuesByStatus,
+  lintWarnings,
   stateSnapshot,
+  recordWitness,
+  witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.13.0";
+const MANAGED_BLOCK_VERSION = "v0.14.0";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -40,6 +44,33 @@ function findProjectRoot() {
     dir = parent;
   }
   return process.env.PI_PROJECT_DIR || process.cwd();
+}
+
+// Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
+// survives context compaction at zero token cost when the project is clean.
+function anomalyAlert(root) {
+  const alerts = [];
+  const name = (p) => p.split(/[\\/]/).pop();
+
+  const unverified = findUnverifiedDoneIssues(root);
+  if (unverified.length) {
+    alerts.push(
+      `done without APPROVE (stop gate will block): ${unverified.map(name).join(", ")}`
+    );
+  }
+  const needsInfo = findIssuesByStatus(root, "needs-info");
+  if (needsInfo.length) {
+    alerts.push(`needs-info awaiting answers: ${needsInfo.map(name).join(", ")}`);
+  }
+  const lint = lintWarnings(root);
+  if (lint.length) {
+    alerts.push(
+      `${lint.length} .loom lint warning(s) — run \`node stop-gate-logic.cjs --lint\` (first: ${lint[0]})`
+    );
+  }
+
+  if (!alerts.length) return "";
+  return "\n\n# Loom alert\n" + alerts.map((a) => `- ${a}`).join("\n");
 }
 
 function buildContextPointers(root) {
@@ -97,7 +128,16 @@ export default function loomExtension(pi) {
       let injection = INVARIANTS;
       if (role && ROLES[role]) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
+        if (/-checker$/.test(role)) {
+          // Headless checker run (LOOM_ROLE=spec-checker omp -p …) — witness it.
+          try {
+            recordWitness(witnessRoot(process.cwd()), role);
+          } catch {
+            // best effort
+          }
+        }
       }
+      injection += anomalyAlert(findProjectRoot());
       const base = Array.isArray(event.systemPrompt)
         ? event.systemPrompt.join("\n\n")
         : event.systemPrompt || "";

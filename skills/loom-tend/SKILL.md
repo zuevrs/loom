@@ -36,7 +36,9 @@ Keep the warp current and debts from rotting — without inventing feature scope
    For each marker: is the ceiling still acceptable? Has the upgrade path become cheap?
 
 3. **Stale issues** — `ready-for-agent` that are already done or merged; fix status drift.
+   Start with the deterministic linter — it catches what eyes skip (status typos that hide issues from every scan, dangling/cyclic `Blocked by`, done-with-undone-blocker):
    ```bash
+   node ~/.loom/hooks/stop-gate-logic.cjs --lint .
    rg -l "Status: ready-for-agent" .loom/
    ```
    Cross-reference with git log — if the acceptance criteria commit exists and the `## Verify` section carries an APPROVE line, mark `done`. Without one, run `loom-verify` first (enforcement gate requires it).

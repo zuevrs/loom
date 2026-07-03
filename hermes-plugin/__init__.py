@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.13.0"
+MANAGED_BLOCK_VERSION = "v0.14.0"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -47,6 +47,100 @@ def _find_project_root():
         if (parent / "AGENTS.md").exists():
             return parent
     return cwd
+
+
+STATUS_VOCAB = {
+    "needs-triage", "needs-info", "ready-for-agent",
+    "ready-for-human", "done", "wontfix",
+}
+
+
+# loom: Python mirror of lintWarnings in hooks/stop-gate-logic.cjs — keep the two in sync.
+def _lint_warnings(root: Path) -> "list[str]":
+    import re
+
+    def strip(p: Path) -> str:
+        return re.sub(r"<!--[\s\S]*?-->", "", p.read_text())
+
+    def is_done(text: str) -> bool:
+        return bool(re.search(r"^Status:\s*done\b", text, re.M))
+
+    def blocked_refs(text: str) -> "list[str]":
+        section = next(
+            (s for s in re.split(r"^(?=## )", text, flags=re.M) if re.match(r"## Blocked by\b", s)),
+            None,
+        )
+        if not section:
+            return []
+        refs = []
+        for line in section.splitlines():
+            m = re.match(r"^\s*[-*]\s+(.+?)\s*$", line)
+            if not m:
+                continue
+            link = re.search(r"\]\(([^)]+)\)", m.group(1))
+            ref = (link.group(1) if link else m.group(1)).strip()
+            ref = re.sub(r"\.md$", "", ref)
+            if ref and ref.lower() != "none":
+                refs.append(ref)
+        return refs
+
+    warnings = []
+    loom_dir = root / ".loom"
+    candidates = []
+    if loom_dir.is_dir():
+        candidates.append((loom_dir / "issues", "(root)"))
+        candidates.extend((d / "issues", d.name) for d in loom_dir.iterdir() if d.is_dir())
+
+    for issues_dir, pack in candidates:
+        files = sorted(issues_dir.glob("*.md")) if issues_dir.is_dir() else []
+        if not files:
+            continue
+        label = lambda f: f.name if pack == "(root)" else f"{pack}/{f.name}"
+        by_name = {f.stem: f for f in files}
+
+        def resolve_ref(ref):
+            if ref in by_name:
+                return by_name[ref]
+            hit = next((n for n in by_name if n.startswith(ref + "-")), None)
+            return by_name[hit] if hit else None
+
+        graph = {}
+        for f in files:
+            text = strip(f)
+            statuses = re.findall(r"^Status:\s*(\S+)", text, re.M)
+            if not statuses:
+                warnings.append(f"{label(f)}: no Status line")
+            for s in statuses:
+                if s not in STATUS_VOCAB:
+                    warnings.append(f'{label(f)}: unknown Status "{s}" — invisible to every scan')
+
+            graph[f.stem] = []
+            for ref in blocked_refs(text):
+                target = resolve_ref(ref)
+                if target is None:
+                    warnings.append(f'{label(f)}: Blocked by "{ref}" matches no issue in pack')
+                    continue
+                graph[f.stem].append(target.stem)
+                if is_done(text) and not is_done(strip(target)):
+                    warnings.append(f'{label(f)}: done while blocker "{ref}" is not done')
+
+        color = {}
+
+        def walk(node, trail):
+            color[node] = "gray"
+            for dep in graph.get(node, []):
+                if color.get(dep) == "gray":
+                    cycle = trail[trail.index(dep):] + [dep]
+                    warnings.append(f"{pack}: blocker cycle {' → '.join(cycle)}")
+                elif dep not in color:
+                    walk(dep, trail + [dep])
+            color[node] = "black"
+
+        for node in graph:
+            if node not in color:
+                walk(node, [node])
+
+    return warnings
 
 
 # loom: Python mirror of stateSnapshot in hooks/stop-gate-logic.cjs — keep the two in sync.
@@ -97,7 +191,50 @@ def _state_snapshot(root: Path) -> "str | None":
     if grills:
         lines.append(f"grill digests: {len(grills)} (latest: {grills[-1].name})")
 
+    lint = _lint_warnings(root)
+    lines.extend(f"lint: {w}" for w in lint[:5])
+    if len(lint) > 5:
+        lines.append(f"lint: +{len(lint) - 5} more — run `node stop-gate-logic.cjs --lint`")
+
     return "## .loom state\n" + "\n".join(lines) if lines else None
+
+
+# loom: Python mirror of anomalyAlert in omp-extension.mjs / loom-pre-llm.cjs — keep in sync.
+def _anomaly_alert(root: Path) -> str:
+    import re
+
+    loom_dir = root / ".loom"
+    issue_files = []
+    if loom_dir.is_dir():
+        issue_files.extend(sorted((loom_dir / "issues").glob("*.md")) if (loom_dir / "issues").is_dir() else [])
+        for d in loom_dir.iterdir():
+            if d.is_dir() and (d / "issues").is_dir():
+                issue_files.extend(sorted((d / "issues").glob("*.md")))
+
+    unverified, needs_info = [], []
+    for f in issue_files:
+        text = re.sub(r"<!--[\s\S]*?-->", "", f.read_text())
+        m = re.search(r"^Status:\s*(\S+)", text, re.M)
+        if m and m.group(1) == "needs-info":
+            needs_info.append(f.name)
+        if re.search(r"^Status:\s*done\b", text, re.M) and not any(
+            re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
+            for s in re.split(r"^(?=## )", text, flags=re.M)
+        ):
+            unverified.append(f.name)
+
+    alerts = []
+    if unverified:
+        alerts.append(f"done without APPROVE (stop gate will block): {', '.join(unverified)}")
+    if needs_info:
+        alerts.append(f"needs-info awaiting answers: {', '.join(needs_info)}")
+    lint = _lint_warnings(root)
+    if lint:
+        alerts.append(f"{len(lint)} .loom lint warning(s) — run `node stop-gate-logic.cjs --lint` (first: {lint[0]})")
+
+    if not alerts:
+        return ""
+    return "\n\n# Loom alert\n" + "\n".join(f"- {a}" for a in alerts)
 
 
 def _build_context_pointers(root: Path) -> str:
@@ -148,12 +285,16 @@ def register(ctx):
 
     ctx.register_hook("on_session_start", on_session_start)
 
-    # --- Hook: pre_llm_call (per-turn invariants + role context) ---
+    # --- Hook: pre_llm_call (per-turn invariants + role context + anomaly alert) ---
     def pre_llm_hook(messages=None, **kwargs):
         role = os.environ.get("LOOM_ROLE", "").lower()
         ctx_text = DISCIPLINE
         if role in ROLES:
             ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
+        try:
+            ctx_text += _anomaly_alert(_find_project_root())
+        except Exception:
+            pass  # alert is best-effort — never break a turn over it
         return {"context": ctx_text}
 
     ctx.register_hook("pre_llm_call", pre_llm_hook)

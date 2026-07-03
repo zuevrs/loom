@@ -110,11 +110,23 @@ Three light lifecycle hooks — non-mutating, no auto-run.
 
 | Hook | Purpose |
 |---|---|
-| `session-start` | Sync context pointers; check managed-block version |
-| `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done) |
-| `sub-agent-spawn` | Attach role manifest; enforce checker no-auto-fix |
+| `session-start` | Sync context pointers; check managed-block version; `.loom` state snapshot with lint warnings |
+| `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done) + anomaly alert — one extra block **only when something is wrong** (done-without-APPROVE, needs-info pending, lint warnings), so discipline survives context compaction at zero cost when clean |
+| `sub-agent-spawn` | Attach role manifest; enforce checker no-auto-fix; record a **verify witness** when a checker role spawns |
 
-Hooks inject guidance — they never edit files or run rituals automatically. If your host has no hook primitive, the invariants live in the managed block instead.
+Hooks inject guidance — they never edit files or run rituals automatically (the witness marker lives in the OS temp dir, never in your repo). If your host has no hook primitive, the invariants live in the managed block instead.
+
+### The `.loom` linter
+
+State-machine corruption is silent: a typo'd `Status: redy-for-agent` hides an issue from every scan, a dangling `Blocked by` never unblocks, a cycle deadlocks a pack. The gate script lints for all of it — unknown/missing statuses, dangling and cyclic blockers, `done` with an unfinished blocker — and the warnings surface in the session-start snapshot, the pre-LLM alert, and CI gate stderr. Warn-only by design: the only thing that ever blocks is done-without-APPROVE.
+
+```bash
+node ~/.loom/hooks/stop-gate-logic.cjs --lint .   # explicit lint run, always exit 0
+```
+
+### The verify witness
+
+An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. `LOOM_WITNESS=strict` upgrades the warning to a block; `LOOM_WITNESS=off` disables. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
 
 ## Host-Native Enforcement
 
@@ -132,7 +144,7 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 
 **Known OMP limitation:** Some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work. See [issue tracker](https://github.com/zuevrs/loom/issues) for status.
 
-**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook fails and the agent must run `loom-verify` first.
+**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook fails and the agent must run `loom-verify` first. The same hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
 
 ### Checker models
 

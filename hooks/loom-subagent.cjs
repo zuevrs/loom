@@ -56,6 +56,15 @@ function finish() {
   done = true;
   try {
     const role = resolveRole(input);
+    if (/-checker$/.test(role)) {
+      // Witness for the stop gate: proof a checker sub-agent actually spawned.
+      try {
+        const { recordWitness, witnessRoot } = require("./stop-gate-logic.cjs");
+        recordWitness(witnessRoot(process.cwd()), role);
+      } catch {
+        // witness is best-effort — never break a spawn over it
+      }
+    }
     const manifest = ROLES[role] || ROLES.maker;
     const output = [
       `# Loom sub-agent role: ${role}`,

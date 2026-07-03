@@ -28,6 +28,16 @@ function finish() {
     if (data.loomRole && ROLES[data.loomRole]) role = data.loomRole;
   } catch {}
 
+  if (/-checker$/.test(role)) {
+    // Witness for the stop gate: proof a checker sub-agent actually spawned.
+    try {
+      const { recordWitness, witnessRoot } = require("./stop-gate-logic.cjs");
+      recordWitness(witnessRoot(process.cwd()), role);
+    } catch {
+      // witness is best-effort — never break a spawn over it
+    }
+  }
+
   const message = ROLES[role] || ROLES.maker;
   process.stdout.write(JSON.stringify({ permission: "allow", user_message: message }) + "\n");
 }

@@ -77,6 +77,8 @@ APPROVE — {date} — spec pass, standards pass
 
 Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status: done` only when a `## Verify` section contains a line starting with `APPROVE`; (2) memory — the digest in chat dies with the session, so a REJECT that isn't written back is invisible to the next fresh session, which would re-derive the same mistake. OMP also injects a TTSR reminder when you write `Status: done` mid-stream.
 
+**The APPROVE is witnessed.** On hosts with sub-agent spawn hooks (Claude Code, Codex, Cursor) the hook records every checker spawn; the Stop gate warns when a fresh APPROVE appears with no witnessed checker run (`LOOM_WITNESS=strict` turns the warning into a block, `LOOM_WITNESS=off` disables). Writing the APPROVE line without actually spawning checkers is therefore visible — don't.
+
 ## Hard stops
 
 - No evidence → no approve.

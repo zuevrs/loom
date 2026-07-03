@@ -56,7 +56,7 @@ The Stop-hook script is a plain CLI: `node hooks/stop-gate-logic.cjs <repo-root>
       - run: node ~/.loom/hooks/stop-gate-logic.cjs .   # fails the PR on done-without-APPROVE
 ```
 
-Adjust the path to wherever your Loom clone lives (the installer's default is `~/.loom`; a vendored copy inside the repo works too).
+Adjust the path to wherever your Loom clone lives (the installer's default is `~/.loom`; a vendored copy inside the repo works too). The same run prints `.loom` lint warnings (status typos, dangling/cyclic `Blocked by`) to stderr without failing the check, and skips the local-only verify-witness check automatically when `CI` is set (pass `--ci` to force that on other runners).
 
 ### Codex (`/goal`)
 
