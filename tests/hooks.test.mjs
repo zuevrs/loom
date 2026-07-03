@@ -1406,4 +1406,16 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(read("skills/loom-plan/GRILL.md").includes("Name the real target path (`docs/adr/NNNN-slug.md`)"), "GRILL ADR offer names docs/adr/ path");
 }
 
+// v0.16.3 — field-run fixes: dead-extension liveness hint, restart-after-update, post-APPROVE delta contract
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const ttsr = read("rules/loom-verify-before-done.md");
+  ok(ttsr.includes("# Loom invariants"), "TTSR rule names the invariants marker the model should look for");
+  ok(/extension is not loaded[\s\S]*restart OMP/i.test(ttsr), "TTSR rule tells the user to restart OMP when the extension is dead");
+  ok(/restart the host process/.test(read("README.md")), "README upgrade flow requires a host restart after plugin update");
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("An APPROVE vouches only for the diff it judged"), "loom-verify scopes APPROVE to the judged diff");
+  ok(verify.includes("Post-verify delta"), "loom-verify names the post-verify delta log format");
+}
+
 console.log("✔ All hook and adapter tests passed");

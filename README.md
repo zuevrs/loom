@@ -81,7 +81,7 @@ Then run **`loom-init`** in each project to write the managed block.
 When upgrading Loom, use this flow:
 
 1. **Global Loom install**
-   - Plugin-native hosts: re-run the install command from the table above for your host. On OMP, `omp plugin doctor loom` confirms the plugin is healthy after the update.
+   - Plugin-native hosts: re-run the install command from the table above for your host, then **restart the host process** — a plugin hot-swapped under a running host keeps serving stale code or a dead extension (observed live on OMP). `omp plugin doctor loom` confirms the plugin is healthy after the update.
    - Script-based hosts:
      - `git -C ~/.loom pull --ff-only`
      - re-run the installer (`node ~/.loom/scripts/install.mjs --<host>`) — it repairs its own stale entries (renamed hooks, moved paths) and never touches foreign config

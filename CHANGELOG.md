@@ -4,6 +4,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.3] - 2026-07-03
+
+Field run round 3: issue 02 implemented in a fresh session — and the whole session ran with the Loom extension **silently dead** (the plugin had been hot-swapped under a long-running OMP process minutes earlier). The discipline held anyway, carried entirely by the managed block and skills — the layered design's first live validation — but witness and the `session_stop` gate simply did not exist that session, and nothing said so. Three fixes.
+
+### Fixed
+
+- **Dead extension is now self-detected** — the TTSR `Status: done` reminder (which loads through OMP's separate `rules/` mechanism and survives extension death) now tells the model: no `# Loom invariants` in this session's system prompt means the extension is not loaded, the gate and witness are dead, tell the user to restart OMP
+- **Upgrade flow requires a host restart** — README: a plugin hot-swapped under a running host keeps serving stale code or a dead extension; restart after updating
+- **Post-APPROVE deltas have a contract** — `loom-verify`: an APPROVE vouches only for the diff it judged; any later change reruns the objective gates and is logged as a `Post-verify delta: {what, why, gates rerun}` entry in the issue; changes touching product behavior get a fresh verify, not a delta note (codifies what the field-run maker improvised, correctly)
+
+### Migration
+
+Restart your OMP/host process after updating the plugin — this release is itself subject to the bug it documents.
+
 ## [0.16.2] - 2026-07-03
 
 Field run round 2: the first `loom-implement` + verify cycle on a real project, audited end-to-end. The discipline held (honest TDD red, assumptions confirmed before code, checkers found two real bugs, and the TTSR reminder caught a premature `Status: done` mid-stream — first live save by the enforcement layer). Two infrastructure leaks fixed.
@@ -647,7 +661,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.3...HEAD
+[0.16.3]: https://github.com/zuevrs/loom/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/zuevrs/loom/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/zuevrs/loom/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/zuevrs/loom/compare/v0.15.1...v0.16.0
