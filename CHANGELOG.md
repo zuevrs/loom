@@ -4,6 +4,23 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-07-03
+
+Flow-seams grill: six places where the ritual prose left an agent guessing at a seam — now each has one written rule.
+
+### Added
+
+- **Direct small-fix lane** — the router's "small single-session fix → `loom-implement` directly" path finally has its contract: no PRD or issue file, so `## Log` and the verify verdict live in the chat (attended) or PR description (unattended); the user's fix request is the spec source; discipline unchanged — no verify digest → no "complete". `loom-verify` mirrors it: no issue file → the digest **is** the deliverable. Outgrows one session → route to `loom-plan`
+- **Session handoff after done** (`loom-implement` step 14) — end the report by naming the next lowest-numbered unblocked `ready-for-agent` issue (or "pack complete — consider `loom-tend`") and recommending a fresh session; never start the next issue in the same session. The fresh-session contract now has a written exit, not just an entry
+- **Two strikes rule** (`loom-verify`) — a second REJECT on the same issue with overlapping blockers stops the re-implement loop (attended mirror of the unattended "same error twice" rule) and forks explicitly: amend the plan, accept as `loom:` debt, or drop. Matching failure-mode row in `loom-implement`
+- **Amendment route** (`loom-plan` § Route scope) — a wrong or outgrown PRD no longer means re-running the full ritual: grill only the delta, amend the PRD in place with a dated `## Amendments` entry, re-quiz only the affected slices; a ballooning amendment routes back to the full ritual
+- **Riskiest seam first** (`TO-ISSUES.md`) — the first real slice crosses the integration the PRD's Seams section trusts least; if the architecture fails, learn it in slice 1
+- **Completed-pack archiving** (`loom-tend`) — packs with all issues `done`/`wontfix` move to `.loom/archive/<pack>/` (user approves, `git mv`); archived packs are invisible to the stop gate, snapshot, and linter by construction — pinned by an executed behavioral test
+
+### Migration
+
+Nothing to do — prose contracts only, no hook changes. Managed block version bumps; run `loom-init` when the session-start warning appears.
+
 ## [0.14.0] - 2026-07-03
 
 Enforcement grill: three mechanical upgrades that close real holes — silent `.loom` corruption, forgeable APPROVE lines, and discipline dying at context compaction.
@@ -531,7 +548,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/zuevrs/loom/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/zuevrs/loom/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/zuevrs/loom/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/zuevrs/loom/compare/v0.12.0...v0.12.1
