@@ -29,8 +29,12 @@ import {
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const LOOM_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const { versionDriftWarning } = createRequire(import.meta.url)(
+  join(LOOM_ROOT, "hooks", "stop-gate-logic.cjs")
+);
 const SKILLS_DIR = join(LOOM_ROOT, "skills");
 const HOOKS_DIR = join(LOOM_ROOT, "hooks");
 const HOME = homedir();
@@ -297,9 +301,10 @@ function doctor() {
   }
   if (agentsMd) {
     const m = readFileSync(agentsMd, "utf8").match(/<!-- loom:begin version=v([^\s]+)/);
+    const drift = m && versionDriftWarning(`v${m[1]}`, `v${LOOM_VERSION}`, "pull/update the Loom install this script runs from");
     if (!m) warnLine(`managed block: none in ${agentsMd} — run loom-init if this project should use Loom`);
-    else if (m[1] === LOOM_VERSION) okLine(`managed block: v${m[1]} (current project)`);
-    else failLine(`managed block v${m[1]} != installed v${LOOM_VERSION} in ${agentsMd}`, "run loom-init in this project to refresh the managed block");
+    else if (!drift) okLine(`managed block: v${m[1]} (current project)`);
+    else failLine(`managed block v${m[1]} vs installed v${LOOM_VERSION} in ${agentsMd}`, drift.replace(/^⚠️ /, ""));
   }
 
   console.log(`\n${problems.length} failure(s), ${warnings.length} warning(s)`);

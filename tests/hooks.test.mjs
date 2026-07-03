@@ -1276,6 +1276,128 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(verify.includes("the general contract applies unchanged"), "OMP workflow defers to the general contract");
 }
 
+// v0.16.2 — field-run fixes round 2: direction-aware version drift, OMP witness
+{
+  const { createRequire } = await import("node:module");
+  const { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync: rf } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const requireCjs = createRequire(import.meta.url);
+  const gate = requireCjs(resolve(hooksDir, "stop-gate-logic.cjs"));
+
+  // Direction-aware drift: block newer → "update the install", never "run loom-init".
+  const stale = gate.versionDriftWarning("v0.16.0", "v0.7.0", "run `omp plugin update loom`");
+  ok(stale.includes("older than this project's managed block"), "plugin-behind warning names the real problem");
+  ok(stale.includes("omp plugin update loom"), "plugin-behind warning carries the host hint");
+  ok(!stale.includes("run loom-init to update"), "plugin-behind warning does not loop through loom-init");
+  const behind = gate.versionDriftWarning("v0.7.0", "v0.16.0");
+  ok(behind.includes("run loom-init to update"), "block-behind keeps the loom-init advice");
+  strictEqual(gate.versionDriftWarning("v1.0.0", "v1.0.0"), null, "equal versions warn nothing");
+  strictEqual(gate.versionDriftWarning("", "v1.0.0"), null, "missing block version warns nothing");
+  // Two-digit segments compare numerically, not lexically (v0.10.0 > v0.9.0).
+  ok(gate.versionDriftWarning("v0.10.0", "v0.9.0", "x").includes("older than"), "numeric segment compare");
+
+  // Spelling variants of the same version never warn (v1.0 vs v1.0.0).
+  strictEqual(gate.versionDriftWarning("v1.0", "v1.0.0"), null, "format-only difference warns nothing");
+
+  // All four carriers route through the shared helper; hardcoded one-direction
+  // message templates are gone.
+  const read = (p) => rf(resolve(__dirname, "..", p), "utf8");
+  for (const f of ["omp-extension.mjs", "hooks/loom-session-start.cjs", "scripts/install.mjs"]) {
+    ok(read(f).includes("versionDriftWarning"), `${f} uses the shared drift helper`);
+    ok(!/[Mm]anaged block \$\{/.test(read(f)), `${f} dropped the hardcoded one-direction message`);
+  }
+  ok(read("hermes-plugin/__init__.py").includes("_version_drift_warning"), "hermes mirrors the drift helper");
+
+  // Python parity: byte-identical messages for both directions, same hint.
+  try {
+    const py = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+print(mod._version_drift_warning("v0.16.0", "v0.7.0", "pull the clone"))
+print(mod._version_drift_warning("v0.7.0", "v0.16.0"))
+print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    const [pyStale, pyBehind, pyFormat] = py.trim().split(/\r?\n/);
+    strictEqual(pyStale, gate.versionDriftWarning("v0.16.0", "v0.7.0", "pull the clone"), "python plugin-behind parity (exact)");
+    strictEqual(pyBehind, gate.versionDriftWarning("v0.7.0", "v0.16.0"), "python block-behind parity (exact)");
+    strictEqual(pyFormat, "None", "python format-only difference warns nothing");
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e; // no python3 → parity runs in CI
+  }
+
+  // OMP witness: task-tool checker spawns are recorded; session_stop warns on
+  // fresh unwitnessed APPROVEs and stays quiet once a spawn was witnessed.
+  const tmp = mkdtempSync(join(tmpdir(), "loom-v0162-omp-"));
+  writeFileSync(join(tmp, "AGENTS.md"), "<!-- loom:begin version=v0.16.2 -->\n<!-- loom:end -->\n");
+  const issues = join(tmp, ".loom", "feat", "issues");
+  mkdirSync(issues, { recursive: true });
+  writeFileSync(
+    join(issues, "001.md"),
+    "# One\n\n## Verify\n\nAPPROVE — checks pass\n\n## Status\n\nStatus: done\n"
+  );
+  rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
+
+  const omp = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
+  const handlers = {};
+  omp.default({ on: (name, fn) => { handlers[name] = fn; } });
+  ok(handlers.tool_execution_start, "OMP extension registers tool_execution_start");
+
+  const envBackup = { PI_PROJECT_DIR: process.env.PI_PROJECT_DIR, CI: process.env.CI, LOOM_WITNESS: process.env.LOOM_WITNESS };
+  process.env.PI_PROJECT_DIR = tmp;
+  delete process.env.CI;
+  delete process.env.LOOM_WITNESS;
+  try {
+    const before = handlers.session_stop();
+    ok(before && before.additionalContext.startsWith("WITNESS:"), "session_stop warns on unwitnessed APPROVE");
+    ok(before.additionalContext.includes("001.md"), "witness warning names the issue");
+
+    handlers.tool_execution_start({
+      type: "tool_execution_start",
+      toolName: "task",
+      args: { agent: "reviewer", context: "loom verify — fresh checker", tasks: [{ assignment: "# Role: Spec checker (loom verify)" }, { assignment: "# Role: Standards checker" }] },
+    });
+    const entries = JSON.parse(rf(gate.witnessPath(gate.witnessRoot(tmp)), "utf8"));
+    ok(entries.some((e) => e.role === "spec-checker") && entries.some((e) => e.role === "standards-checker"),
+      "task spawn recorded both checker witnesses");
+
+    strictEqual(handlers.session_stop(), undefined, "witnessed APPROVE passes session_stop");
+
+    // Named plugin agents match too (the field run's first spawn attempt).
+    rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
+    handlers.tool_execution_start({ type: "tool_execution_start", toolName: "task", args: { agent: "loom-verify-spec", context: "judge only" } });
+    ok(JSON.parse(rf(gate.witnessPath(gate.witnessRoot(tmp)), "utf8")).some((e) => e.role === "spec-checker"),
+      "named loom-verify-spec agent spawn is witnessed");
+
+    const countBefore = JSON.parse(rf(gate.witnessPath(gate.witnessRoot(tmp)), "utf8")).length;
+    handlers.tool_execution_start({ type: "tool_execution_start", toolName: "bash", args: { command: "echo spec-checker" } });
+    // non-task tools never record — witness file unchanged
+    strictEqual(JSON.parse(rf(gate.witnessPath(gate.witnessRoot(tmp)), "utf8")).length, countBefore, "non-task tools are not witnessed");
+
+    // CI runners never witness-warn (fresh runner has no marker by definition).
+    rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
+    process.env.CI = "1";
+    strictEqual(handlers.session_stop(), undefined, "CI env silences the session_stop witness warning");
+    delete process.env.CI;
+
+    process.env.LOOM_WITNESS = "off";
+    strictEqual(handlers.session_stop(), undefined, "LOOM_WITNESS=off silences the session_stop witness warning");
+  } finally {
+    for (const [k, v] of Object.entries(envBackup)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+    rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
+    rmSync(tmp, { recursive: true });
+  }
+}
+
 // v0.16.1 — field-run fixes: citations survive to the write point, ADR offers name the real path
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");

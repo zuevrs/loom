@@ -6,9 +6,9 @@
 
 const fs = require("fs");
 const path = require("path");
-const { stateSnapshot } = require("./stop-gate-logic.cjs");
+const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.16.1";
+const MANAGED_BLOCK_VERSION = "v0.16.2";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -29,11 +29,12 @@ function run() {
     const match = content.match(/<!-- loom:begin version=([^ ]+)/);
     if (match) {
       const version = match[1].replace(/\s.*/, "");
-      if (version !== MANAGED_BLOCK_VERSION) {
-        pointers.push(
-          `⚠️ Loom managed block ${version} != installed ${MANAGED_BLOCK_VERSION}; consider running loom-init to update.`
-        );
-      }
+      const drift = versionDriftWarning(
+        version,
+        MANAGED_BLOCK_VERSION,
+        "update the Loom plugin / pull the ~/.loom clone"
+      );
+      if (drift) pointers.push(drift);
     }
     pointers.push(`AGENTS.md: ${agentsPath}`);
   }

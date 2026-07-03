@@ -130,7 +130,7 @@ A session killed mid-implement changes no status and files no report — the onl
 
 ### The verify witness
 
-An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. `LOOM_WITNESS=strict` upgrades the warning to a block; `LOOM_WITNESS=off` disables. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
+An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. On OMP the extension witnesses checker spawns made through the `task` tool (named `loom-verify-*` agents or generic spawns carrying the checker role) and the `session_stop` gate carries the same warning — warn-only there, since `session_stop` has no blocking primitive. `LOOM_WITNESS=strict` upgrades the warning to a block on Stop-hook hosts; `LOOM_WITNESS=off` disables. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
 
 **Known limitation (Codex):** the witness recorder rides the `SubagentStart` hook; on Codex versions that don't fire it, checker spawns go unwitnessed and the warning appears even though verify genuinely ran. It is warn-only — read it as "confirm checkers ran", or set `LOOM_WITNESS=off` for that host. Keep `strict` to hosts whose spawn hooks are confirmed firing (Claude Code, Cursor).
 
@@ -140,7 +140,7 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 
 | Host | Mechanism | What it enforces |
 |------|-----------|-----------------|
-| **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) | Hard gate at turn end + stream reminder + verify agents via `task` tool |
+| **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | Hard gate at turn end + stream reminder + verify agents via `task` tool + witnessed checker spawns |
 | **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) | Blocks agent stop if issues marked done without verify digest |
 | **Cursor** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) + managed rules | Same verify gate via hook + rule-file injection |
 | **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |

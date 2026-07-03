@@ -180,6 +180,42 @@ function lintWarnings(root) {
 }
 
 // ---------------------------------------------------------------------------
+// Version drift — managed block vs installed hooks. The fix depends on WHICH
+// side is stale: a field run hit a plugin nine releases behind whose warning
+// said "run loom-init to update" — advice that can never resolve that
+// direction (init rewrites the block, not the plugin) and loops forever.
+// ---------------------------------------------------------------------------
+
+/** "v1.2.3"-ish → [1,2,3]; unparseable segments count as 0. */
+function versionNums(v) {
+  return String(v || "")
+    .replace(/^v/i, "")
+    .split(".")
+    .map((s) => parseInt(s, 10) || 0);
+}
+
+/**
+ * One-line warning for a block/installed version mismatch, null when in sync.
+ * updateHint names the host's own update command (e.g. `omp plugin update loom`).
+ */
+function versionDriftWarning(block, installed, updateHint) {
+  if (!block || !installed || block === installed) return null;
+  const [a, b] = [versionNums(block), versionNums(installed)];
+  let blockNewer = false;
+  let differs = false;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] || 0) === (b[i] || 0)) continue;
+    differs = true;
+    blockNewer = (a[i] || 0) > (b[i] || 0);
+    break;
+  }
+  if (!differs) return null; // "v1.0" vs "v1.0.0" — same version, different spelling
+  return blockNewer
+    ? `⚠️ Loom install ${installed} is older than this project's managed block ${block} — ${updateHint || "update the Loom install"}. loom-init cannot fix this direction.`
+    : `⚠️ Managed block ${block} != installed ${installed}; run loom-init to update.`;
+}
+
+// ---------------------------------------------------------------------------
 // Verify witness — anti-fake-APPROVE. Subagent hooks record checker spawns;
 // the gate warns when a fresh done+APPROVE has no witnessed checker run.
 // Warn-first: LOOM_WITNESS=strict blocks, CI/LOOM_WITNESS=off skips.
@@ -477,6 +513,7 @@ module.exports = {
   lastVerdictIsReject,
   dirtyTreeCount,
   alertScanAllowed,
+  versionDriftWarning,
   recordWitness,
   hasFreshWitness,
   unwitnessedApproved,

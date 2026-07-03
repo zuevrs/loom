@@ -18,11 +18,13 @@ const {
   lintWarnings,
   alertScanAllowed,
   stateSnapshot,
+  versionDriftWarning,
   recordWitness,
+  unwitnessedApproved,
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.16.1";
+const MANAGED_BLOCK_VERSION = "v0.16.2";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -82,11 +84,14 @@ function buildContextPointers(root) {
   if (existsSync(agentsPath)) {
     const content = readFileSync(agentsPath, "utf8");
     const match = content.match(/<!-- loom:begin version=([^\s]+)/);
-    if (match && match[1] !== MANAGED_BLOCK_VERSION) {
-      pointers.push(
-        `⚠️ Managed block ${match[1]} != installed ${MANAGED_BLOCK_VERSION}; run loom-init to update.`
+    const drift =
+      match &&
+      versionDriftWarning(
+        match[1],
+        MANAGED_BLOCK_VERSION,
+        "run `omp plugin update loom` (or reinstall the plugin), then restart"
       );
-    }
+    if (drift) pointers.push(drift);
     pointers.push(`AGENTS.md: ${agentsPath}`);
   }
 
@@ -149,16 +154,52 @@ export default function loomExtension(pi) {
     }
   });
 
+  // Witness checker spawns made through the `task` tool. Field run v0.16.1
+  // showed OMP checkers ran as in-session sub-agents, invisible to the witness
+  // (only headless LOOM_ROLE runs recorded) — so nothing on OMP could tell a
+  // real verify from a hand-typed APPROVE. Matches both named agents
+  // (loom-verify-spec/-standards) and generic spawns carrying the checker role
+  // in their payload ("spec-checker", "# Role: Spec checker", …).
+  pi.on("tool_execution_start", (event) => {
+    try {
+      if (event.toolName !== "task") return undefined;
+      const raw = JSON.stringify(event.args || {});
+      const root = witnessRoot(findProjectRoot());
+      // Recorded at spawn, not success — same timing as the Claude SubagentStart hook.
+      if (/loom-verify-spec|spec.?checker/i.test(raw)) recordWitness(root, "spec-checker");
+      if (/loom-verify-standards|standards.?checker/i.test(raw)) recordWitness(root, "standards-checker");
+    } catch {
+      // best effort
+    }
+    return undefined;
+  });
+
   // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)
   pi.on("session_stop", () => {
     try {
-      const blocked = findUnverifiedDoneIssues(findProjectRoot());
-      if (blocked.length === 0) return undefined;
-      const names = blocked.map((p) => p.split("/").pop()).join(", ");
-      return {
-        continue: true,
-        additionalContext: `BLOCKED: ${names} marked done without an APPROVE verify digest. Run loom-verify, write its verdict (a line starting with APPROVE) into the issue's ## Verify section, then retry.`,
-      };
+      const root = findProjectRoot();
+      const blocked = findUnverifiedDoneIssues(root);
+      if (blocked.length > 0) {
+        const names = blocked.map((p) => p.split("/").pop()).join(", ");
+        return {
+          continue: true,
+          additionalContext: `BLOCKED: ${names} marked done without an APPROVE verify digest. Run loom-verify, write its verdict (a line starting with APPROVE) into the issue's ## Verify section, then retry.`,
+        };
+      }
+      // Witness warning (warn-only, parity with the Stop-hook gate): a fresh
+      // APPROVE with no witnessed checker spawn on this machine is suspect.
+      const witnessMode = (process.env.LOOM_WITNESS || "warn").toLowerCase();
+      if (witnessMode !== "off" && !process.env.CI) {
+        const unwitnessed = unwitnessedApproved(root);
+        if (unwitnessed.length > 0) {
+          const names = unwitnessed.map((p) => p.split("/").pop()).join(", ");
+          return {
+            continue: true,
+            additionalContext: `WITNESS: ${names} approved recently but no checker sub-agent spawn was witnessed on this machine. If loom-verify really ran, its checkers should have been spawned via the task tool; if it did not, remove the APPROVE and run loom-verify.`,
+          };
+        }
+      }
+      return undefined;
     } catch {
       return undefined;
     }

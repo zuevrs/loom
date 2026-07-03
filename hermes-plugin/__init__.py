@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.16.1"
+MANAGED_BLOCK_VERSION = "v0.16.2"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -47,6 +47,43 @@ def _find_project_root():
         if (parent / "AGENTS.md").exists():
             return parent
     return cwd
+
+
+# loom: Python mirror of versionDriftWarning in hooks/stop-gate-logic.cjs — keep the two in sync.
+def _version_nums(v):
+    """'v1.2.3'-ish -> [1, 2, 3]; unparseable segments count as 0."""
+    nums = []
+    for seg in str(v or "").lstrip("vV").split("."):
+        try:
+            nums.append(int(seg))
+        except ValueError:
+            nums.append(0)
+    return nums
+
+
+def _version_drift_warning(block, installed, update_hint=None):
+    """Direction-aware mismatch warning, None when in sync. Mirrors versionDriftWarning."""
+    if not block or not installed or block == installed:
+        return None
+    a, b = _version_nums(block), _version_nums(installed)
+    block_newer = False
+    differs = False
+    for i in range(max(len(a), len(b))):
+        x, y = (a[i] if i < len(a) else 0), (b[i] if i < len(b) else 0)
+        if x == y:
+            continue
+        differs = True
+        block_newer = x > y
+        break
+    if not differs:
+        return None  # "v1.0" vs "v1.0.0" — same version, different spelling
+    if block_newer:
+        hint = update_hint or "update the Loom install"
+        return (
+            f"⚠️ Loom install {installed} is older than this project's managed block {block} — "
+            f"{hint}. loom-init cannot fix this direction."
+        )
+    return f"⚠️ Managed block {block} != installed {installed}; run loom-init to update."
 
 
 STATUS_VOCAB = {
@@ -325,10 +362,13 @@ def _build_context_pointers(root: Path) -> str:
         import re
         content = agents.read_text()
         m = re.search(r"<!-- loom:begin version=(\S+)", content)
-        if m and m.group(1) != MANAGED_BLOCK_VERSION:
-            lines.append(
-                f"⚠️ Managed block {m.group(1)} != installed {MANAGED_BLOCK_VERSION}; run loom-init to update."
-            )
+        drift = m and _version_drift_warning(
+            m.group(1),
+            MANAGED_BLOCK_VERSION,
+            "pull the ~/.loom clone (the hermes plugin is a symlink into it)",
+        )
+        if drift:
+            lines.append(drift)
         lines.append(f"AGENTS.md: {agents}")
 
     context = root / "CONTEXT.md"

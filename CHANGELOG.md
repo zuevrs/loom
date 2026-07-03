@@ -4,6 +4,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-07-03
+
+Field run round 2: the first `loom-implement` + verify cycle on a real project, audited end-to-end. The discipline held (honest TDD red, assumptions confirmed before code, checkers found two real bugs, and the TTSR reminder caught a premature `Status: done` mid-stream — first live save by the enforcement layer). Two infrastructure leaks fixed.
+
+### Fixed
+
+- **Version-drift warning is direction-aware** — the field run ran on an OMP plugin nine releases behind, and the mismatch warning's only advice was "run loom-init to update", which cannot fix a stale *install* (init rewrites the block, not the plugin) and loops forever. New shared `versionDriftWarning` in `stop-gate-logic.cjs`: when the install is older than the block it says so and names the host's own update command; all three carriers (OMP extension, session-start hook, Hermes mirror) route through it
+- **OMP witnesses in-session checker spawns** — checkers on OMP run via the `task` tool, which the witness never saw (only headless `LOOM_ROLE` runs recorded), so a hand-typed APPROVE was indistinguishable from a real verify. The extension now records witnesses on `tool_execution_start` for task spawns carrying a checker (named `loom-verify-*` agents or role text), and `session_stop` carries the warn-only WITNESS message — parity with the Stop-hook hosts
+
+### Migration
+
+Nothing to do — but if your OMP plugin is old (`omp plugin doctor loom` shows a version far behind this changelog), run `omp plugin update loom` or reinstall; the plugin does not self-update.
+
 ## [0.16.1] - 2026-07-03
 
 First field run (a real `loom-init` → `loom-plan` session on a user project) audited end-to-end: 18 single-question asks, inline `CONTEXT.md` writes between questions, both ADRs offered on the 3-part test, research before the stack recommendation, a 6-entry assumptions ledger, and a tracer-bullet first slice. Two leaks found and fixed — both are rules that lived in the grill phase but were violated at the write point.
@@ -634,7 +647,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/zuevrs/loom/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/zuevrs/loom/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/zuevrs/loom/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/zuevrs/loom/compare/v0.15.0...v0.15.1
