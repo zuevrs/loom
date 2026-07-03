@@ -1433,4 +1433,23 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(/pre-assemble the digest frame/.test(verify), "verify pre-assembles the digest during the wait");
 }
 
+// v0.17.0 — brownfield boot phase + maker self-review
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const brown = read("skills/loom-plan/BROWNFIELD.md");
+  ok(brown.includes("Mine first; interview only the remainder"), "BROWNFIELD leads with mine-before-interview");
+  ok(/package scripts, Makefile, CI config/.test(brown), "BROWNFIELD mines commands from real carriers");
+  ok(brown.includes("each non-obvious claim names its source file"), "BROWNFIELD draft carries provenance");
+  ok(brown.includes("Unknowns stay unknown"), "BROWNFIELD forbids invented conventions");
+  ok(/before the grill starts/.test(brown), "BROWNFIELD gates the draft with the user before the interview");
+  ok(/Sample, don't exhaust/.test(brown), "BROWNFIELD timeboxes the mining");
+  ok(brown.includes("a README or scattered docs do NOT skip the boot"), "BROWNFIELD skip clause is unambiguous on mature repos");
+  ok(/brownfield check.*BROWNFIELD\.md/s.test(read("skills/loom-plan/SKILL.md")), "plan step 1 routes to BROWNFIELD.md on trigger");
+  const impl = read("skills/loom-implement/SKILL.md");
+  ok(impl.includes("Self-review, then verify."), "implement step 13 opens with self-review");
+  ok(/read your own full diff top-to-bottom/.test(impl), "self-review reads the full diff");
+  ok(impl.includes("Self-review replaces neither checker"), "self-review does not replace maker/checker separation");
+  ok(/do not yield.*until a verify digest exists/s.test(impl), "step 13 verify mandate survives the self-review fold");
+}
+
 console.log("✔ All hook and adapter tests passed");

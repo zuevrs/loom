@@ -4,6 +4,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-07-04
+
+Two capability additions chosen by expected boost per effort. All three field runs so far were greenfield; real adoption is mostly brownfield — and there the plan phase had a cold start. Plus the cheapest quality lever from code-review practice: the author reads their own diff first.
+
+### Added
+
+- **Brownfield boot** (`loom-plan/BROWNFIELD.md`, routed from plan step 1) — on a mature repo with no `CONTEXT.md`/`PRODUCT.md` and no prior `.loom` pack: mine the repo first (commands from package scripts/Makefile/CI, stack from manifests, layout, conventions, existing docs — timeboxed, sample-don't-exhaust), write a **draft** `CONTEXT.md` where each non-obvious claim names its source file and unknowns stay unknown, gate the draft with the user, then grill only what mining could not answer. The explore-don't-ask rule applied wholesale: a user interviewed about what their own code answers loses trust in the whole interview
+- **Maker self-review** (`loom-implement` step 13) — before spawning checkers, read your own full diff top-to-bottom against the issue: leftover debug code, out-of-scope file touches, `## Log` claims the diff doesn't back, forgotten acceptance criteria. A blocker caught here costs one turn; from a checker it costs a REJECT lap. Replaces neither checker — it removes the embarrassments before fresh eyes spend time on them
+
+### Migration
+
+Nothing to do.
+
 ## [0.16.4] - 2026-07-04
 
 Session-speed round, grounded in field-run turn counts: of 94 agent turns on one issue, ~15 were pure waste — 8 serial single-file reads during bootup (all five issue cards read in full to pick one) and 6 consecutive no-op polls waiting for checkers. All fixes are prose; the next field run measures them.
@@ -675,7 +688,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.4...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/zuevrs/loom/compare/v0.16.4...v0.17.0
 [0.16.4]: https://github.com/zuevrs/loom/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/zuevrs/loom/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/zuevrs/loom/compare/v0.16.1...v0.16.2

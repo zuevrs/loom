@@ -33,7 +33,7 @@ Produce a verifiable PRD + issue pack under `.loom/<feature-slug>/` without star
 
 Run the phases strictly in order. Read ONLY the current phase file — do NOT open a later phase file before its gate. Each file is self-contained for its phase; reading ahead pulls your attention out of the phase you are in.
 
-1. **Grill** — read [`GRILL.md`](GRILL.md) NOW and follow it. Relentless scope interview, one question per `ask` call, domain modeled inline (`CONTEXT.md` via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), ADRs via [`ADR-FORMAT.md`](ADR-FORMAT.md)). Exit gate: user confirms shared understanding AND gives an explicit go.
+1. **Grill** — first, brownfield check: mature repo with no `CONTEXT.md`/`PRODUCT.md` and no prior `.loom` pack? Read [`BROWNFIELD.md`](BROWNFIELD.md) and mine the repo into a draft `CONTEXT.md` before any interview. Then read [`GRILL.md`](GRILL.md) NOW and follow it. Relentless scope interview, one question per `ask` call, domain modeled inline (`CONTEXT.md` via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), ADRs via [`ADR-FORMAT.md`](ADR-FORMAT.md)). Exit gate: user confirms shared understanding AND gives an explicit go.
 2. **PRD** — only after that go: read [`TO-PRD.md`](TO-PRD.md). Pure synthesis via [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md) (+ [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) / [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) when applicable), no re-interview. Exit gate: user confirms the PRD.
 3. **Issues** — only after PRD confirmation: read [`TO-ISSUES.md`](TO-ISSUES.md). Vertical slices, granularity quiz, then write issue files via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md).
 
