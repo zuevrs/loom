@@ -943,7 +943,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
       ],
       { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
     );
-    const pyWarnings = py.trim().split("\n").sort();
+    // Windows Python prints CRLF — split on both or every warning grows a \r tail.
+    const pyWarnings = py.trim().split(/\r?\n/).sort();
     const nodeWarnings = warnings.slice().sort();
     strictEqual(
       JSON.stringify(pyWarnings),
