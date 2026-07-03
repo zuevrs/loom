@@ -16,6 +16,7 @@ const {
   findUnverifiedDoneIssues,
   findIssuesByStatus,
   lintWarnings,
+  alertScanAllowed,
   stateSnapshot,
   recordWitness,
   witnessRoot,
@@ -49,6 +50,7 @@ function findProjectRoot() {
 // Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
 // survives context compaction at zero token cost when the project is clean.
 function anomalyAlert(root) {
+  if (!alertScanAllowed(root)) return ""; // ceiling: see stop-gate-logic.cjs
   const alerts = [];
   const name = (p) => p.split(/[\\/]/).pop();
 

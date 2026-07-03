@@ -15,11 +15,13 @@ try {
     findUnverifiedDoneIssues,
     findIssuesByStatus,
     lintWarnings,
+    alertScanAllowed,
     witnessRoot,
   } = require("./stop-gate-logic.cjs");
   const { basename } = require("node:path");
 
   const root = witnessRoot(process.cwd());
+  if (!alertScanAllowed(root)) return; // ceiling: see stop-gate-logic.cjs
   const alerts = [];
 
   const unverified = findUnverifiedDoneIssues(root);

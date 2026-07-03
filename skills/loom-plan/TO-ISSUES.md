@@ -9,6 +9,7 @@ Break the PRD into **tracer-bullet** issues. Each issue is a thin vertical slice
 - Each slice delivers a narrow but COMPLETE path through every layer and is demoable/verifiable on its own.
 - Any prefactoring goes first — "make the change easy, then make the easy change."
 - **First real slice crosses the riskiest seam** — the integration the PRD's Seams section trusts least (new external API, unproven boundary). If the architecture is going to fail, learn it in slice 1, not slice 5.
+- **`Blocked by` is intra-pack only.** An issue may block on a sibling in the same pack, never on another pack — cross-feature ordering is pack sequencing (don't start pack B until pack A ships), decided with the user at plan time. Need a cross-pack edge anyway? That's one feature pretending to be two — merge the packs.
 
 ## Quiz the user
 

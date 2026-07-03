@@ -118,7 +118,11 @@ def _lint_warnings(root: Path) -> "list[str]":
             for ref in blocked_refs(text):
                 target = resolve_ref(ref)
                 if target is None:
-                    warnings.append(f'{label(f)}: Blocked by "{ref}" matches no issue in pack')
+                    # Blockers are intra-pack by definition; cross-pack = pack sequencing at plan level.
+                    if "/" in ref:
+                        warnings.append(f'{label(f)}: Blocked by "{ref}" looks cross-pack — unsupported; sequence packs instead')
+                    else:
+                        warnings.append(f'{label(f)}: Blocked by "{ref}" matches no issue in pack')
                     continue
                 graph[f.stem].append(target.stem)
                 if is_done(text) and not is_done(strip(target)):
@@ -199,6 +203,10 @@ def _state_snapshot(root: Path) -> "str | None":
     return "## .loom state\n" + "\n".join(lines) if lines else None
 
 
+# loom: per-turn alert ceiling — mirror of ALERT_SCAN_CEILING in stop-gate-logic.cjs.
+ALERT_SCAN_CEILING = 200
+
+
 # loom: Python mirror of anomalyAlert in omp-extension.mjs / loom-pre-llm.cjs — keep in sync.
 def _anomaly_alert(root: Path) -> str:
     import re
@@ -210,6 +218,9 @@ def _anomaly_alert(root: Path) -> str:
         for d in loom_dir.iterdir():
             if d.is_dir() and (d / "issues").is_dir():
                 issue_files.extend(sorted((d / "issues").glob("*.md")))
+
+    if len(issue_files) > ALERT_SCAN_CEILING:
+        return ""  # ceiling: session-start snapshot and the stop gate still cover big trees
 
     unverified, needs_info = [], []
     for f in issue_files:

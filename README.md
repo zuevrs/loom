@@ -128,6 +128,8 @@ node ~/.loom/hooks/stop-gate-logic.cjs --lint .   # explicit lint run, always ex
 
 An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. `LOOM_WITNESS=strict` upgrades the warning to a block; `LOOM_WITNESS=off` disables. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
 
+**Known limitation (Codex):** the witness recorder rides the `SubagentStart` hook; on Codex versions that don't fire it, checker spawns go unwitnessed and the warning appears even though verify genuinely ran. It is warn-only — read it as "confirm checkers ran", or set `LOOM_WITNESS=off` for that host. Keep `strict` to hosts whose spawn hooks are confirmed firing (Claude Code, Cursor).
+
 ## Host-Native Enforcement
 
 Loom leverages each host's native enforcement primitives to guarantee discipline at runtime — stronger than prompt injection alone.

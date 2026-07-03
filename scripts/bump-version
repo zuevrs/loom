@@ -1,0 +1,70 @@
+#!/usr/bin/env node
+// loom: bump every version carrier in one pass.
+//   node scripts/bump-version 0.15.0          — rewrite carriers
+//   node scripts/bump-version --dry 0.15.0    — list what would change
+// The manual version of this chore shipped three releases with stuck
+// plugin.json manifests before the drift canary caught it — hence a script.
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+// [file, pattern] — pattern matches the CURRENT version wherever it lives.
+const V = "(\\d+\\.\\d+\\.\\d+)";
+const CARRIERS = [
+  ["package.json", `"version": "${V}"`],
+  [".claude-plugin/plugin.json", `"version": "${V}"`],
+  [".codex-plugin/plugin.json", `"version": "${V}"`],
+  ["kiro-agent.json", `"version": "${V}"`],
+  ["hermes-plugin/plugin.yaml", `version: ${V}`],
+  ["hermes-plugin/__init__.py", `MANAGED_BLOCK_VERSION = "v${V}"`],
+  ["omp-extension.mjs", `const MANAGED_BLOCK_VERSION = "v${V}";`],
+  ["hooks/loom-session-start.cjs", `const MANAGED_BLOCK_VERSION = "v${V}";`],
+  ["opencode-plugin.mjs", `Version: ${V}`],
+  ["AGENTS.md", `<!-- loom:begin version=v${V} -->`],
+  ["skills/loom-init/SKILL.md", `<!-- loom:begin version=v${V} -->`],
+];
+
+const args = process.argv.slice(2);
+const dry = args.includes("--dry");
+const version = args.find((a) => /^\d+\.\d+\.\d+$/.test(a));
+
+if (!version) {
+  process.stderr.write(
+    "usage: node scripts/bump-version [--dry] <x.y.z>\n" +
+      `carriers: ${CARRIERS.length} files\n`
+  );
+  process.exit(1);
+}
+
+let failed = false;
+for (const [file, pattern] of CARRIERS) {
+  const path = resolve(ROOT, file);
+  const content = readFileSync(path, "utf8");
+  const re = new RegExp(pattern);
+  const m = content.match(re);
+  if (!m) {
+    process.stderr.write(`NO MATCH: ${file} (pattern: ${pattern})\n`);
+    failed = true;
+    continue;
+  }
+  const updated = content.replace(re, m[0].replace(m[1], version));
+  const line = `${m[1]} -> ${version}  ${file}`;
+  if (dry) {
+    process.stdout.write(`would bump: ${line}\n`);
+  } else if (m[1] === version) {
+    process.stdout.write(`already at: ${line}\n`);
+  } else {
+    writeFileSync(path, updated);
+    process.stdout.write(`bumped: ${line}\n`);
+  }
+}
+
+if (failed) {
+  process.stderr.write("carrier drifted from its pattern — fix the list above\n");
+  process.exit(1);
+}
+if (!dry) {
+  process.stdout.write("done — now run: bash scripts/check-drift && bash scripts/smoke\n");
+}

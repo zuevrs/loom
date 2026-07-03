@@ -1059,4 +1059,90 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   rmSync(tmp, { recursive: true });
 }
 
+// v0.14.2 — seam sweep: intra-pack blockers, bump script, alert ceiling, research sweep, Codex caveat
+{
+  const { spawnSync } = await import("node:child_process");
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const { lintWarnings, alertScanAllowed } = requireCjs(
+    resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
+  );
+
+  // G1: cross-pack ref gets the sequencing hint (JS + executed Python parity).
+  const tmp = mkdtempSync(join(tmpdir(), "loom-v0142-"));
+  const dir = join(tmp, ".loom", "auth", "issues");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "001-a.md"), "# A\n\n## Blocked by\n\n- billing/003\n\n## Status\n\nStatus: ready-for-agent\n");
+  const w = lintWarnings(tmp);
+  strictEqual(w.length, 1, "cross-pack ref yields exactly one warning");
+  ok(w[0].includes("looks cross-pack") && w[0].includes("sequence packs instead"), "warning teaches pack sequencing");
+  try {
+    const py = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+for x in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(x)`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        tmp,
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    strictEqual(py.trim().split(/\r?\n/)[0], w[0], "python mirrors the cross-pack wording");
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e;
+  }
+  ok(read("skills/loom-plan/TO-ISSUES.md").includes("intra-pack only"), "TO-ISSUES states the intra-pack stance");
+  rmSync(tmp, { recursive: true });
+
+  // G2: bump-version dry-run covers every carrier; no-args exits 1 with usage.
+  const bump = resolve(__dirname, "..", "scripts", "bump-version");
+  const dryRun = spawnSync(process.execPath, [bump, "--dry", "9.9.9"], { encoding: "utf8" });
+  strictEqual(dryRun.status, 0, "bump --dry exits 0");
+  strictEqual((dryRun.stdout.match(/^would bump: /gm) || []).length, 11, "dry-run lists all 11 carriers");
+  ok(!dryRun.stdout.includes("bumped:"), "dry-run writes nothing");
+  const usage = spawnSync(process.execPath, [bump], { encoding: "utf8" });
+  strictEqual(usage.status, 1, "no version → usage error");
+
+  // G3: alert ceiling — >200 issues silences the per-turn scan, snapshot still works.
+  const big = mkdtempSync(join(tmpdir(), "loom-v0142-big-"));
+  const bigDir = join(big, ".loom", "bulk", "issues");
+  mkdirSync(bigDir, { recursive: true });
+  for (let i = 0; i < 201; i++) {
+    writeFileSync(join(bigDir, `${String(i).padStart(3, "0")}.md`), "# I\n\n## Status\n\nStatus: done\n");
+  }
+  strictEqual(alertScanAllowed(big), false, "201 issues exceed the alert ceiling");
+  const preLlmOut = execFileSync(
+    process.execPath,
+    [resolve(__dirname, "..", "hooks", "loom-pre-llm.cjs")],
+    { cwd: big, encoding: "utf8", timeout: 5000 }
+  );
+  ok(!preLlmOut.includes("Loom alert"), "pre-LLM skips the alert above the ceiling");
+  ok(preLlmOut.includes("Loom invariants"), "static invariants survive the ceiling");
+  try {
+    const pyAlert = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        big,
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    strictEqual(pyAlert.trim(), "''", "hermes alert short-circuits above the ceiling");
+  } catch (e) {
+    if (e.code !== "ENOENT") throw e;
+  }
+  rmSync(big, { recursive: true });
+  ok(read("hermes-plugin/__init__.py").includes("ALERT_SCAN_CEILING = 200"), "hermes mirrors the ceiling");
+  ok(read("omp-extension.mjs").includes("alertScanAllowed"), "OMP alert respects the ceiling");
+
+  // G4 + G5: prose landed.
+  ok(read("skills/loom-tend/SKILL.md").includes(".loom/research/*.md"), "tend sweeps research notes");
+  ok(read("README.md").includes("Known limitation (Codex)"), "README carries the Codex witness caveat");
+}
+
 console.log("✔ All hook and adapter tests passed");

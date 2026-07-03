@@ -136,7 +136,13 @@ function lintWarnings(root) {
       for (const ref of blockedRefs(text)) {
         const target = resolveRef(ref);
         if (!target) {
-          warnings.push(`${label(p)}: Blocked by "${ref}" matches no issue in pack`);
+          // Blockers are intra-pack by definition; cross-feature ordering is
+          // pack sequencing at plan level, not graph edges.
+          warnings.push(
+            ref.includes("/")
+              ? `${label(p)}: Blocked by "${ref}" looks cross-pack — unsupported; sequence packs instead`
+              : `${label(p)}: Blocked by "${ref}" matches no issue in pack`
+          );
           continue;
         }
         graph[name].push(basename(target).replace(/\.md$/, ""));
@@ -328,6 +334,16 @@ function stateSnapshot(root) {
   return ["## .loom state", ...lines].join("\n");
 }
 
+// loom: per-turn alert ceiling — above this many issue files the per-prompt
+// scan is skipped (readdir count only, no file reads). Session-start snapshot
+// and the stop gate still cover big trees; upgrade path is an mtime cache.
+const ALERT_SCAN_CEILING = 200;
+
+/** True when .loom is small enough for per-turn (every prompt) scanning. */
+function alertScanAllowed(root) {
+  return collectIssuePaths(join(root, ".loom")).length <= ALERT_SCAN_CEILING;
+}
+
 /** @returns {string[]} issue paths whose (first) status matches */
 function findIssuesByStatus(root, status) {
   const hits = [];
@@ -391,6 +407,7 @@ module.exports = {
   isDoneWithoutVerify,
   stateSnapshot,
   lintWarnings,
+  alertScanAllowed,
   recordWitness,
   hasFreshWitness,
   unwitnessedApproved,
