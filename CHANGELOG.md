@@ -10,7 +10,7 @@ Seam sweep: five small holes left after the v0.14.0/v0.14.1 rounds — a state-m
 
 ### Added
 
-- **`scripts/bump-version`** — `node scripts/bump-version 0.15.0` rewrites every version carrier (all 11) in one pass; `--dry` previews, no version prints usage and exits 1, and a carrier whose pattern stopped matching fails loudly. The manual version of this chore shipped three releases with stuck plugin manifests before the drift canary caught it — hence a script. Dogfooded on this very release
+- **`scripts/bump-version`** — `node scripts/bump-version 0.15.0` rewrites every version carrier (all 12, including the changelog's `[Unreleased]` compare link) in one pass; `--dry` previews, no version prints usage and exits 1, and a carrier whose pattern stopped matching fails loudly. The manual version of this chore shipped three releases with stuck plugin manifests before the drift canary caught it — hence a script. Dogfooded on this very release
 - **Codex witness caveat** (README) — on Codex versions that don't fire `SubagentStart`, checker spawns go unwitnessed and the warn-only witness message appears despite real verify runs; guidance: read it as "confirm checkers ran" or `LOOM_WITNESS=off` for that host, keep `strict` to hosts with confirmed spawn hooks
 
 ### Changed
@@ -567,7 +567,7 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.2...HEAD
 [0.14.2]: https://github.com/zuevrs/loom/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/zuevrs/loom/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/zuevrs/loom/compare/v0.13.0...v0.14.0

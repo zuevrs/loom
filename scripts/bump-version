@@ -24,6 +24,9 @@ const CARRIERS = [
   ["opencode-plugin.mjs", `Version: ${V}`],
   ["AGENTS.md", `<!-- loom:begin version=v${V} -->`],
   ["skills/loom-init/SKILL.md", `<!-- loom:begin version=v${V} -->`],
+  // The [Unreleased] compare link must chase the newest tag, or the
+  // doc-consistency canary fails on the push AFTER tagging — bump it upfront.
+  ["CHANGELOG.md", `\\[Unreleased\\]: https://github.com/zuevrs/loom/compare/v${V}\\.\\.\\.HEAD`],
 ];
 
 const args = process.argv.slice(2);

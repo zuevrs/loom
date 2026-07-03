@@ -1099,7 +1099,7 @@ for x in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(x)`,
   const bump = resolve(__dirname, "..", "scripts", "bump-version");
   const dryRun = spawnSync(process.execPath, [bump, "--dry", "9.9.9"], { encoding: "utf8" });
   strictEqual(dryRun.status, 0, "bump --dry exits 0");
-  strictEqual((dryRun.stdout.match(/^would bump: /gm) || []).length, 11, "dry-run lists all 11 carriers");
+  strictEqual((dryRun.stdout.match(/^would bump: /gm) || []).length, 12, "dry-run lists all 12 carriers");
   ok(!dryRun.stdout.includes("bumped:"), "dry-run writes nothing");
   const usage = spawnSync(process.execPath, [bump], { encoding: "utf8" });
   strictEqual(usage.status, 1, "no version → usage error");
