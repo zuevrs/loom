@@ -4,6 +4,25 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.14.2] - 2026-07-03
+
+Seam sweep: five small holes left after the v0.14.0/v0.14.1 rounds — a state-machine ambiguity, a release-chore bug class, a hot-path ceiling, and two hygiene lines.
+
+### Added
+
+- **`scripts/bump-version`** — `node scripts/bump-version 0.15.0` rewrites every version carrier (all 11) in one pass; `--dry` previews, no version prints usage and exits 1, and a carrier whose pattern stopped matching fails loudly. The manual version of this chore shipped three releases with stuck plugin manifests before the drift canary caught it — hence a script. Dogfooded on this very release
+- **Codex witness caveat** (README) — on Codex versions that don't fire `SubagentStart`, checker spawns go unwitnessed and the warn-only witness message appears despite real verify runs; guidance: read it as "confirm checkers ran" or `LOOM_WITNESS=off` for that host, keep `strict` to hosts with confirmed spawn hooks
+
+### Changed
+
+- **`Blocked by` is intra-pack only** — the previously unspecified stance is now written: an issue may block on a sibling in the same pack, never on another pack; cross-feature ordering is pack sequencing decided at plan time (`TO-ISSUES.md`). The linter teaches it: a dangling ref containing `/` now warns `looks cross-pack — unsupported; sequence packs instead` (JS + Python mirror, executed parity test)
+- **Per-turn alert ceiling** — the pre-prompt anomaly scan (pre-LLM hook, OMP adapter, Hermes plugin) short-circuits above 200 issue files: a readdir count, zero file reads. Session-start snapshot and the stop gate still cover big trees; upgrade path is an mtime cache (`loom:` comment). Pinned by an executed 201-file fixture in both JS and Python
+- **`loom-tend` step 5 sweeps `.loom/research/`** — research notes whose decision already shipped are provenance, not reading list: keep if an ADR/PRD cites them, propose archiving otherwise (same contract as grill digests)
+
+### Migration
+
+Nothing to do — run `loom-init` when the session-start warning appears to refresh the managed block version.
+
 ## [0.14.1] - 2026-07-03
 
 Flow-seams grill: six places where the ritual prose left an agent guessing at a seam — now each has one written rule.
@@ -549,6 +568,7 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - `AGENTS.md` managed block with router and discipline
 
 [Unreleased]: https://github.com/zuevrs/loom/compare/v0.14.1...HEAD
+[0.14.2]: https://github.com/zuevrs/loom/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/zuevrs/loom/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/zuevrs/loom/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/zuevrs/loom/compare/v0.12.1...v0.13.0
