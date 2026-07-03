@@ -1243,4 +1243,37 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   }
 }
 
+// v0.16.0 — worked examples in load-bearing skills + no-op sweep
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  // Four examples: verify digest, filled issue, ## Log shape, grill cadence.
+  const verify = read("skills/loom-verify/SKILL.md");
+  ok(verify.includes("What good findings look like"), "verify carries an example digest");
+  ok(/severity: blocker \| export skips archived rows/.test(verify), "example finding quotes evidence shape");
+  ok(verify.includes("is an opinion, not evidence"), "example names the bar");
+
+  const toIssues = read("skills/loom-plan/TO-ISSUES.md");
+  ok(toIssues.includes("A well-cut slice, filled"), "TO-ISSUES carries a filled issue example");
+  ok(toIssues.includes("# CSV export downloads the current filter view"), "example issue is end-to-end behavioral");
+  ok(/````markdown[\s\S]*```bash[\s\S]*````/.test(toIssues), "nested fences use a 4-backtick outer block");
+
+  const impl = read("skills/loom-implement/SKILL.md");
+  ok(impl.includes("- Decision: streamed the CSV"), "implement carries a ## Log example");
+  ok(impl.includes("is noise, not a claim"), "Log example names the anti-pattern");
+
+  const grill = read("skills/loom-plan/GRILL.md");
+  ok(grill.includes("## The cadence, worked"), "GRILL.md carries a worked exchange");
+  ok(grill.includes("updates `CONTEXT.md`"), "worked exchange shows the inline CONTEXT write");
+  ok(grill.includes("want an ADR for it?"), "worked exchange offers (not writes) the ADR");
+
+  // No-op sweep: restatements removed, semantics still carried by their owners.
+  ok(!verify.includes("Neither checker fixes work"), "verify: judge-only restatement removed from process");
+  ok(verify.includes("**Judge only. Never fix.**") && verify.includes("Do not fix code during verify"), "judge-only survives in banner + hard stop");
+  ok(!/Rules:.*deletion over addition/.test(impl), "implement: ladder Rules no longer duplicates step 5");
+  ok(impl.includes("5. Prefer deletion over addition."), "deletion-over-addition survives as step 5");
+  ok(!verify.includes("Aggregate structured verdicts into the digest above"), "OMP workflow trimmed to OMP-specific facts");
+  ok(verify.includes("the general contract applies unchanged"), "OMP workflow defers to the general contract");
+}
+
 console.log("✔ All hook and adapter tests passed");

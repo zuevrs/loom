@@ -31,9 +31,8 @@ Structured digest (below), persisted into the issue's `## Verify` section on **e
    - **Named checker agents:** if the host ships pre-configured checker agents (e.g. OMP plugin agents `loom-verify-spec` / `loom-verify-standards`), **attempt them once per session** — never assume unavailability without one recorded attempt. Record the outcome (found / not found) in Sub-agent evidence and reuse it for every subsequent verify in the session. On not-found, fall back to generic sub-agents with the checker manifests inlined.
    - **Checker model tier:** checkers run on the host's **fast/cheap tier** when a model can be chosen — named checker manifests already pin it (OMP `model: fast`, Claude `model: haiku`); when spawning generic sub-agents through an interface that exposes model selection, pick the host's fast/cheap tier yourself. The **user's host config always wins** (model roles, redefined agents, user rules); when no tier is discernible, inherit the session model. Record the tier used in Sub-agent evidence either way.
 3. **Wait without spamming.** Checkers take tens of seconds. Prefer the host's blocking wait; if only polling is available, space polls out (~15s or more) and do useful aggregation work between them — no empty rapid-fire polls.
-4. Neither checker fixes work — judges only.
-5. Aggregate digest; blocking findings first.
-6. Run objective quality gates: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE.
+4. Aggregate digest; blocking findings first.
+5. Run objective quality gates: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE.
 
 ## Output format
 
@@ -61,6 +60,25 @@ APPROVE | REJECT | ESCALATE_HUMAN
 
 ## Recommended next action
 ```
+
+What good findings look like — spec quotes its line, standards names its source, checks are real commands:
+
+```markdown
+## Verdict
+REJECT
+
+## Spec findings
+- severity: blocker | export skips archived rows | PRD §Stories 7 "export includes archived entries when the filter is off" — `src/export.ts` drops them unconditionally | make the filter respect the toggle
+
+## Standards findings
+- severity: minor | new helper duplicates `formatDate` in `lib/dates.ts` | CONTEXT.md names dates a single-owner seam | reuse the existing helper
+
+## Checks executed
+- `npm test` → pass (14/14)
+- `npm run lint` → pass
+```
+
+(Remaining sections filled likewise.) A finding without a quoted spec line or a named source is an opinion, not evidence.
 
 Status effects: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change.
 
@@ -126,9 +144,8 @@ For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), 
 
 1. First verify of the session: try spawn via `task` tool with `agent: "loom-verify-spec"` and `agent: "loom-verify-standards"` (plugin ships both in `agents/`). Record found/not-found in Sub-agent evidence; reuse the answer for the rest of the session.
 2. If not found: fall back to parallel generic `task` sub-agents with the checker manifests inlined (`loomRole: "spec-checker"` / `"standards-checker"`), or host `reviewer`.
-3. Aggregate structured verdicts into the digest above.
-4. Write the verdict line into the issue's `## Verify` section; on APPROVE also set `Status: done`.
-5. `session_stop` blocks turn completion if any issue is `done` without an APPROVE line in `## Verify`.
+
+From there the general contract applies unchanged (digest, write-back, gates); OMP's `session_stop` is the Stop-gate equivalent.
 
 ## Done when
 

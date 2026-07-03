@@ -38,6 +38,18 @@ The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.
 - **Offer an ADR** (ask — never write silently) only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Any missing → skip. ([ADR-FORMAT.md](ADR-FORMAT.md))
 - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately. Drafting in English and rewriting later is a defect, not a workflow.
 
+## The cadence, worked
+
+One exchange showing the moves — one question, recommendation first, inline CONTEXT write, ADR offered (not written):
+
+> **Agent:** When a report is exported while filters are active — does the CSV mirror the filtered view or the full dataset? I'd recommend the filtered view: it matches what the user sees, and "export = screenshot of my view" is the least surprising contract. *(waits)*
+>
+> **User:** Filtered. And "report" is wrong — we call it a "ledger view" internally.
+>
+> **Agent:** *(updates `CONTEXT.md`: "Ledger view — the filtered, user-visible projection of the ledger; exports always mirror it" — before asking anything else)* That export contract is hard to reverse once users share CSVs, it'd surprise a newcomer, and we just traded completeness for predictability — want an ADR for it? *(waits; writes it only on yes)*
+
+Ten flat multiple-choice questions in a row with no doc writes is the anti-pattern this file exists to prevent.
+
 ## Exit gate
 
 Exit only when BOTH hold:

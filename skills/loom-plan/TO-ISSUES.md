@@ -29,6 +29,42 @@ Each approved slice → `.loom/<feature-slug>/issues/<NN>-<slug>.md` via [`ISSUE
 - Order follows `Blocked by` fields (blockers get lower numbers); no separate execution-order file.
 - Work that needs human judgement (auth, payments, irreversible migrations, credential surfaces) → `Status: ready-for-human` instead.
 
+A well-cut slice, filled (note: end-to-end behavior, no file paths, checkable criteria, runnable command):
+
+````markdown
+# CSV export downloads the current filter view
+
+**Parent:** ../PRD.md
+
+## What to build
+
+Export button produces a CSV of exactly the rows the active filters show — same columns, same order, streamed as a download.
+
+## Acceptance criteria
+
+- [ ] CSV row count equals the filtered view's row count
+- [ ] Applying a filter then exporting reflects the filter without a reload
+- [ ] Empty result exports headers only, not an error
+
+## Verification command
+
+```bash
+npm test -- --grep "csv export"
+```
+
+## Blocked by
+
+- 001-report-filters
+
+## Out of scope
+
+- XLSX format, scheduled exports
+
+## Status
+
+Status: ready-for-agent
+````
+
 Recommend host-native skills when scope touches security/perf/CI — do not fold into Loom core.
 
 ## Done when (whole ritual)
