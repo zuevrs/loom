@@ -4,6 +4,26 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-07-03
+
+Prose quality round: the enforcement mechanics are strong; the prose is what steers the model, and models imitate examples far better than they follow rules. Loom's skills carried zero worked examples until now.
+
+### Added
+
+- **Worked examples at point-of-use**, one per load-bearing artifact:
+  - **Verify digest example** (`loom-verify`, under the output format) — a REJECT excerpt where the spec finding quotes its PRD line, the standards finding names its source, and checks are real commands with pass counts; "a finding without a quoted spec line or a named source is an opinion, not evidence"
+  - **Filled issue example** (`TO-ISSUES.md` § Write) — a well-cut CSV-export slice: behavioral end-to-end title, no file paths, checkable criteria, runnable verification command, intra-pack blocker
+  - **`## Log` example** (`loom-implement` step 12) — Decision / Deviation / Open bullets; "narrating what the diff already shows is noise, not a claim"
+  - **Worked grill exchange** (`GRILL.md` § The cadence, worked) — one question with the recommendation first, the `CONTEXT.md` write landing *before* the next question, the ADR offered on the 3-part test and written only on yes; "ten flat multiple-choice questions in a row is the anti-pattern this file exists to prevent"
+
+### Changed
+
+- **No-op sweep** (restatements cut, semantics stay with their owners): verify's process no longer restates judge-only (banner + hard stop + failure mode carry it); the discipline ladder's Rules line no longer repeats "deletion over addition" (process step 5 owns it); the OMP verify workflow keeps only OMP-specific discovery steps and defers the rest to the general contract
+
+### Migration
+
+Nothing to do — run `loom-init` when the session-start warning appears to refresh the managed block version.
+
 ## [0.15.1] - 2026-07-03
 
 Upstream re-audit (the reference skill repos Loom distills from): one real delta taken, two windows clean.
@@ -601,7 +621,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/zuevrs/loom/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/zuevrs/loom/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/zuevrs/loom/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/zuevrs/loom/compare/v0.14.1...v0.14.2
