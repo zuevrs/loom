@@ -24,7 +24,7 @@
 
 - ...
 
-<!-- Implement appends a Log section here on completion: key decisions, deviations from this issue, open questions. Verify appends its verdict section (every attempt — APPROVE and REJECT both). -->
+<!-- Implement appends a Log section here AS WORK HAPPENS (a bullet per key decision, deviation, open question — crash-surviving trace, not an end-of-run summary). Verify appends its verdict section (every attempt — APPROVE and REJECT both). -->
 
 ## Status
 

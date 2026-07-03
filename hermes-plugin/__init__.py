@@ -163,24 +163,76 @@ def _state_snapshot(root: Path) -> "str | None":
         if files:
             packs[pack] = files
 
-    lines, needs_info, unverified = [], [], []
+    def _last_verdict_is_reject(text):
+        verdicts = [s for s in re.split(r"^(?=## )", text, flags=re.M) if re.match(r"## Verify\b", s)]
+        if not verdicts:
+            return False
+        return bool(re.search(r"^REJECT\b", verdicts[-1], re.M)) and not re.search(r"^APPROVE\b", verdicts[-1], re.M)
+
+    # Same extraction as blocked_refs in _lint_warnings (nested there) — keep in sync.
+    def _blocked_refs(text):
+        section = next((s for s in re.split(r"^(?=## )", text, flags=re.M) if re.match(r"## Blocked by\b", s)), None)
+        if not section:
+            return []
+        refs = []
+        for line in section.splitlines():
+            m = re.match(r"^\s*[-*]\s+(.+?)\s*$", line)
+            if not m:
+                continue
+            link = re.search(r"\]\(([^)]+)\)", m.group(1))
+            ref = (link.group(1) if link else m.group(1)).strip()
+            ref = re.sub(r"\.md$", "", ref)
+            if ref and ref.lower() != "none":
+                refs.append(ref)
+        return refs
+
+    lines, needs_info, unverified, rework = [], [], [], []
     for pack, files in packs.items():
         counts = {}
+        by_file = {}
+        by_name = {f.stem: f for f in files}
+
+        def _resolve(ref):
+            if ref in by_name:
+                return by_name[ref]
+            return next((by_name[n] for n in by_name if n.startswith(ref + "-")), None)
+
         for f in files:
             text = re.sub(r"<!--[\s\S]*?-->", "", f.read_text())
             m = re.search(r"^Status:\s*(\S+)", text, re.M)
             status = m.group(1) if m else "unknown"
             counts[status] = counts.get(status, 0) + 1
+            by_file[f] = (status, text)
             if status == "needs-info":
                 needs_info.append(f.name)
+            if status not in ("done", "wontfix") and _last_verdict_is_reject(text):
+                rework.append(f.name)
             # Same rule as the real gate (isDoneWithoutVerify): done anywhere, not just first Status line.
             if re.search(r"^Status:\s*done\b", text, re.M) and not any(
                 re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
                 for s in re.split(r"^(?=## )", text, flags=re.M)
             ):
                 unverified.append(f.name)
+
+        # Next up = lowest ready-for-agent with ALL blockers done (wontfix does not unblock).
+        def _is_done(text):
+            return bool(re.search(r"^Status:\s*done\b", text, re.M))
+
+        next_up = next(
+            (
+                f
+                for f in files
+                if by_file[f][0] == "ready-for-agent"
+                and all(
+                    (t := _resolve(r)) is not None and _is_done(by_file[t][1])
+                    for r in _blocked_refs(by_file[f][1])
+                )
+            ),
+            None,
+        )
+
         summary = ", ".join(f"{n} {s}" for s, n in counts.items())
-        lines.append(f"{pack}: {summary}")
+        lines.append(f"{pack}: {summary}" + (f" — next up: {next_up.name}" if next_up else ""))
 
     def _cap(names):
         head = ", ".join(names[:5])
@@ -188,6 +240,8 @@ def _state_snapshot(root: Path) -> "str | None":
 
     if needs_info:
         lines.append(f"needs-info awaiting answers: {_cap(needs_info)}")
+    if rework:
+        lines.append(f"rework pending (last verdict REJECT): {_cap(rework)} — read its ## Verify before re-implementing")
     if unverified:
         lines.append(f"⚠️ done without APPROVE (stop gate will block): {_cap(unverified)}")
 
@@ -199,6 +253,22 @@ def _state_snapshot(root: Path) -> "str | None":
     lines.extend(f"lint: {w}" for w in lint[:5])
     if len(lint) > 5:
         lines.append(f"lint: +{len(lint) - 5} more — run `node stop-gate-logic.cjs --lint`")
+
+    # Crash-recovery breadcrumb — mirror of dirtyTreeCount in stop-gate-logic.cjs.
+    try:
+        import subprocess
+
+        out = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=root, capture_output=True, timeout=2, text=True,
+        )
+        dirty = len([l for l in out.stdout.splitlines() if l.strip()]) if out.returncode == 0 else 0
+    except Exception:
+        dirty = 0  # best-effort: absence of git must never break session start
+    if dirty:
+        lines.append(
+            f"working tree: {dirty} uncommitted change(s) — possibly interrupted work; check git status/diff before picking an issue"
+        )
 
     return "## .loom state\n" + "\n".join(lines) if lines else None
 

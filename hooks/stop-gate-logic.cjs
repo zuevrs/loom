@@ -273,6 +273,31 @@ const listNames = (paths) =>
     .map((p) => basename(p))
     .join(", ") + (paths.length > 5 ? `, +${paths.length - 5} more` : "");
 
+/** Rework pending = the LAST ## Verify section's digest line is REJECT. */
+function lastVerdictIsReject(text) {
+  const verdicts = text
+    .split(/^(?=## )/m)
+    .filter((s) => /^## Verify\b/.test(s));
+  if (!verdicts.length) return false;
+  const last = verdicts[verdicts.length - 1];
+  return /^REJECT\b/m.test(last) && !/^APPROVE\b/m.test(last);
+}
+
+/** Uncommitted-change count, or 0 when not a repo / no git / too slow. */
+function dirtyTreeCount(root) {
+  try {
+    const { execFileSync } = require("node:child_process");
+    const out = execFileSync("git", ["status", "--porcelain"], {
+      cwd: root,
+      timeout: 2000,
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return out.toString().split("\n").filter(Boolean).length;
+  } catch {
+    return 0; // best-effort: absence of git must never break session start
+  }
+}
+
 /**
  * Deterministic .loom state digest for session-start injection.
  * @returns {string|null} null when the project has no .loom/
@@ -284,23 +309,56 @@ function stateSnapshot(root) {
   const needsInfo = [];
   const unverifiedDone = [];
 
-  for (const [pack, paths] of Object.entries(packs)) {
+  const rework = [];
+  for (const [pack, unsorted] of Object.entries(packs)) {
+    const paths = unsorted.slice().sort();
     const counts = {};
+    const byFile = {}; // path → { status, text (comment-stripped) }
+    const byName = {};
+    for (const p of paths) byName[basename(p).replace(/\.md$/, "")] = p;
+    const resolveRef = (ref) => {
+      if (byName[ref]) return byName[ref];
+      const hit = Object.keys(byName).find((n) => n.startsWith(ref + "-"));
+      return hit ? byName[hit] : null;
+    };
+
     for (const p of paths) {
       const content = readFileSync(p, "utf8");
       const status = issueStatus(content);
       counts[status] = (counts[status] || 0) + 1;
+      byFile[p] = { status, text: content.replace(/<!--[\s\S]*?-->/g, "") };
       if (status === "needs-info") needsInfo.push(p);
       if (isDoneWithoutVerify(content)) unverifiedDone.push(p);
+      if (status !== "done" && status !== "wontfix" && lastVerdictIsReject(byFile[p].text)) {
+        rework.push(p);
+      }
     }
+
+    // Next up = lowest-numbered ready-for-agent whose blockers are ALL done
+    // (wontfix does not unblock — same rule as loom-implement step 1).
+    const next = paths.find((p) => {
+      if (byFile[p].status !== "ready-for-agent") return false;
+      return blockedRefs(byFile[p].text).every((ref) => {
+        const target = resolveRef(ref);
+        return target && isDone(byFile[target].text);
+      });
+    });
+
     const summary = Object.entries(counts)
       .map(([s, n]) => `${n} ${s}`)
       .join(", ");
-    lines.push(`${pack}: ${summary}`);
+    lines.push(
+      `${pack}: ${summary}` + (next ? ` — next up: ${basename(next)}` : "")
+    );
   }
 
   if (needsInfo.length) {
     lines.push(`needs-info awaiting answers: ${listNames(needsInfo)}`);
+  }
+  if (rework.length) {
+    lines.push(
+      `rework pending (last verdict REJECT): ${listNames(rework)} — read its ## Verify before re-implementing`
+    );
   }
   if (unverifiedDone.length) {
     lines.push(
@@ -327,6 +385,15 @@ function stateSnapshot(root) {
   if (lint.length > 5) {
     lines.push(
       `lint: +${lint.length - 5} more — run \`node stop-gate-logic.cjs --lint\``
+    );
+  }
+
+  // Crash-recovery breadcrumb: a session that died mid-implement leaves no
+  // ## Log and no status change — uncommitted changes are the only trace.
+  const dirty = dirtyTreeCount(root);
+  if (dirty > 0) {
+    lines.push(
+      `working tree: ${dirty} uncommitted change(s) — possibly interrupted work; check git status/diff before picking an issue`
     );
   }
 
@@ -407,6 +474,8 @@ module.exports = {
   isDoneWithoutVerify,
   stateSnapshot,
   lintWarnings,
+  lastVerdictIsReject,
+  dirtyTreeCount,
   alertScanAllowed,
   recordWitness,
   hasFreshWitness,

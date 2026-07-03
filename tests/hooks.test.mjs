@@ -453,7 +453,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const impl = rf(resolve(skillsDir, "loom-implement", "SKILL.md"), "utf8");
   const verify = rf(resolve(skillsDir, "loom-verify", "SKILL.md"), "utf8");
   const issueTpl = rf(resolve(skillsDir, "loom-plan", "ISSUE-TEMPLATE.md"), "utf8");
-  ok(impl.includes("Write `## Log` into the issue file"), "implement writes the Log before verify");
+  ok(impl.includes("Append a `## Log` bullet"), "implement writes the Log before verify");
   ok(impl.includes("`## Log` written into the issue file"), "Log is part of implement done-when");
   ok(verify.includes("Issue `## Log` when present"), "verify reads the Log as input");
   ok(verify.includes("flag undeclared deviations"), "verify flags deviations missing from the Log");
@@ -1143,6 +1143,94 @@ print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
   // G4 + G5: prose landed.
   ok(read("skills/loom-tend/SKILL.md").includes(".loom/research/*.md"), "tend sweeps research notes");
   ok(read("README.md").includes("Known limitation (Codex)"), "README carries the Codex witness caveat");
+}
+
+// v0.15.0 — session resumability: next-up pointer, rework-pending, dirty-tree breadcrumb, log-as-you-go
+{
+  const { spawnSync } = await import("node:child_process");
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const { stateSnapshot, lastVerdictIsReject, dirtyTreeCount } = requireCjs(
+    resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
+  );
+
+  // Fixture pack: 001 done+APPROVE, 002 rework (REJECT last), 003 blocked by 001 (done → unblocked), 004 blocked by 002 (not done).
+  const tmp = mkdtempSync(join(tmpdir(), "loom-v0150-"));
+  const dir = join(tmp, ".loom", "auth", "issues");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "001-base.md"), "# A\n\n## Verify\n\nAPPROVE — checks ran\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dir, "002-mid.md"), "# B\n\n## Verify\n\nAPPROVE — first pass\n\n## Verify\n\nREJECT — seam untested\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "003-next.md"), "# C\n\n## Blocked by\n\n- 001\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "004-later.md"), "# D\n\n## Blocked by\n\n- 002-mid\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "000-cancelled.md"), "# W\n\n## Status\n\nStatus: wontfix\n");
+  writeFileSync(join(dir, "005-onwf.md"), "# E\n\n## Blocked by\n\n- 000-cancelled\n\n## Status\n\nStatus: ready-for-agent\n");
+
+  const snap = stateSnapshot(tmp);
+  ok(/auth: .*— next up: 002-mid\.md/.test(snap), "next up = lowest unblocked ready-for-agent (002 has no blockers)");
+  ok(snap.includes("rework pending (last verdict REJECT): 002-mid.md"), "REJECT-last flagged as rework");
+  ok(!snap.includes("004-later"), "issue blocked by not-done sibling is not next up");
+  ok(!/next up: 005/.test(snap), "wontfix blocker does not unblock — 005 never next up");
+  ok(!snap.includes("working tree:"), "non-git fixture gets no dirty-tree line");
+
+  // Python parity on the PRE-mutation fixture: rework line + next-up.
+  const pySnap = (dirArg) => {
+    try {
+      return execFileSync(
+        "python3",
+        ["-c",
+          `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
+          resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+          dirArg,
+        ],
+        { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+      );
+    } catch (e) {
+      if (e.code !== "ENOENT") throw e;
+      return null; // no python3 on this machine — parity runs in CI
+    }
+  };
+  const pyBefore = pySnap(tmp);
+  if (pyBefore !== null) {
+    ok(pyBefore.includes("rework pending (last verdict REJECT): 002-mid.md"), "python mirrors the rework line");
+    ok(/auth: .*— next up: 002-mid\.md/.test(pyBefore), "python mirrors pre-mutation next-up");
+  }
+
+  // Verdict ordering: REJECT then APPROVE = resolved, not rework.
+  ok(!lastVerdictIsReject("## Verify\n\nREJECT — x\n\n## Verify\n\nAPPROVE — fixed\n"), "APPROVE after REJECT clears rework");
+  ok(lastVerdictIsReject("## Verify\n\nAPPROVE — v1\n\n## Verify\n\nREJECT — regression\n"), "REJECT after APPROVE is rework");
+  strictEqual(lastVerdictIsReject("no verdicts here"), false, "no Verify section — no rework");
+
+  // Once 002 is done, next up moves to 003 (blocked only by done 001).
+  writeFileSync(join(dir, "002-mid.md"), "# B\n\n## Verify\n\nAPPROVE — fixed\n\n## Status\n\nStatus: done\n");
+  ok(/auth: .*— next up: 003-next\.md/.test(stateSnapshot(tmp)), "next up advances once blocker resolution changes");
+
+  // Dirty-tree breadcrumb: real git repo with an uncommitted file.
+  const gitOk = spawnSync("git", ["init", "-q", tmp], { encoding: "utf8" }).status === 0;
+  if (gitOk) {
+    writeFileSync(join(tmp, "wip.txt"), "uncommitted");
+    ok(dirtyTreeCount(tmp) > 0, "dirtyTreeCount sees uncommitted files");
+    ok(
+      stateSnapshot(tmp).includes("possibly interrupted work"),
+      "snapshot carries the interrupted-work breadcrumb"
+    );
+  }
+
+  // Python parity on the POST-mutation fixture: advanced next-up + dirty tree.
+  const pyAfter = pySnap(tmp);
+  if (pyAfter !== null) {
+    ok(/auth: .*— next up: 003-next\.md/.test(pyAfter), "python mirrors next-up");
+    if (gitOk) {
+      ok(pyAfter.includes("possibly interrupted work"), "python mirrors the dirty-tree line");
+    }
+  }
+  rmSync(tmp, { recursive: true, force: true });
+
+  // G4: log-as-you-go prose landed.
+  ok(read("skills/loom-implement/SKILL.md").includes("Log as you go, not at the end"), "implement logs in the moment");
+  ok(read("skills/loom-plan/ISSUE-TEMPLATE.md").includes("AS WORK HAPPENS"), "template comment carries the contract");
+  ok(read("README.md").includes("Sessions die; the snapshot resumes"), "README explains the resume story");
 }
 
 console.log("✔ All hook and adapter tests passed");

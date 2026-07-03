@@ -110,7 +110,7 @@ Three light lifecycle hooks — non-mutating, no auto-run.
 
 | Hook | Purpose |
 |---|---|
-| `session-start` | Sync context pointers; check managed-block version; `.loom` state snapshot with lint warnings |
+| `session-start` | Sync context pointers; check managed-block version; `.loom` state snapshot — per-pack status counts with a **next up** pointer, rework-pending REJECTs, uncommitted-changes breadcrumb, lint warnings |
 | `pre-LLM` | Invariant guard (router, human-gate, maker/checker, verify-before-done) + anomaly alert — one extra block **only when something is wrong** (done-without-APPROVE, needs-info pending, lint warnings), so discipline survives context compaction at zero cost when clean |
 | `sub-agent-spawn` | Attach role manifest; enforce checker no-auto-fix; record a **verify witness** when a checker role spawns |
 
@@ -123,6 +123,10 @@ State-machine corruption is silent: a typo'd `Status: redy-for-agent` hides an i
 ```bash
 node ~/.loom/hooks/stop-gate-logic.cjs --lint .   # explicit lint run, always exit 0
 ```
+
+### Sessions die; the snapshot resumes
+
+A session killed mid-implement changes no status and files no report — the only traces are uncommitted changes and whatever `## Log` bullets were written in the moment (which is why the implement ritual logs as it goes, not at the end). The session-start snapshot turns those traces into a resume point: each pack line names the **next up** issue (lowest-numbered unblocked `ready-for-agent`), issues whose last verify verdict was REJECT are flagged as rework pending, and a dirty working tree gets an "possibly interrupted work" breadcrumb. A fresh session reads the snapshot and knows whether it is starting clean or picking up a corpse.
 
 ### The verify witness
 
