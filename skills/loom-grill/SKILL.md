@@ -1,6 +1,6 @@
 ---
 name: loom-grill
-description: Freeform brainstorm grill on any topic — no PRD, no issues, no project docs. Use when the user wants to think something through out loud (even unrelated to the repo) and walk away with a single digest file of the session. Not for planning buildable work — when the user wants a PRD and issues, that is loom-plan.
+description: Grill any topic freeform — relentless brainstorm interview, no PRD, no issues, no project docs. Use when the user wants to think something through out loud (even unrelated to the repo) and walk away with a single digest file of the session. Not for planning buildable work — when the user wants a PRD and issues, that is loom-plan.
 disable-model-invocation: true
 ---
 
@@ -41,6 +41,7 @@ Sharpen the user's thinking on any topic through a relentless interview, then co
 - NEVER write PRD, issues, `CONTEXT.md`, or ADRs from this skill — digest file only.
 - NEVER write the digest before the user confirms the path.
 - Never batch questions. One `ask` call = one question. Always.
+- **Never enact what was discussed from inside the grill** — no code, no configs, no doc writes beyond the digest. The user liking an idea is not a go; wrap up and route to the right ritual.
 
 ## Failure modes
 

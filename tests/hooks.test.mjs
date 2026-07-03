@@ -1233,4 +1233,14 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(read("README.md").includes("Sessions die; the snapshot resumes"), "README explains the resume story");
 }
 
+// v0.15.1 — upstream re-audit: enactment gates (Pocock grilling #433), grill leading word
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize enactment");
+  ok(read("skills/loom-grill/SKILL.md").includes("Never enact what was discussed from inside the grill"), "loom-grill: no enactment from inside the grill");
+  for (const f of ["skills/loom-grill/SKILL.md", "commands/loom-grill.md"]) {
+    ok(/^description: Grill /m.test(read(f)), `${f} description leads with the grill verb`);
+  }
+}
+
 console.log("✔ All hook and adapter tests passed");
