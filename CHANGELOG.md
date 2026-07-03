@@ -4,6 +4,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-07-03
+
+Upstream re-audit (the reference skill repos Loom distills from): one real delta taken, two windows clean.
+
+### Changed
+
+- **Enthusiasm is not a go** (Plan grill hard stop) — "interesting" / "good idea" / "love it" resolves a branch of the decision tree; it does not authorize enactment. No PRD, no issues, no code until the explicit go at the exit gate
+- **No enactment from inside the grill** (`loom-grill` hard stop) — no code, configs, or doc writes beyond the digest; the user liking an idea is not a go — wrap up and route to the right ritual
+- **`loom-grill` description leads with the verb** — "Grill any topic freeform …" (skill + command), sharpening invocation routing; the negative example stays
+
+### Migration
+
+Nothing to do.
+
 ## [0.15.0] - 2026-07-03
 
 Session resumability: a session killed mid-implement changes no status and files no report — until now the only recovery was manual archaeology. The snapshot becomes a resume point.
@@ -587,7 +601,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/zuevrs/loom/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/zuevrs/loom/compare/v0.14.2...v0.15.0
 [0.14.2]: https://github.com/zuevrs/loom/compare/v0.14.1...v0.14.2
 [0.14.1]: https://github.com/zuevrs/loom/compare/v0.14.0...v0.14.1
