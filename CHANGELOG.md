@@ -4,6 +4,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+- `docs/omp-advisor.md`: field-run limits documented — the advisor reviews at turn boundaries (a headless `omp -p` run can exit before the shadow reviews the final turn), and it is user-aligned by design (explicitly user-requested anti-patterns are out of its lane); interactive TUI sessions are where the profile earns its keep
+
 ## [0.21.0] - 2026-07-04
 
 A Loom discipline profile for the OMP advisor — the first enforcement layer that acts **during** the turn. Everything Loom had fires before (managed block, pre-LLM invariants) or after (stop gate, checkers, witness); the advisor is OMP's second-model shadow that reviews each turn incrementally and injects notes, where `concern`/`blocker` interrupt the turn in progress. The profile teaches it Loom's ritual contracts as narrow signatures, so a collapsed grill or a gate bypass is called out on the turn it happens — not in next-day dump archaeology. Host-boundary honest: OMP-only, optional, additive — one YAML the user copies per project; skills, hooks, and the managed block are untouched.
