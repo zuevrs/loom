@@ -31,12 +31,14 @@ Report = PRs. Silent death is the only forbidden exit.
 
 | Host | Launch line (from the worktree) | Outer bound |
 |---|---|---|
-| OMP | `caffeinate -i nohup omp -p --cwd <worktree> --approval-mode yolo --max-time 7200 "<seed>" > dispatch.log 2>&1 &` | `--max-time` |
+| OMP | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i omp -p --cwd <worktree> --approval-mode yolo --max-time 7200 "<seed>" > <worktree>/dispatch.log 2>&1'` | `--max-time` |
 | Claude Code | `claude --bg --name "dispatch <pack>" "<seed>"` | its permission config; manage via `claude agents` |
-| Codex | `caffeinate -i nohup codex exec --cd <worktree> "<seed>" > dispatch.log 2>&1 &` — or `/goal` with a budget cap | goal budget |
+| Codex | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i codex exec --cd <worktree> "<seed>" > <worktree>/dispatch.log 2>&1'` — or `/goal` with a budget cap | goal budget |
 | Cursor | Background/cloud agent with the seed as prompt (already branch-and-PR-shaped) | its limits |
-| opencode | `cd <worktree> && caffeinate -i nohup opencode run "<seed>" > dispatch.log 2>&1 &` (no cwd flag — cd first) | outer timeout |
+| opencode | `screen -dmS dispatch-<pack> sh -c 'cd <worktree> && caffeinate -i opencode run "<seed>" > dispatch.log 2>&1'` (no cwd flag — cd inside) | outer timeout |
 
+- **The fresh session is load-bearing when the dispatcher is itself an agent.** Harness-managed shells kill their whole process session when the command (or the agent's shell) ends — `nohup … &` and even a double-forked subshell die with it; field-verified twice. `screen -dmS` (preinstalled on macOS; `tmux new-session -d` where present) detaches into a session of its own and survives. A human launching from their own terminal can use plain `nohup … &`.
+- Check on the run: `screen -ls`, attach with `screen -r dispatch-<pack>`, log tails to `dispatch.log`.
 - `caffeinate -i` is macOS; elsewhere use the platform's keep-awake or a machine that doesn't sleep.
 - Autonomous tool approval (`yolo` / `--bg` permissions) is required: the first approval prompt in a background run is a dead run — nobody answers, no draft PR gets written.
 - Optional hardening on OMP: `--profile factory` isolates settings/sessions (auth comes from env vars, or run the profile once interactively first).

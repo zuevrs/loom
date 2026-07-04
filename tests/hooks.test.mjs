@@ -1547,6 +1547,9 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   for (const host of ["OMP", "Claude Code", "Codex", "Cursor", "opencode"])
     ok(d.includes(`| ${host} |`), `launch matrix covers ${host}`);
   ok(/opencode.*cd <worktree>/.test(d), "opencode row enforces the worktree cwd");
+  // field run 5: nohup and double-fork both died with the agent dispatcher's shell session; screen -dmS survived
+  ok(/screen -dmS dispatch-<pack>.*omp -p/.test(d), "OMP launch detaches via a fresh screen session");
+  ok(d.includes("fresh session is load-bearing"), "the why of screen-over-nohup is stated");
   // routes: the capability is reachable from implement, plan exit, tend, and the unattended doc
   ok(/read \[`DISPATCH\.md`\]\(DISPATCH\.md\) and follow it/.test(read("skills/loom-implement/SKILL.md")), "implement routes launching to DISPATCH.md");
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("background run on the whole pack"), "plan exit offers the background hand-off");

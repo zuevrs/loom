@@ -4,6 +4,10 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dispatch launch lines detach via `screen -dmS`, not `nohup … &`** — field run 5 falsified the nohup form twice: when the dispatcher is itself an agent, harness-managed shells kill their whole process session on command exit, taking `nohup` children and even double-forked subshells with them. A fresh `screen` session (preinstalled on macOS; log via `sh -c '… > dispatch.log'` — Apple's screen 4.00.03 lacks `-Logfile`) survives; a human dispatching from their own terminal can still use plain `nohup`. Test pins updated
+
 ## [0.19.0] - 2026-07-04
 
 The day factory: launch a pack burn from an attended session and walk away. The launch primitive was the one missing piece — the goal-run contract (batch mode), stop conditions (draft-PR exits), and runaway protection already existed. A re-distill under this frame flips one earlier verdict: Pocock's `claude-handoff` was skipped as Claude-only launch mechanics, but as the attended→background bridge it is exactly the missing piece — and Loom's version is cheaper, because the disk is the handoff: the seed prompt is three lines, `.loom/` state carries the rest (ADR-0037 extended, not broken).
