@@ -395,7 +395,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(verify.includes("Checker model tier"), "verify documents the checker model tier rule");
   ok(verify.includes("user's host config always wins"), "user config beats the tier default");
   ok(verify.includes("Checker model tier: fast/cheap tier"), "digest records the tier used");
-  ok(ompSpec.includes("model: fast") && ompStd.includes("model: fast"), "OMP checkers pin the fast tier");
+  ok(ompSpec.includes("model: pi/smol") && ompStd.includes("model: pi/smol"), "OMP checkers pin the fast tier via the smol model role (bare `fast` is a raw name pattern, not a role — it silently falls back to the session model)");
   ok(claudeSpec.includes("model: haiku") && claudeStd.includes("model: haiku"), "Claude checkers pin the haiku tier");
   ok(JSON.parse(claudePlugin).agents === "./.claude-plugin/agents/", "plugin.json wires the Claude agents dir explicitly");
 

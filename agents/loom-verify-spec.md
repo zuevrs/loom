@@ -2,7 +2,7 @@
 name: loom-verify-spec
 description: Independent spec checker for loom-verify. Spawn via task tool with agent "loom-verify-spec" after implement.
 tools: [read, grep, find]
-model: fast
+model: pi/smol
 blocking: true
 output:
   type: object

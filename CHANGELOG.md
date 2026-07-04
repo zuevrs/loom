@@ -4,6 +4,14 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-07-04
+
+### Fixed
+
+- **OMP checker agents actually land on the fast tier now: `model: fast` → `model: pi/smol`.** In OMP, only `pi/`-prefixed values target a model *role*; a bare `fast` is a raw name pattern, and on providers whose model ids don't contain the substring (e.g. `zai/glm-*`) it matched nothing and silently fell back to the session model — field run 6's checkers ran on the expensive primary while the README promised "judging is cheaper than making". `pi/smol` resolves through the user's `modelRoles: smol:` entry; with smol unset it inherits the session model, so nothing regresses. README tier table, authoring guidance, and the verify skill's tier line corrected; test pin now guards the role-alias form
+
+### Docs
+
 - `docs/omp-advisor.md`: field-run limits documented — the advisor reviews at turn boundaries (a headless `omp -p` run can exit before the shadow reviews the final turn), and it is user-aligned by design (explicitly user-requested anti-patterns are out of its lane); interactive TUI sessions are where the profile earns its keep
 
 ## [0.21.0] - 2026-07-04
@@ -756,7 +764,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.21.1...HEAD
+[0.21.1]: https://github.com/zuevrs/loom/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/zuevrs/loom/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/zuevrs/loom/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/zuevrs/loom/compare/v0.19.0...v0.19.1

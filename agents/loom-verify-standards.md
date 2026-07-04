@@ -2,7 +2,7 @@
 name: loom-verify-standards
 description: Independent standards checker for loom-verify. Spawn via task tool with agent "loom-verify-standards" after implement.
 tools: [read, grep, find]
-model: fast
+model: pi/smol
 blocking: true
 output:
   type: object

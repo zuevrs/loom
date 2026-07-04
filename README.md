@@ -158,7 +158,7 @@ Verify's two checkers default to the host's **fast/cheap tier** — judging is c
 
 | Host | How the tier is set | How you override |
 |------|--------------------|------------------|
-| OMP | plugin agents carry `model: fast` | your OMP model-roles config defines what `fast` means |
+| OMP | plugin agents carry `model: pi/smol` (the fast-tier model role) | your OMP `modelRoles: smol:` entry defines the tier; unset smol inherits the session model |
 | Claude Code / Droid | plugin agents carry `model: haiku` | redefine the agent in `.claude/agents/` (project level wins) or set `model: inherit` |
 | Cursor | skill rule — spawn picks a fast/cheap slug via the Task `model` param | a user rule pinning sub-agent models wins |
 | OpenCode | inherit by default | define checker agents with models in `opencode.json` |
