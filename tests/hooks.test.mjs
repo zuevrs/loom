@@ -1542,6 +1542,11 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(d.includes("re-dispatch = resume"), "recovery is re-entry from disk state");
   ok(d.includes("Never dispatch `ready-for-human`"), "human-judgement issues stay out of background runs");
   ok(/Morning review/.test(d) && d.includes("No PRs at all"), "morning checklist detects infra death");
+  ok(d.includes("same error twice in a row"), "stagnation rule rides inside the run contract");
+  ok(d.includes("gh auth status") && d.includes("stop-gate-logic.cjs --lint"), "preconditions check auth and graph before launch");
+  for (const host of ["OMP", "Claude Code", "Codex", "Cursor", "opencode"])
+    ok(d.includes(`| ${host} |`), `launch matrix covers ${host}`);
+  ok(/opencode.*cd <worktree>/.test(d), "opencode row enforces the worktree cwd");
   // routes: the capability is reachable from implement, plan exit, tend, and the unattended doc
   ok(/read \[`DISPATCH\.md`\]\(DISPATCH\.md\) and follow it/.test(read("skills/loom-implement/SKILL.md")), "implement routes launching to DISPATCH.md");
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("background run on the whole pack"), "plan exit offers the background hand-off");

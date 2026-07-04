@@ -35,7 +35,7 @@ Report = PRs. Silent death is the only forbidden exit.
 | Claude Code | `claude --bg --name "dispatch <pack>" "<seed>"` | its permission config; manage via `claude agents` |
 | Codex | `caffeinate -i nohup codex exec --cd <worktree> "<seed>" > dispatch.log 2>&1 &` — or `/goal` with a budget cap | goal budget |
 | Cursor | Background/cloud agent with the seed as prompt (already branch-and-PR-shaped) | its limits |
-| opencode | `caffeinate -i nohup opencode run "<seed>" > dispatch.log 2>&1 &` | outer timeout |
+| opencode | `cd <worktree> && caffeinate -i nohup opencode run "<seed>" > dispatch.log 2>&1 &` (no cwd flag — cd first) | outer timeout |
 
 - `caffeinate -i` is macOS; elsewhere use the platform's keep-awake or a machine that doesn't sleep.
 - Autonomous tool approval (`yolo` / `--bg` permissions) is required: the first approval prompt in a background run is a dead run — nobody answers, no draft PR gets written.
@@ -59,7 +59,7 @@ The run cannot page anyone; this checklist catches every death mode:
 3. **No PRs at all** = infra death (network, OOM, `--max-time` mid-issue, killed process) — read the run's own log: `dispatch.log` tail, `omp -r` the session, `claude agents`
 4. Worktree dirty = an issue died mid-flight — its `## Log` bullets say where
 
-Recovery is re-entry, not repair: state lives on disk, so **re-dispatch = resume** — a fresh run reads statuses and continues from the next unblocked issue. A half-finished issue can also be picked up attended in the worktree.
+Recovery is re-entry, not repair: state lives on disk, so **re-dispatch = resume** — a fresh run reads statuses and continues from the next unblocked issue.
 
 ## 6 — Collect
 
