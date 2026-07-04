@@ -1442,8 +1442,9 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     for (const keep of ["### Discipline", "### Invariants", "### Router", "**Confusable pairs:**", "### Session state", "### Status vocabulary", "needs-triage`, `needs-info"])
       ok(block.includes(keep), `${p} block keeps universal section: ${keep}`);
     // ritual-time content is out — carried by GRILL.md, loom-verify, TO-ISSUES.md instead
-    for (const gone of ["Invocation policy", "Transitions: unlabeled", "After Verify passes", "Model-invoked"])
+    for (const gone of ["Invocation policy", "Transitions: unlabeled", "Transition rules live", "After Verify passes", "Model-invoked"])
       ok(!block.includes(gone), `${p} block sheds ritual-time content: ${gone}`);
+    // ceiling = post-trim size (59) + small headroom, well under the pre-trim 73
     ok(block.split("\n").length <= 65, `${p} block stays under the 65-line ceiling`);
   }
   // the moved rules still exist at their ritual homes (no rule was lost, only relocated)

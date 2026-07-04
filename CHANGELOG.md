@@ -10,8 +10,8 @@ Upstream audit round (7 harness-engineering sources). One structural change take
 
 ### Changed
 
-- **Managed block trimmed 73 → 61 lines** along one boundary: universal rules stay in the block, ritual-time rules live in the ritual that uses them. Cut: the `Invocation policy` section (user-invocation is enforced by `disable-model-invocation` frontmatter; verify-after-implement is carried by `loom-implement` step 13, the `loom-verify` description, the TTSR rule, and the Stop gate), the triage transitions diagram (moved to `loom-plan/GRILL.md` § Inbound triage, where triage actually happens), the after-verify/`ready-for-human` lines (already carried verbatim by `loom-verify` and `TO-ISSUES.md`), and `Session state` compressed to one line. Discipline, Invariants, Router + Confusable pairs, Scope routing, and the Status vocabulary stay — they act between rituals, where no skill is loaded
-- New test pins the boundary both ways: universal sections must stay in the block, ritual-time content must stay out (65-line ceiling), and every moved rule must exist at its ritual home
+- **Managed block trimmed 73 → 59 lines** along one boundary: universal rules stay in the block, ritual-time rules live in the ritual that uses them. Cut: the `Invocation policy` section (deduplicated, not relocated — user-invocation is enforced by `disable-model-invocation` frontmatter; verify-after-implement is carried by `loom-implement` step 13, the `loom-verify` description, the TTSR rule, and the Stop gate), the triage transitions diagram (moved verbatim to `loom-plan/GRILL.md` § Inbound triage, where triage actually happens), the after-verify/`ready-for-human` lines (their rules already live in `loom-verify` and `TO-ISSUES.md`), and `Session state` compressed to one line. Discipline, Invariants, Router + Confusable pairs, Scope routing, and the Status vocabulary stay — they act between rituals, where no skill is loaded
+- New test pins the boundary both ways: universal sections must stay in the block, ritual-time content must stay out (65-line ceiling), and each relocated or deduplicated rule must exist at its ritual home
 
 ### Migration
 

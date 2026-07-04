@@ -60,6 +60,4 @@ Before acting, reconstruct state from `.loom/` (active PRD, issue cards, statuse
 ### Status vocabulary
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
-
-Transition rules live in the rituals that write statuses (`loom-plan` triage, `loom-verify` → done, slicing → `ready-for-human`).
 <!-- loom:end -->
