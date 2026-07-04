@@ -4,7 +4,15 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-## [0.18.0] - 2026-07-04
+## [0.19.0] - 2026-07-04
+
+The day factory: launch a pack burn from an attended session and walk away. The launch primitive was the one missing piece — the goal-run contract (batch mode), stop conditions (draft-PR exits), and runaway protection already existed. A re-distill under this frame flips one earlier verdict: Pocock's `claude-handoff` was skipped as Claude-only launch mechanics, but as the attended→background bridge it is exactly the missing piece — and Loom's version is cheaper, because the disk is the handoff: the seed prompt is three lines, `.loom/` state carries the rest (ADR-0037 extended, not broken).
+
+### Added
+
+- **`loom-implement/DISPATCH.md`** — the launch gate, phase-file style (read only when dispatching): preconditions (gh auth, non-interactive signing, lint the graph, never dispatch `ready-for-human`), one worktree per run (`dispatch/<pack>` branch — the run can't reach the user's tree or the default branch; PR is the only exit), a per-host launch matrix (OMP `-p --approval-mode yolo --max-time`, `claude --bg`, `codex exec`/`/goal`, Cursor background agents, `opencode run` — keep-awake included), in-run deltas (branches stack along the blocker graph with PR base = unmerged blocker's branch; a stopped issue doesn't kill the run; stagnation rule inline), a morning-review checklist as the failure detector (infra death = no PRs — read the run's own log), and recovery as re-entry: state lives on disk, so re-dispatch = resume. Ceiling stated honestly: the worktree guards the repo, not the machine — OS sandboxing stays host/infra work
+- Routes to the gate: `loom-implement` § Unattended mode points launching at DISPATCH.md; `loom-plan` TO-ISSUES offers the background hand-off once at pack approval; `loom-tend` sweeps dispatch leftovers (worktrees whose PRs are merged/closed); `docs/unattended.md` names dispatch as the attended-launch lane beside scheduled recipes
+- Test pins: seed-from-disk, worktree isolation, yolo+max-time pairing, the honesty ceiling, stacked branches, stopped-issue survival, re-dispatch recovery, ready-for-human exclusion, morning checklist, and all four routes
 
 Upstream audit round (7 harness-engineering sources). One structural change taken: the ETH Zurich agentfile study (via HumanLayer's "Skill Issue" post) measures 14–22% reasoning-token overhead on context-file instructions and finds only universally-applicable lines pay their way. Applied as a second pass of the no-op test to the managed block — the one surface injected into **every** session on **every** host.
 
@@ -714,7 +722,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/zuevrs/loom/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/zuevrs/loom/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/zuevrs/loom/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/zuevrs/loom/compare/v0.16.4...v0.17.0

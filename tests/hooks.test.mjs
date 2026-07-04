@@ -1529,4 +1529,24 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/do not yield.*until a verify digest exists/s.test(impl), "step 13 verify mandate survives the self-review fold");
 }
 
+// v0.19.0 — dispatch: attended launch of a background pack run
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const d = read("skills/loom-implement/DISPATCH.md");
+  ok(d.includes("The disk is the handoff."), "dispatch seeds from .loom state, not a summary");
+  ok(d.includes("git worktree add"), "dispatch isolates in a worktree per run");
+  ok(/--approval-mode yolo/.test(d) && /--max-time/.test(d), "OMP launch line pairs autonomy with an outer bound");
+  ok(d.includes("guards the *repo*"), "the worktree-not-machine ceiling is stated");
+  ok(d.includes("Branches stack along the blocker graph."), "unmerged blocker → stacked branch, PR base = blocker branch");
+  ok(d.includes("A stopped issue doesn't kill the run."), "run continues past a blocked issue");
+  ok(d.includes("re-dispatch = resume"), "recovery is re-entry from disk state");
+  ok(d.includes("Never dispatch `ready-for-human`"), "human-judgement issues stay out of background runs");
+  ok(/Morning review/.test(d) && d.includes("No PRs at all"), "morning checklist detects infra death");
+  // routes: the capability is reachable from implement, plan exit, tend, and the unattended doc
+  ok(/read \[`DISPATCH\.md`\]\(DISPATCH\.md\) and follow it/.test(read("skills/loom-implement/SKILL.md")), "implement routes launching to DISPATCH.md");
+  ok(read("skills/loom-plan/TO-ISSUES.md").includes("background run on the whole pack"), "plan exit offers the background hand-off");
+  ok(read("skills/loom-tend/SKILL.md").includes("Dispatch leftovers"), "tend sweeps merged-out dispatch worktrees");
+  ok(read("docs/unattended.md").includes("DISPATCH.md"), "unattended doc names dispatch as the attended-launch lane");
+}
+
 console.log("✔ All hook and adapter tests passed");

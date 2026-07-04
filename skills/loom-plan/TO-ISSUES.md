@@ -67,6 +67,8 @@ Status: ready-for-agent
 
 Recommend host-native skills when scope touches security/perf/CI — do not fold into Loom core.
 
+Pack written and approved? Offer both hand-offs once: a fresh attended session per issue, or a background run on the whole pack (`loom-implement` [`DISPATCH.md`](../loom-implement/DISPATCH.md)).
+
 ## Done when (whole ritual)
 
 - Every load-bearing decision is confirmed by the user or recorded in the PRD's Assumptions section

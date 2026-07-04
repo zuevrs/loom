@@ -51,6 +51,8 @@ Keep the warp current and debts from rotting — without inventing feature scope
 
    **Completed packs** — a pack whose issues are all `done`/`wontfix` is finished, not furniture: left in place it pads every session snapshot forever. Offer to move it to `.loom/archive/<pack>/` (git history preserved via `git mv`; user approves). Archived packs vanish from the snapshot and the stop gate automatically — both scan only `.loom/issues/` and `.loom/<pack>/issues/`, one pack level deep.
 
+   **Dispatch leftovers** — `git worktree list` entries from background runs (`dispatch/<pack>` branches) whose PRs are all merged or closed: offer `git worktree remove` + branch deletion (user approves). A worktree with unmerged work is not a leftover — leave it.
+
 6. **Recipe check** — an audit that recurs tend after tend belongs on a schedule. Same finding class again (docs drift, dep rot, smells)? Offer the matching recipe from `~/.loom/recipes/` — attended run in chat, or scheduled via the host runner (`docs/unattended.md` has the wiring). Stubs filed by scheduled recipes land in `.loom/maintenance/issues/`; the stale-issues sweep above covers them.
 
 7. **Comprehension** — remind to read shipped diffs / spot-check gates when relevant.
