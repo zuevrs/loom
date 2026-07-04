@@ -1537,7 +1537,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(d.includes("git worktree add"), "dispatch isolates in a worktree per run");
   ok(/--approval-mode yolo/.test(d) && /--max-time/.test(d), "OMP launch line pairs autonomy with an outer bound");
   ok(d.includes("guards the *repo*"), "the worktree-not-machine ceiling is stated");
-  ok(d.includes("Branches stack along the blocker graph."), "unmerged blocker → stacked branch, PR base = blocker branch");
+  ok(d.includes("Branches chain in run order."), "sequential worktree → each issue chains from the last green base");
+  ok(d.includes("<worktree>.log"), "run log lives beside the worktree, not inside it");
   ok(d.includes("A stopped issue doesn't kill the run."), "run continues past a blocked issue");
   ok(d.includes("re-dispatch = resume"), "recovery is re-entry from disk state");
   ok(d.includes("Never dispatch `ready-for-human`"), "human-judgement issues stay out of background runs");

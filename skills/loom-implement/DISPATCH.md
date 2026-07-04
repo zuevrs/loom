@@ -31,11 +31,13 @@ Report = PRs. Silent death is the only forbidden exit.
 
 | Host | Launch line (from the worktree) | Outer bound |
 |---|---|---|
-| OMP | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i omp -p --cwd <worktree> --approval-mode yolo --max-time 7200 "<seed>" > <worktree>/dispatch.log 2>&1'` | `--max-time` |
+| OMP | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i omp -p --cwd <worktree> --approval-mode yolo --max-time 7200 "<seed>" > <worktree>.log 2>&1'` | `--max-time` |
 | Claude Code | `claude --bg --name "dispatch <pack>" "<seed>"` | its permission config; manage via `claude agents` |
-| Codex | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i codex exec --cd <worktree> "<seed>" > <worktree>/dispatch.log 2>&1'` — or `/goal` with a budget cap | goal budget |
+| Codex | `screen -dmS dispatch-<pack> sh -c 'caffeinate -i codex exec --cd <worktree> "<seed>" > <worktree>.log 2>&1'` — or `/goal` with a budget cap | goal budget |
 | Cursor | Background/cloud agent with the seed as prompt (already branch-and-PR-shaped) | its limits |
-| opencode | `screen -dmS dispatch-<pack> sh -c 'cd <worktree> && caffeinate -i opencode run "<seed>" > dispatch.log 2>&1'` (no cwd flag — cd inside) | outer timeout |
+| opencode | `screen -dmS dispatch-<pack> sh -c 'cd <worktree> && caffeinate -i opencode run "<seed>" > <worktree>.log 2>&1'` (no cwd flag — cd inside) | outer timeout |
+
+- The log lives **next to** the worktree (`<worktree>.log`, a sibling path), not inside it — inside, it dirties the tree the morning review reads as a death signal, and `git worktree remove` erases the post-mortem.
 
 - **The fresh session is load-bearing when the dispatcher is itself an agent.** Harness-managed shells kill their whole process session when the command (or the agent's shell) ends — `nohup … &` and even a double-forked subshell die with it; field-verified twice. `screen -dmS` (preinstalled on macOS; `tmux new-session -d` where present) detaches into a session of its own and survives. A human launching from their own terminal can use plain `nohup … &`.
 - Check on the run: `screen -ls`, attach with `screen -r dispatch-<pack>`, log tails to `dispatch.log`.
@@ -48,7 +50,7 @@ Report = PRs. Silent death is the only forbidden exit.
 
 Batch mode is unchanged: fresh implement sub-agent per issue, verify between issues, dependency order. On top of it:
 
-- **Branches stack along the blocker graph.** No blocker (or blocker already merged) → branch from the default branch. Blocker `done` but its PR unmerged (the human gate is asleep) → branch from the blocker's branch and set the PR base to it — the platform retargets when the base merges.
+- **Branches chain in run order.** One worktree advances sequentially, so each issue branches from the **last completed** issue's branch — its PR base too; the first issue branches from the default branch. The platform retargets as bases merge. Branching a later issue from the default branch instead would eject earlier unmerged work from the shared worktree — the blocker graph decides *order*, the chain decides *bases*. A stopped issue's partial work stays on its own branch; the next issue chains from the last green base.
 - **A stopped issue doesn't kill the run.** `needs-info`/blocked → draft PR, status written, move to the next unblocked ready issue; its dependents stay blocked.
 - **Stagnation rule:** the same error twice in a row → stop that issue through the draft-PR path with the error named. Never a third identical attempt.
 
@@ -58,7 +60,7 @@ The run cannot page anyone; this checklist catches every death mode:
 
 1. PRs vs expectations — one per attempted issue (`gh pr list`, draft = blocked)
 2. Issue statuses vs what was dispatched (`done` / `needs-info` / untouched)
-3. **No PRs at all** = infra death (network, OOM, `--max-time` mid-issue, killed process) — read the run's own log: `dispatch.log` tail, `omp -r` the session, `claude agents`
+3. **No PRs at all** = infra death (network, OOM, `--max-time` mid-issue, killed process) — read the run's own log: `<worktree>.log` tail, `omp -r` the session, `claude agents`
 4. Worktree dirty = an issue died mid-flight — its `## Log` bullets say where
 
 Recovery is re-entry, not repair: state lives on disk, so **re-dispatch = resume** — a fresh run reads statuses and continues from the next unblocked issue.

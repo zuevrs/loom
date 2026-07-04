@@ -4,9 +4,15 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.19.1] - 2026-07-04
+
+Field run 5 — Loom's first completed unattended run (3 issues, 3 stacked PRs, 3 APPROVE digests, main untouched, ~74 of 90 budgeted minutes) — sent back three launch-mechanics fixes:
+
 ### Fixed
 
-- **Dispatch launch lines detach via `screen -dmS`, not `nohup … &`** — field run 5 falsified the nohup form twice: when the dispatcher is itself an agent, harness-managed shells kill their whole process session on command exit, taking `nohup` children and even double-forked subshells with them. A fresh `screen` session (preinstalled on macOS; log via `sh -c '… > dispatch.log'` — Apple's screen 4.00.03 lacks `-Logfile`) survives; a human dispatching from their own terminal can still use plain `nohup`. Test pins updated
+- **Dispatch launch lines detach via `screen -dmS`, not `nohup … &`** — the nohup form was falsified twice before the model even started: when the dispatcher is itself an agent, harness-managed shells kill their whole process session on command exit, taking `nohup` children and even double-forked subshells with them. A fresh `screen` session (preinstalled on macOS; log via `sh -c` redirect — Apple's screen 4.00.03 lacks `-Logfile`) survives; a human dispatching from their own terminal can still use plain `nohup`
+- **Branch rule rewritten from "stack along the blocker graph" to "chain in run order"** — the run exposed the written rule as wrong for a shared worktree: branching a no-blocker issue from the default branch would eject earlier unmerged work from the tree. Now: each issue branches from the last **completed** issue's branch (PR base = it; first issue from the default branch; a stopped issue's partial work stays on its own branch). The blocker graph decides order, the chain decides bases — which is what the field run's orchestrator correctly did on its own
+- **Run log moved beside the worktree (`<worktree>.log`), not inside it** — inside, it dirties the tree the morning review reads as a death signal, and `git worktree remove` erases the post-mortem
 
 ## [0.19.0] - 2026-07-04
 
@@ -728,7 +734,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.19.1...HEAD
+[0.19.1]: https://github.com/zuevrs/loom/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/zuevrs/loom/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/zuevrs/loom/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/zuevrs/loom/compare/v0.17.0...v0.17.1
