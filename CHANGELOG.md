@@ -4,6 +4,17 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-07-04
+
+A Loom discipline profile for the OMP advisor — the first enforcement layer that acts **during** the turn. Everything Loom had fires before (managed block, pre-LLM invariants) or after (stop gate, checkers, witness); the advisor is OMP's second-model shadow that reviews each turn incrementally and injects notes, where `concern`/`blocker` interrupt the turn in progress. The profile teaches it Loom's ritual contracts as narrow signatures, so a collapsed grill or a gate bypass is called out on the turn it happens — not in next-day dump archaeology. Host-boundary honest: OMP-only, optional, additive — one YAML the user copies per project; skills, hooks, and the managed block are untouched.
+
+### Added
+
+- **`templates/WATCHDOG.yml`** — the `loom-discipline` advisor: fire-only-on signatures with a severity map (gates are blockers: materializing before the explicit go, done without a `## Verify` APPROVE, unconfirmed project writes in setup flows; drift is a concern: batched grill questions, post-interruption interview shrink, edits before the pre-flight baseline, scope creep, silently invented load-bearing decisions; hygiene is a nit: CONTEXT.md not written inline, missing `## Log` bullet). Outside Loom rituals the profile stays silent by contract; no `model:` hardcoded — the host's `advisor` role decides, with a commented pin for the fast tier
+- **`docs/omp-advisor.md`** — install (copy template + per-project `advisor.enabled: true` in `.omp/config.yml`), the severity/delivery table, host controls (`/advisor on|off|status|dump|configure`), cost and noise stance (baseline advisor behavior ships with the toggle — which is why the profile is per-project, not global)
+- README: both OMP-synergy Advisor mentions now route to the profile
+- Test pins: signature severities, silence-outside-rituals, commented model line, doc's enable key and honesty notes, README route, and core stays clean — no WATCHDOG reference may appear in AGENTS.md or ritual skills
+
 ## [0.20.0] - 2026-07-04
 
 Dispatch (0.19.0/0.19.1) withdrawn after one day in the field. The capability worked — the first unattended run delivered 3 stacked PRs with APPROVE digests — but the grill that followed judged it complex and brittle for what it buys today: no command surface (prose-routed), a git+remote-shaped contract, and real context-parity traps (an uncommitted pack is silently invisible to the worktree; fresh checkouts lack deps and `.env`). Each is fixable; together they are a second product bolted onto six rituals. Parked, not killed: the field-validated design (worktree isolation, screen-detach launch, chain-in-run-order branches, morning review, re-dispatch = resume) lives in the changelog history and the consumer-side ADR, with re-entry triggers named there.
@@ -743,7 +754,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/zuevrs/loom/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/zuevrs/loom/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/zuevrs/loom/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/zuevrs/loom/compare/v0.18.0...v0.19.0

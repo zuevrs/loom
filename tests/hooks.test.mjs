@@ -1537,4 +1537,36 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     ok(!/DISPATCH|dispatch\/<pack>|Dispatch leftovers/.test(read(p)), `${p} carries no dispatch route`);
 }
 
+// v0.21.0 — OMP advisor discipline profile: template + doc + README routes
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const tpl = read("templates/WATCHDOG.yml");
+  ok(tpl.includes("name: loom-discipline"), "advisor template declares the loom-discipline advisor");
+  ok(tpl.includes("Fire ONLY on these signatures — silence otherwise"), "advisor template is fire-only-on, silent otherwise");
+  ok(/no Loom ritual is active.*stay silent/s.test(tpl), "advisor template stays out of non-Loom sessions");
+  // Severity map pins (grill decisions): gates are blockers, drift is concern, hygiene is nit.
+  ok(/one ask call = exactly ONE\s+question/.test(tpl) && /question arrays.*→ concern/s.test(tpl), "batched grill questions → concern");
+  ok(/before the user's explicit\s+go.*→ blocker/s.test(tpl), "materialization before go → blocker");
+  ok(/APPROVE line\s+in the issue's `## Verify` section → blocker/.test(tpl), "done without verify APPROVE → blocker");
+  ok(/without user confirmation\s+→ blocker/.test(tpl), "unconfirmed project writes → blocker");
+  ok(/pre-flight baseline.*→ concern/s.test(tpl), "edits before pre-flight → concern");
+  ok(/interview visibly shrinks.*→ concern/s.test(tpl), "post-interruption shrink → concern");
+  ok(/exceeds the issue's scope.*→ concern/s.test(tpl), "scope creep → concern");
+  ok(/load-bearing decision invented silently.*→ concern/s.test(tpl), "silent load-bearing invention → concern");
+  ok(/no `## Log` bullet.*→ nit/s.test(tpl), "missing Log bullet → nit");
+  ok(/CONTEXT\.md was not updated.*→ nit/s.test(tpl), "batched CONTEXT writes → nit");
+  ok(/# model:/.test(tpl), "model line ships commented — advisor role by default, no hardcoded model");
+  const doc = read("docs/omp-advisor.md");
+  ok(doc.includes("templates/WATCHDOG.yml"), "advisor doc points at the template");
+  ok(/advisor:\\n {2}enabled: true/.test(doc) && doc.includes(".omp/config.yml"), "advisor doc shows the per-project enable key");
+  ok(doc.includes("/advisor on") && doc.includes("/advisor dump"), "advisor doc lists the host controls");
+  ok(/OMP-only/.test(doc), "advisor doc is honest about the host boundary");
+  ok(/baseline.*advisor behavior/s.test(doc), "advisor doc warns the baseline advisor comes with the toggle");
+  const readme = read("README.md");
+  ok(readme.includes("docs/omp-advisor.md"), "README routes to the advisor profile doc");
+  // Core stays untouched: the profile must not leak into rituals or the managed block.
+  for (const p of ["AGENTS.md", "skills/loom-implement/SKILL.md", "skills/loom-plan/SKILL.md", "skills/loom-init/SKILL.md", "skills/loom-grill/SKILL.md", "skills/loom-verify/SKILL.md", "skills/loom-tend/SKILL.md"])
+    ok(!/WATCHDOG/.test(read(p)), `${p} carries no advisor route`);
+}
+
 console.log("✔ All hook and adapter tests passed");

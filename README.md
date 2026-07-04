@@ -188,7 +188,7 @@ cd your-project && omp
 |-------|------|-------------|--------------|
 | **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
 | **Brainstorm** | `/loom-grill` any topic → one digest file | — | Relentless interview without the PRD machinery; hand the digest to `/loom-plan` if it becomes scope |
-| **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn |
+| **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](docs/omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
 | **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** | Loom tracks state on disk; OMP runs unattended with token budget |
@@ -199,7 +199,7 @@ cd your-project && omp
 | OMP command/feature | Use with Loom when… |
 |---------------------|---------------------|
 | **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
-| **Advisor** | Long implement sessions — continuous review while Loom scopes one issue |
+| **Advisor** | Long implement sessions — continuous review while Loom scopes one issue; add the [Loom discipline profile](docs/omp-advisor.md) (`templates/WATCHDOG.yml`) so ritual drift is interrupted on the turn it starts |
 | **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
