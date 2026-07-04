@@ -1529,7 +1529,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/do not yield.*until a verify digest exists/s.test(impl), "step 13 verify mandate survives the self-review fold");
 }
 
-// v0.19.0 — dispatch: attended launch of a background pack run
+// v0.19.x — dispatch: attended launch of a background pack run (0.19.1 folds field-run-5 fixes)
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const d = read("skills/loom-implement/DISPATCH.md");

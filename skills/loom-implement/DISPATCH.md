@@ -40,7 +40,7 @@ Report = PRs. Silent death is the only forbidden exit.
 - The log lives **next to** the worktree (`<worktree>.log`, a sibling path), not inside it — inside, it dirties the tree the morning review reads as a death signal, and `git worktree remove` erases the post-mortem.
 
 - **The fresh session is load-bearing when the dispatcher is itself an agent.** Harness-managed shells kill their whole process session when the command (or the agent's shell) ends — `nohup … &` and even a double-forked subshell die with it; field-verified twice. `screen -dmS` (preinstalled on macOS; `tmux new-session -d` where present) detaches into a session of its own and survives. A human launching from their own terminal can use plain `nohup … &`.
-- Check on the run: `screen -ls`, attach with `screen -r dispatch-<pack>`, log tails to `dispatch.log`.
+- Check on the run: `screen -ls`, attach with `screen -r dispatch-<pack>`, log tails to `<worktree>.log`.
 - `caffeinate -i` is macOS; elsewhere use the platform's keep-awake or a machine that doesn't sleep.
 - Autonomous tool approval (`yolo` / `--bg` permissions) is required: the first approval prompt in a background run is a dead run — nobody answers, no draft PR gets written.
 - Optional hardening on OMP: `--profile factory` isolates settings/sessions (auth comes from env vars, or run the profile once interactively first).
