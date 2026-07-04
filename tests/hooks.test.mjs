@@ -1529,33 +1529,12 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/do not yield.*until a verify digest exists/s.test(impl), "step 13 verify mandate survives the self-review fold");
 }
 
-// v0.19.x — dispatch: attended launch of a background pack run (0.19.1 folds field-run-5 fixes)
+// v0.20.0 — dispatch withdrawn (parked): the capability must leave no dangling routes behind
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
-  const d = read("skills/loom-implement/DISPATCH.md");
-  ok(d.includes("The disk is the handoff."), "dispatch seeds from .loom state, not a summary");
-  ok(d.includes("git worktree add"), "dispatch isolates in a worktree per run");
-  ok(/--approval-mode yolo/.test(d) && /--max-time/.test(d), "OMP launch line pairs autonomy with an outer bound");
-  ok(d.includes("guards the *repo*"), "the worktree-not-machine ceiling is stated");
-  ok(d.includes("Branches chain in run order."), "sequential worktree → each issue chains from the last green base");
-  ok(d.includes("<worktree>.log"), "run log lives beside the worktree, not inside it");
-  ok(d.includes("A stopped issue doesn't kill the run."), "run continues past a blocked issue");
-  ok(d.includes("re-dispatch = resume"), "recovery is re-entry from disk state");
-  ok(d.includes("Never dispatch `ready-for-human`"), "human-judgement issues stay out of background runs");
-  ok(/Morning review/.test(d) && d.includes("No PRs at all"), "morning checklist detects infra death");
-  ok(d.includes("same error twice in a row"), "stagnation rule rides inside the run contract");
-  ok(d.includes("gh auth status") && d.includes("stop-gate-logic.cjs --lint"), "preconditions check auth and graph before launch");
-  for (const host of ["OMP", "Claude Code", "Codex", "Cursor", "opencode"])
-    ok(d.includes(`| ${host} |`), `launch matrix covers ${host}`);
-  ok(/opencode.*cd <worktree>/.test(d), "opencode row enforces the worktree cwd");
-  // field run 5: nohup and double-fork both died with the agent dispatcher's shell session; screen -dmS survived
-  ok(/screen -dmS dispatch-<pack>.*omp -p/.test(d), "OMP launch detaches via a fresh screen session");
-  ok(d.includes("fresh session is load-bearing"), "the why of screen-over-nohup is stated");
-  // routes: the capability is reachable from implement, plan exit, tend, and the unattended doc
-  ok(/read \[`DISPATCH\.md`\]\(DISPATCH\.md\) and follow it/.test(read("skills/loom-implement/SKILL.md")), "implement routes launching to DISPATCH.md");
-  ok(read("skills/loom-plan/TO-ISSUES.md").includes("background run on the whole pack"), "plan exit offers the background hand-off");
-  ok(read("skills/loom-tend/SKILL.md").includes("Dispatch leftovers"), "tend sweeps merged-out dispatch worktrees");
-  ok(read("docs/unattended.md").includes("DISPATCH.md"), "unattended doc names dispatch as the attended-launch lane");
+  ok(!existsSync(resolve(__dirname, "..", "skills/loom-implement/DISPATCH.md")), "DISPATCH.md is gone");
+  for (const p of ["skills/loom-implement/SKILL.md", "skills/loom-plan/TO-ISSUES.md", "skills/loom-tend/SKILL.md", "docs/unattended.md", "AGENTS.md", "skills/loom-init/SKILL.md"])
+    ok(!/DISPATCH|dispatch\/<pack>|Dispatch leftovers/.test(read(p)), `${p} carries no dispatch route`);
 }
 
 console.log("✔ All hook and adapter tests passed");

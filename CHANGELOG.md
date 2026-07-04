@@ -4,6 +4,15 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-07-04
+
+Dispatch (0.19.0/0.19.1) withdrawn after one day in the field. The capability worked — the first unattended run delivered 3 stacked PRs with APPROVE digests — but the grill that followed judged it complex and brittle for what it buys today: no command surface (prose-routed), a git+remote-shaped contract, and real context-parity traps (an uncommitted pack is silently invisible to the worktree; fresh checkouts lack deps and `.env`). Each is fixable; together they are a second product bolted onto six rituals. Parked, not killed: the field-validated design (worktree isolation, screen-detach launch, chain-in-run-order branches, morning review, re-dispatch = resume) lives in the changelog history and the consumer-side ADR, with re-entry triggers named there.
+
+### Removed
+
+- `loom-implement/DISPATCH.md` and its four routes (implement § Unattended pointer, plan TO-ISSUES exit offer, tend dispatch-leftovers sweep, `docs/unattended.md` lane note). The § Unattended mode contract itself — branch/PR exits, draft-PR stops, stagnation rule — predates dispatch and stays; scheduled recipes are untouched
+- Dispatch test pins, replaced by a withdrawal pin: no dangling dispatch route may survive anywhere
+
 ## [0.19.1] - 2026-07-04
 
 Field run 5 — Loom's first completed unattended run (3 issues, 3 stacked PRs, 3 APPROVE digests, main untouched, ~74 of 90 budgeted minutes) — sent back three launch-mechanics fixes:
@@ -734,7 +743,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/zuevrs/loom/compare/v0.19.1...v0.20.0
 [0.19.1]: https://github.com/zuevrs/loom/compare/v0.19.0...v0.19.1
 [0.19.0]: https://github.com/zuevrs/loom/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/zuevrs/loom/compare/v0.17.1...v0.18.0

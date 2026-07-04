@@ -4,7 +4,7 @@ Loom ships no runner (see ADR history: host-native execution won). Every host al
 
 ## The contract
 
-An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). Two ways in: **dispatch** (launched by hand from an attended session — worktree isolation, launch matrix, morning review: `loom-implement` [`DISPATCH.md`](../skills/loom-implement/DISPATCH.md)) or a **schedule** (the host wiring below). The rules either way (canonical text: `loom-implement` § Unattended mode):
+An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). The rules (canonical text: `loom-implement` § Unattended mode):
 
 1. **Branch, not trunk.** All work happens in a dedicated branch. Commits there are expected. Pushing to the default branch or merging is never the agent's call.
 2. **PR is the exit for anything written.** A run that produced changes — code or stub issues — ends in a pull request: diff, verify digest, issue `## Log`, open questions in the description. The human gate that attended mode puts in the chat moves to PR review. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
