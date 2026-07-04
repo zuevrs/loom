@@ -4,6 +4,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-07-04
+
+Upstream audit round (7 harness-engineering sources). One structural change taken: the ETH Zurich agentfile study (via HumanLayer's "Skill Issue" post) measures 14–22% reasoning-token overhead on context-file instructions and finds only universally-applicable lines pay their way. Applied as a second pass of the no-op test to the managed block — the one surface injected into **every** session on **every** host.
+
+### Changed
+
+- **Managed block trimmed 73 → 61 lines** along one boundary: universal rules stay in the block, ritual-time rules live in the ritual that uses them. Cut: the `Invocation policy` section (user-invocation is enforced by `disable-model-invocation` frontmatter; verify-after-implement is carried by `loom-implement` step 13, the `loom-verify` description, the TTSR rule, and the Stop gate), the triage transitions diagram (moved to `loom-plan/GRILL.md` § Inbound triage, where triage actually happens), the after-verify/`ready-for-human` lines (already carried verbatim by `loom-verify` and `TO-ISSUES.md`), and `Session state` compressed to one line. Discipline, Invariants, Router + Confusable pairs, Scope routing, and the Status vocabulary stay — they act between rituals, where no skill is loaded
+- New test pins the boundary both ways: universal sections must stay in the block, ritual-time content must stay out (65-line ceiling), and every moved rule must exist at its ritual home
+
+### Migration
+
+Run `loom-init` once per project to refresh the managed block (old blocks keep working — the version-drift warning will nudge).
+
 ## [0.17.1] - 2026-07-04
 
 Field run round 4: the first brownfield run — `loom-init` + full `loom-plan` on a mature repo with its Loom artifacts deleted. Brownfield boot worked as designed on its first live outing (mined the repo, spotted orphaned issue markers, drafted and gated `CONTEXT.md` before the interview). Two leaks fixed.
@@ -701,7 +714,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.17.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/zuevrs/loom/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/zuevrs/loom/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/zuevrs/loom/compare/v0.16.4...v0.17.0
 [0.16.4]: https://github.com/zuevrs/loom/compare/v0.16.3...v0.16.4

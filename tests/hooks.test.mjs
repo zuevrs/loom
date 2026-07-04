@@ -367,21 +367,19 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const s of smells) ok(agent.includes(s), `smell baseline carries: ${s}`);
 }
 
-// templates — prototype exception to the no-snippets rule; managed block — triage transitions
+// templates — prototype exception to the no-snippets rule; triage transitions live at triage time
 {
   const { readFileSync: rf } = await import("node:fs");
   const planDir = resolve(__dirname, "..", "skills", "loom-plan");
   const prd = rf(resolve(planDir, "PRD-TEMPLATE.md"), "utf8");
   const issue = rf(resolve(planDir, "ISSUE-TEMPLATE.md"), "utf8");
-  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
-  const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
+  const grillPhase = rf(resolve(planDir, "GRILL.md"), "utf8");
 
   ok(prd.includes("decision-rich snippet from a prototype"), "PRD template has prototype exception");
   ok(issue.includes("decision-rich snippet from a prototype"), "issue template has prototype exception");
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("Transitions: unlabeled"), "managed block documents triage transitions");
-    ok(doc.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "managed block enforces one category + one state");
-  }
+  // v0.18.0: ritual-time rules moved out of the managed block (ETH-lens trim) into the ritual that uses them
+  ok(grillPhase.includes("Transitions: unlabeled"), "plan triage documents transitions");
+  ok(grillPhase.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "plan triage enforces one category + one state");
 }
 
 // checker model tiers — semantic tier per host dialect, smell-baseline parity between dialects
@@ -1431,6 +1429,27 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(/scratch file outside the repo worktree/.test(verify), "briefing scratch lives outside the worktree");
   ok(verify.includes("The wait is work time."), "verify turns the checker wait into work time");
   ok(/pre-assemble the digest frame/.test(verify), "verify pre-assembles the digest during the wait");
+}
+
+// v0.18.0 — managed-block trim: every always-injected line must be universal;
+// ritual-time rules live in the ritual that uses them (ETH agentfile-overhead lens)
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  for (const p of ["AGENTS.md", "skills/loom-init/SKILL.md"]) {
+    // version=v<digit> anchors past the "vX.Y.Z" placeholder in loom-init's Outputs prose
+    const block = read(p).match(/<!-- loom:begin version=v\d[\s\S]*?loom:end -->/)[0];
+    // universal sections survive
+    for (const keep of ["### Discipline", "### Invariants", "### Router", "**Confusable pairs:**", "### Session state", "### Status vocabulary", "needs-triage`, `needs-info"])
+      ok(block.includes(keep), `${p} block keeps universal section: ${keep}`);
+    // ritual-time content is out — carried by GRILL.md, loom-verify, TO-ISSUES.md instead
+    for (const gone of ["Invocation policy", "Transitions: unlabeled", "After Verify passes", "Model-invoked"])
+      ok(!block.includes(gone), `${p} block sheds ritual-time content: ${gone}`);
+    ok(block.split("\n").length <= 65, `${p} block stays under the 65-line ceiling`);
+  }
+  // the moved rules still exist at their ritual homes (no rule was lost, only relocated)
+  ok(read("skills/loom-plan/GRILL.md").includes("Transitions: unlabeled"), "transitions relocated to plan triage");
+  ok(read("skills/loom-verify/SKILL.md").includes("set issue `Status: done`"), "verify carries the done transition");
+  ok(read("skills/loom-plan/TO-ISSUES.md").includes("ready-for-human"), "slicing carries the human-judgement route");
 }
 
 // v0.17.1 — field-run 4 fixes: brownfield draft keeps the inline cadence,

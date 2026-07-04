@@ -6,6 +6,9 @@ Resolve EVERY branch of the decision tree with the user, capturing the domain in
 
 Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-paragraph brief before the interview. Inbound includes stubs left by Implement — issues sitting at `Status: needs-triage` (captured scope creep) or `needs-info` (an answered question flips it back to `ready-for-agent`); triage them here.
 
+Transitions: unlabeled → `needs-triage`; from there → `needs-info` (back to `needs-triage` when the reporter replies), `ready-for-agent`, `ready-for-human`, or `wontfix`.
+One category (bug/chore/feature/refactor/docs) + one state per issue; conflicting states → flag and ask.
+
 ## Explore before asking
 
 Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. If exploration (`read`/`grep`/`glob`) can answer a question, explore instead of asking. Ask only what code cannot tell you: intent, preferences, scope edges, trade-offs.

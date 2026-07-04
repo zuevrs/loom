@@ -38,7 +38,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.17.1 -->
+<!-- loom:begin version=v0.18.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -89,27 +89,15 @@ Map intent to ritual skills:
 
 **Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
 
-### Invocation policy
-
-- User-invoked (rituals): `loom-init`, `loom-plan`, `loom-grill`, `loom-implement`, `loom-tend`
-- Model-invoked (ritual): `loom-verify` (after every Implement completion; also user-invocable for ad-hoc review)
-
 ### Session state
 
-Before acting, reconstruct state from:
-
-- active PRD and issue cards under `.loom/`
-- project docs and ADRs
-- current issue status and blocker graph
+Before acting, reconstruct state from `.loom/` (active PRD, issue cards, statuses, blocker graph) and project docs/ADRs.
 
 ### Status vocabulary
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
-Transitions: unlabeled → `needs-triage`; from there → `needs-info` (back to `needs-triage` when the reporter replies), `ready-for-agent`, `ready-for-human`, or `wontfix`.
-One category (bug/chore/feature/refactor/docs) + one state per issue; conflicting states → flag and ask.
-
-After Verify passes → issue `Status: done`. Work that needs human judgement (auth, payments, irreversible migrations) → `ready-for-human` at slicing time.
+Transition rules live in the rituals that write statuses (`loom-plan` triage, `loom-verify` → done, slicing → `ready-for-human`).
 <!-- loom:end -->
 ```
 
