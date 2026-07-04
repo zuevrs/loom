@@ -83,7 +83,10 @@ function blockedRefs(text) {
     if (!m) continue;
     // Markdown link → its target; otherwise the item text itself.
     const link = m[1].match(/\]\(([^)]+)\)/);
-    const ref = (link ? link[1] : m[1]).replace(/\.md$/, "").trim();
+    // Planners annotate refs in prose ("04-x (why)") — the annotation is for
+    // humans, the first token is the edge. Split before the .md strip so
+    // "04-x.md (why)" still resolves.
+    const ref = (link ? link[1] : m[1]).trim().split(/\s/)[0].replace(/\.md$/, "");
     if (ref && !/^none$/i.test(ref)) refs.push(ref);
   }
   return refs;

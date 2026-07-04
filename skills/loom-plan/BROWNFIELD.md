@@ -21,3 +21,5 @@ Write a **draft** `CONTEXT.md` per [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md) from m
 Present the draft to the user for correction **before the grill starts** (confirm-before-write discipline applies — this is a project write). The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
 
 Then proceed to the [`GRILL.md`](GRILL.md) interview, asking only what mining could not answer: intent, priorities, scope edges, trade-offs.
+
+The draft changes nothing about the grill's write cadence: a term the interview resolves is still written to `CONTEXT.md` **before the next question** — the draft is the floor, not the final. A pre-existing file is not permission to batch glossary updates at the exit gate.

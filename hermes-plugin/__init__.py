@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.17.0"
+MANAGED_BLOCK_VERSION = "v0.17.1"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -115,7 +115,9 @@ def _lint_warnings(root: Path) -> "list[str]":
             if not m:
                 continue
             link = re.search(r"\]\(([^)]+)\)", m.group(1))
-            ref = (link.group(1) if link else m.group(1)).strip()
+            # Planners annotate refs in prose ("04-x (why)") — the annotation is
+            # for humans, the first token is the edge. Split before the .md strip.
+            ref = ((link.group(1) if link else m.group(1)).split() or [""])[0]
             ref = re.sub(r"\.md$", "", ref)
             if ref and ref.lower() != "none":
                 refs.append(ref)
@@ -217,7 +219,8 @@ def _state_snapshot(root: Path) -> "str | None":
             if not m:
                 continue
             link = re.search(r"\]\(([^)]+)\)", m.group(1))
-            ref = (link.group(1) if link else m.group(1)).strip()
+            # Same annotation-tolerant split as blocked_refs above — keep in sync.
+            ref = ((link.group(1) if link else m.group(1)).split() or [""])[0]
             ref = re.sub(r"\.md$", "", ref)
             if ref and ref.lower() != "none":
                 refs.append(ref)

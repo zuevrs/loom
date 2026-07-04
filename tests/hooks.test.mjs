@@ -1433,6 +1433,63 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(/pre-assemble the digest frame/.test(verify), "verify pre-assembles the digest during the wait");
 }
 
+// v0.17.1 — field-run 4 fixes: brownfield draft keeps the inline cadence,
+// annotated blocker refs resolve
+{
+  const { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync: rf } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { createRequire } = await import("node:module");
+  const requireCjs = createRequire(import.meta.url);
+
+  const read = (p) => rf(resolve(__dirname, "..", p), "utf8");
+  // F1: the rule repeated at the point of action (BROWNFIELD handoff), plus the
+  // exact excuse the field run produced, in GRILL's anti-rationalization table.
+  ok(read("skills/loom-plan/BROWNFIELD.md").includes("before the next question"), "BROWNFIELD handoff restates the inline write cadence");
+  ok(read("skills/loom-plan/BROWNFIELD.md").includes("the draft is the floor, not the final"), "BROWNFIELD names the draft's role at the handoff");
+  ok(read("skills/loom-plan/GRILL.md").includes("The brownfield boot already wrote CONTEXT.md"), "GRILL anti-rationalization covers the brownfield excuse");
+
+  // F2: planners annotate blocker refs in prose — the edge must still resolve.
+  const { lintWarnings, stateSnapshot } = requireCjs(resolve(hooksDir, "stop-gate-logic.cjs"));
+  const tmp = mkdtempSync(join(tmpdir(), "loom-v0171-"));
+  const dir = join(tmp, ".loom", "calc", "issues");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "04-error-contract.md"), "# EvalError\n\n## Blocked by\n\n- None\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "05-cli-flags.md"), "# CLI\n\n## Blocked by\n\n- 04-error-contract (exit codes come from `EvalError.Kind`)\n\n## Status\n\nStatus: ready-for-agent\n");
+  strictEqual(lintWarnings(tmp).length, 0, "annotated blocker ref resolves — no dangling-ref warning");
+  ok(stateSnapshot(tmp).includes("next up: 04-error-contract.md"), "snapshot blocker walk survives annotated refs (05 stays blocked)");
+
+  // ".md (annotation)" form, and the resolved edge feeds the done-order check.
+  writeFileSync(join(dir, "06-docs.md"), "# Docs\n\n## Blocked by\n\n- 04-error-contract.md (typed errors first)\n\n## Verify\n\nAPPROVE — ok\n\n## Status\n\nStatus: done\n");
+  const w = lintWarnings(tmp);
+  ok(w.some((x) => x.includes('done while blocker "04-error-contract" is not done')), "annotated edge participates in done-order checks");
+  strictEqual(w.length, 1, "annotation itself adds no lint noise");
+
+  // Hermes Python mirror: identical warnings for the annotated tree.
+  try {
+    const py = execFileSync(
+      "python3",
+      ["-c",
+        `import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("loom_hermes", sys.argv[1])
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
+        resolve(__dirname, "..", "hermes-plugin", "__init__.py"),
+        tmp,
+      ],
+      { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    strictEqual(
+      JSON.stringify(py.trim().split(/\r?\n/).sort()),
+      JSON.stringify(w.slice().sort()),
+      "hermes lint parity on annotated refs"
+    );
+  } catch (e) {
+    if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 on this runner → skip parity exec
+  }
+  rmSync(tmp, { recursive: true });
+}
+
 // v0.17.0 — brownfield boot phase + maker self-review
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");

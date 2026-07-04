@@ -4,6 +4,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-07-04
+
+Field run round 4: the first brownfield run — `loom-init` + full `loom-plan` on a mature repo with its Loom artifacts deleted. Brownfield boot worked as designed on its first live outing (mined the repo, spotted orphaned issue markers, drafted and gated `CONTEXT.md` before the interview). Two leaks fixed.
+
+### Fixed
+
+- **Brownfield draft no longer suppresses the inline write cadence** — with a boot-written `CONTEXT.md` on disk, the field-run grill answered ten questions without a single glossary write, then batched one edit at the exit gate (while narrating the inline rule). The fix repeats the rule at the point of action: `BROWNFIELD.md`'s handoff states the draft is the floor, not the final — a term resolved in the interview is still written before the next question — and `GRILL.md`'s anti-rationalization table now names the exact excuse ("the boot already wrote CONTEXT.md — I'll true it up at the gate")
+- **Annotated blocker refs resolve** — the field-run planner wrote `- 04-error-contract (exit codes come from EvalError.Kind)` and the `.loom` linter took the whole item as the ref: a false "matches no issue in pack" warning on every turn, and a silently unenforced 04→05 blocker edge in the snapshot's next-up walk. `blockedRefs` (and the Hermes Python mirror) now take the first whitespace-delimited token as the edge; prose annotations are legal and ignored
+
+### Migration
+
+Nothing to do.
+
 ## [0.17.0] - 2026-07-04
 
 Two capability additions chosen by expected boost per effort. All three field runs so far were greenfield; real adoption is mostly brownfield — and there the plan phase had a cold start. Plus the cheapest quality lever from code-review practice: the author reads their own diff first.
@@ -688,7 +701,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.17.1...HEAD
+[0.17.1]: https://github.com/zuevrs/loom/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/zuevrs/loom/compare/v0.16.4...v0.17.0
 [0.16.4]: https://github.com/zuevrs/loom/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/zuevrs/loom/compare/v0.16.2...v0.16.3
