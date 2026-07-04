@@ -191,14 +191,14 @@ cd your-project && omp
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](docs/omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat below) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
-| **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** | Loom tracks state on disk; OMP runs unattended with token budget |
+| **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** + **goal gate** (tool_call/tool_result) | Loom tracks state on disk; OMP runs unattended with token budget. Goal mode's exit is self-judged (`goal complete` after a self-audit) — the extension blocks completion while any issue is done-without-APPROVE and appends leftover `ready-for-agent` issues to the completion result |
 | **Maintenance** | `loom-tend` | — | Warp audit, stale issues, `loom:` debt |
 
 ### OMP features that amplify Loom
 
 | OMP command/feature | Use with Loom when… |
 |---------------------|---------------------|
-| **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate |
+| **`omp goal "implement issue 003 from .loom/feat/"`** | Batch work — OMP loops, Loom provides issue cards + verify gate, and the extension guards the goal's own exit (no `goal complete` over unverified done) |
 | **Advisor** | Long implement sessions — continuous review while Loom scopes one issue; add the [Loom discipline profile](docs/omp-advisor.md) (`templates/WATCHDOG.yml`) so ritual drift is interrupted on the turn it starts |
 | **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |

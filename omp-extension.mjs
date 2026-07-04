@@ -1,6 +1,7 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
-// session_start: context pointers. before_agent_start: invariants + role. session_stop: verify gate.
+// session_start: context pointers. before_agent_start: invariants + role.
+// tool_call/tool_result: goal-completion gate. session_stop: verify gate.
 // Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
 // Loom planning in OMP is the /loom-plan command only.
 //
@@ -24,7 +25,7 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.21.1";
+const MANAGED_BLOCK_VERSION = "v0.22.0";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -172,6 +173,51 @@ export default function loomExtension(pi) {
       // best effort
     }
     return undefined;
+  });
+
+  // Goal gate — maker/checker on the stop condition. In goal mode the agent
+  // declares its own success (`goal` tool, op "complete") after a self-audit;
+  // nothing else reviews that call, and session_stop fires too late to shape
+  // the completion report. Two hands, sized to certainty:
+  //  - block completion on done-without-APPROVE (never legitimate — the same
+  //    invariant session_stop enforces, applied to the stop-condition judge);
+  //  - leftover ready-for-agent issues get a note appended to the completion
+  //    result instead (a narrow goal legitimately leaves pack work behind).
+  pi.on("tool_call", (event) => {
+    try {
+      if (event.toolName !== "goal" || (event.input || {}).op !== "complete") return undefined;
+      const blocked = findUnverifiedDoneIssues(findProjectRoot());
+      if (!blocked.length) return undefined;
+      const names = blocked.map((p) => p.split(/[\\/]/).pop()).join(", ");
+      return {
+        block: true,
+        reason: `Loom goal gate: ${names} marked done without an APPROVE verify digest. Run loom-verify and write its APPROVE verdict into the issue's ## Verify section, then complete the goal — or pause/drop the goal explicitly and report the blocker.`,
+      };
+    } catch {
+      return undefined;
+    }
+  });
+
+  pi.on("tool_result", (event) => {
+    try {
+      if (event.toolName !== "goal" || (event.input || {}).op !== "complete" || event.isError) {
+        return undefined;
+      }
+      const ready = findIssuesByStatus(findProjectRoot(), "ready-for-agent");
+      if (!ready.length) return undefined;
+      const names = ready.map((p) => p.split(/[\\/]/).pop()).join(", ");
+      return {
+        content: [
+          ...(event.content || []),
+          {
+            type: "text",
+            text: `Loom note: ready-for-agent issues remain (${names}). If they were in this goal's scope, resume instead of completing; either way name them in your final report.`,
+          },
+        ],
+      };
+    } catch {
+      return undefined;
+    }
   });
 
   // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)

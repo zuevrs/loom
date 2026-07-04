@@ -73,6 +73,8 @@ The router sends small single-session fixes here without a PRD or issue file. Th
 
 Lazy means efficient, not careless. **The best code is the code you never wrote.**
 
+The ladder runs **after** you understand the problem: read the issue and the code it touches fully, trace the real flow end to end, then climb. The ladder shortens the solution, never the reading.
+
 Before writing code, stop at the **first rung that holds**:
 
 1. Does this need to be built at all? (YAGNI)
@@ -124,6 +126,8 @@ Before writing code, stop at the **first rung that holds**:
 | "Baseline was already red, my tests pass though" | Unattributable. Pre-flight first; inherited failures go in `## Log` |
 
 ## Done when
+
+Done has two layers: the issue's **acceptance criteria** say what *this slice* must do; the standing list below is the **Definition of Done** for *every* slice. Both must hold — acceptance met without the standing bar is half-done.
 
 - Issue verification commands pass
 - Runnable check exists and passes

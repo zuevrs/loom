@@ -31,6 +31,7 @@ One variable at a time, each probe mapped to a prediction. Debugger/REPL beats l
 
 ## 5 — Fix, regression, sweep
 
+- **Root cause, not symptom.** Before guarding at the failure site, grep every caller of the broken path — one fix in the shared function is a smaller diff than a guard at each call site, and the un-guarded callers are tomorrow's repeat of this bug.
 - Regression test **before the fix**, at a seam that exercises the real bug pattern (PRD seams first). No correct seam exists → that is itself a finding for `## Log`; don't write a false-confidence test at a wrong seam.
 - Red → fix → green → re-run the ORIGINAL un-minimised loop.
 - Sweep before done: grep the debug prefix (zero hits), throwaway harnesses deleted, the winning hypothesis stated in `## Log` — the next session learns what it was, not just that it's fixed.

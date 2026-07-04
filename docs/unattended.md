@@ -7,7 +7,7 @@ Loom ships no runner (see ADR history: host-native execution won). Every host al
 An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). The rules (canonical text: `loom-implement` § Unattended mode):
 
 1. **Branch, not trunk.** All work happens in a dedicated branch. Commits there are expected. Pushing to the default branch or merging is never the agent's call.
-2. **PR is the exit for anything written.** A run that produced changes — code or stub issues — ends in a pull request: diff, verify digest, issue `## Log`, open questions in the description. The human gate that attended mode puts in the chat moves to PR review. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
+2. **PR is the exit for anything written.** A run that produced changes — code or stub issues — ends in a pull request: diff, verify digest, issue `## Log`, open questions in the description. The human gate that attended mode puts in the chat moves to PR review. Two words govern that gate: **push right** — defer the checkpoint as far as it will go, do maximal work before involving the human so they are asked once, late, with everything prepared; and **brief** — the checkpoint presents a tight, decision-ready summary (what was produced, why, where to look), never the raw output. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
 3. **Verify still runs.** `loom-verify` (Spec + Standards) before the PR. Runner can't spawn sub-agents → sequential checkers, limitation documented in the digest.
 4. **Blockers surface as draft PRs.** `needs-info`, scope-creep stubs, a red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — status and question written into the issue file, draft PR opened with whatever exists, blocker named first in the description. Silent death is the only forbidden exit.
 5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
@@ -81,6 +81,8 @@ For a **local** recurring cadence there is also the `/loop` skill (Cursor 3.5+):
 ```bash
 omp goal "Run the recipe in recipes/dep-audit.md. Follow loom-implement § Unattended mode: branch, verify, PR."
 ```
+
+Goal mode's exit is self-judged — the agent calls `goal complete` after its own audit, and no second pair of eyes reviews that call. The Loom extension closes the gap (maker/checker on the stop condition): completion is **blocked** while any `.loom` issue sits `done` without an APPROVE verify digest, and leftover `ready-for-agent` issues are appended to the completion result so the final report has to name them.
 
 Headless checker roles work here too: `LOOM_ROLE=spec-checker omp -p "…"`.
 

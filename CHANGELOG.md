@@ -4,6 +4,21 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-07-04
+
+### Added
+
+- **OMP goal gate — maker/checker on the goal stop condition.** In goal mode the agent declares its own success: it calls the `goal` tool with op `complete` after a self-audit, and nothing reviews that call — `session_stop` fires too late to shape the completion report. The extension now guards the exit with two hands sized to certainty: `tool_call` **blocks** completion while any `.loom` issue is `done` without an APPROVE verify digest (never legitimate — the same invariant the stop gate enforces, applied to the stop-condition judge; the block reason names the fix and the explicit pause/drop escape), and `tool_result` **appends a note** to a successful completion when `ready-for-agent` issues remain (a narrow goal legitimately leaves pack work behind — the final report has to name it, not silently omit it). README synergy table and `docs/unattended.md` OMP section document the gate
+- **Structural remedies in the standards checker** (both dialects, parity-pinned): eight named restructuring moves — replace conditional chain with a typed model, collapse duplicate branches, separate orchestration from logic, move feature logic to its owner, reuse the canonical helper, make a type boundary explicit, delete a pass-through wrapper, extract/split — so a structural finding names the move instead of leaving the maker guessing. Same binding rules as the smell baseline: repo overrides, judgement call
+
+### Fixed (upstream debt — re-audit of ponytail / mattpocock / addyosmani sources)
+
+- **`push right` / `brief` vocabulary re-homed** in `docs/unattended.md` § the contract (PR gate): taken from loop-me in v0.2.x, orphaned when `loom-loop` was removed in v0.3.0 — defer the checkpoint, present a decision-ready brief, never the raw output
+- **Ponytail comprehension rule** in the implement discipline ladder: the ladder runs *after* reading the issue and touched code fully — it shortens the solution, never the reading
+- **Ponytail root-cause rule** in `DIAGNOSE.md` § fix: grep every caller of the broken path before guarding one site — one fix in the shared function beats scattered guards, and names why
+- **Two-layer done** named in implement § Done when: per-issue acceptance criteria + standing Definition of Done, both must hold
+- **Grill dependency order**: when one open decision depends on another, ask the load-bearing one first — an answer built on an unresolved dependency gets re-litigated
+
 ## [0.21.1] - 2026-07-04
 
 ### Fixed
@@ -764,7 +779,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/zuevrs/loom/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/zuevrs/loom/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/zuevrs/loom/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/zuevrs/loom/compare/v0.19.1...v0.20.0

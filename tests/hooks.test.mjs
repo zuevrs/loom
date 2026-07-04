@@ -273,7 +273,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
 }
 
-// omp-extension.mjs — invariants + verify gate only; NO plan-mode patching (withdrawn)
+// omp-extension.mjs — invariants + verify gate + goal gate; NO plan-mode patching (withdrawn)
 {
   const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
   ok(typeof mod.default === "function", "omp-extension exports default function");
@@ -289,6 +289,103 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   strictEqual(handlers.context, undefined, "no context handler — native /plan left untouched");
   ok(typeof handlers.session_stop === "function", "registers session_stop verify gate");
+}
+
+// --- v0.22.0: goal gate — maker/checker on the goal stop condition ---
+{
+  const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
+  const handlers = {};
+  mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
+  ok(typeof handlers.tool_call === "function", "registers tool_call goal gate");
+  ok(typeof handlers.tool_result === "function", "registers tool_result leftover note");
+
+  const tmp = mkdtempSync(join(tmpdir(), "loom-goalgate-"));
+  const issueDir = join(tmp, ".loom", "pack", "issues");
+  mkdirSync(issueDir, { recursive: true });
+  writeFileSync(join(tmp, "AGENTS.md"), "x"); // findProjectRoot anchor
+  const prevDir = process.env.PI_PROJECT_DIR;
+  process.env.PI_PROJECT_DIR = tmp;
+
+  try {
+    // done-without-APPROVE → completion blocked, reason names APPROVE and the escape hatches
+    writeFileSync(join(issueDir, "01-a.md"), "# A\n\n## Status\n\nStatus: done\n");
+    const blocked = handlers.tool_call({ toolName: "goal", input: { op: "complete" } });
+    ok(blocked && blocked.block === true, "goal complete blocked over unverified done");
+    ok(/APPROVE/.test(blocked.reason) && /pause|drop/.test(blocked.reason), "block reason names APPROVE and pause/drop escape");
+
+    // other goal ops and other tools pass through
+    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "create" } }), undefined, "goal create untouched");
+    strictEqual(handlers.tool_call({ toolName: "bash", input: {} }), undefined, "non-goal tools untouched");
+
+    // verified done → completion allowed
+    writeFileSync(
+      join(issueDir, "01-a.md"),
+      "# A\n\n## Verify\n\nAPPROVE — spec pass, standards pass\n\n## Status\n\nStatus: done\n"
+    );
+    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "complete" } }), undefined, "verified done completes freely");
+
+    // leftover ready-for-agent → note appended to completion result, original content kept
+    writeFileSync(join(issueDir, "02-b.md"), "# B\n\n## Status\n\nStatus: ready-for-agent\n");
+    const noted = handlers.tool_result({
+      toolName: "goal",
+      input: { op: "complete" },
+      content: [{ type: "text", text: "Goal complete." }],
+      isError: false,
+    });
+    ok(noted && noted.content.length === 2, "leftover note appended after original content");
+    ok(/ready-for-agent/.test(noted.content[1].text) && /02-b\.md/.test(noted.content[1].text), "note names the leftover issue");
+
+    // errored completion (e.g. blocked by the gate) gets no note; clean pack gets no note
+    strictEqual(
+      handlers.tool_result({ toolName: "goal", input: { op: "complete" }, content: [], isError: true }),
+      undefined,
+      "errored completion gets no leftover note"
+    );
+    rmSync(join(issueDir, "02-b.md"));
+    strictEqual(
+      handlers.tool_result({ toolName: "goal", input: { op: "complete" }, content: [], isError: false }),
+      undefined,
+      "clean pack completes without a note"
+    );
+  } finally {
+    if (prevDir === undefined) delete process.env.PI_PROJECT_DIR;
+    else process.env.PI_PROJECT_DIR = prevDir;
+    rmSync(tmp, { recursive: true });
+  }
+}
+
+// --- v0.22.0: upstream debt pins ---
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+
+  // loop-me vocabulary re-homed after loom-loop removal orphaned it (taken v0.2.x)
+  const unattended = read("docs/unattended.md");
+  ok(unattended.includes("push right") && unattended.includes("brief"), "unattended human gate carries push-right/brief vocabulary");
+  ok(unattended.includes("asked once, late, with everything prepared"), "push right defers the checkpoint");
+
+  // ponytail comprehension + root-cause rules
+  ok(
+    read("skills/loom-implement/SKILL.md").includes("The ladder shortens the solution, never the reading."),
+    "ladder runs after full reading (ponytail comprehension rule)"
+  );
+  const diagnose = read("skills/loom-implement/DIAGNOSE.md");
+  ok(diagnose.includes("Root cause, not symptom"), "diagnose fixes cause not symptom");
+  ok(diagnose.includes("grep every caller"), "diagnose sweeps callers before guarding one site");
+
+  // two-layer done: per-issue acceptance + standing Definition of Done
+  ok(read("skills/loom-implement/SKILL.md").includes("Definition of Done"), "done has the standing-bar layer named");
+
+  // grill resolves decision dependencies in order (upstream grilling nuance)
+  ok(read("skills/loom-plan/GRILL.md").includes("Resolve decision dependencies in order"), "grill orders dependent decisions");
+
+  // structural remedies in BOTH standards dialects, with the binding rules kept
+  for (const p of ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
+    const std = read(p);
+    ok(std.includes("## Structural remedies"), `${p} carries structural remedies`);
+    ok(std.includes("name the move, not just the problem"), `${p} remedies demand the move`);
+    ok(std.includes("removes moving pieces"), `${p} prefers removal over spread`);
+    strictEqual((std.match(/^- (Replace|Collapse|Separate|Move|Reuse|Make|Delete|Extract)/gm) || []).length, 8, `${p} carries 8 named moves`);
+  }
 }
 
 // loom-plan phase files — thin router + self-contained phases with ordered gates

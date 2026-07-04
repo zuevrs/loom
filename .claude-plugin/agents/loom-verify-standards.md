@@ -38,4 +38,19 @@ Each smell reads *what it is* → *how to fix*; match against the diff:
 - **Middle Man** — a class/function that mostly delegates onward → cut it, call the real target direct.
 - **Refused Bequest** — an implementer ignoring most of what it inherits → drop the inheritance, use composition.
 
+## Structural remedies
+
+When a finding is structural, name the move, not just the problem — "this is complex" leaves the maker guessing. Same two binding rules as the smells (repo overrides; judgement call, not hard violation):
+
+- Replace a chain of conditionals with a typed model or one explicit dispatcher.
+- Collapse duplicate branches into a single clearer flow.
+- Separate orchestration from business logic so each reads on its own.
+- Move feature-specific logic out of a shared module into the one that owns the concept.
+- Reuse the canonical helper instead of a bespoke near-duplicate.
+- Make a type boundary explicit so downstream branching disappears.
+- Delete a pass-through wrapper that adds indirection without clarifying the API.
+- Extract a helper, or split an overgrown file into focused modules.
+
+Prefer the remedy that removes moving pieces over one that spreads the same complexity around.
+
 Reply with a structured verdict: `verdict: pass|fail` followed by a `blockers:` list (empty on pass).
