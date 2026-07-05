@@ -101,7 +101,7 @@ Per-host wiring, the full feature matrix, checker-model overrides, linter/witnes
 
 ## Unattended lane
 
-Loom ships no runner — your host already has one (background agents, cron + headless CLI, goal loops). Loom adds the **contract** that keeps an unwatched run safe — dedicated branch, verify before PR, blockers exit as draft PRs, never merge — and a **recipe catalog** for recurring maintenance: [`recipes/`](recipes/) has three discovery recipes that only file `needs-triage` stubs (`docs-drift`, `dep-audit`, `smell-sweep`) and two change recipes that go through the full implement + verify lane (`coverage-raise`, `dead-code`). Wiring: [`docs/unattended.md`](docs/unattended.md).
+Loom ships no runner — your host already has one (background agents, cron + headless CLI, goal loops). Loom adds the **contract** that keeps an unwatched run safe — dedicated branch, verify before PR, blockers exit as draft PRs, never merge — and a **recipe catalog** for recurring maintenance: [`recipes/`](recipes/) has four discovery recipes that only file `needs-triage` stubs (`docs-drift`, `dep-audit`, `smell-sweep`, `host-radar`) and two change recipes that go through the full implement + verify lane (`coverage-raise`, `dead-code`). Wiring: [`docs/unattended.md`](docs/unattended.md).
 
 ## Loom + OMP
 
