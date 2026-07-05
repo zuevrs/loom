@@ -13,6 +13,15 @@ An unattended run picks up work a human already scoped — a `Status: ready-for-
 5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
 6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout as the outer bound — every transport has one: Actions `timeout-minutes`, Codex `/goal`'s budget cap, Cursor `/loop`'s stop condition ("stop after N ticks") and Automations' schedule, the host's token budget elsewhere. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
 
+## Should this be a loop at all?
+
+Four conditions, all required — a task that fails one belongs in an attended chat, not a schedule:
+
+1. **It repeats.** The same task on a cadence, not a one-off with a timer on it.
+2. **Verification is automatable.** A gate that goes red on bad output exists (tests, linters, the stop-gate CI check) — a loop whose only judge is another opinion reviews itself into circles.
+3. **A budget bounds it.** The runner's native timeout/budget is set (§ Runaway protection above); an unbounded loop is an incident, not automation.
+4. **The tools exist.** The agent can actually reach what the task needs (repo, package registry, CI logs) — a loop that can only guess will file guesses.
+
 ## Two tiers of recipes
 
 | Tier | Writes | Ends in | Risk |

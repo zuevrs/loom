@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.23.1 -->
+<!-- loom:begin version=v0.23.2 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -22,6 +22,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
 - No verify digest → no done.
 - Run verification commands before marking `done`.
+- Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
 - Confirm before project writes in setup/apply flows.
 - Match the user's language for project content; ritual names and `loom:` markers stay English.
 

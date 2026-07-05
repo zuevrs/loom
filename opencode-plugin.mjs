@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.23.1
+// loom — OpenCode plugin adapter. Version: 0.23.2
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -35,6 +35,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Non-trivial logic leaves one runnable check before done.
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
 - No verify digest → no done.
+- Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
 - Confirm before project writes in setup/apply flows.
 
 ${PRE_LLM}

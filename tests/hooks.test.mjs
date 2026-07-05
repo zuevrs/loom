@@ -513,6 +513,54 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(read(p).includes("Waits are work time: no back-to-back no-op polls"), `${label} carries the wait-discipline line`);
   }
 
+  // v0.23.2 evidence-first verify: sources converge (Osmani "evidence as hard exit
+  // criterion" / reviewers refuse diffs without test output; 0xCodez "second agent
+  // with an opinion" without an objective gate is a Ralph Wiggum loop). The gap was
+  // real: APPROVE could exist over a red build — gates ran late (old step 5) and
+  // their results bound nothing.
+  {
+    const verify = read("skills/loom-verify/SKILL.md");
+    // gates run first and short-circuit red — checkers judge only what already passed
+    ok(verify.includes("Run the objective gates before spawning anyone"), "verify runs objective gates before checker spawns");
+    ok(verify.includes("not spawned — objective gate red"), "verify short-circuits to REJECT on a red gate without spending checkers");
+    // evidence economy of output: green is one line, red is verbatim
+    ok(verify.includes("silent pass, loud fail"), "verify records gates silent-pass loud-fail");
+    // absence of checks is stated, never silent
+    ok(verify.includes("no runnable checks — {why}"), "verify demands the explicit no-runnable-checks line");
+    // falsifiability: a check that cannot fail is not evidence
+    ok(verify.includes("able to fail") && verify.includes("tautological"), "verify requires cited checks to be falsifiable");
+    // checkers receive the gate facts in the briefing, not the maker's word
+    ok(verify.includes("the step-2 gate results"), "briefing carries gate results to the checkers");
+    ok(verify.includes("evidence beats opinion"), "verify pins gates as verdict input");
+    ok(verify.includes("Empty **Checks executed** → no approve"), "hard stop: empty Checks executed blocks approve");
+    // and the reverse guard: green gates never replace the checkers
+    ok(verify.includes("Green gates earn checkers, not an APPROVE"), "verify forbids objective-only approve");
+
+    const impl = read("skills/loom-implement/SKILL.md");
+    ok(impl.includes("silent pass, loud fail"), "implement captures evidence silent-pass loud-fail");
+    ok(impl.includes("verification ladder") && impl.includes("smoke run"), "implement carries the static→tests→smoke ladder");
+
+    // managed block carries the output-economy line on every surface
+    for (const [p, label] of [
+      ["AGENTS.md", "managed block"],
+      ["skills/loom-init/SKILL.md", "init template"],
+      ["opencode-plugin.mjs", "opencode injection"],
+    ]) {
+      ok(read(p).includes("Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim."), `${label} carries the silent-pass loud-fail line`);
+    }
+
+    // standards checkers own the falsifiability check, both dialects word-identical
+    for (const p of ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
+      const std = read(p);
+      ok(std.includes("able to fail") && std.includes("tautological assert"), `${p} flags non-falsifiable checks`);
+    }
+
+    // unattended lane gates new loops on the four-condition test
+    const unattended = read("docs/unattended.md");
+    ok(unattended.includes("Should this be a loop at all?"), "unattended doc carries the loop test section");
+    ok(unattended.includes("Verification is automatable"), "loop test demands an objective red-capable gate");
+  }
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {

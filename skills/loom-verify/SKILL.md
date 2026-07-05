@@ -25,18 +25,18 @@ Structured digest (below), persisted into the issue's `## Verify` section on **e
 ## Process
 
 1. Pin fixed point; confirm diff is non-empty.
-2. Spawn **two parallel checker sub-agents** (separate context — `Subagent` tool or host equivalent):
+2. **Run the objective gates before spawning anyone**: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE. Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. And a cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence. **Any red gate short-circuits: REJECT now**, blockers name the failing commands, write-back happens as usual, and checkers are **not spawned** (record in Sub-agent evidence: `not spawned — objective gate red`) — judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
+3. Gates green → spawn **two parallel checker sub-agents** (separate context — `Subagent` tool or host equivalent):
    - **Spec**: does change satisfy issue + PRD? Quote spec lines for findings. Pass `loomRole: "spec-checker"` in spawn data.
-   - **Standards**: warp + discipline floor — conventions, runnable check exists and passes. Pass `loomRole: "standards-checker"` in spawn data.
+   - **Standards**: warp + discipline floor — conventions, and the issue's runnable check exists and **can fail** (pass/fail itself arrives with the briefing's gate results — checker tools are read-only). Pass `loomRole: "standards-checker"` in spawn data.
    - **Named checker agents:** if the host ships pre-configured checker agents (e.g. OMP plugin agents `loom-verify-spec` / `loom-verify-standards`), **attempt them once per session** — never assume unavailability without one recorded attempt. Record the outcome (found / not found) in Sub-agent evidence and reuse it for every subsequent verify in the session. On not-found, fall back to generic sub-agents with the checker manifests inlined.
    - **Spawn the named checker agents when the host lists them** (`loom-verify-spec` / `loom-verify-standards` in the sub-agent type list) — a generic task/reviewer sub-agent is the fallback for hosts that don't, not a peer option. The names carry the manifests: role constraints and the model tier below ride on them.
    - **Each checker prompt carries its own agent binding.** Batch the two spawns for parallelism only if the interface binds the agent per item; a single agent field spanning two prompts runs both under one checker's manifest and the other axis silently loses its role and tier (seen live on OMP: standards ran under the spec label).
    - **Checker model tier:** checkers run on the host's **fast/cheap tier** when a model can be chosen — named checker manifests already pin it (OMP `model: pi/smol`, Claude `model: haiku`); when spawning generic sub-agents through an interface that exposes model selection, pick the host's fast/cheap tier yourself. The **user's host config always wins** (model roles, redefined agents, user rules); when no tier is discernible, inherit the session model. Record the tier used in Sub-agent evidence either way.
    - **Shared briefing:** write the checker context **once** to a scratch file outside the repo worktree (`$TMPDIR` or the host's scratch, e.g. OMP `local://`) and hand both spawns the same reference plus their own axis. Two hand-copied prompts drift; one briefing guarantees both checkers judge the same input, and scratch outside the repo keeps the judged diff clean.
-   - **The briefing carries evidence, not pointers.** Contents: the **diff text itself** (not just the command), the **issue card verbatim** (acceptance criteria included), the `## Log` claims, the fixed point, and PRD/standards **paths** for deeper dives. You already computed the diff in step 1 — a checker re-deriving it read-by-read is the single biggest verify cost on record (field run: 9 checkers, 199 turns, most spent re-assembling evidence the orchestrator had). Size valve: past ~400 diff lines, embed the file list + per-file hunk summary instead and let checkers read the changed files themselves.
-3. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15s or more). Either way, fill the wait with the verify-session's own remaining tasks: run the objective gates (step 5) and pre-assemble the digest frame — scope, fixed point, gate results in their slots — so checker verdicts drop into a prepared digest instead of starting it after they land. No empty rapid-fire polls: a field run burned 6 consecutive no-op polls exactly here.
-4. Aggregate digest; blocking findings first.
-5. Run objective quality gates (during the step-3 wait when checkers are still out): everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE.
+   - **The briefing carries evidence, not pointers.** Contents: the **diff text itself** (not just the command), the **issue card verbatim** (acceptance criteria included), the `## Log` claims, the fixed point, **the step-2 gate results** (checkers judge with facts, not the maker's word), and PRD/standards **paths** for deeper dives. You already computed the diff in step 1 — a checker re-deriving it read-by-read is the single biggest verify cost on record (field run: 9 checkers, 199 turns, most spent re-assembling evidence the orchestrator had). Size valve: past ~400 diff lines, embed the file list + per-file hunk summary instead and let checkers read the changed files themselves.
+4. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15s or more). Either way, fill the wait with the verify-session's own remaining tasks: pre-assemble the digest frame — scope, fixed point, step-2 gate results in their slots — so checker verdicts drop into a prepared digest instead of starting it after they land. No empty rapid-fire polls: a field run burned 6 consecutive no-op polls exactly here.
+5. Aggregate digest; blocking findings first. Gate results are verdict input, not decoration — **evidence beats opinion**, and an APPROVE whose Checks executed section is empty is unearned by definition.
 
 ## Output format
 
@@ -51,7 +51,7 @@ APPROVE | REJECT | ESCALATE_HUMAN
 - severity: blocker|major|minor|note | claim | evidence | fix direction
 
 ## Checks executed
-- command → pass/fail
+- command → pass/fail   (never empty: list commands, or `no runnable checks — {why}`; silent pass — one line per green command; loud fail — red output verbatim)
 
 ## Sub-agent evidence
 - Spec sub-agent: invoked (yes/no) | tool/host used
@@ -110,6 +110,7 @@ Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status
 ## Hard stops
 
 - No evidence → no approve.
+- Empty **Checks executed** → no approve: it lists real commands with results, or the explicit `no runnable checks — {why}` line.
 - No **Sub-agent evidence** section → no approve (unless documented host limitation).
 - Do not downgrade blockers to style notes.
 - Do not fix code during verify.
@@ -119,6 +120,7 @@ Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status
 | Symptom | Response |
 |---|---|
 | Empty diff | Stop; pin fixed point and confirm scope |
+| Objective gate red (step 2) | REJECT without spawning checkers; blockers name the failing commands, digest notes `not spawned — objective gate red` |
 | Host cannot spawn sub-agents | Sequential Spec then Standards; document in digest |
 | OMP `task` agent not found | Fall back to host `reviewer` or sequential sub-agents with `loomRole`; document in Sub-agent evidence |
 | Sub-agents unavailable | ESCALATE_HUMAN with explicit limitation |
@@ -131,6 +133,8 @@ Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status
 | Excuse | Reality |
 |---|---|
 | "Looks fine, skip sub-agents" | Parallel Spec+Standards is mandatory |
+| "Gates are green, skip the checkers" | Green gates earn checkers, not an APPROVE — tests can't read the spec |
+| "Checkers passed, the maker said tests pass" | The maker's word is a claim; Checks executed holds commands verify ran itself |
 | "I'll fix it myself in verify" | Verify judges; hand back to implement |
 | "Approve with known gap" | REJECT or ESCALATE_HUMAN with explicit debt marker |
 | "Named agents probably aren't discoverable — straight to fallback" | One recorded attempt per session first; assumption is not evidence |
@@ -156,7 +160,8 @@ From there the general contract applies unchanged (digest, write-back, gates); O
 
 ## Done when
 
-- Both sub-agents ran in parallel (or documented host limitation with sequential fallback)
+- Objective gates ran first — results in the digest and the briefing (or the red-gate short-circuit REJECT was delivered)
+- Both sub-agents ran in parallel (or documented host limitation with sequential fallback; or skipped via the red-gate short-circuit)
 - Digest has all required sections
-- Checks executed section lists commands with pass/fail
+- Checks executed section lists commands with pass/fail, or the explicit `no runnable checks — {why}` line
 - Verdict line written into the issue's `## Verify` section — every attempt, REJECT included (the gate requires an APPROVE line for `done`); no issue file → the digest delivered in chat/PR satisfies the write-back

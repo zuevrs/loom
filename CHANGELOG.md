@@ -4,10 +4,26 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.2] - 2026-07-05
+
+Evidence-first verify. A reference sweep (HumanLayer, LangChain, 0xCodez, two harness-engineering repos, Osmani, Pocock) converged on one sharp critique of LLM-judge verify lanes: a second agent with an *opinion* is not a gate — reviewers must receive **test output and proof it was actually run** (Osmani), and objective checks must be able to fail the work (0xCodez's Ralph-Wiggum warning). Loom had the hole: gates ran late and bound nothing, so an APPROVE over a red build was possible. Prose-contract fixes only; no code behavior changed.
+
+### Changed
+
+- **Objective gates run first and bind the verdict** (`loom-verify`): gates (issue/PRD commands + the repo's own lint/typecheck/test) moved ahead of checker spawns — a red gate short-circuits to REJECT without spending two sub-agents, and gate results now ride in the checker briefing, so checkers judge with facts instead of the maker's word. New hard stop: empty `Checks executed` → no approve — it lists real commands, or the explicit `no runnable checks — {why}` line. Guard in both directions: green gates earn checkers, they never replace them
+- **Silent pass, loud fail** — one new managed-block discipline line (init template, canonical AGENTS.md, OpenCode injection, word-identical) plus recording rules in implement step 11 and verify step 2: a green check is cited in one line, failing output lands verbatim; green walls bury the line that matters
+- **Falsifiability requirement**: a cited check must be **able to fail** — tautological asserts (expected value recomputed the way the code computes it) are not evidence. Named in verify step 2 and as a blocker-level rule in both standards-checker dialects (word-identical); `TDD.md` already taught it to makers
+- **Verification ladder as guidance** (implement step 11): climb as far as the repo allows — static → tests → a smoke run of the touched behavior; depth proportional to the change, and skipping a rung the repo already has is a gap the checker will name. Deliberately not a gate: no mandatory E2E layer
+- **"Should this be a loop at all?"** — four required conditions (repeats; verification automatable; budget bounds it; tools exist) in `docs/unattended.md` before the recipe tiers, so loop theater is rejected at the door
+
 ### Added
 
 - **README graphics** — flat wordmark logo (`assets/logo.png`) + 5s animated hero loop (`assets/logo-loop.gif`, 600px, ~680 KB): the thread weaves through the wordmark, a flaw flashes red and is rewoven, the checkmark pulses green — the verify gate told in one loop. Generated stills + Seedance motion, assembled via ffmpeg palette pipeline
 - **Two README infographics in the same thread language**: the ritual pipeline (`assets/pipeline.png` — grill → prd·adr → slices → implement → verify → done, red reject loop back to implement, tend arcing over the run) after the Sixty-seconds walkthrough, and the host spider (`assets/hosts.png` — one spool, threads to six named hosts + "+6 more") at the top of Install
+
+### Deliberately rejected this round (reference sweep, user decision)
+
+- Eval/benchmark suite (deferred, not never); token budgets / run logs / readiness scripts for unattended (no enforcement surface cross-host — prose decoration); Ralph-style reinjection (contradicts the one-forced-lap stop-gate safety design); worktree/best-of-N parallel makers (token multiplier, breaks one-issue-at-a-time); mandatory E2E gate (overengineering for most repos)
 
 ## [0.23.1] - 2026-07-05
 
@@ -844,7 +860,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.2...HEAD
+[0.23.2]: https://github.com/zuevrs/loom/compare/v0.23.1...v0.23.2
 [0.23.1]: https://github.com/zuevrs/loom/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/zuevrs/loom/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/zuevrs/loom/compare/v0.22.0...v0.22.1
