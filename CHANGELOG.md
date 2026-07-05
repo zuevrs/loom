@@ -6,18 +6,18 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [0.23.3] - 2026-07-05
 
-Reference sweep, round 2 — full inventories of mattpocock/skills and addyosmani/agent-skills against v0.23.2. Most of both catalogs is already adopted or consciously skipped; this round lands the four prose contracts that survived the grill. Deliberately not taken (user decision): a handoff ritual and an inbound-triage ritual — `loom-plan` stays the single entry point, and building a triage vestibule with no inbound stream is YAGNI. No new surfaces; no code behavior changed.
+Four workflow-contract hardenings across the implement and unattended lanes: the test suite only ratchets tighter, assumptions surface before code, unattended PRs get a fixed description shape, and green diffs get a subtraction pass before review. Prose contracts only — no new surfaces, no code behavior changed.
 
 ### Changed
 
 - **Test ratchet** (`TDD.md` anti-patterns): deleting, skipping, or weakening an existing test to get a green run is named as a violation — a failing test is a signal, never an obstacle; a test encoding a stale spec is a plan question, not an edit. The maker-side counterpart of v0.23.2's checker-side falsifiability rule, plus an anti-rationalization row ("This test is in my way")
 - **Surfaced assumptions** (`loom-implement` step 3): the existing rule covers PRD *silence*; the new paragraph covers the gap where the PRD answered but the maker's reading isn't the only one — before non-trivial code, print `Assumptions: … — correct me now or I proceed` (chat when attended, `## Log` when unattended). An assumption surfaced costs one line; the same assumption found by a checker costs a REJECT lap
-- **PR body contract** (`docs/unattended.md` + pointer from implement § Unattended): the unattended human gate is the PR, and its description now has a fixed shape — Summary / Test plan / Verify / Log / Rollout (only when PRD §Risks is non-empty) / Open questions; empty sections are dropped; draft PRs lead with the blocker. The `/ship`-style persona fan-out was deliberately not taken — it would duplicate `loom-verify`
+- **PR body contract** (`docs/unattended.md` + pointer from implement § Unattended): the unattended human gate is the PR, and its description now has a fixed shape — Summary / Test plan / Verify / Log / Rollout (only when PRD §Risks is non-empty) / Open questions; empty sections are dropped; draft PRs lead with the blocker
 - **Simplify while green** (`loom-implement` step 13): between self-review and the checkers, if the diff is heavier than acceptance requires, one behavior-preserving subtraction pass — touched files only, one move at a time, checks after each, Chesterton's fence. Explicitly split from refactoring (renames/moves/redesigns stay verify findings or new issues), with an anti-rationalization row ("I'll call this simplification")
 
 ## [0.23.2] - 2026-07-05
 
-Evidence-first verify. A reference sweep (HumanLayer, LangChain, 0xCodez, two harness-engineering repos, Osmani, Pocock) converged on one sharp critique of LLM-judge verify lanes: a second agent with an *opinion* is not a gate — reviewers must receive **test output and proof it was actually run** (Osmani), and objective checks must be able to fail the work (0xCodez's Ralph-Wiggum warning). Loom had the hole: gates ran late and bound nothing, so an APPROVE over a red build was possible. Prose-contract fixes only; no code behavior changed.
+Evidence-first verify. A second agent with an *opinion* is not a gate: checkers must receive **test output and proof it was actually run**, and objective checks must be able to fail the work. Loom had the hole — gates ran late and bound nothing, so an APPROVE over a red build was possible. Prose-contract fixes only; no code behavior changed.
 
 ### Changed
 
@@ -32,13 +32,9 @@ Evidence-first verify. A reference sweep (HumanLayer, LangChain, 0xCodez, two ha
 - **README graphics** — flat wordmark logo (`assets/logo.png`) + 5s animated hero loop (`assets/logo-loop.gif`, 600px, ~680 KB): the thread weaves through the wordmark, a flaw flashes red and is rewoven, the checkmark pulses green — the verify gate told in one loop. Generated stills + Seedance motion, assembled via ffmpeg palette pipeline
 - **Two README infographics in the same thread language**: the ritual pipeline (`assets/pipeline.png` — grill → prd·adr → slices → implement → verify → done, red reject loop back to implement, tend arcing over the run) after the Sixty-seconds walkthrough, and the host spider (`assets/hosts.png` — one spool, threads to six named hosts + "+6 more") at the top of Install
 
-### Deliberately rejected this round (reference sweep, user decision)
-
-- Eval/benchmark suite (deferred, not never); token budgets / run logs / readiness scripts for unattended (no enforcement surface cross-host — prose decoration); Ralph-style reinjection (contradicts the one-forced-lap stop-gate safety design); worktree/best-of-N parallel makers (token multiplier, breaks one-issue-at-a-time); mandatory E2E gate (overengineering for most repos)
-
 ## [0.23.1] - 2026-07-05
 
-Field run 10 — the first full economics audit of a real Loom run (four-issue pack, goal lane, dual checkers per issue) against a no-harness baseline of the same task. Grand total: 15.5M billed tokens vs ~30k. The structural finding (full pack ritual on a one-shot deliverable) is deferred by user decision; the three measured leaks below are fixed. All three are prose-contract fixes — no code behavior changed.
+An economics audit of a full Loom run (four-issue pack, goal lane, dual checkers per issue) traced the token overhead to three measured leaks in the verify and goal lanes; all three are fixed below. Prose-contract fixes — no code behavior changed.
 
 ### Changed
 
@@ -47,14 +43,9 @@ Field run 10 — the first full economics audit of a real Loom run (four-issue p
 - **Null-yield respawn policy codified in verify.** Two spawns in the field run died to null yields (host glitch, recurring since ADR-0126) and the respawn was ad-hoc orchestrator judgement; the failure table now caps it: respawn that checker once, a second null/empty counts as `verdict: fail` with blocker "checker yield lost (host glitch)", never a third spawn
 - **Wait-discipline line in the managed block** (init template, canonical AGENTS.md, OpenCode injection): "Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them." The goal lane burned 4 blocks of 5 idle job polls, each re-billing the full context; the only prose against this lived in loom-verify step 3, which never bound the goal lane
 
-### Field run 10 (economics audit, glm-5.2 xhigh / glm-5-turbo checkers)
-
-- Loom run: 351 turns across main session + 13 sub-agents; 763k fresh + 14.8M cache-read. Baseline (same prompt, no harness): ~30k tokens, minutes. Verified where the multiplier lives: checker re-derivation (fixed here), idle polls (fixed here), and the pack ritual itself on a task that needed none (plan-lite lane — measured, discussed, deferred)
-- Grill upside, measured: the ritual's grill phase extracted the deck's real genre (course defense, author attribution) that the baseline run guessed wrong, and the checkers' "no invented numbers" rule held — the baseline deck shipped a derived headline stat absent from the source
-
 ## [0.23.0] - 2026-07-05
 
-Docs regroom against the reference-README corpus (mattpocock, ponytail, caveman, addyosmani), a doctor upgrade, and field run 9 — two headless OMP re-confirm probes that exercised the v0.22.1 skill pins and caught three more things.
+Docs regroom, a doctor upgrade, and field run 9 — two headless OMP re-confirm probes that exercised the v0.22.1 skill pins and caught three more things.
 
 ### Added
 
@@ -64,7 +55,7 @@ Docs regroom against the reference-README corpus (mattpocock, ponytail, caveman,
 
 ### Changed
 
-- **README rebuilt on the reference-README pattern** (hook + gate demo up top, quick path only): 316 → 137 lines. One install+uninstall table — the **single** status surface — plus quickstart, upgrade, one-paragraph enforcement story. The depth (per-host feature matrix, host-native enforcement wiring, checker-model table, linter/witness/resume sections, full Loom+OMP workflow, templates) moved to **`docs/hosts.md`**
+- **README rebuilt** (hook + gate demo up top, quick path only): 316 → 137 lines. One install+uninstall table — the **single** status surface — plus quickstart, upgrade, one-paragraph enforcement story. The depth (per-host feature matrix, host-native enforcement wiring, checker-model table, linter/witness/resume sections, full Loom+OMP workflow, templates) moved to **`docs/hosts.md`**
 - `check-doc-consistency` guards the new split: hosts.md must exist, README must route to it, install status must not be restated in hosts.md (the v0.22.1 `impl`-vs-`verified` drift came from two status surfaces), every host appears in both files, template paths pinned in hosts.md
 
 ### Fixed

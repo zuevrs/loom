@@ -116,6 +116,13 @@ fi
 if [ -n "$pkg_version" ] && ! grep -Fq "[${pkg_version}]:" "$CHANGELOG"; then
   errors+=("CHANGELOG compare links are missing [${pkg_version}] entry")
 fi
+# The changelog is product-facing: distillation sources and maintainer-decision
+# narrative live in the maintainer repo (ADRs), never in release notes. Scan only
+# the fresh slice (Unreleased + newest release section) — history stays as written.
+changelog_fresh="$(awk '/^## \[[0-9]/{c++} c==2{exit} {print}' "$CHANGELOG")"
+if printf '%s' "$changelog_fresh" | grep -Eiq 'mattpocock|pocock|osmani|ponytail|caveman|humanlayer|langchain|0xcodez|reference sweep|user decision'; then
+  errors+=("CHANGELOG fresh slice carries internal provenance (source names / decision narrative) — keep release notes product-facing")
+fi
 if ! grep -Fq '[`RELEASE.md`](RELEASE.md)' "$CONTRIBUTING_DOC"; then
   errors+=("CONTRIBUTING is missing release checklist link to RELEASE.md")
 fi
