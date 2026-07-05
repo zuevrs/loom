@@ -126,7 +126,7 @@ function run(script, env = {}) {
 
 // --- Stop gate tests ---
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -714,6 +714,27 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const healthy = runInstaller(["--doctor"]);
   strictEqual(healthy.code, 0, `doctor exits 0 after install (got: ${healthy.out})`);
   ok(healthy.out.includes("0 failure(s)"), "doctor reports zero failures");
+  ok(healthy.out.includes("single install tree"), "doctor confirms all surfaces share one loom tree");
+
+  // split-brain: skills from one tree + hooks from another must fail loudly
+  // (seen live: hooks → ~/.loom, skill links → a dev checkout — they upgrade apart)
+  {
+    const otherTree = join(tmpHome, "other-loom");
+    mkdirSync(join(otherTree, "skills", "loom-plan"), { recursive: true });
+    writeFileSync(join(otherTree, "package.json"), JSON.stringify({ version: "0.0.1" }));
+    writeFileSync(join(otherTree, "skills", "loom-plan", "SKILL.md"), "name: loom-plan\n");
+    const link = join(tmpHome, ".agents", "skills", "loom-plan");
+    rmSync(link, { recursive: true, force: true });
+    symlinkSync(join(otherTree, "skills", "loom-plan"), link);
+    const split = runInstaller(["--doctor"]);
+    strictEqual(split.code, 1, "doctor exits 1 on split-brain install");
+    ok(split.out.includes("split-brain"), "doctor names the split-brain condition");
+    ok(split.out.includes(otherTree) && split.out.includes("v0.0.1"), "doctor lists both trees with versions");
+    // repair: relink from the tree the installer runs from
+    rmSync(link, { recursive: true, force: true });
+    runInstaller(["--cursor"]);
+    strictEqual(runInstaller(["--doctor"]).code, 0, "doctor is clean again after relinking from one tree");
+  }
 
   // a foreign dir squatting on a loom skill name: install skips it, uninstall must not delete it
   const squatter = join(tmpHome, ".agents", "skills", "loom-tend");
@@ -833,10 +854,11 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 {
   const { readFileSync: rf } = await import("node:fs");
   const readme = rf(resolve(__dirname, "..", "README.md"), "utf8");
+  const hostsDoc = rf(resolve(__dirname, "..", "docs", "hosts.md"), "utf8");
   ok(readme.includes("--doctor"), "README documents the doctor");
   ok(readme.includes("--uninstall --cursor"), "README uninstall rows use the installer");
-  ok(readme.includes("fresh sub-agent with the PRD and that single issue"), "goal example carries the per-issue sub-agent contract");
-  ok(readme.includes("LOOM_ROLE=spec-checker"), "headless checker role documented");
+  ok(hostsDoc.includes("fresh sub-agent with the PRD and that single issue"), "goal example carries the per-issue sub-agent contract");
+  ok(hostsDoc.includes("LOOM_ROLE=spec-checker"), "headless checker role documented");
   ok(readme.includes("omp plugin doctor loom"), "OMP post-update doctor documented");
   const tend = rf(resolve(__dirname, "..", "skills", "loom-tend", "SKILL.md"), "utf8");
   ok(tend.includes("Install freshness"), "tend audits managed-block staleness");
@@ -1207,8 +1229,8 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   rmSync(dirtyPy, { recursive: true });
 
   // --- Docs and skills carry the new mechanics ---
-  ok(read("README.md").includes("The `.loom` linter"), "README documents the linter");
-  ok(read("README.md").includes("The verify witness"), "README documents the witness");
+  ok(read("docs/hosts.md").includes("The `.loom` linter"), "hosts doc documents the linter");
+  ok(read("docs/hosts.md").includes("The verify witness"), "hosts doc documents the witness");
   ok(read("skills/loom-verify/SKILL.md").includes("The APPROVE is witnessed"), "verify skill states the witness contract");
   ok(read("skills/loom-tend/SKILL.md").includes("--lint"), "tend starts stale-issue sweep with the linter");
   ok(read("docs/unattended.md").includes("verify-witness check automatically when `CI` is set"), "unattended doc explains CI witness skip");
@@ -1344,7 +1366,7 @@ print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
 
   // G4 + G5: prose landed.
   ok(read("skills/loom-tend/SKILL.md").includes(".loom/research/*.md"), "tend sweeps research notes");
-  ok(read("README.md").includes("Known limitation (Codex)"), "README carries the Codex witness caveat");
+  ok(read("docs/hosts.md").includes("Known limitation (Codex)"), "hosts doc carries the Codex witness caveat");
 }
 
 // v0.15.0 — session resumability: next-up pointer, rework-pending, dirty-tree breadcrumb, log-as-you-go
@@ -1432,7 +1454,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   // G4: log-as-you-go prose landed.
   ok(read("skills/loom-implement/SKILL.md").includes("Log as you go, not at the end"), "implement logs in the moment");
   ok(read("skills/loom-plan/ISSUE-TEMPLATE.md").includes("AS WORK HAPPENS"), "template comment carries the contract");
-  ok(read("README.md").includes("Sessions die; the snapshot resumes"), "README explains the resume story");
+  ok(read("docs/hosts.md").includes("Sessions die; the snapshot resumes"), "hosts doc explains the resume story");
 }
 
 // v0.15.1 — upstream re-audit: enactment gates (Pocock grilling #433), grill leading word
@@ -1766,8 +1788,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(doc.includes("/advisor on") && doc.includes("/advisor dump"), "advisor doc lists the host controls");
   ok(/OMP-only/.test(doc), "advisor doc is honest about the host boundary");
   ok(/baseline.*advisor behavior/s.test(doc), "advisor doc warns the baseline advisor comes with the toggle");
-  const readme = read("README.md");
-  ok(readme.includes("docs/omp-advisor.md"), "README routes to the advisor profile doc");
+  ok(read("docs/hosts.md").includes("omp-advisor.md"), "hosts doc routes to the advisor profile doc");
   // Core stays untouched: the profile must not leak into rituals or the managed block.
   for (const p of ["AGENTS.md", "skills/loom-implement/SKILL.md", "skills/loom-plan/SKILL.md", "skills/loom-init/SKILL.md", "skills/loom-grill/SKILL.md", "skills/loom-verify/SKILL.md", "skills/loom-tend/SKILL.md"])
     ok(!/WATCHDOG/.test(read(p)), `${p} carries no advisor route`);

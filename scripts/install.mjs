@@ -27,7 +27,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -257,6 +257,8 @@ function doctor() {
   }
 
   // Skill links — broken symlinks fail; copies only warn (they drift on update).
+  // Also collect each link's loom tree root for the split-brain check below.
+  const linkRoots = new Set();
   const checkedDirs = new Set();
   for (const dir of Object.values(SKILL_TARGETS)) {
     if (checkedDirs.has(dir) || !existsSync(dir)) continue;
@@ -267,8 +269,13 @@ function doctor() {
     for (const name of loomSkillNames()) {
       const dest = join(dir, name);
       if (isSymlink(dest)) {
-        if (existsSync(dest)) linked += 1;
-        else {
+        if (existsSync(dest)) {
+          linked += 1;
+          const target = readlinkSync(dest);
+          const abs = isAbsolute(target) ? target : resolve(dirname(dest), target);
+          // skills/<name> → tree root is two levels up from the link target
+          linkRoots.add(resolve(abs, "..", ".."));
+        } else {
           failLine(`skills ${dir}: ${name} is a broken symlink`, `re-run the installer for this host`);
           broken += 1;
         }
@@ -280,6 +287,11 @@ function doctor() {
         `skills ${dir}: ${linked} linked${copies ? `, ${copies} copied (re-run installer after updates)` : ""}`
       );
   }
+
+  // Split-brain — every install surface must point into ONE loom tree.
+  // Hooks from clone A + skills from clone B upgrade independently and drift
+  // apart silently (seen live: hooks → ~/.loom, skills → a dev checkout).
+  splitBrainCheck({ hooksFile, linkRoots, okLine, failLine, warnLine });
 
   // Kiro agent
   const kiroAgent = join(HOME, ".kiro", "agents", "loom.json");
@@ -309,6 +321,67 @@ function doctor() {
 
   console.log(`\n${problems.length} failure(s), ${warnings.length} warning(s)`);
   process.exit(problems.length > 0 ? 1 : 0);
+}
+
+// All install surfaces must resolve into one loom tree of one version.
+function splitBrainCheck({ hooksFile, linkRoots, okLine, failLine, warnLine }) {
+  const roots = new Map(); // resolved tree root → Set of surface names
+  const addRoot = (root, surface) => {
+    const key = resolve(root);
+    if (!roots.has(key)) roots.set(key, new Set());
+    roots.get(key).add(surface);
+  };
+  for (const r of linkRoots) addRoot(r, "skill links");
+  if (existsSync(hooksFile)) {
+    try {
+      const json = JSON.parse(readFileSync(hooksFile, "utf8").replace(/^\uFEFF/, ""));
+      for (const arr of Object.values(json.hooks || {})) {
+        for (const h of Array.isArray(arr) ? arr : []) {
+          if (!isLoomEntry(h)) continue;
+          const file = h.command
+            .replaceAll('"', "")
+            .split(/\s+/)
+            .find((t) => LOOM_HOOK_FILES.has(basename(t)));
+          // hooks/<file> → tree root is one level up
+          if (file && isAbsolute(file)) addRoot(resolve(dirname(file), ".."), "cursor hooks");
+        }
+      }
+    } catch {
+      /* unparseable hooks.json is already reported above */
+    }
+  }
+  if (roots.size === 0) return;
+
+  const readVersion = (root) => {
+    try {
+      return JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+    } catch {
+      return null;
+    }
+  };
+
+  if (roots.size > 1) {
+    const desc = [...roots]
+      .map(([root, surfaces]) => `${root} (v${readVersion(root) ?? "?"}: ${[...surfaces].join(" + ")})`)
+      .join("  vs  ");
+    failLine(
+      `split-brain: install surfaces span ${roots.size} loom trees — ${desc}`,
+      "pick one tree, then from it: node <tree>/scripts/install.mjs --uninstall --<host> && node <tree>/scripts/install.mjs --<host>"
+    );
+    return;
+  }
+
+  const [root] = roots.keys();
+  const v = readVersion(root);
+  if (!v) {
+    failLine(`install tree ${root} has no readable package.json`, "re-clone loom there and re-run the installer");
+  } else if (root !== resolve(LOOM_ROOT) && v !== LOOM_VERSION) {
+    warnLine(
+      `install tree ${root} is v${v} but doctor runs from v${LOOM_VERSION} at ${LOOM_ROOT} — upgrade the install tree (git -C ${root} pull) or doctor from it`
+    );
+  } else {
+    okLine(`single install tree: ${root} (v${v})`);
+  }
 }
 
 // --- uninstall: remove what the installer owns; foreign files untouched ---

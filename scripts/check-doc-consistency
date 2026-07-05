@@ -77,6 +77,29 @@ EVIDENCE_DOC="$ROOT/docs/evidence/HOST-INSTALL.md"
 if [ ! -f "$EVIDENCE_DOC" ]; then
   errors+=("docs/evidence/HOST-INSTALL.md is missing")
 fi
+HOSTS_DOC="$ROOT/docs/hosts.md"
+if [ ! -f "$HOSTS_DOC" ]; then
+  errors+=("docs/hosts.md is missing")
+else
+  # README is the lead (quick path), hosts.md is the depth — they must reference each other.
+  if ! grep -Fq 'docs/hosts.md' "$README"; then
+    errors+=("README must route to docs/hosts.md for per-host depth")
+  fi
+  # Install status (verified/implemented) lives ONLY in the README install table.
+  # A second status surface is how the v0.22.1 impl-vs-verified drift happened.
+  if grep -Eq '^\| Status \|' "$HOSTS_DOC" || grep -Fqi '| **verified**' "$HOSTS_DOC"; then
+    errors+=("docs/hosts.md restates install status — README install table is the single status surface")
+  fi
+  # Every host in the README install table must appear in the hosts.md feature matrix.
+  for host in 'Claude Code' 'Codex' 'Pi' 'OMP' 'OpenCode' 'Cursor' 'Windsurf' 'Kiro' 'Hermes' 'Cline' 'Droid' 'OpenClaw'; do
+    if ! grep -Fq "$host" "$README"; then
+      errors+=("README install table is missing host: $host")
+    fi
+    if ! grep -Fq "$host" "$HOSTS_DOC"; then
+      errors+=("docs/hosts.md feature matrix is missing host: $host")
+    fi
+  done
+fi
 if ! grep -Fq 'docs/evidence/HOST-INSTALL.md' "$RELEASE_DOC"; then
   errors+=("RELEASE.md is missing host install evidence checklist link")
 fi
@@ -147,8 +170,8 @@ for rel in "${template_paths[@]}"; do
   if ! grep -Eq '^## ' "$tmpl"; then
     errors+=("$rel is missing section headings")
   fi
-  if ! grep -Fq "$rel" "$README"; then
-    errors+=("README template table is missing path: $rel")
+  if ! grep -Fq "$rel" "$HOSTS_DOC"; then
+    errors+=("docs/hosts.md template table is missing path: $rel")
   fi
 done
 
