@@ -6,7 +6,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Added
 
-- **README hero animation** — flat wordmark logo (`assets/logo.png`) + 5s seamless loop (`assets/logo-loop.gif`, 600px, ~680 KB): the thread weaves through the wordmark, a flaw flashes red and is rewoven, the checkmark pulses green — the verify gate told in one loop. Generated stills + Seedance motion, assembled via ffmpeg palette pipeline
+- **README graphics** — flat wordmark logo (`assets/logo.png`) + 5s animated hero loop (`assets/logo-loop.gif`, 600px, ~680 KB): the thread weaves through the wordmark, a flaw flashes red and is rewoven, the checkmark pulses green — the verify gate told in one loop. Generated stills + Seedance motion, assembled via ffmpeg palette pipeline
+- **Two README infographics in the same thread language**: the ritual pipeline (`assets/pipeline.png` — grill → prd·adr → slices → implement → verify → done, red reject loop back to implement, tend arcing over the run) after the Sixty-seconds walkthrough, and the host spider (`assets/hosts.png` — one spool, threads to six named hosts + "+6 more") at the top of Install
 
 ## [0.23.1] - 2026-07-05
 

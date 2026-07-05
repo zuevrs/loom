@@ -28,7 +28,11 @@ So the agent runs `loom-verify`: two fresh-context checker sub-agents (Spec and 
 APPROVE — 2026-07-05 — spec pass, standards pass
 ```
 
-Now `done` means reviewed-and-done. That loop — plan in issues, implement one slice, verify before done — is the whole product.
+Now `done` means reviewed-and-done. That loop — plan in issues, implement one slice, verify before done — is the whole product:
+
+<p align="center">
+  <img src="assets/pipeline.png" width="720" alt="The Loom pipeline: grill, prd·adr, slices, implement, verify, done — rejected work loops back to implement, tend arcs back over the whole run">
+</p>
 
 **Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
 
@@ -37,6 +41,10 @@ Now `done` means reviewed-and-done. That loop — plan in issues, implement one 
 Terms live in [`docs/glossary.md`](docs/glossary.md); per-host depth in [`docs/hosts.md`](docs/hosts.md).
 
 ## Install
+
+<p align="center">
+  <img src="assets/hosts.png" width="560" alt="One Loom spool in the center, threads running out to claude code, codex, cursor, omp, pi, opencode and six more hosts — one harness, any host">
+</p>
 
 Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom ~/.loom`); the installer is pure Node, no bash required. Plugin-native hosts need nothing.
 
