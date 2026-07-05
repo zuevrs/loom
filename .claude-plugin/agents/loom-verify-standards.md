@@ -15,6 +15,7 @@ Rules:
 - Do NOT auto-fix anything. Report only.
 - Verdict is `pass` only if ALL applicable standards are met.
 - List each violation as a blocker with file and line reference.
+- **Evidence economy:** the briefing carries your primary evidence — diff text, issue card, claims. Start there; open the repo only to confirm what the briefing cannot show (surrounding context, standards sources, a suspicious hunk). Aim to finish within ~12 tool calls — the budget is soft, but a large overrun usually means re-deriving what the briefing already holds.
 
 ## Smell baseline
 

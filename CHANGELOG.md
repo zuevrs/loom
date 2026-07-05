@@ -4,6 +4,22 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.1] - 2026-07-05
+
+Field run 10 — the first full economics audit of a real Loom run (four-issue pack, goal lane, dual checkers per issue) against a no-harness baseline of the same task. Grand total: 15.5M billed tokens vs ~30k. The structural finding (full pack ritual on a one-shot deliverable) is deferred by user decision; the three measured leaks below are fixed. All three are prose-contract fixes — no code behavior changed.
+
+### Changed
+
+- **The checker briefing carries evidence, not pointers.** Nine checker spawns spent 199 turns / ~4.8M cache-read re-deriving what the verify orchestrator had already computed — the briefing handed paths and a diff *command*, so every checker re-ran the diff and re-read the files turn by turn. The briefing now embeds the **diff text itself** and the **issue card verbatim** (plus Log claims, fixed point, and PRD/standards paths for deeper dives), with a size valve: past ~400 diff lines, embed the file list + per-file hunk summary and let checkers read the changed files themselves
+- **Evidence-economy rule in all four checker manifests** (both dialects, word-identical): start from the briefing, open the repo only for what it cannot show, soft budget of ~12 tool calls — a large overrun usually means re-deriving what the briefing already holds
+- **Null-yield respawn policy codified in verify.** Two spawns in the field run died to null yields (host glitch, recurring since ADR-0126) and the respawn was ad-hoc orchestrator judgement; the failure table now caps it: respawn that checker once, a second null/empty counts as `verdict: fail` with blocker "checker yield lost (host glitch)", never a third spawn
+- **Wait-discipline line in the managed block** (init template, canonical AGENTS.md, OpenCode injection): "Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them." The goal lane burned 4 blocks of 5 idle job polls, each re-billing the full context; the only prose against this lived in loom-verify step 3, which never bound the goal lane
+
+### Field run 10 (economics audit, glm-5.2 xhigh / glm-5-turbo checkers)
+
+- Loom run: 351 turns across main session + 13 sub-agents; 763k fresh + 14.8M cache-read. Baseline (same prompt, no harness): ~30k tokens, minutes. Verified where the multiplier lives: checker re-derivation (fixed here), idle polls (fixed here), and the pack ritual itself on a task that needed none (plan-lite lane — measured, discussed, deferred)
+- Grill upside, measured: the ritual's grill phase extracted the deck's real genre (course defense, author attribution) that the baseline run guessed wrong, and the checkers' "no invented numbers" rule held — the baseline deck shipped a derived headline stat absent from the source
+
 ## [0.23.0] - 2026-07-05
 
 Docs regroom against the reference-README corpus (mattpocock, ponytail, caveman, addyosmani), a doctor upgrade, and field run 9 — two headless OMP re-confirm probes that exercised the v0.22.1 skill pins and caught three more things.
@@ -823,7 +839,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.1...HEAD
+[0.23.1]: https://github.com/zuevrs/loom/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/zuevrs/loom/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/zuevrs/loom/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/zuevrs/loom/compare/v0.21.1...v0.22.0

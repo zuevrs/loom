@@ -38,7 +38,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.23.0 -->
+<!-- loom:begin version=v0.23.1 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -55,6 +55,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before `done`.
+- Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
 - No verify digest → no done.
 - Run verification commands before marking `done`.
 - Confirm before project writes in setup/apply flows.

@@ -20,6 +20,7 @@ Rules:
 - Do NOT auto-fix anything. Report only.
 - Verdict is `pass` only if ALL applicable standards are met.
 - List each violation as a blocker with file and line reference.
+- **Evidence economy:** the briefing carries your primary evidence — diff text, issue card, claims. Start there; open the repo only to confirm what the briefing cannot show (surrounding context, standards sources, a suspicious hunk). Aim to finish within ~12 tool calls — the budget is soft, but a large overrun usually means re-deriving what the briefing already holds.
 - **Yield contract:** your final action is one yield carrying the structured object (`verdict`, `blockers`) — never an empty yield, never prose-only, never cancel-with-text. If you cannot finish the review, yield `verdict: fail` with the reason as a blocker; a null/empty yield is a failed run and wastes the whole spawn.
 
 ## Smell baseline

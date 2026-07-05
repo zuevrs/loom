@@ -480,6 +480,39 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(read("docs/unattended.md").includes("omp -p --auto-approve"), "unattended doc teaches the real OMP headless flag");
   ok(!read("docs/hosts.md").includes("-p --approve ") && !read("docs/unattended.md").includes("-p --approve "), "no doc resurrects the nonexistent --approve flag");
 
+  // field run 10 (deck run, measured): 9 checkers spent 199 turns / ~4.8M cache-read
+  // re-deriving evidence the orchestrator already had (pointer-only briefing), two
+  // spawns died to null yields, and the goal lane burned 4 blocks of back-to-back
+  // no-op polls. Three fixes pinned below.
+  {
+    const verify = read("skills/loom-verify/SKILL.md");
+    // 1a. briefing carries the evidence itself, with a size valve for big diffs
+    ok(verify.includes("The briefing carries evidence, not pointers"), "verify briefing ships evidence, not pointers");
+    ok(verify.includes("diff text itself"), "briefing embeds the diff text, not just the command");
+    ok(verify.includes("issue card verbatim"), "briefing embeds the issue card verbatim");
+    ok(verify.includes("Size valve"), "briefing has a size valve for oversized diffs");
+    // 1b. checkers start from the briefing; soft turn budget rides on all four manifests
+    for (const p of [
+      "agents/loom-verify-spec.md", "agents/loom-verify-standards.md",
+      ".claude-plugin/agents/loom-verify-spec.md", ".claude-plugin/agents/loom-verify-standards.md",
+    ]) {
+      ok(read(p).includes("Evidence economy:"), `${p} carries the evidence-economy rule`);
+      ok(read(p).includes("~12 tool calls"), `${p} carries the soft turn budget`);
+    }
+    // 2. null yield burns a spawn: one respawn max, then fail — never a third
+    ok(verify.includes("Respawn that checker **once**"), "verify caps null-yield respawns at one");
+    ok(verify.includes("never a third spawn"), "verify forbids a third spawn on repeated null yields");
+  }
+  // 3. wait discipline binds every lane on every host (goal-lane polls were outside
+  // the verify-only prose that already existed)
+  for (const [p, label] of [
+    ["AGENTS.md", "managed block"],
+    ["skills/loom-init/SKILL.md", "init template"],
+    ["opencode-plugin.mjs", "opencode injection"],
+  ]) {
+    ok(read(p).includes("Waits are work time: no back-to-back no-op polls"), `${label} carries the wait-discipline line`);
+  }
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {
