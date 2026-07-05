@@ -561,6 +561,35 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(unattended.includes("Verification is automatable"), "loop test demands an objective red-capable gate");
   }
 
+  // v0.23.3 pocock/osmani sweep, round 2 — four prose contracts, no new surfaces
+  // (handoff and triage deliberately skipped: no inbound stream, plan stays the
+  // single entry point).
+  {
+    // 1. test ratchet (Osmani long-running-agents failure mode): the maker-side
+    // counterpart of verify's falsifiability rule
+    const tdd = read("skills/loom-implement/TDD.md");
+    ok(tdd.includes("Ratchet violation"), "TDD names the ratchet anti-pattern");
+    ok(tdd.includes("A failing test is a signal, never an obstacle"), "TDD forbids deleting/weakening tests for green");
+
+    const impl = read("skills/loom-implement/SKILL.md");
+    // 2. surfaced assumptions: the gap between "PRD answered" and "my reading is
+    // the only reading" — silent invention caught one lap before the checkers
+    ok(impl.includes("Surface the assumptions you do make"), "implement surfaces assumptions before non-trivial code");
+    ok(impl.includes("correct me now or I proceed"), "assumption block carries the correct-me-now contract");
+    // 3. PR body contract: the unattended human gate gets a fixed shape
+    const unattended = read("docs/unattended.md");
+    ok(unattended.includes("### PR body contract"), "unattended doc fixes the PR description shape");
+    ok(unattended.includes("drop a section entirely when it's empty"), "PR contract drops empty sections, not ceremony");
+    ok(unattended.includes("lead with the blocker"), "draft PRs lead with the blocker");
+    ok(impl.includes("PR body contract"), "implement unattended mode points at the PR body contract");
+    // 4. simplify-while-green: maker-initiated subtraction pass between the
+    // discipline ladder (prevent) and the standards checker (judge)
+    ok(impl.includes("Simplify while green"), "self-review carries the simplification pass");
+    ok(impl.includes("Chesterton's fence"), "simplification pass respects Chesterton's fence");
+    ok(impl.includes("I'll call this simplification"), "anti-rationalization splits simplification from refactor");
+    ok(impl.includes("The suite only ratchets tighter"), "anti-rationalization blocks test deletion for green");
+  }
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {

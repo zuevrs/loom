@@ -19,6 +19,7 @@ Seams are settled at plan time — the PRD's Testing Decisions section names the
 - **Implementation-coupled** — mocks internal collaborators, tests private methods, or verifies through a side channel (querying the DB instead of the interface). The tell: the test breaks on refactor while behavior is unchanged.
 - **Tautological** — the assertion recomputes the expected value the way the code does (`expect(add(a, b)).toBe(a + b)`; a hand-derived snapshot; a constant asserted against itself), so it passes by construction. Expected values come from an independent source of truth — a known-good literal, a worked example, the spec.
 - **Horizontal slicing** — all tests first, then all implementation. Bulk tests verify *imagined* behavior and go insensitive to real changes. Work in **vertical slices**: one test → one implementation → repeat, each test a tracer bullet informed by the last cycle.
+- **Ratchet violation** — deleting, skipping, or weakening an existing test to get a green run. A failing test is a signal, never an obstacle: fix the code, or bring the contradiction to the user (the test may encode a stale spec — that's a plan question, not an edit). The suite only ratchets tighter.
 
 ## Rules of the loop
 

@@ -4,6 +4,17 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.3] - 2026-07-05
+
+Reference sweep, round 2 — full inventories of mattpocock/skills and addyosmani/agent-skills against v0.23.2. Most of both catalogs is already adopted or consciously skipped; this round lands the four prose contracts that survived the grill. Deliberately not taken (user decision): a handoff ritual and an inbound-triage ritual — `loom-plan` stays the single entry point, and building a triage vestibule with no inbound stream is YAGNI. No new surfaces; no code behavior changed.
+
+### Changed
+
+- **Test ratchet** (`TDD.md` anti-patterns): deleting, skipping, or weakening an existing test to get a green run is named as a violation — a failing test is a signal, never an obstacle; a test encoding a stale spec is a plan question, not an edit. The maker-side counterpart of v0.23.2's checker-side falsifiability rule, plus an anti-rationalization row ("This test is in my way")
+- **Surfaced assumptions** (`loom-implement` step 3): the existing rule covers PRD *silence*; the new paragraph covers the gap where the PRD answered but the maker's reading isn't the only one — before non-trivial code, print `Assumptions: … — correct me now or I proceed` (chat when attended, `## Log` when unattended). An assumption surfaced costs one line; the same assumption found by a checker costs a REJECT lap
+- **PR body contract** (`docs/unattended.md` + pointer from implement § Unattended): the unattended human gate is the PR, and its description now has a fixed shape — Summary / Test plan / Verify / Log / Rollout (only when PRD §Risks is non-empty) / Open questions; empty sections are dropped; draft PRs lead with the blocker. The `/ship`-style persona fan-out was deliberately not taken — it would duplicate `loom-verify`
+- **Simplify while green** (`loom-implement` step 13): between self-review and the checkers, if the diff is heavier than acceptance requires, one behavior-preserving subtraction pass — touched files only, one move at a time, checks after each, Chesterton's fence. Explicitly split from refactoring (renames/moves/redesigns stay verify findings or new issues), with an anti-rationalization row ("I'll call this simplification")
+
 ## [0.23.2] - 2026-07-05
 
 Evidence-first verify. A reference sweep (HumanLayer, LangChain, 0xCodez, two harness-engineering repos, Osmani, Pocock) converged on one sharp critique of LLM-judge verify lanes: a second agent with an *opinion* is not a gate — reviewers must receive **test output and proof it was actually run** (Osmani), and objective checks must be able to fail the work (0xCodez's Ralph-Wiggum warning). Loom had the hole: gates ran late and bound nothing, so an APPROVE over a red build was possible. Prose-contract fixes only; no code behavior changed.
@@ -860,7 +871,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.3...HEAD
+[0.23.3]: https://github.com/zuevrs/loom/compare/v0.23.2...v0.23.3
 [0.23.2]: https://github.com/zuevrs/loom/compare/v0.23.1...v0.23.2
 [0.23.1]: https://github.com/zuevrs/loom/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/zuevrs/loom/compare/v0.22.1...v0.23.0

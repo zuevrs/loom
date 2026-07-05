@@ -13,6 +13,33 @@ An unattended run picks up work a human already scoped — a `Status: ready-for-
 5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
 6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout as the outer bound — every transport has one: Actions `timeout-minutes`, Codex `/goal`'s budget cap, Cursor `/loop`'s stop condition ("stop after N ticks") and Automations' schedule, the host's token budget elsewhere. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
 
+### PR body contract
+
+The description is the handoff, and its shape is fixed — the reviewer should never reconstruct intent from the diff. Sections, in order; **drop a section entirely when it's empty** (an empty heading is ceremony, not information):
+
+```markdown
+## Summary
+{what changed and why — 2-4 sentences, issue/PRD linked}
+
+## Test plan
+- [x] {command} → pass          <!-- from the verify digest's Checks executed -->
+- [ ] {anything only a human can check, if any}
+
+## Verify
+{verdict line + blockers/notes from the digest — silent pass, loud fail}
+
+## Log
+{the issue's ## Log bullets — decisions, deviations, open questions}
+
+## Rollout
+{only when PRD § Risks is non-empty: migration/flag/revert notes}
+
+## Open questions
+{what needs the human, one line each}
+```
+
+Draft PRs (blocked runs) lead with the blocker instead of Summary — the first line names what stopped the run and what decision unblocks it.
+
 ## Should this be a loop at all?
 
 Four conditions, all required — a task that fails one belongs in an attended chat, not a schedule:
