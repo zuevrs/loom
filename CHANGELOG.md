@@ -4,6 +4,10 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Added
+
+- **README hero animation** — flat wordmark logo (`assets/logo.png`) + 5s seamless loop (`assets/logo-loop.gif`, 600px, ~680 KB): the thread weaves through the wordmark, a flaw flashes red and is rewoven, the checkmark pulses green — the verify gate told in one loop. Generated stills + Seedance motion, assembled via ffmpeg palette pipeline
+
 ## [0.23.1] - 2026-07-05
 
 Field run 10 — the first full economics audit of a real Loom run (four-issue pack, goal lane, dual checkers per issue) against a no-harness baseline of the same task. Grand total: 15.5M billed tokens vs ~30k. The structural finding (full pack ritual on a one-shot deliverable) is deferred by user decision; the three measured leaks below are fixed. All three are prose-contract fixes — no code behavior changed.
