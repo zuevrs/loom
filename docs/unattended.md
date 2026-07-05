@@ -22,7 +22,7 @@ An unattended run picks up work a human already scoped — a `Status: ready-for-
 
 Start with discovery recipes; graduate a task to the change tier once its PRs come back boring.
 
-Catalog: [`recipes/`](../recipes/) — `docs-drift`, `dep-audit`, `smell-sweep`, `host-radar` (discovery); `coverage-raise`, `dead-code` (change). Recipes live in the Loom repo — copy the ones you use into your project (or `cat` them from your Loom clone, e.g. `~/.loom/recipes/`) so the runner can read them.
+Catalog: [`recipes/`](../recipes/) — `docs-drift`, `dep-audit`, `smell-sweep` (discovery); `coverage-raise`, `dead-code` (change). Recipes live in the Loom repo — copy the ones you use into your project (or `cat` them from your Loom clone, e.g. `~/.loom/recipes/`) so the runner can read them.
 
 Recipes are plain prompts, so they also run **attended**: ask the agent in chat to read and execute one (e.g. "run `~/.loom/recipes/dep-audit.md`"). Each recipe carries the adaptation — same task and hard stops, but findings go to the chat and the branch/PR exit is skipped, because the human gate is sitting right there.
 

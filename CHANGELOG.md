@@ -4,10 +4,6 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-### Added
-
-- **`recipes/host-radar.md`** (discovery tier, monthly): reads release notes of the six integrated hosts (Claude Code, Codex, Cursor, OMP, Pi, OpenCode) since the last run's ledger mark, files a `needs-triage` stub for anything touching Loom's integration surfaces (manifest schemas, hook exit-code contracts, discovery, headless flags, spawn APIs), and keeps a per-host version ledger under `.loom/maintenance/`. Every past integration break came from a host moving first — the radar makes that a scheduled read instead of a field-run surprise
-
 ## [0.23.1] - 2026-07-05
 
 Field run 10 — the first full economics audit of a real Loom run (four-issue pack, goal lane, dual checkers per issue) against a no-harness baseline of the same task. Grand total: 15.5M billed tokens vs ~30k. The structural finding (full pack ritual on a one-shot deliverable) is deferred by user decision; the three measured leaks below are fixed. All three are prose-contract fixes — no code behavior changed.

@@ -857,7 +857,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
 
   // Recipe catalog: five files, valid tier frontmatter, discovery never edits code.
-  const tiers = { "docs-drift": "discovery", "dep-audit": "discovery", "smell-sweep": "discovery", "host-radar": "discovery", "coverage-raise": "change", "dead-code": "change" };
+  const tiers = { "docs-drift": "discovery", "dep-audit": "discovery", "smell-sweep": "discovery", "coverage-raise": "change", "dead-code": "change" };
   for (const [name, tier] of Object.entries(tiers)) {
     const recipe = read(`recipes/${name}.md`);
     ok(recipe.startsWith("---"), `${name} has frontmatter`);
