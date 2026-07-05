@@ -34,6 +34,12 @@ function resolveRole(input) {
       const data = JSON.parse(input.replace(/^\uFEFF/, ""));
       if (data.loomRole && ROLES[data.loomRole]) return data.loomRole;
       if (data.role && ROLES[data.role]) return data.role;
+      // Claude Code / Codex SubagentStart payload names the agent, not a role:
+      // agent_type is plugin-scoped ("loom:loom-verify-spec"). Map it, or the
+      // checker spawn is never witnessed and the stop gate cries wolf.
+      const agent = String(data.agent_type || "");
+      if (/loom-verify-spec$/.test(agent)) return "spec-checker";
+      if (/loom-verify-standards$/.test(agent)) return "standards-checker";
     } catch {
       // non-JSON stdin — ignore
     }

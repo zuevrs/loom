@@ -1,6 +1,6 @@
 // loom: hook smoke tests — asserts hooks execute without error and produce expected output
 import { execFileSync } from "node:child_process";
-import { strictEqual, ok } from "node:assert";
+import { strictEqual, deepStrictEqual, ok } from "node:assert";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -50,6 +50,25 @@ function run(script, env = {}) {
     timeout: 5000,
   });
   ok(out.includes("standards-checker"), "subagent respects loomRole stdin");
+}
+
+// field run 8: Claude/Codex SubagentStart sends agent_type (plugin-scoped agent
+// name), not a role — without the mapping no checker spawn is ever witnessed
+// and the stop gate warns on every legitimate APPROVE.
+{
+  for (const [agent, role] of [
+    ["loom:loom-verify-spec", "spec-checker"],
+    ["loom:loom-verify-standards", "standards-checker"],
+    ["loom-verify-spec", "spec-checker"],
+    ["loom-verify-standards", "standards-checker"],
+  ]) {
+    const out = execFileSync("node", [resolve(hooksDir, "loom-subagent.cjs")], {
+      encoding: "utf8",
+      input: JSON.stringify({ hook_event_name: "SubagentStart", agent_type: agent }),
+      timeout: 5000,
+    });
+    ok(out.includes(role), `subagent maps agent_type ${agent} → ${role}`);
+  }
 }
 
 // subagent-cursor defaults to maker
@@ -136,12 +155,63 @@ import { join } from "node:path";
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: ready-for-agent\n");
   execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000 });
 
+  // --- field run 8: the Claude/Codex Stop-hook contract ---
+  // Exit 1 is a non-blocking "hook error" toast on those hosts; only exit 2
+  // blocks and feeds stderr back to the model. And a block must be one forced
+  // lap: stop_hook_active=true means the model already continued once — block
+  // again and a headless run loops forever (observed live before the fix).
+  const hookRun = (payload) => {
+    try {
+      execFileSync(process.execPath, [stopGate, "--hook"], {
+        cwd: tmp, timeout: 5000,
+        input: typeof payload === "string" ? payload : JSON.stringify(payload),
+      });
+      return 0;
+    } catch (e) {
+      return e.status;
+    }
+  };
+  writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
+  strictEqual(hookRun({ hook_event_name: "Stop", stop_hook_active: false }), 2, "--hook blocks with exit 2 (Claude/Codex contract; 1 is a toast, not a block)");
+  strictEqual(hookRun({ hook_event_name: "Stop", stop_hook_active: true }), 0, "--hook lets the second stop through (one forced lap, no headless loop)");
+  strictEqual(hookRun("\uFEFF" + JSON.stringify({ stop_hook_active: true })), 0, "--hook tolerates a BOM-prefixed payload (PowerShell pipes)");
+  strictEqual(hookRun("not json at all"), 2, "--hook with unparseable stdin still gates on filesystem state (first lap blocks)");
+  try {
+    execFileSync(process.execPath, [stopGate, "--ci"], { cwd: tmp, timeout: 5000, input: "" });
+    ok(false, "--ci should still exit 1");
+  } catch (e) {
+    strictEqual(e.status, 1, "--ci keeps the plain CI exit code 1");
+  }
+  const blockMsg = (() => {
+    try {
+      execFileSync(process.execPath, [stopGate, "--hook"], { cwd: tmp, timeout: 5000, input: "{}", stdio: ["pipe", "pipe", "pipe"] });
+      return "";
+    } catch (e) {
+      return String(e.stderr);
+    }
+  })();
+  ok(/ready-for-agent/.test(blockMsg) && /needs-triage/.test(blockMsg) && /wontfix/.test(blockMsg), "block reason names all three legitimate exits for a wrong done, not only loom-verify");
+  ok(/Do not fabricate/.test(blockMsg), "block reason forbids fabricating an APPROVE");
+
+  // Same Windows-freeze regression as the subagent hooks: --hook reads stdin,
+  // so a never-closing pipe must self-exit on the fallback timer, still gated.
+  {
+    const { spawn } = await import("node:child_process");
+    const child = spawn("node", [stopGate, "--hook"], { cwd: tmp, stdio: ["pipe", "pipe", "pipe"] });
+    child.stdin.write(JSON.stringify({ stop_hook_active: true })); // no end() — EOF never arrives
+    const code = await new Promise((res, rej) => {
+      const t = setTimeout(() => { child.kill(); rej(new Error("stop-gate --hook hung on open stdin")); }, 4000);
+      child.on("exit", (c) => { clearTimeout(t); res(c); });
+    });
+    strictEqual(code, 0, "stop-gate --hook self-exits on open stdin and honors the recovered stop_hook_active");
+  }
+
   rmSync(tmp, { recursive: true });
 
   // Hooks JSON must be pure Node — no bash anywhere (Windows parity).
   const hooksJson = readFileSync(resolve(__dirname, "..", "hooks", "claude-codex-hooks.json"), "utf8");
   ok(!hooksJson.includes("bash"), "claude-codex-hooks.json is bash-free");
-  ok(hooksJson.includes("stop-gate-logic.cjs"), "Stop hook invokes stop-gate-logic.cjs directly");
+  ok(/stop-gate-logic\.cjs\\?" --hook/.test(hooksJson), "Stop hook invokes stop-gate-logic.cjs in --hook mode (exit-2 block contract)");
   ok(!existsSync(resolve(__dirname, "..", "hooks", "loom-stop-gate.sh")), "loom-stop-gate.sh removed");
 }
 
@@ -378,6 +448,33 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   // grill resolves decision dependencies in order (upstream grilling nuance)
   ok(read("skills/loom-plan/GRILL.md").includes("Resolve decision dependencies in order"), "grill orders dependent decisions");
 
+  // field run 8: an implement agent wrote "**Verdict: APPROVE**" and the gate
+  // (rightly) rejected it — the digest-line format is load-bearing and must be
+  // named at the point of action, in the implement verify step.
+  {
+    const impl = read("skills/loom-implement/SKILL.md");
+    ok(impl.includes("format is load-bearing"), "implement names the digest-line format at the write-back step");
+    ok(impl.includes("a line **starting with** `APPROVE`"), "implement pins the starts-with-APPROVE contract");
+    ok(impl.includes("APPROVE — {date} — spec pass, standards pass"), "implement carries the canonical digest line");
+    ok(impl.includes("`**Verdict: APPROVE**` does not satisfy the stop gate"), "implement names the observed prose failure mode");
+  }
+
+  // field run 8: an omp -p verify run spawned generic task agents instead of the
+  // named checkers — the tier pin and role manifests ride on the names.
+  ok(read("skills/loom-verify/SKILL.md").includes("Spawn the named checker agents"), "verify prefers named checker agents over generic sub-agents");
+
+  // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
+  // stop-gate prose carries the exit-2 / one-forced-lap contract.
+  {
+    const readme = read("README.md");
+    ok(readme.includes("opencode plugin -g github:zuevrs/loom"), "README OpenCode install carries -g (bare command lands in the project's .opencode/)");
+    ok(readme.includes("/loom:loom-init"), "README names the plugin-namespaced ritual invocation for Claude Code");
+    ok(readme.includes("Responses API"), "README names the Codex model-leg upstream block (Responses-only host, z.ai serves none)");
+    ok(/Codex.*verified.*install\/discovery\/uninstall/s.test(readme), "README Codex row claims only what ran (no full-cycle overclaim)");
+    ok(readme.includes("exit 2") && readme.includes("one forced lap"), "README stop-gate section documents the exit-2 block and one-forced-lap rule");
+    ok(read("docs/unattended.md").includes("< /dev/null"), "unattended docs name the piped-but-empty stdin hang and its fix");
+  }
+
   // structural remedies in BOTH standards dialects, with the binding rules kept
   for (const p of ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
     const std = read(p);
@@ -494,7 +591,17 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(verify.includes("Checker model tier: fast/cheap tier"), "digest records the tier used");
   ok(ompSpec.includes("model: pi/smol") && ompStd.includes("model: pi/smol"), "OMP checkers pin the fast tier via the smol model role (bare `fast` is a raw name pattern, not a role — it silently falls back to the session model)");
   ok(claudeSpec.includes("model: haiku") && claudeStd.includes("model: haiku"), "Claude checkers pin the haiku tier");
-  ok(JSON.parse(claudePlugin).agents === "./.claude-plugin/agents/", "plugin.json wires the Claude agents dir explicitly");
+  // Field run 8: Claude Code's manifest schema rejects a directory string for
+  // `agents` ("Invalid input") — only an array of explicit .md file paths installs.
+  deepStrictEqual(
+    JSON.parse(claudePlugin).agents,
+    ["./.claude-plugin/agents/loom-verify-spec.md", "./.claude-plugin/agents/loom-verify-standards.md"],
+    "plugin.json wires the Claude agents as explicit file paths (directory string fails schema validation)"
+  );
+  // Field run 8: commands/ stubs registered as a second copy of every skill and
+  // the Skill tool resolved to the stub, whose relative path is dead outside the
+  // plugin dir. Claude reads skills/ natively — commands must stay empty here.
+  deepStrictEqual(JSON.parse(claudePlugin).commands, [], "plugin.json disables commands/ for Claude (skills/ is the single source; stubs double-register and dead-end the Skill tool)");
 
   // smell baseline parity between the two standards-checker dialects
   const smellNames = (ompStd.match(/^- \*\*[^*]+\*\* — .*→/gm) || []).map((s) => s.match(/\*\*([^*]+)\*\*/)[1]);

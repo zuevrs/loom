@@ -22,11 +22,11 @@ See [`docs/glossary.md`](docs/glossary.md) for terms.
 
 | Host | Command | Status |
 |------|---------|--------|
-| Claude Code | `/install-plugin zuevrs/loom` | implemented |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | implemented |
-| Pi | `pi install git:github.com/zuevrs/loom` | implemented |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are user-invoked as `/loom:loom-init` etc. (plugin-namespaced) | **verified** (live full cycle: init → implement → checkers → stop gate) |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
+| Pi | `pi install git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` | **verified** (live sessions) |
-| OpenCode | `opencode plugin github:zuevrs/loom` | implemented |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | **verified** (live smoke: managed block + 6 skills in context) |
 | Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) | implemented |
 
 **Script-based hosts** (clone first):
@@ -141,7 +141,7 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 | Host | Mechanism | What it enforces |
 |------|-----------|-----------------|
 | **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | Hard gate at turn end + stream reminder + verify agents via `task` tool + witnessed checker spawns |
-| **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) | Blocks agent stop if issues marked done without verify digest |
+| **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Blocks agent stop if issues marked done without verify digest — one forced lap, then lets go with the warning on record |
 | **Cursor** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) + managed rules | Same verify gate via hook + rule-file injection |
 | **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |
 | **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills; add the [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check) (`node hooks/stop-gate-logic.cjs`) to block done-without-APPROVE at PR level |
@@ -150,7 +150,7 @@ Loom leverages each host's native enforcement primitives to guarantee discipline
 
 **Known OMP limitation:** Some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work. See [issue tracker](https://github.com/zuevrs/loom/issues) for status.
 
-**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook fails and the agent must run `loom-verify` first. The same hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
+**Claude Code / Codex / Cursor users:** The `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook blocks the stop (exit 2) and the block reason — run `loom-verify`, or correct a wrong `done` status — is fed back to the model. The block is **one forced lap**: if the agent stops again without resolving (`stop_hook_active` set), the gate lets the stop through with the warning already in the transcript — otherwise a headless run loops forever. The same hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
 
 ### Checker models
 
@@ -272,7 +272,7 @@ These hosts get **skills + managed block** but no hard verify gate. Discipline i
 | Host | Install | What you get | For hard gates use… |
 |------|---------|--------------|---------------------|
 | **Pi** | `pi install git:github.com/zuevrs/loom` | Skills via Agent Skills standard | OMP or Claude/Codex/Cursor |
-| **OpenCode** | `opencode plugin github:zuevrs/loom` | Skills + system prompt injection | Claude/Codex/Cursor |
+| **OpenCode** | `opencode plugin -g github:zuevrs/loom` | Skills + system prompt injection | Claude/Codex/Cursor |
 | **Windsurf** | `install-windsurf` | Skills + AGENTS.md | Cursor |
 | **Kiro** | `install-kiro` | Agent prompt + skills | Claude/Codex |
 | **Hermes** | plugin symlink | 3 hooks (no stop gate) | Claude/Codex/Cursor |

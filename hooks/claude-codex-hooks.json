@@ -43,8 +43,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate-logic.cjs\"",
-            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\stop-gate-logic.cjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate-logic.cjs\" --hook",
+            "commandWindows": "node \"%CLAUDE_PLUGIN_ROOT%\\hooks\\stop-gate-logic.cjs\" --hook",
             "timeout": 5,
             "statusMessage": "Checking verify-before-done gate..."
           }

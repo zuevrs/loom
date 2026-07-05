@@ -48,6 +48,8 @@ jobs:
 
 Same shape for `codex exec "$(cat …)"` and `omp -p --approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
 
+When stdin is a pipe but empty (some CI shells, wrapper scripts), close it explicitly — `claude -p "…" < /dev/null`, `codex exec … < /dev/null`, `pi -p … < /dev/null` — or the CLI waits on "additional input from stdin" and the run hangs.
+
 ### The verify gate as a CI check
 
 The Stop-hook script is a plain CLI: `node hooks/stop-gate-logic.cjs <repo-root>` exits 1 and names the offenders when any `.loom/` issue is `Status: done` without an APPROVE line in its `## Verify` section. Wire it as a PR check and the gate holds even for hosts with no runtime hooks (Windsurf, Kiro, Cline, OpenClaw — and any unattended runner):

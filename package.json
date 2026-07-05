@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "Skills-first harness for agent workflows",
   "license": "MIT",
   "repository": "zuevrs/loom",

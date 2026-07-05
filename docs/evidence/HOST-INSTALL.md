@@ -20,12 +20,12 @@ Release-gate template. Fill one row per supported host before tagging a release.
 
 | Host | Native install | Post-install check |
 |------|----------------|-------------------|
-| Claude Code | `/install-plugin zuevrs/loom` | 3 lifecycle hooks + Stop enforcement in plugin; `loom-init` in test project |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | 3 lifecycle hooks + Stop enforcement in plugin; `loom-init` in test project |
 | Codex | `codex plugin add loom@loom` | hooks + commands registered |
 | Cursor | `~/.loom/scripts/install-cursor` | 4 hooks in `~/.cursor/hooks.json` (incl. stop gate); skills symlinked; `install.mjs --doctor` exits 0. Windows path: CI `check-windows` job runs the full installer smoke (install → doctor → uninstall → doctor) on `windows-latest` every push — cite the release's run URL as evidence |
 | Pi | `pi install git:github.com/zuevrs/loom` | skills load; discipline in session |
 | OMP | `omp plugin install git:github.com/zuevrs/loom` | extension (session_start + before_agent_start + session_stop) + TTSR rules + verify agents; `omp plugin doctor loom` clean |
-| OpenCode | `opencode plugin github:zuevrs/loom` | system transform injection |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` | system transform injection |
 | Droid | `droid plugin install zuevrs/loom` | `.claude-plugin/` format loads |
 | Windsurf | `install-windsurf` | skills symlinked |
 | Kiro | `install-kiro` | agent + skills linked |

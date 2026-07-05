@@ -484,7 +484,7 @@ function check(root, opts = {}) {
   const blocked = findUnverifiedDoneIssues(root);
   for (const p of blocked) {
     process.stderr.write(
-      `BLOCKED: ${basename(p)} marked done without an APPROVE verify digest. Run loom-verify.\n`
+      `BLOCKED: ${basename(p)} marked done without an APPROVE verify digest. Run loom-verify — or, if the done status itself is wrong, set the issue back to ready-for-agent / needs-triage / wontfix with a note. Do not fabricate an APPROVE.\n`
     );
   }
   if (blocked.length > 0) code = 1;
@@ -538,5 +538,39 @@ if (require.main === module) {
     process.exit(0); // lint is warn-only by design
   }
   // Hook invocation (Stop hook / manual) — witness applies; CI should use --ci.
-  process.exit(check(root, { witness: !args.includes("--ci") }));
+  // Claude Code / Codex Stop-hook contract: exit 2 = block (stderr fed back to
+  // the model), exit 1 = non-blocking "hook error" toast. CI keeps exit 1.
+  const finish = (payload) => {
+    const code = check(root, { witness: !args.includes("--ci") });
+    if (!args.includes("--hook")) process.exit(code);
+    // stop_hook_active = the model already continued once because this gate
+    // blocked. Blocking again loops a headless run forever (observed: -p probe
+    // burned laps until killed). One forced lap is the contract: block once
+    // with a reason that names the fix, then let the stop through — the
+    // warning is already in the transcript for the human gate.
+    if (code && payload && payload.stop_hook_active) process.exit(0);
+    process.exit(code ? 2 : 0);
+  };
+  if (process.stdin.isTTY) {
+    finish(null);
+  } else {
+    // Same stdin caveats as loom-subagent.cjs: never hang, tolerate non-JSON.
+    let input = "";
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      let payload = null;
+      try {
+        payload = JSON.parse(input.replace(/^\uFEFF/, ""));
+      } catch {
+        // no/invalid payload (CI, manual run) — gate on filesystem state alone
+      }
+      finish(payload);
+    };
+    process.stdin.on("data", (d) => (input += d));
+    process.stdin.on("end", settle);
+    process.stdin.on("error", settle);
+    setTimeout(settle, 1000).unref();
+  }
 }

@@ -4,6 +4,26 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-07-05
+
+Field run 8 — a five-host conformance matrix (Claude Code, Codex, Pi, OpenCode, OMP re-confirm) ran the real user paths: install → discovery → `loom-init` → `loom-implement` → checkers → stop gate → uninstall, on z.ai models where the host allows one. Everything below is what the matrix caught. All fixes verified live on the host that surfaced them.
+
+### Fixed
+
+- **Claude Code install was broken: manifest `agents` must be an array of file paths.** Current Claude Code schema rejects `"agents": "./dir/"` with `Validation errors: agents: Invalid input` (and an array of directories installs but discovers 0 agents). `plugin.json` now lists the two checker `.md` files explicitly — verified: install succeeds, both `loom:loom-verify-*` agents reach the Task tool
+- **Claude Code saw every skill twice and the Skill tool dead-ended on the stub copy.** `commands/*.md` (one-line "read the skill" stubs for hosts that need flat commands) registered as a second copy of each ritual; invoking the stub injected a *relative* skill path that resolves nowhere outside the plugin dir, so a headless agent declared the skill unreachable and refused to improvise (twice, correctly). `"commands": []` in the Claude manifest — `skills/` is the single source there; `commands/` stays for hosts that consume it (OMP slash templates). Rituals are invoked plugin-namespaced: `/loom:loom-init`
+- **The Stop gate never actually blocked on Claude Code/Codex — wrong exit code.** The hosts' hook contract is exit 2 = block (stderr fed back to the model); exit 1 is a non-blocking "hook error" toast, which is what the gate had been emitting. The hooks entry now runs `stop-gate-logic.cjs --hook`: exit 2 on block, and **one forced lap only** — when `stop_hook_active` says the model already continued once, the gate lets the stop through instead of looping a headless run forever (observed live: a `-p` probe burned laps until killed). CI/CLI invocations keep exit 1
+- **Stop-gate block reason names the legitimate exits.** A blocked agent whose `done` status is simply wrong (probe/typo) had only "Run loom-verify" to obey and no honest way out; the reason now offers ready-for-agent / needs-triage / wontfix with a note, and forbids fabricating an APPROVE
+- **Checker spawns on Claude Code/Codex were never witnessed.** `SubagentStart` sends `agent_type` (plugin-scoped agent name, e.g. `loom:loom-verify-spec`), not a `loomRole`; the subagent hook now maps checker agent names to checker roles, so the verify witness records them and the gate stops crying wolf on legitimate APPROVEs
+- **Verify digest format named at the point of action.** A Claude implement run wrote `**Verdict: APPROVE**` prose and the gate (rightly) refused it; implement § verify now pins the load-bearing line — starts with `APPROVE`, canonically `APPROVE — {date} — spec pass, standards pass`
+- **Verify prefers the named checker agents.** An `omp -p` run spawned generic `task` sub-agents where the named `loom-verify-spec`/`loom-verify-standards` types were available — losing the manifest-pinned tier and role constraints; the skill now says: named types when the host lists them, generic is the fallback
+
+### Docs
+
+- README install matrix re-statused from live runs: Claude Code **verified** (full cycle), Pi **verified** (smoke: z.ai via `models.json`, managed block + skills visible, clean uninstall), OpenCode **verified** (smoke; install needs `-g` for global — without it the plugin lands in the current project's `.opencode/`), Codex **verified for install/discovery/uninstall** with the model leg named honestly: Codex ≥ 0.142 speaks only the Responses API and z.ai serves none (`/responses` 404) — no direct pairing exists today
+- `docs/unattended.md`: headless CLIs (`claude -p`, `codex exec`, `pi -p`) hang waiting on piped-but-empty stdin — close it (`< /dev/null`)
+- README stop-gate section documents the exit-2 contract and the one-forced-lap rule
+
 ## [0.22.0] - 2026-07-04
 
 ### Added
@@ -779,7 +799,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/zuevrs/loom/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/zuevrs/loom/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/zuevrs/loom/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/zuevrs/loom/compare/v0.20.0...v0.21.0
