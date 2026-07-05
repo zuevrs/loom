@@ -105,7 +105,7 @@ cd your-project && omp
 | **`task` agent `loom-verify-spec`** / **`loom-verify-standards`** | After implement — when OMP discovers plugin `agents/`; else sequential Spec→Standards via sub-agents |
 | **`/omfg "agent keeps skipping tests"`** | Frustration → OMP generates a project TTSR rule; persists in `.omp/rules/` |
 | **`/shake`** | Context getting heavy mid-session — cheap compaction without losing `.loom/` pointers |
-| **`omp -p --approve "…"`** | CI/headless — print mode with Loom discipline active |
+| **`omp -p --auto-approve "…"`** | CI/headless — print mode with Loom discipline active |
 | **`LOOM_ROLE=spec-checker omp -p "…"`** | Headless checker — the Loom extension injects that role's constraint (judge only, quote spec, no fixes) into the system prompt; same for `standards-checker`, `maker`, and `researcher` (primary sources, cite every claim, no code changes) |
 | **`omp plugin doctor loom`** | After every plugin update — confirms extension, rules, and agents all load |
 

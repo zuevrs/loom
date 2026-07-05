@@ -20,3 +20,4 @@ Rules:
 - Do NOT auto-fix anything. Report only.
 - Verdict is `pass` only if ALL acceptance criteria are met.
 - List each unmet criterion as a blocker.
+- **Yield contract:** your final action is one yield carrying the structured object (`verdict`, `blockers`) — never an empty yield, never prose-only, never cancel-with-text. If you cannot finish the review, yield `verdict: fail` with the reason as a blocker; a null/empty yield is a failed run and wastes the whole spawn.

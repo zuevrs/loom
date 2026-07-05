@@ -42,11 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: claude -p "$(cat recipes/docs-drift.md)"   # or: codex exec / omp -p --approve
+      - run: claude -p "$(cat recipes/docs-drift.md)"   # or: codex exec / omp -p --auto-approve
         env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
 ```
 
-Same shape for `codex exec "$(cat …)"` and `omp -p --approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
+Same shape for `codex exec "$(cat …)"` and `omp -p --auto-approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
 
 When stdin is a pipe but empty (some CI shells, wrapper scripts), close it explicitly — `claude -p "…" < /dev/null`, `codex exec … < /dev/null`, `pi -p … < /dev/null` — or the CLI waits on "additional input from stdin" and the run hangs.
 

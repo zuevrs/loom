@@ -16,4 +16,4 @@ Rules:
 - Verdict is `pass` only if ALL acceptance criteria are met.
 - List each unmet criterion as a blocker.
 
-Reply with a structured verdict: `verdict: pass|fail` followed by a `blockers:` list (empty on pass).
+Reply with a structured verdict: `verdict: pass|fail` followed by a `blockers:` list (empty on pass). Your final message must carry that structure — never end empty, prose-only, or cancelled with a trailing text verdict; if you cannot finish the review, return `verdict: fail` with the reason as a blocker.

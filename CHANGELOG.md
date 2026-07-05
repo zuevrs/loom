@@ -4,6 +4,30 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-07-05
+
+Docs regroom against the reference-README corpus (mattpocock, ponytail, caveman, addyosmani), a doctor upgrade, and field run 9 — two headless OMP re-confirm probes that exercised the v0.22.1 skill pins and caught three more things.
+
+### Added
+
+- **`install.mjs --doctor` catches split-brain installs.** All install surfaces (hook commands, skill links) must resolve into one Loom tree of one version; hooks wired to `~/.loom` with skills linked from a dev checkout upgrade independently and drift apart silently — seen live on the maintainer's own machine. Doctor now fails with both trees, their versions, and the relink fix
+- **Checker yield contract in the agent manifests** (both dialects): the final yield/reply must carry the structured verdict — never empty, never prose-only, never cancel-with-text; an unfinishable review yields `fail` with the reason as a blocker. Field run 9 wasted a 13s spawn on a null yield (ADR-0126 candidate, now recurring on the current model tier — hardened at the manifest, where the checker actually reads it)
+- **Per-item agent binding rule in verify.** One batch-level `agent` field spanning two checker prompts ran the standards axis under the spec checker's label and tier (field run 9); the skill now requires each checker prompt to carry its own agent binding, batching only when the interface binds per item
+
+### Changed
+
+- **README rebuilt on the reference-README pattern** (hook + gate demo up top, quick path only): 316 → 137 lines. One install+uninstall table — the **single** status surface — plus quickstart, upgrade, one-paragraph enforcement story. The depth (per-host feature matrix, host-native enforcement wiring, checker-model table, linter/witness/resume sections, full Loom+OMP workflow, templates) moved to **`docs/hosts.md`**
+- `check-doc-consistency` guards the new split: hosts.md must exist, README must route to it, install status must not be restated in hosts.md (the v0.22.1 `impl`-vs-`verified` drift came from two status surfaces), every host appears in both files, template paths pinned in hosts.md
+
+### Fixed
+
+- **`omp -p --approve` never existed** — the flag is `--auto-approve`; docs said otherwise in three places (caught when field run 9 ran the documented command verbatim and OMP refused it)
+
+### Field run 9 (headless OMP re-confirms, glm-5.2 / glm-5-turbo checkers)
+
+- Implement leg: full ritual green — canonical digest line written (`APPROVE — {date} — spec pass, standards pass`), named checkers spawned in parallel under their own labels, `Status: done` only after dual APPROVE. The v0.22.1 digest-format and named-checker pins held
+- Unprimed verify leg: named checkers chosen without prompting; found the two spawn-mechanics gaps above
+
 ## [0.22.1] - 2026-07-05
 
 Field run 8 — a five-host conformance matrix (Claude Code, Codex, Pi, OpenCode, OMP re-confirm) ran the real user paths: install → discovery → `loom-init` → `loom-implement` → checkers → stop gate → uninstall, on z.ai models where the host allows one. Everything below is what the matrix caught. All fixes verified live on the host that surfaced them.
@@ -799,7 +823,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/zuevrs/loom/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/zuevrs/loom/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/zuevrs/loom/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/zuevrs/loom/compare/v0.21.0...v0.21.1

@@ -463,6 +463,23 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   // named checkers — the tier pin and role manifests ride on the names.
   ok(read("skills/loom-verify/SKILL.md").includes("Spawn the named checker agents"), "verify prefers named checker agents over generic sub-agents");
 
+  // field run 9: one batch-level agent field over two prompts ran standards under
+  // the spec label; and a checker yielded null (13s spawn wasted). Both pinned.
+  ok(read("skills/loom-verify/SKILL.md").includes("Each checker prompt carries its own agent binding"), "verify pins per-item agent binding for batched spawns");
+  for (const p of ["agents/loom-verify-spec.md", "agents/loom-verify-standards.md"]) {
+    ok(read(p).includes("Yield contract:"), `${p} carries the yield contract`);
+    ok(read(p).includes("never an empty yield"), `${p} forbids the observed null yield`);
+  }
+  for (const p of [".claude-plugin/agents/loom-verify-spec.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
+    ok(read(p).includes("never end empty, prose-only, or cancelled"), `${p} forbids empty/prose-only/cancel-with-text final messages`);
+  }
+
+  // field run 9: docs prescribed `omp -p --approve` — a flag OMP rejects; the real
+  // one is --auto-approve. Pin the command everywhere it is taught.
+  ok(read("docs/hosts.md").includes("omp -p --auto-approve"), "hosts doc teaches the real OMP headless flag");
+  ok(read("docs/unattended.md").includes("omp -p --auto-approve"), "unattended doc teaches the real OMP headless flag");
+  ok(!read("docs/hosts.md").includes("-p --approve ") && !read("docs/unattended.md").includes("-p --approve "), "no doc resurrects the nonexistent --approve flag");
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {
