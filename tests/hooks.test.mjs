@@ -590,6 +590,23 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(impl.includes("The suite only ratchets tighter"), "anti-rationalization blocks test deletion for green");
   }
 
+  // v0.23.4 delta sweep — facts-vs-decisions grill split (upstream fixed a live
+  // self-grilling bug: "explore instead of asking" read as license to answer the
+  // user's decisions autonomously), plus prompt-the-positive in the authoring guide
+  {
+    const grill = read("skills/loom-plan/GRILL.md");
+    ok(grill.includes("Facts vs decisions"), "plan grill splits facts from decisions");
+    ok(grill.includes("wait for the answer"), "plan grill waits for the user's answer on decisions");
+    ok(grill.includes("Exploration never stands in for the user"), "plan grill blocks self-answered decisions");
+
+    const freeform = read("skills/loom-grill/SKILL.md");
+    ok(freeform.includes("never by exploration"), "freeform grill keeps decisions with the user");
+
+    const authoring = read("docs/authoring.md");
+    ok(authoring.includes("Prompt the positive"), "authoring guide carries prompt-the-positive");
+    ok(authoring.includes("pair it with the positive target"), "prohibitions must pair with the positive target");
+  }
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {

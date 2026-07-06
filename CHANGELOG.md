@@ -4,6 +4,15 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.4] - 2026-07-06
+
+Two prose hardenings in the interview lane plus one authoring rule. No new surfaces, no code behavior changed.
+
+### Changed
+
+- **Facts vs decisions in the grill.** Both interview rituals (`loom-plan` phase 1 and `loom-grill`) now split what exploration may answer from what only the user may: a *fact* the repo can yield is looked up instead of asked; a *decision* — intent, preferences, scope edges, trade-offs — is put to the user, and the interview waits for the answer. Exploration never stands in for the user's side of a decision. Closes the reading where "explore instead of asking" licenses an agent-driven session to answer the user's decisions autonomously.
+- **Prompt the positive (authoring guide).** New prose-discipline rule in `docs/authoring.md`: state the target behaviour instead of naming the forbidden one — a prohibition survives only as a hard guardrail that cannot be phrased positively, and pairs with the positive target even then.
+
 ## [0.23.3] - 2026-07-05
 
 Four workflow-contract hardenings across the implement and unattended lanes: the test suite only ratchets tighter, assumptions surface before code, unattended PRs get a fixed description shape, and green diffs get a subtraction pass before review. Prose contracts only — no new surfaces, no code behavior changed.
@@ -862,7 +871,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.3...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.4...HEAD
+[0.23.4]: https://github.com/zuevrs/loom/compare/v0.23.3...v0.23.4
 [0.23.3]: https://github.com/zuevrs/loom/compare/v0.23.2...v0.23.3
 [0.23.2]: https://github.com/zuevrs/loom/compare/v0.23.1...v0.23.2
 [0.23.1]: https://github.com/zuevrs/loom/compare/v0.23.0...v0.23.1

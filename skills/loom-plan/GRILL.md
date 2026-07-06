@@ -11,7 +11,7 @@ One category (bug/chore/feature/refactor/docs) + one state per issue; conflictin
 
 ## Explore before asking
 
-Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. If exploration (`read`/`grep`/`glob`) can answer a question, explore instead of asking. Ask only what code cannot tell you: intent, preferences, scope edges, trade-offs.
+Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. **Facts vs decisions**: a *fact* exploration (`read`/`grep`/`glob`) can find, look up instead of asking. A *decision* — intent, preferences, scope edges, trade-offs — is the user's: put each one to the user and wait for the answer. Exploration never stands in for the user's side of a decision.
 
 The same applies **outside the repo**: before grilling a technology choice (library, API, protocol), check the current docs with the host's research tools (web search, docs MCP) when available. A recommendation built on stale training data is a silent invention; a question the ecosystem already answers wastes the user's turn. Research informs the recommendation — the user still decides.
 

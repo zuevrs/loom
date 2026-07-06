@@ -29,6 +29,10 @@ Co-locate with the skill that materializes them:
 
 Follow ADR contracts (Matt core + Addy guards for PRD; vertical slice for issues).
 
+## Prose discipline
+
+**Prompt the positive.** Naming a forbidden behaviour drags it into context and makes it *more* available ("don't think of an elephant"). State the target behaviour instead ("write one-line comments", not "never write verbose comments"). A prohibition earns its place only as a hard guardrail you cannot phrase positively — and even then, pair it with the positive target. Hard stops and anti-rationalization tables are that guardrail case: each row pairs the excuse with the reality to land on.
+
 ## Hooks
 
 Author invariants once in `hooks/invariants.cjs`. Adapters inject — they do not fork behavior.
@@ -61,7 +65,7 @@ After changing canonical behavior:
 ## References distilled
 
 - **ponytail** — lazy ladder, thin adapters, drift canary
-- **mattpocock** — user-invoked implement/plan skills, model-invoked verify
+- **mattpocock** — user-invoked implement/plan skills, model-invoked verify, facts-vs-decisions grill split, prompt-the-positive prose
 - **addyosmani** — PRD scope/quality gates
 - **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection
 - **checker model tiers** — semantic tier per host dialect, never a hardcoded model name: root `agents/` is OMP format (`model: pi/smol` — the `pi/` prefix targets a model *role*; a bare name like `fast` is a raw pattern that silently falls back to the session model when nothing matches), `.claude-plugin/agents/` is Claude format (`model: haiku`). The explicit `agents` key in `.claude-plugin/plugin.json` keeps Claude Code away from the OMP-format files. Keep the standards checker's smell baseline identical in both files (drift canary compares them)
