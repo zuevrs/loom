@@ -607,6 +607,24 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(authoring.includes("pair it with the positive target"), "prohibitions must pair with the positive target");
   }
 
+  // v0.23.5 loopkit/dzhng delta — fake-done patterns in checker + tacit-knowledge probe
+  {
+    for (const p of ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
+      const std = read(p);
+      ok(std.includes("## Fake-done patterns"), `${p} carries fake-done section`);
+      ok(std.includes("Swallowed error"), `${p} names swallowed-error shortcut`);
+      ok(std.includes("Fake rename"), `${p} names fake-rename shortcut`);
+      ok(std.includes("Comment-as-fix"), `${p} names comment-as-fix shortcut`);
+      ok(std.includes("Happy-path only"), `${p} names happy-path-only shortcut`);
+      ok(std.includes("Invented API"), `${p} names invented-API shortcut`);
+      ok(std.includes("blocker-grade"), `${p} marks fake-done as blocker-grade`);
+    }
+
+    const grill = read("skills/loom-plan/GRILL.md");
+    ok(grill.includes("Probe for unstated constraints"), "grill carries tacit-knowledge probe");
+    ok(grill.includes("well obviously"), "tacit-knowledge probe names the tell-phrase");
+  }
+
   // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
   // stop-gate prose carries the exit-2 / one-forced-lap contract.
   {

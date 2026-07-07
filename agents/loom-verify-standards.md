@@ -46,6 +46,16 @@ Each smell reads *what it is* → *how to fix*; match against the diff:
 - **Middle Man** — a class/function that mostly delegates onward → cut it, call the real target direct.
 - **Refused Bequest** — an implementer ignoring most of what it inherits → drop the inheritance, use composition.
 
+## Fake-done patterns
+
+Agents shortcut "done" in predictable ways. These are blocker-grade when present — not judgement calls like smells, because each one means the change does NOT do what it claims:
+
+- **Swallowed error** — a `try/catch`/`rescue` that hides the failure (empty catch, bare `pass`, log-and-continue) instead of handling or propagating it. The bug is invisible, not fixed.
+- **Fake rename** — a function/variable "fixed" by renaming, behavior unchanged. A new name is not a new implementation.
+- **Comment-as-fix** — the bug is now a `// TODO` or `// FIXME`. A comment is not a fix.
+- **Happy-path only** — error states, empty inputs, missing resources, timeouts unhandled. The code works on the demo, fails in production.
+- **Invented API** — calling a method, property, or parameter that does not exist in the actual codebase or dependency. Verify the call target exists.
+
 ## Structural remedies
 
 When a finding is structural, name the move, not just the problem — "this is complex" leaves the maker guessing. Same two binding rules as the smells (repo overrides; judgement call, not hard violation):

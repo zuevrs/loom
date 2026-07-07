@@ -4,6 +4,15 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.23.5] - 2026-07-07
+
+Concrete "fake-done" detection in the standards checker and a tacit-knowledge probe in the interview.
+
+### Changed
+
+- **Fake-done patterns (standards checker).** New blocker-grade section in both checker manifests: five concrete shortcuts agents use to counterfeit completion — swallowed errors, fake renames, comment-as-fix, happy-path-only, and invented API. Unlike the Fowler smell baseline (judgement-call heuristics), these are blocker-grade when present because each means the change does not do what it claims.
+- **Tacit-knowledge probe (plan grill).** One new interview rule after "Start broad, then narrow": probe for constraints the user treats as obvious, offer a concrete option they would reject — the rejection teaches more than an open question.
+
 ## [0.23.4] - 2026-07-06
 
 Two prose hardenings in the interview lane plus one authoring rule. No new surfaces, no code behavior changed.
@@ -871,7 +880,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.4...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.5...HEAD
+[0.23.5]: https://github.com/zuevrs/loom/compare/v0.23.4...v0.23.5
 [0.23.4]: https://github.com/zuevrs/loom/compare/v0.23.3...v0.23.4
 [0.23.3]: https://github.com/zuevrs/loom/compare/v0.23.2...v0.23.3
 [0.23.2]: https://github.com/zuevrs/loom/compare/v0.23.1...v0.23.2
