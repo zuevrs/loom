@@ -1,6 +1,6 @@
 ---
 name: loom-grill
-description: Investigate, decide, act — disciplined exploration that can enact its findings. Not for planning buildable work with defined scope (that is loom-plan). Use when the user is exploring a question, debugging, studying alternatives, or asking "why/how" — anything where the answer might lead to code changes or architectural decisions without a pre-defined scope.
+description: Investigate, decide, act — disciplined exploration that enacts its findings. Not for planning buildable work with defined scope (that is loom-plan).
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Goal
 
-Sharpen the user's thinking through relentless interview, then enact findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues).
+Investigate a question, resolve it through disciplined interview, then enact findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues). Covers both "think this through" and "debug/fix this" when the user has no pre-defined scope.
 
 ## Inputs
 
@@ -109,7 +109,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 
 ## Done when
 
-- All questions resolved (user signalled stop or naturally concluded)
+- User signalled stop — you never self-declare the grill finished
 - Every enacted change verified by gates
 - Decisions captured in lightweight ADRs (when triple-gate holds); domain updates in CONTEXT.md
 - No unconfirmed proposals left hanging
