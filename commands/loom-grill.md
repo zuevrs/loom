@@ -1,6 +1,6 @@
 ---
 name: loom-grill
-description: Grill any topic freeform — one digest file, no PRD/issues/docs
+description: Grill any topic — investigate, decide, act with confirmation
 ---
 
 Read and follow the `loom-grill` skill (`skills/loom-grill/SKILL.md`).

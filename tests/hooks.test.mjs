@@ -600,7 +600,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes("Exploration never stands in for the user"), "plan grill blocks self-answered decisions");
 
     const freeform = read("skills/loom-grill/SKILL.md");
-    ok(freeform.includes("never by exploration"), "freeform grill keeps decisions with the user");
+    ok(freeform.includes("Exploration never stands in for the user"), "freeform grill keeps decisions with the user");
 
     const authoring = read("docs/authoring.md");
     ok(authoring.includes("Prompt the positive"), "authoring guide carries prompt-the-positive");
@@ -644,6 +644,38 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(std.includes("name the move, not just the problem"), `${p} remedies demand the move`);
     ok(std.includes("removes moving pieces"), `${p} prefers removal over spread`);
     strictEqual((std.match(/^- (Replace|Collapse|Separate|Move|Reuse|Make|Delete|Extract)/gm) || []).length, 8, `${p} carries 8 named moves`);
+  }
+
+  // v0.24.0 — loom-grill redesign: think+act unified (no more digest-only)
+  {
+    const grill = read("skills/loom-grill/SKILL.md");
+    ok(grill.includes("Explore with discipline. Act with confirmation. Leave a trace."), "grill carries the unified tagline");
+    ok(grill.includes("Action gate"), "grill has an explicit action gate step");
+    ok(grill.includes("Wait for explicit user confirmation"), "grill requires confirm before enactment");
+    ok(grill.includes("lightweight ADR"), "grill writes lightweight ADRs as trace");
+    ok(grill.includes("Question / Decision / Why"), "grill ADR format is three-section lightweight");
+    ok(grill.includes("run objective gates"), "grill runs gates after code changes");
+    ok(grill.includes(">3 files"), "grill has scope threshold signal");
+    ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
+    ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids enactment");
+    ok(grill.includes("Never enact without explicit user confirmation"), "grill guards enactment with confirm");
+    ok(grill.includes("Never write PRD or issue cards"), "grill still forbids PRD/issues (Plan territory)");
+    ok(grill.includes("One question at a time"), "grill keeps one-question discipline");
+    ok(grill.includes("Facts vs decisions"), "grill keeps facts-vs-decisions split");
+
+    // router update
+    for (const [p, label] of [
+      ["AGENTS.md", "managed block"],
+      ["skills/loom-init/SKILL.md", "init template"],
+    ]) {
+      const content = read(p);
+      ok(content.includes("investigate/explore/ask"), `${label} router routes investigate/explore to grill`);
+      ok(content.includes("exploring/asking/debugging → Grill"), `${label} confusable-pairs updated`);
+      ok(!content.includes("no docs wanted"), `${label} drops old 'no docs wanted' grill description`);
+    }
+
+    const ocp = read("opencode-plugin.mjs");
+    ok(ocp.includes("investigate/explore/decide/act"), "opencode injection describes grill as investigate/explore/decide/act");
   }
 }
 
@@ -771,7 +803,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const s of smellNames) ok(claudeStd.includes(s), `Claude standards checker carries ${s}`);
 }
 
-// loom-grill — freeform brainstorm contract: one digest file, no project docs, routed everywhere
+// loom-grill — think+act unified: investigate, decide, enact with confirmation
 {
   const { readFileSync: rf } = await import("node:fs");
   const grill = rf(resolve(__dirname, "..", "skills", "loom-grill", "SKILL.md"), "utf8");
@@ -779,10 +811,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
   ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
-  ok(grill.includes("One `ask` call = exactly ONE question"), "loom-grill keeps one-question discipline");
-  ok(grill.includes("NEVER write PRD, issues, `CONTEXT.md`, or ADRs"), "loom-grill forbids project-doc writes");
-  ok(grill.includes(".loom/grills/"), "loom-grill documents default digest path");
-  ok(grill.includes("confirms the path"), "digest written only after path confirmation");
+  ok(grill.includes("One question at a time"), "loom-grill keeps one-question discipline");
+  ok(grill.includes("Never write PRD or issue cards"), "loom-grill forbids PRD/issues (Plan territory)");
+  ok(grill.includes("Never enact without explicit user confirmation"), "loom-grill requires confirm before action");
+  ok(grill.includes("lightweight ADR"), "loom-grill writes lightweight ADRs for decisions");
   for (const doc of [agents, initSkill]) {
     ok(doc.includes("loom-grill"), "managed block routes loom-grill");
   }
@@ -1619,14 +1651,14 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(read("docs/hosts.md").includes("Sessions die; the snapshot resumes"), "hosts doc explains the resume story");
 }
 
-// v0.15.1 — upstream re-audit: enactment gates (Pocock grilling #433), grill leading word
+// v0.15.1 → v0.24.0 — enactment gates: plan grill still blocks enthusiasm,
+// freeform grill now allows enactment WITH explicit confirmation (unified think+act)
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize enactment");
-  ok(read("skills/loom-grill/SKILL.md").includes("Never enact what was discussed from inside the grill"), "loom-grill: no enactment from inside the grill");
-  for (const f of ["skills/loom-grill/SKILL.md", "commands/loom-grill.md"]) {
-    ok(/^description: Grill /m.test(read(f)), `${f} description leads with the grill verb`);
-  }
+  ok(read("skills/loom-grill/SKILL.md").includes("Never enact without explicit user confirmation"), "loom-grill: enactment requires explicit confirm");
+  ok(/^description: Investigate/m.test(read("skills/loom-grill/SKILL.md")), "loom-grill description leads with investigate");
+  ok(/^description: Grill /m.test(read("commands/loom-grill.md")), "loom-grill command description leads with grill verb");
 }
 
 // v0.16.0 — worked examples in load-bearing skills + no-op sweep

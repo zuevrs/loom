@@ -4,6 +4,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-07-08
+
+Grill redesign: unified think+act mode. Investigation, decision-making, and enactment in one session — with confirmation gates, objective verification, and persistent trace via lightweight ADRs.
+
+### Changed
+
+- **`loom-grill` — think+act unified.** The grill is no longer a brainstorm-only ritual that produces a digest file. It now investigates with grill discipline (one question at a time, recommend answers, facts vs decisions), and when a decision crystallises, proposes an action — code changes verified by objective gates, architectural decisions captured in lightweight ADRs (Question / Decision / Why). The "never enact" hard stop is replaced by "never enact without explicit user confirmation." No PRD, no issues, no digest — ADR + CONTEXT.md + commit = trace.
+- **Scope threshold signal.** When enacted changes exceed 3 files, the grill signals that Plan might be more appropriate and lets the user decide whether to continue or upgrade.
+- **Router wording.** The managed block now routes `investigate/explore/ask/debug/decide` to grill (was: "freeform brainstorm"). Confusable-pairs updated: "has a defined scope → Plan, exploring/asking/debugging → Grill."
+
+### Removed
+
+- **Digest file output.** The `.loom/grills/` digest is no longer produced — decisions go to ADRs, domain knowledge to CONTEXT.md, code to commits.
+
 ## [0.23.5] - 2026-07-07
 
 Concrete "fake-done" detection in the standards checker and a tacit-knowledge probe in the interview.
@@ -880,7 +894,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.23.5...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.0...HEAD
+[0.24.0]: https://github.com/zuevrs/loom/compare/v0.23.5...v0.24.0
 [0.23.5]: https://github.com/zuevrs/loom/compare/v0.23.4...v0.23.5
 [0.23.4]: https://github.com/zuevrs/loom/compare/v0.23.3...v0.23.4
 [0.23.3]: https://github.com/zuevrs/loom/compare/v0.23.2...v0.23.3

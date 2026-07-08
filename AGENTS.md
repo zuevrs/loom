@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.23.5 -->
+<!-- loom:begin version=v0.24.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.
@@ -38,13 +38,13 @@ Map intent to ritual skills:
 
 - setup/install/project wiring → `loom-init`
 - planning/scope/prd/issues/slicing → `loom-plan`
-- freeform brainstorm/"think this through with me" (no docs wanted) → `loom-grill`
+- investigate/explore/ask/"why/how"/debug/decide → `loom-grill`
 - implementation/build/fix for a selected issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
 - recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
 
-**Confusable pairs:** wants PRD/issues → Plan, no docs wanted → Grill; judging a change → Verify, fixing its findings → Implement.
+**Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
 
 **Scope routing:**
 
