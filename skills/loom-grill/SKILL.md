@@ -17,9 +17,9 @@ Sharpen the user's thinking through relentless interview, then enact findings in
 
 ## Outputs
 
-- Decisions → lightweight ADR (`docs/adr/NNNN-<slug>.md`: Question / Decision / Why)
-- Domain knowledge → `CONTEXT.md` updates
-- Code changes → verified by objective gates
+- Decisions → lightweight ADR (`docs/adr/NNNN-<slug>.md`: Question / Decision / Why) — only when all three hold: hard to reverse + surprising without context + result of a real trade-off
+- Domain knowledge → `CONTEXT.md` updates (written inline as terms resolve — no separate confirmation)
+- Code changes → verified by objective gates (confirmation required)
 - No PRD, no issues, no digest file
 
 ## Process
@@ -27,20 +27,25 @@ Sharpen the user's thinking through relentless interview, then enact findings in
 1. **Confirm the topic** in one sentence; if the topic touches the repo, explore code/docs first — *facts* are looked up, *decisions* are put to the user. Topic hinges on external facts (a library, an API, a spec)? Research **primary sources** with the host's tools — delegate to a background/sub-agent when the host has one (pass `loomRole: "researcher"` in spawn data).
 2. **Interview relentlessly** — same discipline as Plan grill:
    - **One question at a time.** Never batch; each answer branches the next.
+   - **Resolve decision dependencies in order.** When one open question depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the grill will re-litigate.
    - **Recommend an answer** — which option you'd pick and why, listed first.
+   - **Never invent a load-bearing decision silently.** If you would otherwise assume something — ask, or surface it as an explicit assumption for the user to confirm.
    - **Start broad, then narrow**: problem, context, constraints — then push edges and trade-offs one-by-one.
-   - **Probe for unstated constraints** — the "well obviously…" answer is the one never said.
-   - **Challenge fuzzy language** — propose precise terms.
+   - **Probe for unstated constraints** — the "well obviously…" answer is the one never said. Offer a concrete option the user would reject; the rejection teaches more than an open question.
+   - **Challenge fuzzy language** — propose precise terms. Update `CONTEXT.md` inline the moment a term resolves (before the next question — never batch writes).
    - **Facts vs decisions**: a fact exploration can find — look it up. A decision (intent, preference, scope, trade-off) — put to the user, wait for the answer. Exploration never stands in for the user's side of a decision.
+   - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
    - **The interview runs in the user's language**; technical terms stay as-is.
+   - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately.
    - **Interruptions never shrink the grill** — restate the last unanswered question and resume.
-3. **Action gate** — when investigation crystallises into something actionable:
-   - State the decision and proposed action: *"Решение: X. Енактить: [конкретные шаги]?"*
-   - Wait for explicit user confirmation before any write.
+3. **Action gate** — when investigation crystallises into something actionable (code change or ADR-worthy decision):
+   - State the decision and proposed action (in the user's language): *"Decision: X. Enact: [concrete steps]?"*
+   - Wait for explicit user confirmation before any code write or ADR.
    - User says no → continue grilling; the decision is just a leaning until confirmed.
+   - Note: `CONTEXT.md` glossary writes do NOT require this gate — they happen inline during step 2.
 4. **Enact** — after confirmation:
    - **Code changes**: minimal diff, then run objective gates (lint/typecheck/test — whatever the repo has). Silent pass, loud fail.
-   - **Architectural decision**: write lightweight ADR — three sections, 3–5 lines total:
+   - **ADR** (only when triple-gate holds: hard to reverse + surprising + trade-off): lightweight format —
      ```
      # Question
      <what we were deciding>
@@ -49,9 +54,20 @@ Sharpen the user's thinking through relentless interview, then enact findings in
      # Why
      <1-2 sentences>
      ```
-   - **Domain knowledge**: update `CONTEXT.md` (terms, boundaries, invariants).
    - Return to grilling if questions remain.
-5. **Scope signal** — if enacted changes touch >3 files or require >1 commit: *"Скоп растёт. Рекомендую Plan для оставшегося — продолжаем здесь?"* User decides.
+5. **Scope signal** — if enacted changes touch >3 files or require >1 commit: *"Scope is growing. Recommend Plan for the rest — continue here?"* (in the user's language). User decides.
+
+## The cadence, worked
+
+One exchange showing the moves — question with recommendation, inline CONTEXT write, action gate only for the code change:
+
+> **Agent:** The retry logic lives in `src/client.ts` — should it back off exponentially or use a fixed delay? I'd recommend exponential: it's kinder to the server under load, and the stdlib `setTimeout` multiplication is one line. *(waits)*
+>
+> **User:** Exponential. And 3 retries max, not 5.
+>
+> **Agent:** *(updates `CONTEXT.md`: "Retry policy — exponential backoff, 3 attempts max" — before asking anything else)* That caps the worst-case wait at ~7s. The current code uses a fixed 1s × 5. Decision: rewrite the retry loop to exponential with max 3. Enact? *(waits for explicit go)*
+
+A flat sequence of questions with no doc writes and no action proposals is the anti-pattern this file exists to prevent.
 
 ## Verification
 
@@ -60,11 +76,12 @@ Sharpen the user's thinking through relentless interview, then enact findings in
 
 ## Hard stops
 
-- **Never enact without explicit user confirmation** — proposing ≠ doing.
+- **Never enact without explicit user confirmation** — proposing ≠ doing. (Exception: `CONTEXT.md` glossary writes are inline and automatic.)
 - Never write PRD or issue cards — that is Plan territory.
 - Never batch questions. One question = one answer = one branch.
 - Never auto-upgrade to Plan — signal and let the user decide.
 - Never skip gates after code changes — a change without a gate run is unverified.
+- Never invent a load-bearing decision silently — ask or surface as assumption.
 
 ## Failure modes
 
@@ -84,12 +101,15 @@ Sharpen the user's thinking through relentless interview, then enact findings in
 | "User seemed to agree, I'll just do it" | Agreement is not confirmation. State the action, wait for explicit go. |
 | "I'll skip gates, it's a tiny change" | Gates exist to catch what tiny changes break. Run them. |
 | "Ask 5 questions at once, faster" | One question = one answer. Each answer branches the next. |
-| "No ADR needed, it's obvious" | If you made a decision, it gets a trace. Future sessions start cold. |
-| "I'll write a digest too" | ADR + CONTEXT + commit = trace. No digest. |
+| "No ADR needed, it's obvious" | Apply the triple-gate: hard to reverse + surprising + trade-off. All three → ADR. Missing one → skip. |
+| "I'll batch the CONTEXT writes at the end" | Term resolved → written before the next question. Batching is the deviation. |
+| "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it or surface it as assumption. |
+| "I already know what they want" | You know what YOU would build — ask what THEY need. |
+| "User seems impatient, wrap up" | Resume the grill where it stopped. One more question now saves a bad change later. |
 
 ## Done when
 
 - All questions resolved (user signalled stop or naturally concluded)
 - Every enacted change verified by gates
-- Decisions captured in lightweight ADRs; domain updates in CONTEXT.md
+- Decisions captured in lightweight ADRs (when triple-gate holds); domain updates in CONTEXT.md
 - No unconfirmed proposals left hanging
