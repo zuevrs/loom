@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.2] - 2026-07-09
+
+README and hosts docs: OMP update path and current grill description.
+
+### Changed
+
+- **OMP upgrade in README.** Install table points to Upgrade; Upgrade section documents `omp plugin install … --force` (without it OMP reuses the cached tarball).
+- **`loom-grill` description updated** in README Skills table and `docs/hosts.md` — reflects think+act unified mode (no digest file).
+- **Doc consistency canaries** — `check-doc-consistency` rejects stale digest-file wording and missing OMP `--force` in README.
+
 ## [0.24.1] - 2026-07-09
 
 Grill quality: four Plan-parity gaps closed.
@@ -906,7 +916,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.2...HEAD
+[0.24.2]: https://github.com/zuevrs/loom/compare/v0.24.1...v0.24.2
 [0.24.1]: https://github.com/zuevrs/loom/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/zuevrs/loom/compare/v0.23.5...v0.24.0
 [0.23.5]: https://github.com/zuevrs/loom/compare/v0.23.4...v0.23.5

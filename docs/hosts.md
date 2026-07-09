@@ -82,6 +82,9 @@ Loom owns **what** to build (PRD, issues, verify contract). OMP owns **how** the
 omp plugin install git:github.com/zuevrs/loom
 cd your-project && omp
 # In session: run loom-init — creates .loom/, AGENTS.md managed block
+
+# Update to latest (required — without --force OMP reuses the cached tarball):
+omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ### Daily workflow
@@ -89,7 +92,7 @@ cd your-project && omp
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
 | **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
-| **Brainstorm** | `/loom-grill` any topic → one digest file | — | Relentless interview without the PRD machinery; hand the digest to `/loom-plan` if it becomes scope |
+| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; enact inline with gates; upgrade to `/loom-plan` if scope grows |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |

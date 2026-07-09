@@ -54,7 +54,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 |------|---------|-----------|--------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | **verified** (live full cycle: init → implement → checkers → stop gate) |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` | `omp plugin uninstall loom` | **verified** (live sessions) |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live sessions) |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (live smoke: managed block + 6 skills in context) |
@@ -76,7 +76,7 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 
 ## Upgrade
 
-1. **Global install** — plugin-native hosts: re-run the install command, then **restart the host process** (a plugin hot-swapped under a running host keeps serving stale code — observed live on OMP; `omp plugin doctor loom` confirms health). Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer — it repairs its own stale entries and never touches foreign config. If your clone is pinned to a tag (detached HEAD), use `git -C ~/.loom fetch --tags && git -C ~/.loom checkout <new-tag>` instead of pull.
+1. **Global install** — plugin-native hosts: re-run the install command (**OMP:** `omp plugin install git:github.com/zuevrs/loom --force` — without `--force` the cached tarball is reused), then **restart the host process** (a plugin hot-swapped under a running host keeps serving stale code — observed live on OMP; `omp plugin doctor loom` confirms health). Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer — it repairs its own stale entries and never touches foreign config. If your clone is pinned to a tag (detached HEAD), use `git -C ~/.loom fetch --tags && git -C ~/.loom checkout <new-tag>` instead of pull.
 2. **Per project** — run `loom-init` in active repos to refresh the managed block when prompted.
 3. **Verify** — `node ~/.loom/scripts/install.mjs --doctor`: checks hook entries point at existing files, skill links aren't broken, **all surfaces resolve into one Loom tree of one version** (hooks from one clone + skills from another upgrade apart silently), and the current project's managed block matches the installed version. Prints the exact fix for anything wrong, changes nothing. Exit 0 = healthy.
 
@@ -96,7 +96,7 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 |---|---|
 | `loom-init` | Project setup: managed block, `.loom/` |
 | `loom-plan` | Scope interview → PRD + issue pack |
-| `loom-grill` | Freeform brainstorm on any topic (even non-project) → one digest file, no PRD/issues/docs |
+| `loom-grill` | Investigate, decide, act — disciplined exploration with confirmation gates; ADR + CONTEXT.md + verified code changes, no PRD/issues |
 | `loom-implement` | Ship one issue with minimal diff |
 | `loom-verify` | Fresh checker: Spec + Standards in parallel. Auto-invoked by `loom-implement` — you rarely call it; invoke directly only for ad-hoc review of an arbitrary diff |
 | `loom-tend` | Warp maintenance, stale issues, capture learning |
