@@ -24,7 +24,7 @@ Investigate a question, resolve it through disciplined interview, then enact fin
 
 ## Process
 
-1. **Confirm the topic** in one sentence; if the topic touches the repo, explore code/docs first — *facts* are looked up, *decisions* are put to the user. Topic hinges on external facts (a library, an API, a spec)? Research **primary sources** with the host's tools — delegate to a background/sub-agent when the host has one (pass `loomRole: "researcher"` in spawn data).
+1. **Confirm the topic** in one sentence; if the topic touches the repo, explore code/docs first — *facts* are looked up, *decisions* are put to the user. Topic hinges on external facts (a library, an API, a spec)? Research **primary sources** with the host's tools — delegate to a background/sub-agent when the host has one (pass `loomRole: "researcher"` in spawn data). Findings that shaped a decision are persisted with citations (inline in the ADR or `CONTEXT.md`) — "some blog said so" is not provenance a future session can check.
 2. **Interview relentlessly** — same discipline as Plan grill:
    - **One question at a time.** Never batch; each answer branches the next.
    - **Resolve decision dependencies in order.** When one open question depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the grill will re-litigate.
@@ -32,7 +32,8 @@ Investigate a question, resolve it through disciplined interview, then enact fin
    - **Never invent a load-bearing decision silently.** If you would otherwise assume something — ask, or surface it as an explicit assumption for the user to confirm.
    - **Start broad, then narrow**: problem, context, constraints — then push edges and trade-offs one-by-one.
    - **Probe for unstated constraints** — the "well obviously…" answer is the one never said. Offer a concrete option the user would reject; the rejection teaches more than an open question.
-   - **Challenge fuzzy language** — propose precise terms. Update `CONTEXT.md` inline the moment a term resolves (before the next question — never batch writes).
+   - **Challenge fuzzy language** — propose precise terms. A term that conflicts with existing `CONTEXT.md` language → call it out on the spot. Update `CONTEXT.md` inline the moment a term resolves (before the next question — never batch writes).
+   - **Invent edge-case scenarios** — stress-test domain relationships with concrete scenarios that force the user to be precise about boundaries.
    - **Facts vs decisions**: a fact exploration can find — look it up. A decision (intent, preference, scope, trade-off) — put to the user, wait for the answer. Exploration never stands in for the user's side of a decision.
    - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
    - **The interview runs in the user's language**; technical terms stay as-is.
@@ -40,7 +41,7 @@ Investigate a question, resolve it through disciplined interview, then enact fin
    - **Interruptions never shrink the grill** — restate the last unanswered question and resume.
 3. **Action gate** — when investigation crystallises into something actionable (code change or ADR-worthy decision):
    - State the decision and proposed action (in the user's language): *"Decision: X. Enact: [concrete steps]?"*
-   - Wait for explicit user confirmation before any code write or ADR.
+   - Wait for explicit user confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", "love it" resolve a branch but do not authorize enactment.
    - User says no → continue grilling; the decision is just a leaning until confirmed.
    - Note: `CONTEXT.md` glossary writes do NOT require this gate — they happen inline during step 2.
 4. **Enact** — after confirmation:
@@ -76,7 +77,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 
 ## Hard stops
 
-- **Never enact without explicit user confirmation** — proposing ≠ doing. (Exception: `CONTEXT.md` glossary writes are inline and automatic.)
+- **Never enact without explicit user confirmation** — proposing ≠ doing. Enthusiasm ("interesting", "sounds right") resolves a branch, not an action gate. (Exception: `CONTEXT.md` glossary writes are inline and automatic.)
 - Never write PRD or issue cards — that is Plan territory.
 - Never batch questions. One question = one answer = one branch.
 - Never auto-upgrade to Plan — signal and let the user decide.
@@ -105,6 +106,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 | "I'll batch the CONTEXT writes at the end" | Term resolved → written before the next question. Batching is the deviation. |
 | "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it or surface it as assumption. |
 | "I already know what they want" | You know what YOU would build — ask what THEY need. |
+| "User said ok, that's their decision" | An accepted recommendation is not a stated preference. In the ADR, own which part was your proposal. |
 | "User seems impatient, wrap up" | Resume the grill where it stopped. One more question now saves a bad change later. |
 
 ## Done when

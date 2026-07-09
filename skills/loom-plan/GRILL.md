@@ -94,3 +94,4 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 | "The brownfield boot already wrote CONTEXT.md — I'll true it up at the gate" | The draft is the floor, not the final. The inline cadence is unchanged by a pre-existing file. |
 | "User seems impatient / said 'continue', wrap up" | Resume the grill where it stopped. One more question now saves a bad PRD later. |
 | "I already know what they want" | You know what YOU would build — ask what THEY need |
+| "User said ok, that's their decision" | An accepted recommendation is not a stated preference. Name the proposal's origin in the PRD. |

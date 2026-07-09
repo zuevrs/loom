@@ -1988,4 +1988,16 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     ok(!/WATCHDOG/.test(read(p)), `${p} carries no advisor route`);
 }
 
+// v0.24.1 — grill quality: plan-parity gaps closed (glossary challenge, edge-case
+// scenarios, research provenance, enthusiasm-is-not-a-go)
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const grill = read("skills/loom-grill/SKILL.md");
+  ok(grill.includes("conflicts with existing `CONTEXT.md` language"), "grill challenges against existing glossary");
+  ok(grill.includes("Invent edge-case scenarios"), "grill invents edge-case scenarios to force precision");
+  ok(grill.includes("persisted with citations"), "grill requires research provenance with citations");
+  ok(grill.includes("Enthusiasm is not a go"), "grill action gate: enthusiasm is not a go");
+  ok(grill.includes("resolves a branch, not an action gate"), "grill hard stop clarifies enthusiasm vs confirmation");
+}
+
 console.log("✔ All hook and adapter tests passed");

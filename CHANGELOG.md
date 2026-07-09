@@ -4,6 +4,18 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.1] - 2026-07-09
+
+Grill quality: four Plan-parity gaps closed.
+
+### Changed
+
+- **Glossary challenge.** The grill now explicitly checks new terms against existing `CONTEXT.md` language and surfaces conflicts on the spot.
+- **Edge-case scenarios.** Interview rules include inventing concrete scenarios that force the user to be precise about boundaries.
+- **Research provenance.** Findings that shaped a decision must be persisted with citations — "some blog said so" is not provenance a future session can check.
+- **Enthusiasm is not a go.** Action gate and hard stops clarify that "interesting" or "sounds right" resolves a branch but does not authorize enactment.
+- **Anti-anchoring.** New anti-rationalization row in both grills: an accepted recommendation is not a stated preference — own the proposal's origin.
+
 ## [0.24.0] - 2026-07-08
 
 Grill redesign: unified think+act mode. Investigation, decision-making, and enactment in one session — with confirmation gates, objective verification, and persistent trace via lightweight ADRs.
@@ -894,7 +906,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.1...HEAD
+[0.24.1]: https://github.com/zuevrs/loom/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/zuevrs/loom/compare/v0.23.5...v0.24.0
 [0.23.5]: https://github.com/zuevrs/loom/compare/v0.23.4...v0.23.5
 [0.23.4]: https://github.com/zuevrs/loom/compare/v0.23.3...v0.23.4
