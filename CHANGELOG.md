@@ -4,6 +4,21 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.3] - 2026-07-09
+
+Grill plan-parity: surgical gap closure in `loom-grill`.
+
+### Changed
+
+- **Ask-tool discipline** — `One ask call = exactly ONE question` plus anti-rationalization for question arrays (OMP live bug class).
+- **Research persistence** — `.loom/research/YYYY-MM-DD-<slug>.md` path for external findings with citations.
+- **ADR offer in interview** — offer before write (never silent); worked example shows ADR offer before code enact.
+- **Format links** — `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` referenced from grill interview rules.
+- **Interruption resume** — re-read this file on continue/drop.
+- **Failure modes** — conflicting ADRs, "just do it" pushback.
+- **Hard stops** — unresolved ADR conflict, fuzzy topic.
+- **Anti-rationalization** — ask-tool array, skip CONTEXT/ADR, brownfield CONTEXT batching.
+
 ## [0.24.2] - 2026-07-09
 
 README and hosts docs: OMP update path and current grill description.
@@ -916,7 +931,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.3...HEAD
+[0.24.3]: https://github.com/zuevrs/loom/compare/v0.24.2...v0.24.3
 [0.24.2]: https://github.com/zuevrs/loom/compare/v0.24.1...v0.24.2
 [0.24.1]: https://github.com/zuevrs/loom/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/zuevrs/loom/compare/v0.23.5...v0.24.0

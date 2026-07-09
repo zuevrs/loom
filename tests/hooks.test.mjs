@@ -660,7 +660,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids enactment");
     ok(grill.includes("Never enact without explicit user confirmation"), "grill guards enactment with confirm");
     ok(grill.includes("Never write PRD or issue cards"), "grill still forbids PRD/issues (Plan territory)");
-    ok(grill.includes("One question at a time"), "grill keeps one-question discipline");
+    ok(grill.includes("One `ask` call = exactly ONE question"), "grill keeps one-question discipline");
     ok(grill.includes("Facts vs decisions"), "grill keeps facts-vs-decisions split");
 
     // router update
@@ -811,7 +811,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
   ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
-  ok(grill.includes("One question at a time"), "loom-grill keeps one-question discipline");
+  ok(grill.includes("One `ask` call = exactly ONE question"), "loom-grill keeps one-question discipline");
   ok(grill.includes("Never write PRD or issue cards"), "loom-grill forbids PRD/issues (Plan territory)");
   ok(grill.includes("Never enact without explicit user confirmation"), "loom-grill requires confirm before action");
   ok(grill.includes("lightweight ADR"), "loom-grill writes lightweight ADRs for decisions");
@@ -1998,6 +1998,22 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(grill.includes("persisted with citations"), "grill requires research provenance with citations");
   ok(grill.includes("Enthusiasm is not a go"), "grill action gate: enthusiasm is not a go");
   ok(grill.includes("resolves a branch, not an action gate"), "grill hard stop clarifies enthusiasm vs confirmation");
+}
+
+// v0.24.3 — grill plan-parity surgical: ask-tool batching, research file,
+// ADR offer in cadence, re-read on interrupt, format links, failure modes
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const grill = read("skills/loom-grill/SKILL.md");
+  ok(grill.includes("One `ask` call = exactly ONE question"), "grill pins ask-tool one-question rule");
+  ok(grill.includes("The ask tool accepts an array"), "grill anti-rat blocks ask-tool batching");
+  ok(grill.includes(".loom/research/YYYY-MM-DD"), "grill persists research to .loom/research/");
+  ok(grill.includes("Offer an ADR") && grill.includes("never write silently"), "grill offers ADR before writing");
+  ok(grill.includes("re-read this file"), "grill re-reads skill on interruption");
+  ok(grill.includes("CONTEXT-FORMAT.md") && grill.includes("ADR-FORMAT.md"), "grill links format references");
+  ok(grill.includes("Conflicting ADRs"), "grill failure mode for ADR conflicts");
+  ok(grill.includes('just do it'), "grill failure mode for premature enact");
+  ok(grill.includes("want an ADR at"), "worked example shows ADR offer before enact");
 }
 
 console.log("✔ All hook and adapter tests passed");
