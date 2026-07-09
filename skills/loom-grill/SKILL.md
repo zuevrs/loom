@@ -44,7 +44,7 @@ Investigate a question, resolve it through disciplined interview, then enact fin
    - User says no → continue grilling; the decision is just a leaning until confirmed.
    - Note: `CONTEXT.md` glossary writes do NOT require this gate — they happen inline during step 2.
 4. **Enact** — after confirmation:
-   - **Code changes**: minimal diff, then run objective gates (lint/typecheck/test — whatever the repo has). Silent pass, loud fail.
+   - **Code changes**: if this is the first code change in the session, run gates BEFORE touching code — a red baseline makes your change unattributable. Then: minimal diff, run gates again. Silent pass, loud fail.
    - **ADR** (only when triple-gate holds: hard to reverse + surprising + trade-off): lightweight format —
      ```
      # Question

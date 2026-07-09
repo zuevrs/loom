@@ -122,6 +122,9 @@ OMP is the maximum-synergy host: Loom owns **what** to build (PRD, issues, verif
 ```bash
 omp plugin install git:github.com/zuevrs/loom
 cd your-project && omp        # in session: run loom-init
+
+# Update to latest:
+omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ```

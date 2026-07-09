@@ -654,7 +654,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes("Wait for explicit user confirmation"), "grill requires confirm before enactment");
     ok(grill.includes("lightweight ADR"), "grill writes lightweight ADRs as trace");
     ok(grill.includes("Question / Decision / Why"), "grill ADR format is three-section lightweight");
-    ok(grill.includes("run objective gates"), "grill runs gates after code changes");
+    ok(grill.includes("run the repo's objective gates"), "grill runs gates after code changes");
     ok(grill.includes(">3 files"), "grill has scope threshold signal");
     ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
     ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids enactment");
