@@ -69,7 +69,7 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 - Fuzzy objective — keep grilling; no PRD, no issues.
 - Unresolved ADR conflict in project warp — surface it; ask one resolving question.
 - Never batch questions. One `ask` call = one question. Always.
-- **Enthusiasm is not a go.** "Interesting", "good idea", "love it" resolve a branch — they do not authorize enactment. No PRD, no issues, no code until the explicit go at the exit gate.
+- **Enthusiasm is not a go.** "Interesting", "good idea", "love it" resolve a branch — they do not authorize materialization. No PRD, no issues, no code until the explicit go at the exit gate.
 
 ## Failure modes
 

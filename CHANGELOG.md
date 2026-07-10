@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.6] - 2026-07-10
+
+Light Plan/Grill terminology parity on gate wording.
+
+### Changed
+
+- **Shared gate term.** `loom-grill` now uses `materialize` instead of `enact` in action-gate wording, depth checkpoint, and worked cadence.
+- **Plan/Grill enthusiasm rule aligned.** `skills/loom-plan/GRILL.md` now uses the same “does not authorize materialization” wording.
+- **Test alignment.** `tests/hooks.test.mjs` assertions updated for the new terminology.
+
 ## [0.24.5] - 2026-07-10
 
 Grill depth hardening with a lightweight pre-enact checkpoint.
@@ -951,7 +961,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.5...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.6...HEAD
+[0.24.6]: https://github.com/zuevrs/loom/compare/v0.24.5...v0.24.6
 [0.24.5]: https://github.com/zuevrs/loom/compare/v0.24.4...v0.24.5
 [0.24.4]: https://github.com/zuevrs/loom/compare/v0.24.3...v0.24.4
 [0.24.3]: https://github.com/zuevrs/loom/compare/v0.24.2...v0.24.3

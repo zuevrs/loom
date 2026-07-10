@@ -658,7 +658,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes(">3 files"), "grill has scope threshold signal");
     ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
     ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids enactment");
-    ok(grill.includes("Never enact without explicit user confirmation"), "grill guards enactment with confirm");
+    ok(grill.includes("Never materialize without explicit user confirmation"), "grill guards materialization with confirm");
     ok(grill.includes("Never write PRD or issue cards"), "grill still forbids PRD/issues (Plan territory)");
     ok(grill.includes("One `ask` call = exactly ONE question"), "grill keeps one-question discipline");
     ok(grill.includes("Facts vs decisions"), "grill keeps facts-vs-decisions split");
@@ -803,7 +803,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const s of smellNames) ok(claudeStd.includes(s), `Claude standards checker carries ${s}`);
 }
 
-// loom-grill — think+act unified: investigate, decide, enact with confirmation
+// loom-grill — think+act unified: investigate, decide, materialize with confirmation
 {
   const { readFileSync: rf } = await import("node:fs");
   const grill = rf(resolve(__dirname, "..", "skills", "loom-grill", "SKILL.md"), "utf8");
@@ -813,7 +813,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
   ok(grill.includes("One `ask` call = exactly ONE question"), "loom-grill keeps one-question discipline");
   ok(grill.includes("Never write PRD or issue cards"), "loom-grill forbids PRD/issues (Plan territory)");
-  ok(grill.includes("Never enact without explicit user confirmation"), "loom-grill requires confirm before action");
+  ok(grill.includes("Never materialize without explicit user confirmation"), "loom-grill requires confirm before action");
   ok(grill.includes("lightweight ADR"), "loom-grill writes lightweight ADRs for decisions");
   for (const doc of [agents, initSkill]) {
     ok(doc.includes("loom-grill"), "managed block routes loom-grill");
@@ -1651,12 +1651,12 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(read("docs/hosts.md").includes("Sessions die; the snapshot resumes"), "hosts doc explains the resume story");
 }
 
-// v0.15.1 → v0.24.0 — enactment gates: plan grill still blocks enthusiasm,
-// freeform grill now allows enactment WITH explicit confirmation (unified think+act)
+// v0.15.1 → v0.24.0 — materialization gates: plan grill still blocks enthusiasm,
+// freeform grill now allows materialization WITH explicit confirmation (unified think+act)
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
-  ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize enactment");
-  ok(read("skills/loom-grill/SKILL.md").includes("Never enact without explicit user confirmation"), "loom-grill: enactment requires explicit confirm");
+  ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize materialization");
+  ok(read("skills/loom-grill/SKILL.md").includes("Never materialize without explicit user confirmation"), "loom-grill: materialization requires explicit confirm");
   ok(/^description: Investigate/m.test(read("skills/loom-grill/SKILL.md")), "loom-grill description leads with investigate");
   ok(/^description: Grill /m.test(read("commands/loom-grill.md")), "loom-grill command description leads with grill verb");
 }
@@ -2012,17 +2012,17 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(grill.includes("re-read this file"), "grill re-reads skill on interruption");
   ok(grill.includes("CONTEXT-FORMAT.md") && grill.includes("ADR-FORMAT.md"), "grill links format references");
   ok(grill.includes("Conflicting ADRs"), "grill failure mode for ADR conflicts");
-  ok(grill.includes('just do it'), "grill failure mode for premature enact");
-  ok(grill.includes("want an ADR at"), "worked example shows ADR offer before enact");
+  ok(grill.includes('just do it'), "grill failure mode for premature materialization");
+  ok(grill.includes("want an ADR at"), "worked example shows ADR offer before materialization");
 }
 
-// v0.24.5 — grill depth: pre-enact edge-case checkpoint for code changes
+// v0.24.5 — grill depth: pre-materialize edge-case checkpoint for code changes
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const grill = read("skills/loom-grill/SKILL.md");
-  ok(grill.includes("Pre-enact edge-case checkpoint"), "grill adds pre-enact edge-case checkpoint");
-  ok(grill.includes("Never skip the pre-enact edge-case checkpoint"), "grill hard stop requires edge-case checkpoint");
-  ok(grill.includes("Pre-enact edge case is unresolved"), "grill failure mode blocks enact on unresolved edge-case");
+  ok(grill.includes("Pre-materialize edge-case checkpoint"), "grill adds pre-materialize edge-case checkpoint");
+  ok(grill.includes("Never skip the pre-materialize edge-case checkpoint"), "grill hard stop requires edge-case checkpoint");
+  ok(grill.includes("Pre-materialize edge case is unresolved"), "grill failure mode blocks materialization on unresolved edge-case");
   ok(grill.includes("We'll handle edge cases after coding"), "grill anti-rationalization rejects post-code edge handling");
 }
 
