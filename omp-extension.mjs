@@ -25,7 +25,7 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.3";
+const MANAGED_BLOCK_VERSION = "v0.24.4";
 
 const INVARIANTS = `${PRE_LLM}
 

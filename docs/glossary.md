@@ -26,7 +26,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
 
-**Grill** — Freeform brainstorm interview on any topic (even non-project); output is one digest file, never PRD/issues/docs.
+**Grill** — Investigate/explore/debug/decide flow for undefined scope: disciplined interview with confirmation-gated enactment. No PRD/issues and no digest file.
 
 **Implement** — Ship one issue with minimal diff; leave one runnable check.
 

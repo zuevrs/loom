@@ -831,7 +831,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   // every skill description names when NOT to use it (OpenAI eval-skills: negative examples lift routing accuracy)
   const notFor = {
     "loom-init": /[Nn]ot for planning/,
-    "loom-plan": /Not for freeform brainstorming/,
+    "loom-plan": /Not for investigate\/explore\/debug sessions/,
     "loom-grill": /Not for planning buildable work/,
     "loom-implement": /Not for scoping new work/,
     "loom-verify": /not for fixing findings/,

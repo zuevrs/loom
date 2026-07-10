@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.4] - 2026-07-10
+
+Drift cleanup for `loom-grill` wording across remaining surfaces.
+
+### Changed
+
+- **Glossary alignment.** `docs/glossary.md` now describes Grill as investigate/explore/debug/decide with confirmation-gated enactment (no digest file).
+- **Kiro router alignment.** `kiro-agent.json` router prompt now matches the current `loom-grill` contract instead of the old brainstorm/digest wording.
+- **Plan description alignment.** `skills/loom-plan/SKILL.md` negative-example wording now points to undefined-scope investigate/explore/debug sessions for `loom-grill`.
+
 ## [0.24.3] - 2026-07-09
 
 Grill plan-parity: surgical gap closure in `loom-grill`.
@@ -931,7 +941,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.3...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.4...HEAD
+[0.24.4]: https://github.com/zuevrs/loom/compare/v0.24.3...v0.24.4
 [0.24.3]: https://github.com/zuevrs/loom/compare/v0.24.2...v0.24.3
 [0.24.2]: https://github.com/zuevrs/loom/compare/v0.24.1...v0.24.2
 [0.24.1]: https://github.com/zuevrs/loom/compare/v0.24.0...v0.24.1
