@@ -42,6 +42,7 @@ Investigate a question, resolve it through disciplined interview, then enact fin
    - **Interruptions never shrink the grill.** After a dropped connection, an error, or the user saying "continue": re-read this file, restate the last unanswered question, and resume.
 3. **Action gate** — when investigation crystallises into something actionable (code change or ADR-worthy decision):
    - State the decision and proposed action (in the user's language): *"Decision: X. Enact: [concrete steps]?"*
+   - **Pre-enact edge-case checkpoint (code changes only).** Before the first code enact in this thread, ask one adversarial edge-case question with a recommendation. If unresolved, keep grilling — no enact yet.
    - Wait for explicit user confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", "love it" resolve a branch but do not authorize enactment.
    - User says no → continue grilling; the decision is just a leaning until confirmed.
    - Note: `CONTEXT.md` glossary writes do NOT require this gate — they happen inline during step 2.
@@ -71,7 +72,11 @@ One exchange showing the moves — one question, recommendation first, inline CO
 >
 > **User:** Yes. And fix the code.
 >
-> **Agent:** Decision: rewrite the retry loop to exponential with max 3. Enact? *(waits for explicit go)*
+> **Agent:** One edge case before enact: if the API returns `429` twice and then times out, should attempt 3 still happen, or stop on timeout? I'd recommend stop on timeout to avoid compounding load and user wait. *(waits)*
+>
+> **User:** Stop on timeout.
+>
+> **Agent:** Decision: rewrite the retry loop to exponential with max 3 and stop on timeout. Enact? *(waits for explicit go)*
 
 A flat sequence of questions with no doc writes and no action proposals is the anti-pattern this file exists to prevent.
 
@@ -85,6 +90,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 - **Never enact without explicit user confirmation** — proposing ≠ doing. Enthusiasm ("interesting", "sounds right") resolves a branch, not an action gate. (Exception: `CONTEXT.md` glossary writes are inline and automatic.)
 - Never write PRD or issue cards — that is Plan territory.
 - Never batch questions. One `ask` call = one question. Always.
+- Never skip the pre-enact edge-case checkpoint on code changes.
 - Unresolved ADR conflict in project warp — surface it; ask one resolving question.
 - Fuzzy topic — keep grilling; no enactment until the load-bearing branches resolve.
 - Never auto-upgrade to Plan — signal and let the user decide.
@@ -97,6 +103,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 |---|---|
 | User wants full feature scope mid-grill | Signal: "this is Plan-sized — wrap up findings here, continue as Plan?" |
 | Investigation finds nothing actionable | End naturally — no forced output; the conversation IS the value |
+| Pre-enact edge case is unresolved | Keep grilling until the edge decision is explicit; do not enact yet |
 | Conflicting ADRs | Surface conflict; ask one resolving question |
 | User says "just do it" without clarity | Push back once ("I need to understand X before enacting"), then comply if they insist |
 | Gates fail after enactment | Fix inline (same session), re-run gates, continue |
@@ -110,6 +117,7 @@ A flat sequence of questions with no doc writes and no action proposals is the a
 | "This feels like Plan, I'll write a PRD" | Wrong ritual. Grill explores and enacts inline; Plan scopes buildable work. |
 | "User seemed to agree, I'll just do it" | Agreement is not confirmation. State the action, wait for explicit go. |
 | "I'll skip gates, it's a tiny change" | Gates exist to catch what tiny changes break. Run them. |
+| "We'll handle edge cases after coding" | No. Ask one adversarial edge case before first code enact, or you're coding on a guess. |
 | "Ask 5 questions at once, faster" | One `ask` call = ONE question. Each answer branches the next. |
 | "The ask tool accepts an array — one call, many questions" | That is batching. One question object per call. |
 | "Just ask the questions, skip writing CONTEXT/ADR" | Inline docs ARE the discipline — challenge, sharpen, write `CONTEXT.md`, offer ADRs. A flat quiz is not a grill. |

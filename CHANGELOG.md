@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.5] - 2026-07-10
+
+Grill depth hardening with a lightweight pre-enact checkpoint.
+
+### Changed
+
+- **Pre-enact edge-case checkpoint.** `loom-grill` now requires one adversarial edge-case question (with recommendation) before the first code enact in a thread.
+- **Runtime guardrails for shallow enact.** Added hard stop, failure mode, and anti-rationalization lines that block "code now, edge-cases later" behavior.
+- **Cadence example updated.** The worked sequence now shows edge-case closure before action gate confirmation.
+
 ## [0.24.4] - 2026-07-10
 
 Drift cleanup for `loom-grill` wording across remaining surfaces.
@@ -941,7 +951,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.4...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.5...HEAD
+[0.24.5]: https://github.com/zuevrs/loom/compare/v0.24.4...v0.24.5
 [0.24.4]: https://github.com/zuevrs/loom/compare/v0.24.3...v0.24.4
 [0.24.3]: https://github.com/zuevrs/loom/compare/v0.24.2...v0.24.3
 [0.24.2]: https://github.com/zuevrs/loom/compare/v0.24.1...v0.24.2

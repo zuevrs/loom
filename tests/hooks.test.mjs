@@ -2016,4 +2016,14 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(grill.includes("want an ADR at"), "worked example shows ADR offer before enact");
 }
 
+// v0.24.5 — grill depth: pre-enact edge-case checkpoint for code changes
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const grill = read("skills/loom-grill/SKILL.md");
+  ok(grill.includes("Pre-enact edge-case checkpoint"), "grill adds pre-enact edge-case checkpoint");
+  ok(grill.includes("Never skip the pre-enact edge-case checkpoint"), "grill hard stop requires edge-case checkpoint");
+  ok(grill.includes("Pre-enact edge case is unresolved"), "grill failure mode blocks enact on unresolved edge-case");
+  ok(grill.includes("We'll handle edge cases after coding"), "grill anti-rationalization rejects post-code edge handling");
+}
+
 console.log("✔ All hook and adapter tests passed");
