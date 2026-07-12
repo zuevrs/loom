@@ -18,7 +18,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **The Discipline** — YAGNI → reuse → stdlib → platform → installed dep → one line → minimum code, with carve-outs for security, validation, and accessibility.
 
-**`loom:`** — Marker for an intentional shortcut naming the ceiling and upgrade path.
+**`loom:`** — Marker used only for deliberate simplifications that cut a real corner; must name the ceiling and upgrade path.
 
 ## Rituals
 

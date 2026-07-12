@@ -761,10 +761,16 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const planDir = resolve(__dirname, "..", "skills", "loom-plan");
   const prd = rf(resolve(planDir, "PRD-TEMPLATE.md"), "utf8");
   const issue = rf(resolve(planDir, "ISSUE-TEMPLATE.md"), "utf8");
+  const toPrd = rf(resolve(planDir, "TO-PRD.md"), "utf8");
+  const implement = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
   const grillPhase = rf(resolve(planDir, "GRILL.md"), "utf8");
 
   ok(prd.includes("decision-rich snippet from a prototype"), "PRD template has prototype exception");
+  ok(prd.includes("prototype/<slug>") && prd.includes("never merged"), "PRD template records prototype branch pointer policy");
   ok(issue.includes("decision-rich snippet from a prototype"), "issue template has prototype exception");
+  ok(issue.includes("branch + commit"), "issue template asks for prototype pointer in Log");
+  ok(toPrd.includes("Prototype as primary source"), "TO-PRD carries prototype-as-primary-source contract");
+  ok(implement.includes("Never merge prototype branches"), "implement keeps prototype branches as non-merge evidence");
   // v0.18.0: ritual-time rules moved out of the managed block (ETH-lens trim) into the ritual that uses them
   ok(grillPhase.includes("Transitions: unlabeled"), "plan triage documents transitions");
   ok(grillPhase.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "plan triage enforces one category + one state");
@@ -2024,6 +2030,23 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(grill.includes("Never skip the pre-materialize edge-case checkpoint"), "grill hard stop requires edge-case checkpoint");
   ok(grill.includes("Pre-materialize edge case is unresolved"), "grill failure mode blocks materialization on unresolved edge-case");
   ok(grill.includes("We'll handle edge cases after coding"), "grill anti-rationalization rejects post-code edge handling");
+}
+
+// v0.24.7 — marker narrowing: loom: comments only for real corner-cuts
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const phrase = "deliberate simplifications that cut a real corner";
+  for (const p of [
+    "AGENTS.md",
+    "skills/loom-init/SKILL.md",
+    "skills/loom-implement/SKILL.md",
+    "hooks/invariants.cjs",
+    "opencode-plugin.mjs",
+    "hermes-plugin/__init__.py",
+    "docs/glossary.md",
+  ]) {
+    ok(read(p).includes(phrase), `${p} narrows loom marker to real corner-cuts`);
+  }
 }
 
 console.log("✔ All hook and adapter tests passed");

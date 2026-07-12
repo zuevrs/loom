@@ -24,7 +24,7 @@
 
 ## Implementation Decisions
 
-{Key technical choices settled during the interview: modules built/modified, interfaces, contracts, schema/API changes. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision, not a reference to code.}
+{Key technical choices settled during the interview: modules built/modified, interfaces, contracts, schema/API changes. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision, not a reference to code. If a prototype branch exists, include its pointer (`prototype/<slug>` + commit) as evidence; prototype branches are primary sources and are never merged.}
 
 ## Assumptions
 

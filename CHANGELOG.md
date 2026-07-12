@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [0.24.7] - 2026-07-12
+
+Reference distill: cleaner debt signal and stronger prototype evidence trace.
+
+### Changed
+
+- **`loom:` marker narrowing.** The marker is now explicitly limited to deliberate simplifications that cut a real corner, with a named ceiling and upgrade path — reducing debt-noise from trivial comments.
+- **Prototype-as-evidence contract.** Plan/Implement now treat decision-shaping prototypes as primary-source evidence on throwaway `prototype/<slug>` branches (pointer recorded as branch + commit), never merge targets.
+- **Template and test alignment.** PRD/issue/phase guidance and test pins now enforce prototype pointer capture and marker semantics.
+
 ## [0.24.6] - 2026-07-10
 
 Light Plan/Grill terminology parity on gate wording.
@@ -961,7 +971,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.6...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.7...HEAD
+[0.24.7]: https://github.com/zuevrs/loom/compare/v0.24.6...v0.24.7
 [0.24.6]: https://github.com/zuevrs/loom/compare/v0.24.5...v0.24.6
 [0.24.5]: https://github.com/zuevrs/loom/compare/v0.24.4...v0.24.5
 [0.24.4]: https://github.com/zuevrs/loom/compare/v0.24.3...v0.24.4
