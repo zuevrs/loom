@@ -801,6 +801,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const { readFileSync: rf } = await import("node:fs");
   const dialects = ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"];
   const normalize = (content) => content
+    .replace(/\r\n?/g, "\n")
     .replace(/^---[\s\S]*?\n---\n/, "")
     .replace(/^Reply with a structured verdict[^\n]*$/m, "")
     .replace(/^- \*\*Yield contract:\*\*[^\n]*$/m, "")
