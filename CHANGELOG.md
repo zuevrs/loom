@@ -4,6 +4,32 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [0.24.8] - 2026-07-14
+
+### Highlights
+
+- **Truthful host enforcement.** Cursor now invokes the shared stop gate in blocking mode; OMP permits one corrective lap and then exits a repeated unresolved state with a warning; host capability claims distinguish observable enforcement from installation wiring.
+- **Auditable TDD discipline.** Standards verification now treats unexplained behavioral-test deletion, green-manufacturing skips, weakened assertions, and avoidably private seams as blocker-grade findings while preserving explicit higher-seam and spec-backed exceptions.
+- **One interview canon.** Plan owns shared interview discipline; Grill loads that canon and retains its distinct action and consent flow.
+
+### Migration steps
+
+- Reinstall or force-upgrade the Loom plugin, then restart the host process so its hooks and managed instructions reload.
+- Run the host doctor or installer check after upgrade; follow the host-specific command in the README.
+
+### Adapter impacts
+
+- **Cursor:** an unverified `done` now blocks through Cursor's exit-2 hook contract.
+- **OMP:** the first unresolved stop requests correction; an immediate repeat of the same state exits with a visible warning instead of looping indefinitely.
+- **Codex and Droid:** hard enforcement remains labelled Unverified pending live host evidence.
+
+### Safety changes
+
+- Standards checkers reject coverage-reducing shortcuts and test seams below the PRD-confirmed public boundary.
+- Write, publication, irreversible-action, scope, and human-consent gates remain explicit while normal interview instructions use positive target behavior.
+
 ## [0.24.7] - 2026-07-12
 
 Reference distill: cleaner debt signal and stronger prototype evidence trace.
@@ -971,7 +997,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.7...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.8...HEAD
+[0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8
 [0.24.7]: https://github.com/zuevrs/loom/compare/v0.24.6...v0.24.7
 [0.24.6]: https://github.com/zuevrs/loom/compare/v0.24.5...v0.24.6
 [0.24.5]: https://github.com/zuevrs/loom/compare/v0.24.4...v0.24.5

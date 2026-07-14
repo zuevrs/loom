@@ -25,7 +25,7 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.7";
+const MANAGED_BLOCK_VERSION = "v0.24.8";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -108,6 +108,7 @@ function buildContextPointers(root) {
 }
 
 export default function loomExtension(pi) {
+  let lastBlockedState = null;
   pi.on("session_start", () => {
     try {
       const root = findProjectRoot();
@@ -224,14 +225,23 @@ export default function loomExtension(pi) {
   pi.on("session_stop", () => {
     try {
       const root = findProjectRoot();
-      const blocked = findUnverifiedDoneIssues(root);
+      const blocked = findUnverifiedDoneIssues(root).sort();
       if (blocked.length > 0) {
         const names = blocked.map((p) => p.split("/").pop()).join(", ");
+        const blockedState = blocked.join("\n");
+        if (blockedState === lastBlockedState) {
+          process.stderr.write(
+            `WARNING: repeated unresolved stop permitted after one forced correction lap (${names}); verify is still unresolved.\n`
+          );
+          return undefined;
+        }
+        lastBlockedState = blockedState;
         return {
           continue: true,
           additionalContext: `BLOCKED: ${names} marked done without an APPROVE verify digest. Run loom-verify, write its verdict (a line starting with APPROVE) into the issue's ## Verify section, then retry.`,
         };
       }
+      lastBlockedState = null;
       // Witness warning (warn-only, parity with the Stop-hook gate): a fresh
       // APPROVE with no witnessed checker spawn on this machine is suspect.
       const witnessMode = (process.env.LOOM_WITNESS || "warn").toLowerCase();

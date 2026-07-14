@@ -21,17 +21,17 @@ Release-gate template. Fill one row per supported host before tagging a release.
 | Host | Native install | Post-install check |
 |------|----------------|-------------------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | 3 lifecycle hooks + Stop enforcement in plugin; `loom-init` in test project |
-| Codex | `codex plugin add loom@loom` | hooks + commands registered |
-| Cursor | `~/.loom/scripts/install-cursor` | 4 hooks in `~/.cursor/hooks.json` (incl. stop gate); skills symlinked; `install.mjs --doctor` exits 0. Windows path: CI `check-windows` job runs the full installer smoke (install → doctor → uninstall → doctor) on `windows-latest` every push — cite the release's run URL as evidence |
+| Codex | `codex plugin add loom@loom` | hooks + commands registered; Hard stop remains Unverified until live plugin-root expansion and stop blocking are recorded |
+| Cursor | `~/.loom/scripts/install-cursor` | 4 hooks in `~/.cursor/hooks.json`; generated stop command includes `--hook` and fixture checks pin exit 2 unresolved / exit 0 verified. Skills symlinked; `install.mjs --doctor` exits 0. Windows path: CI `check-windows` runs install → doctor → uninstall → doctor on `windows-latest` — cite the release run URL |
 | Pi | `pi install git:github.com/zuevrs/loom` | skills load; discipline in session |
 | OMP | `omp plugin install git:github.com/zuevrs/loom` | extension (session_start + before_agent_start + session_stop) + TTSR rules + verify agents; `omp plugin doctor loom` clean |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` | system transform injection |
-| Droid | `droid plugin install zuevrs/loom` | `.claude-plugin/` format loads |
+| Droid | `droid plugin install zuevrs/loom` | `.claude-plugin/` format loads; Hard stop remains Unverified until live plugin-root expansion and stop blocking are recorded |
 | Windsurf | `install-windsurf` | skills symlinked |
 | Kiro | `install-kiro` | agent + skills linked |
-| Hermes | symlink `hermes-plugin` | skills + pre_llm hook |
+| Hermes | symlink `hermes-plugin` | skills + two working callbacks (`on_session_start`, `pre_llm_call`); registered no-op `subagent_start` is not counted |
 | Cline | `install-agents-skills` | skills + AGENTS.md |
-| OpenClaw | `install-agents-skills` or clawhub | skills discoverable |
+| OpenClaw | `install-agents-skills` or clawhub | skills discoverable; no Loom extension ships, so enforcement is Convention-only |
 
 ## Release gate
 

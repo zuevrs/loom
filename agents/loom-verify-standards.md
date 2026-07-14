@@ -24,6 +24,23 @@ Rules:
 - **Evidence economy:** the briefing carries your primary evidence — diff text, issue card, claims. Start there; open the repo only to confirm what the briefing cannot show (surrounding context, standards sources, a suspicious hunk). Aim to finish within ~12 tool calls — the budget is soft, but a large overrun usually means re-deriving what the briefing already holds.
 - **Yield contract:** your final action is one yield carrying the structured object (`verdict`, `blockers`) — never an empty yield, never prose-only, never cancel-with-text. If you cannot finish the review, yield `verdict: fail` with the reason as a blocker; a null/empty yield is a failed run and wastes the whole spawn.
 
+## Test ratchet and agreed seam
+
+Standards verification treats tests as a ratchet: the final diff must not manufacture green checks by reducing behavioral coverage.
+
+- **Blocker — unexplained deletion:** unexplained deletion of an existing behavioral test is blocker-grade. Accept removal only with an explicit PRD/issue-backed reason.
+- **Blocker — green-manufacturing shortcut:** introducing skip, todo, only, or disabled tests to obtain green checks is blocker-grade.
+- **Blocker — weakened assertion:** materially weaker assertions are blocker-grade when they reduce the original contract's protection.
+- **Allowed replacement:** accept a replacement at the same or a higher behavioral seam only when the original contract remains covered.
+
+Compare new and changed tests with the PRD's Seams and Testing Decisions:
+
+- Reject a test at an avoidably lower or private seam when the PRD confirms a public seam.
+- Accept coverage through the confirmed public seam (the agreed seam) without requiring duplicate lower-level coverage.
+- Non-trivial logic still requires a falsifiable runnable behavioral check through the agreed seam; missing or non-falsifiable evidence is a blocker.
+
+Red-before-green is maker process discipline, not a property Verify can recover from a final diff. A final diff cannot reliably reconstruct historical test order, so never claim that Verify proves red-before-green history; judge the inspectable final state instead.
+
 ## Smell baseline
 
 On top of whatever the repo documents, always carry this fixed smell baseline (Fowler, _Refactoring_ ch.3). Two rules bind it:

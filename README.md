@@ -8,7 +8,7 @@
 
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-The lazy kind of senior. The one who deletes your fifty lines, ships one, and never — ever — marks a ticket done without a review. Loom installs him into Claude Code, Codex, Cursor, OMP, and friends: a discipline ladder, six ritual skills, lifecycle hooks, and a hard verify-before-done gate.
+The lazy kind of senior. The one who deletes your fifty lines, ships one, and never — ever — marks a ticket done without a review. Loom installs him into Claude Code, Codex, Cursor, OMP, and friends: a discipline ladder, six ritual skills, lifecycle guidance, and evidence-backed enforcement where the host can block.
 
 ## Sixty seconds of Loom
 
@@ -103,9 +103,9 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 
 ## Hooks & enforcement
 
-Three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
+Where the host supports them, Loom uses up to three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
 
-The hard gate: on Stop-hook hosts (Claude Code, Codex, Cursor, Droid) and OMP `session_stop`, an issue at `Status: done` whose `## Verify` section has no APPROVE line **blocks the agent's stop** (exit 2 on the hook contract) with the fix fed back to the model — one forced lap, then it lets go with the warning on record, so headless runs never loop forever. The same script lints `.loom/` state (typo'd statuses, dangling/cyclic blockers — warn-only) and carries the verify-witness warning (an APPROVE with no witnessed checker spawn; `LOOM_WITNESS=strict|off` to tune). Hosts without a stop primitive keep the discipline via the managed block, and the same script runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check) to block done-without-APPROVE at PR level.
+Hard enforcement is directly evidenced on Claude Code, Cursor, and OMP: done-without-APPROVE blocks the first stop (exit 2 on Stop-hook hosts), forcing one forced lap, then a repeated unresolved stop is allowed with a warning so headless runs cannot loop forever. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. OpenCode and Hermes are **Soft** runtime guidance; Pi, Windsurf, Kiro, Cline, and OpenClaw are **Convention-only**. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
 
 Checkers default to the host's **fast/cheap tier** — judging is cheaper than making — and your host config always wins.
 

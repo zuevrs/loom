@@ -1,6 +1,10 @@
 # Phase 1 — Grill (relentless scope interview)
 
-Resolve EVERY branch of the decision tree with the user, capturing the domain inline as decisions crystallise. No PRD, no issues, no implementation in this phase. Do NOT open `TO-PRD.md` or `TO-ISSUES.md` yet.
+## Canon scope
+
+This file is the sole canonical source for the interview discipline shared by Plan and Grill. Apply `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` as one body. Plan uses that body to produce planning artifacts only and exits through its PRD/issue gates below.
+
+Stay in the interview phase until its decision branches are resolved; leave `TO-PRD.md` and `TO-ISSUES.md` unread and produce planning artifacts only after this phase.
 
 ## Inbound triage (when applicable)
 
@@ -11,7 +15,7 @@ One category (bug/chore/feature/refactor/docs) + one state per issue; conflictin
 
 ## Explore before asking
 
-Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. **Facts vs decisions**: a *fact* exploration (`read`/`grep`/`glob`) can find, look up instead of asking. A *decision* — intent, preferences, scope edges, trade-offs — is the user's: put each one to the user and wait for the answer. Exploration never stands in for the user's side of a decision.
+Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) and the code. **Facts vs decisions**: establish facts through exploration (`read`/`grep`/`glob`); ask the user to decide intent, preferences, scope edges, and trade-offs. Evidence informs the recommendation, while the user owns the decision.
 
 The same applies **outside the repo**: before grilling a technology choice (library, API, protocol), check the current docs with the host's research tools (web search, docs MCP) when available. A recommendation built on stale training data is a silent invention; a question the ecosystem already answers wastes the user's turn. Research informs the recommendation — the user still decides.
 
@@ -19,16 +23,16 @@ Research discipline when you do it: **primary sources over write-ups** — offic
 
 ## Interview rules
 
-Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Do NOT stop at "enough for a coherent PRD" — that lower bar is exactly what produces shallow plans. You never self-declare "enough"; the interview ends only when the user signals shared understanding and gives an explicit go.
+Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Continue beyond a merely coherent PRD; end the interview when the user signals shared understanding and gives an explicit go.
 
-- **One `ask` call = exactly ONE question.** Never pass several questions in a single call (no question arrays), never stack questions in prose. Each answer branches the next question; batching is bewildering and forbidden.
+- **One `ask` call = exactly ONE question.** Put one question object in each call and keep prose to that question. Each answer branches the next question; a single-question cadence preserves that context.
 - **Resolve decision dependencies in order.** When one open decision depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the interview will have to re-litigate.
 - **Recommend an answer** with every question — say which option you'd pick and *why*, and mark it (list it first / label it recommended). A bare multiple-choice menu is an interrogation, not a grill.
-- **Never invent a load-bearing decision silently.** Output format, command/interface names, parser or tech approach, error contracts, edge-case behavior, precision — if you would otherwise assume one, ask it or surface it as an explicit assumption for the user to confirm. A plan full of your unconfirmed guesses is the failure mode.
+- **Surface every load-bearing decision.** For output format, command/interface names, parser or tech approach, error contracts, edge-case behavior, and precision, ask the user or record an explicit assumption for confirmation. A plan records confirmed choices rather than unconfirmed guesses.
 - **Start broad, then narrow.** Scope, users, success criteria first; then push boundaries — "What's explicitly NOT in scope?" — and stress edge cases and trade-offs one-by-one.
-- **Probe for unstated constraints.** After named questions are resolved, ask what the user treats as obvious — the answer that starts with "well obviously…" is the one that was never said. Offer a concrete option the user would reject; the rejection teaches more than an open question.
+- **Probe for unstated constraints.** After named questions are resolved, ask about assumptions the user treats as obvious. Offer a concrete option the user would reject; that rejection makes the constraint explicit.
 - **Seams.** Propose where the feature will be tested. Prefer existing seams, use the highest seam, the fewer the better (ideal: one). Confirm the seams with the user.
-- **Interruptions never shrink the grill.** After a dropped connection, an error, or the user saying "continue": re-read this file, restate the last unanswered question, and resume. An interruption is NOT permission to skip questions, rush, or declare a question "the last one".
+- **Resume after interruptions.** After a dropped connection, an error, or the user saying "continue", re-read this file, restate the last unanswered question, and resume. Preserve the full interview rather than treating the interruption as a shortcut.
 - **The interview runs in the user's language** — questions, options, recommendations, all of it, with no English duplicates in parentheses. Technical terms and ritual names stay as-is.
 
 ## Model the domain as you grill
@@ -39,8 +43,8 @@ The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.
 - **Sharpen fuzzy language.** Vague or overloaded term → propose a precise canonical one ("'account' — the Customer or the User? Different things.").
 - **Invent edge-case scenarios.** Stress-test domain relationships with concrete scenarios that force the user to be precise about boundaries.
 - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
-- **Write `CONTEXT.md` inline, automatically.** The moment a term is resolved, update the glossary **before asking the next question** — never batch writes at the exit gate. Glossary only, zero implementation detail. ([CONTEXT-FORMAT.md](CONTEXT-FORMAT.md))
-- **Offer an ADR** (ask — never write silently) only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Any missing → skip. Name the real target path (`docs/adr/NNNN-slug.md`) in the offer — don't improvise a location. ([ADR-FORMAT.md](ADR-FORMAT.md))
+- **Write `CONTEXT.md` inline, automatically.** The moment a term is resolved, update the glossary **before asking the next question**. Write each resolved term at that point; keep the glossary free of implementation detail. ([CONTEXT-FORMAT.md](CONTEXT-FORMAT.md))
+- **Offer an ADR** only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Ask the user to approve it, skip it when a condition is missing, and name the real target path (`docs/adr/NNNN-slug.md`). ([ADR-FORMAT.md](ADR-FORMAT.md))
 - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately. Drafting in English and rewriting later is a defect, not a workflow.
 
 ## The cadence, worked
@@ -68,7 +72,7 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 
 - Fuzzy objective — keep grilling; no PRD, no issues.
 - Unresolved ADR conflict in project warp — surface it; ask one resolving question.
-- Never batch questions. One `ask` call = one question. Always.
+- Keep every `ask` call to exactly one question.
 - **Enthusiasm is not a go.** "Interesting", "good idea", "love it" resolve a branch — they do not authorize materialization. No PRD, no issues, no code until the explicit go at the exit gate.
 
 ## Failure modes
@@ -78,7 +82,7 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 | User wants implementation mid-interview | Finish the grill or scope down to single-session (`loom-implement`) |
 | Conflicting ADRs | Surface conflict; ask one resolving question |
 | User says "just do it" without clarity | Push back once ("I need to understand X before a coherent PRD"), then comply if they insist |
-| Stream drops / user says "continue" | Re-read this file; restate the last unanswered question; resume — do not rush |
+| Stream drops / user says "continue" | Re-read this file; restate the last unanswered question; resume at that point |
 
 ## Anti-rationalization
 
