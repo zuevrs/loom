@@ -6,6 +6,17 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.24.10] - 2026-07-15
+
+Correctness fixes for verification state and host project discovery.
+
+### Fixed
+
+- **Effective verify verdicts.** JavaScript gates and Hermes now use the latest effective `APPROVE` or `REJECT` verdict to decide whether work is done or needs rework.
+- **Consistent project-root discovery.** Host integrations, including OMP, prefer an ancestor `.loom` project over an intermediate `AGENTS.md`.
+- **Bounded OMP witness handling.** OMP witness warnings remain non-blocking by default, while strict mode requests at most one corrective lap for an unchanged issue set.
+- **Focused regressions.** Added coverage for verdict ordering, nested-root discovery, and OMP witness stop behavior.
+
 ## [0.24.9] - 2026-07-15
 
 Terminology and drift-warning cleanup.
@@ -1007,7 +1018,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.9...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.10...HEAD
+[0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
 [0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9
 [0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8
 [0.24.7]: https://github.com/zuevrs/loom/compare/v0.24.6...v0.24.7

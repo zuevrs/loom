@@ -146,6 +146,22 @@ import { join } from "node:path";
     strictEqual(e.status, 1, "stop-gate blocks done without ## Verify");
   }
 
+  // No explicit root discovers the parent project from a nested cwd.
+  const nested = join(tmp, "work", "nested");
+  mkdirSync(nested, { recursive: true });
+  writeFileSync(join(tmp, "work", "AGENTS.md"), "# Nested instructions\n");
+  try {
+    execFileSync(process.execPath, [stopGate], { cwd: nested, timeout: 5000 });
+    ok(false, "stop-gate should discover the parent .loom from a nested cwd");
+  } catch (e) {
+    strictEqual(e.status, 1, "stop-gate prefers parent .loom over intermediate AGENTS.md");
+  }
+
+  // An explicit root remains authoritative even when cwd discovers another project.
+  const explicit = mkdtempSync(join(tmpdir(), "loom-stop-explicit-"));
+  execFileSync(process.execPath, [stopGate, explicit], { cwd: nested, timeout: 5000 });
+  rmSync(explicit, { recursive: true });
+
   // Case 2: done with ## Verify → should pass (exit 0)
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Verify\n\nAPPROVE — 2026-06-30\n\n## Status\n\nStatus: done\n");
   const out2 = execFileSync(process.execPath, [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000 });
@@ -280,6 +296,20 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   );
   strictEqual(findUnverifiedDoneIssues(tmp).length, 0, "REJECT-then-APPROVE history passes");
 
+  // A later verdict supersedes an older approval in the same history.
+  writeFileSync(
+    issue,
+    "# T\n\n## Verify\n\nAPPROVE — 2026-07-01 — initially passed\nREJECT — 2026-07-02 — regression\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "APPROVE-then-REJECT history blocks");
+
+  // The latest Verify section supersedes an older approved section.
+  writeFileSync(
+    issue,
+    "# T\n\n## Verify\n\nAPPROVE — 2026-07-01\n\n## Verify\n\nREJECT — 2026-07-02\n\n## Status\n\nStatus: done\n"
+  );
+  strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "latest Verify section verdict controls the gate");
+
   // Anchoring: "Status: done" mid-line in prose is not a done status.
   writeFileSync(
     issue,
@@ -407,6 +437,49 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     writeFileSync(secondIssue, "# Two\n\n## Status\n\nStatus: done\n");
     ok(handlers.session_stop()?.continue, "OMP changed unresolved state starts a fresh forced lap");
     strictEqual(repeatedStop().result, undefined, "OMP repeated changed state is bounded to one lap");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    rmSync(tmp, { recursive: true });
+  }
+}
+
+// OMP root discovery — parent .loom outranks an intermediate AGENTS.md.
+{
+  const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
+  const handlers = {};
+  mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
+  const tmp = mkdtempSync(join(tmpdir(), "loom-omp-root-"));
+  const issueDir = join(tmp, ".loom", "pack", "issues");
+  const nested = join(tmp, "workspace", "nested");
+  mkdirSync(issueDir, { recursive: true });
+  mkdirSync(nested, { recursive: true });
+  writeFileSync(join(tmp, "workspace", "AGENTS.md"), "# Intermediate instructions\n");
+  writeFileSync(join(issueDir, "01-parent.md"), "# Parent issue\n\n## Status\n\nStatus: done\n");
+  const previous = {
+    PI_PROJECT_DIR: process.env.PI_PROJECT_DIR,
+    LOOM_WITNESS: process.env.LOOM_WITNESS,
+  };
+  process.env.PI_PROJECT_DIR = nested;
+  process.env.LOOM_WITNESS = "off";
+  try {
+    const stop = handlers.session_stop();
+    ok(stop?.continue && stop.additionalContext.includes("01-parent.md"), "OMP stop finds parent .loom past intermediate AGENTS.md");
+
+    let sessionOut = "";
+    const write = process.stdout.write;
+    process.stdout.write = (chunk) => { sessionOut += String(chunk); return true; };
+    try {
+      handlers.session_start();
+    } finally {
+      process.stdout.write = write;
+    }
+    ok(sessionOut.includes("## .loom state") && sessionOut.includes("01-parent.md"), "OMP snapshot uses the same parent .loom root");
+
+    const prompt = handlers.before_agent_start({ systemPrompt: "BASE" });
+    ok(prompt?.systemPrompt.includes("done without APPROVE") && prompt.systemPrompt.includes("01-parent.md"), "OMP alert uses the same parent .loom root");
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];
@@ -1564,7 +1637,9 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const dirtyPy = mkdtempSync(join(tmpdir(), "loom-v014-pyalert-"));
   const dirtyPyDir = join(dirtyPy, ".loom", "a", "issues");
   mkdirSync(dirtyPyDir, { recursive: true });
-  writeFileSync(join(dirtyPyDir, "001.md"), "# A\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dirtyPyDir, "001.md"), "# A\n\n## Verify\n\nAPPROVE — old\nREJECT — current\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dirtyPyDir, "002.md"), "# B\n\n## Verify\n\nREJECT — old\nAPPROVE — current\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dirtyPyDir, "003.md"), "# C\n\n## Verify\n\nAPPROVE — old\n\n## Verify\n\nREJECT — current\n\n## Status\n\nStatus: done\n");
   try {
     const pyAlert = execFileSync(
       "python3",
@@ -1578,7 +1653,9 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
       ],
       { encoding: "utf8", timeout: 10000, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
     );
-    ok(pyAlert.includes("done without APPROVE") && pyAlert.includes("001.md"), "hermes alert parity on dirty tree");
+    ok(pyAlert.includes("done without APPROVE") && pyAlert.includes("001.md"), "Hermes alert flags same-section latest REJECT");
+    ok(pyAlert.includes("003.md"), "Hermes alert flags multi-section latest REJECT");
+    ok(!pyAlert.includes("002.md"), "Hermes alert resolves same-section latest APPROVE");
   } catch (e) {
     if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 → skip
   }
@@ -1780,7 +1857,27 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   // Verdict ordering: REJECT then APPROVE = resolved, not rework.
   ok(!lastVerdictIsReject("## Verify\n\nREJECT — x\n\n## Verify\n\nAPPROVE — fixed\n"), "APPROVE after REJECT clears rework");
   ok(lastVerdictIsReject("## Verify\n\nAPPROVE — v1\n\n## Verify\n\nREJECT — regression\n"), "REJECT after APPROVE is rework");
+  ok(lastVerdictIsReject("## Verify\n\nAPPROVE — v1\nREJECT — regression\n"), "same-section APPROVE then REJECT is rework");
+  ok(!lastVerdictIsReject("## Verify\n\nREJECT — x\nAPPROVE — fixed\n"), "same-section REJECT then APPROVE clears rework");
+  ok(lastVerdictIsReject("<!-- ## Verify\nAPPROVE — fake -->\n## Verify\nREJECT — real\n"), "commented verdicts do not affect rework");
   strictEqual(lastVerdictIsReject("no verdicts here"), false, "no Verify section — no rework");
+
+  writeFileSync(join(dir, "006-same-reject.md"), "# F\n\n## Verify\n\nAPPROVE — v1\nREJECT — regression\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "007-same-approve.md"), "# G\n\n## Verify\n\nREJECT — x\nAPPROVE — fixed\n\n## Status\n\nStatus: ready-for-agent\n");
+  writeFileSync(join(dir, "008-done-reject.md"), "# H\n\n## Verify\n\nAPPROVE — old\nREJECT — current\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(dir, "009-done-approve.md"), "# I\n\n## Verify\n\nREJECT — old\nAPPROVE — current\n\n## Status\n\nStatus: done\n");
+  const orderedSnap = stateSnapshot(tmp);
+  ok(orderedSnap.includes("006-same-reject.md"), "snapshot flags same-section latest REJECT as rework");
+  ok(!orderedSnap.match(/rework pending[^\n]*007-same-approve\.md/), "snapshot resolves same-section latest APPROVE");
+  ok(orderedSnap.match(/done without APPROVE[^\n]*008-done-reject\.md/), "snapshot blocks stale APPROVE followed by REJECT");
+  ok(!orderedSnap.match(/done without APPROVE[^\n]*009-done-approve\.md/), "snapshot accepts latest APPROVE after REJECT");
+  const pyOrdered = pySnap(tmp);
+  if (pyOrdered !== null) {
+    ok(pyOrdered.includes("006-same-reject.md"), "Hermes snapshot flags same-section latest REJECT");
+    ok(!pyOrdered.match(/rework pending[^\n]*007-same-approve\.md/), "Hermes snapshot resolves same-section latest APPROVE");
+    ok(pyOrdered.match(/done without APPROVE[^\n]*008-done-reject\.md/), "Hermes snapshot blocks stale APPROVE followed by REJECT");
+    ok(!pyOrdered.match(/done without APPROVE[^\n]*009-done-approve\.md/), "Hermes snapshot accepts latest APPROVE after REJECT");
+  }
 
   // Once 002 is done, next up moves to 003 (blocked only by done 001).
   writeFileSync(join(dir, "002-mid.md"), "# B\n\n## Verify\n\nAPPROVE — fixed\n\n## Status\n\nStatus: done\n");
@@ -1912,8 +2009,8 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 → parity runs in CI
   }
 
-  // OMP witness: task-tool checker spawns are recorded; session_stop warns on
-  // fresh unwitnessed APPROVEs and stays quiet once a spawn was witnessed.
+  // OMP witness: warn mode is warning-only; strict gets one bounded corrective
+  // lap per unchanged unwitnessed set; checker spawns clear the state.
   const tmp = mkdtempSync(join(tmpdir(), "loom-v0162-omp-"));
   writeFileSync(join(tmp, "AGENTS.md"), "<!-- loom:begin version=v0.16.2 -->\n<!-- loom:end -->\n");
   const issues = join(tmp, ".loom", "feat", "issues");
@@ -1934,9 +2031,31 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   delete process.env.CI;
   delete process.env.LOOM_WITNESS;
   try {
-    const before = handlers.session_stop();
-    ok(before && before.additionalContext.startsWith("WITNESS:"), "session_stop warns on unwitnessed APPROVE");
-    ok(before.additionalContext.includes("001.md"), "witness warning names the issue");
+    let warning = "";
+    const write = process.stderr.write;
+    process.stderr.write = (chunk) => { warning += String(chunk); return true; };
+    let before;
+    try {
+      before = handlers.session_stop();
+    } finally {
+      process.stderr.write = write;
+    }
+    strictEqual(before, undefined, "default witness mode does not force continuation");
+    ok(warning.startsWith("WITNESS:") && warning.includes("001.md"), "warn mode writes a visible issue-specific warning");
+
+    process.env.LOOM_WITNESS = "strict";
+    const strictFirst = handlers.session_stop();
+    ok(strictFirst?.continue && strictFirst.additionalContext.startsWith("BLOCKED:"), "strict witness first stop requests one corrective lap");
+    warning = "";
+    process.stderr.write = (chunk) => { warning += String(chunk); return true; };
+    let strictRepeated;
+    try {
+      strictRepeated = handlers.session_stop();
+    } finally {
+      process.stderr.write = write;
+    }
+    strictEqual(strictRepeated, undefined, "strict repeated unchanged witness state permits stop");
+    ok(warning.includes("repeated unwitnessed stop"), "strict repeated stop writes a bounded-loop warning");
 
     handlers.tool_execution_start({
       type: "tool_execution_start",
@@ -1947,7 +2066,9 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     ok(entries.some((e) => e.role === "spec-checker") && entries.some((e) => e.role === "standards-checker"),
       "task spawn recorded both checker witnesses");
 
-    strictEqual(handlers.session_stop(), undefined, "witnessed APPROVE passes session_stop");
+    strictEqual(handlers.session_stop(), undefined, "witnessed APPROVE passes session_stop and clears strict state");
+    rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
+    ok(handlers.session_stop()?.continue, "strict witness blocks again after witness state clears");
 
     // Named plugin agents match too (the field run's first spawn attempt).
     rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });

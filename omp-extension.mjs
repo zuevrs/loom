@@ -9,7 +9,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
@@ -25,7 +25,7 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.9";
+const MANAGED_BLOCK_VERSION = "v0.24.10";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -40,14 +40,7 @@ const ROLES = {
 };
 
 function findProjectRoot() {
-  let dir = process.env.PI_PROJECT_DIR || process.cwd();
-  for (let i = 0; i < 20; i++) {
-    if (existsSync(resolve(dir, "AGENTS.md"))) return dir;
-    const parent = resolve(dir, "..");
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return process.env.PI_PROJECT_DIR || process.cwd();
+  return witnessRoot(process.env.PI_PROJECT_DIR || process.cwd());
 }
 
 // Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
@@ -109,6 +102,7 @@ function buildContextPointers(root) {
 
 export default function loomExtension(pi) {
   let lastBlockedState = null;
+  let lastWitnessState = null;
   pi.on("session_start", () => {
     try {
       const root = findProjectRoot();
@@ -227,7 +221,8 @@ export default function loomExtension(pi) {
       const root = findProjectRoot();
       const blocked = findUnverifiedDoneIssues(root).sort();
       if (blocked.length > 0) {
-        const names = blocked.map((p) => p.split("/").pop()).join(", ");
+        lastWitnessState = null;
+        const names = blocked.map((p) => basename(p)).join(", ");
         const blockedState = blocked.join("\n");
         if (blockedState === lastBlockedState) {
           process.stderr.write(
@@ -242,20 +237,34 @@ export default function loomExtension(pi) {
         };
       }
       lastBlockedState = null;
-      // Witness warning (warn-only, parity with the Stop-hook gate): a fresh
-      // APPROVE with no witnessed checker spawn on this machine is suspect.
+      // Witness warning: default is genuinely warn-only. Strict requests one
+      // corrective lap for each changed unwitnessed set, then permits a repeat.
       const witnessMode = (process.env.LOOM_WITNESS || "warn").toLowerCase();
-      if (witnessMode !== "off" && !process.env.CI) {
-        const unwitnessed = unwitnessedApproved(root);
-        if (unwitnessed.length > 0) {
-          const names = unwitnessed.map((p) => p.split("/").pop()).join(", ");
-          return {
-            continue: true,
-            additionalContext: `WITNESS: ${names} approved recently but no checker sub-agent spawn was witnessed on this machine. If loom-verify really ran, its checkers should have been spawned via the task tool; if it did not, remove the APPROVE and run loom-verify.`,
-          };
-        }
+      if (witnessMode === "off" || process.env.CI) {
+        lastWitnessState = null;
+        return undefined;
       }
-      return undefined;
+      const unwitnessed = unwitnessedApproved(root).sort();
+      if (unwitnessed.length === 0) {
+        lastWitnessState = null;
+        return undefined;
+      }
+      const names = unwitnessed.map((p) => basename(p)).join(", ");
+      const warning = `${names} approved recently but no checker sub-agent spawn was witnessed on this machine. If loom-verify really ran, its checkers should have been spawned via the task tool; if it did not, remove the APPROVE and run loom-verify.`;
+      if (witnessMode !== "strict") {
+        lastWitnessState = null;
+        process.stderr.write(`WITNESS: ${warning}\n`);
+        return undefined;
+      }
+      const witnessState = unwitnessed.join("\n");
+      if (witnessState === lastWitnessState) {
+        process.stderr.write(
+          `WARNING: repeated unwitnessed stop permitted after one forced correction lap (${names}); verify witness is still unresolved.\n`
+        );
+        return undefined;
+      }
+      lastWitnessState = witnessState;
+      return { continue: true, additionalContext: `BLOCKED: ${warning}` };
     } catch {
       return undefined;
     }
