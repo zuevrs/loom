@@ -6,6 +6,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.24.9] - 2026-07-15
+
+Terminology and drift-warning cleanup.
+
+### Fixed
+
+- **Glossary and hosts.md terminology.** Normalized remaining "enact/enactment" to "materialize/materialization" (missed in v0.24.6).
+- **OMP drift warning.** The version-drift message now shows the working `omp plugin install … --force` command instead of the broken `omp plugin update` path.
+- **Canary for future drift.** `check-doc-consistency` now rejects "enact" in glossary and hosts docs.
+
 ## [0.24.8] - 2026-07-14
 
 ### Highlights
@@ -997,7 +1007,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.8...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.9...HEAD
+[0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9
 [0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8
 [0.24.7]: https://github.com/zuevrs/loom/compare/v0.24.6...v0.24.7
 [0.24.6]: https://github.com/zuevrs/loom/compare/v0.24.5...v0.24.6

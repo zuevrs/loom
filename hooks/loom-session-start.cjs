@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.8";
+const MANAGED_BLOCK_VERSION = "v0.24.9";
 
 function findProjectRoot() {
   let dir = process.cwd();

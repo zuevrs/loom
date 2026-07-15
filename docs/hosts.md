@@ -97,7 +97,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
 | **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
-| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; enact inline with gates; upgrade to `/loom-plan` if scope grows |
+| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; materialize inline with gates; upgrade to `/loom-plan` if scope grows |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |

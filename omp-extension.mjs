@@ -25,7 +25,7 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.8";
+const MANAGED_BLOCK_VERSION = "v0.24.9";
 
 const INVARIANTS = `${PRE_LLM}
 
@@ -90,7 +90,7 @@ function buildContextPointers(root) {
       versionDriftWarning(
         match[1],
         MANAGED_BLOCK_VERSION,
-        "run `omp plugin update loom` (or reinstall the plugin), then restart"
+        "run `omp plugin install git:github.com/zuevrs/loom --force`, then restart"
       );
     if (drift) pointers.push(drift);
     pointers.push(`AGENTS.md: ${agentsPath}`);

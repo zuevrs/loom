@@ -72,6 +72,8 @@ GLOSSARY_DOC="$ROOT/docs/glossary.md"
 AUTHORING_DOC="$ROOT/docs/authoring.md"
 if [ ! -f "$GLOSSARY_DOC" ]; then
   errors+=("docs/glossary.md is missing")
+elif grep -Fwq 'enactment' "$GLOSSARY_DOC"; then
+  errors+=("docs/glossary.md uses 'enactment' — normalized to 'materialization' since v0.24.6")
 fi
 if [ ! -f "$AUTHORING_DOC" ]; then
   errors+=("docs/authoring.md is missing")
@@ -89,6 +91,9 @@ if [ ! -f "$HOSTS_DOC" ]; then
 else
   if grep -Fq 'one digest file' "$HOSTS_DOC"; then
     errors+=("docs/hosts.md still describes loom-grill as digest-file output (stale since v0.24.0)")
+  fi
+  if grep -Fwq 'enact' "$HOSTS_DOC"; then
+    errors+=("docs/hosts.md uses 'enact' — normalized to 'materialize' since v0.24.6")
   fi
   # README is the lead (quick path), hosts.md is the depth — they must reference each other.
   if ! grep -Fq 'docs/hosts.md' "$README"; then

@@ -707,13 +707,13 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     const canon = read("skills/loom-plan/GRILL.md");
     ok(grill.includes("Explore with discipline. Act with confirmation. Leave a trace."), "grill carries the unified tagline");
     ok(grill.includes("Action gate"), "grill has an explicit action gate step");
-    ok(grill.includes("Wait for explicit user confirmation"), "grill requires confirm before enactment");
+    ok(grill.includes("Wait for explicit user confirmation"), "grill requires confirm before materialization");
     ok(grill.includes("lightweight ADR"), "grill writes lightweight ADRs as trace");
     ok(grill.includes("Question / Decision / Why"), "grill ADR format is three-section lightweight");
     ok(grill.includes("run the repo's objective gates"), "grill runs gates after code changes");
     ok(grill.includes(">3 files"), "grill has scope threshold signal");
     ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
-    ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids enactment");
+    ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids old enact hard stop");
     ok(grill.includes("Never materialize a code write or ADR without explicit user confirmation"), "grill guards materialization with confirm");
     ok(grill.includes("Never write PRD or issue cards"), "grill still forbids PRD/issues (Plan territory)");
     ok(grill.includes("../loom-plan/GRILL.md") && canon.includes("One `ask` call = exactly ONE question"), "grill loads the canon that owns one-question discipline");
