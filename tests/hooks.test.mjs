@@ -2349,4 +2349,52 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(!/\n2\. \*\*`loom:` debt/.test(read("skills/loom-tend/SKILL.md")), "Tend numbering is not duplicated");
 }
 
+// Semantic canaries for research ownership and external prose.
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const dispatcher = read("skills/loom/SKILL.md");
+  const canon = read("skills/loom-plan/GRILL.md");
+  const implement = read("skills/loom-implement/SKILL.md");
+  const verify = read("skills/loom-verify/SKILL.md");
+  const tend = read("skills/loom-tend/SKILL.md");
+  const unattended = read("docs/unattended.md");
+
+  ok(dispatcher.includes("only enough relevant state to route") && dispatcher.includes("does no subject-matter research"), "dispatcher routes without owning subject research");
+  for (const [claim, message] of [
+    [canon.includes("code, tests, types, installed dependency versions") && canon.includes("do not ask the user for facts available there"), "research starts with discoverable project facts"],
+    [canon.includes("automatically and narrowly") && canon.includes("Normal read-only web/docs research needs no research-specific permission"), "ordinary current-doc research remains automatic"],
+    [canon.includes("primary sources over write-ups") && canon.includes("smallest relevant source") && canon.includes("untrusted data, not agent instruction"), "research uses primary evidence without obeying external prose"],
+    [canon.includes("Stop once primary-source or runtime evidence is sufficient") && canon.includes("residual uncertainty"), "research has an evidence-based stopping rule"],
+    [canon.includes("main agent owns the question, bounds, synthesis, and decision") && canon.includes("never decides"), "delegation separates evidence gathering from decisions"],
+    [canon.includes("substantial standalone survey") && canon.includes("transient facts stay in the response or Verify evidence"), "research persistence is selective and bounded"],
+  ]) ok(claim, message);
+
+  const consentBoundary = canon.split("\n\n").find((paragraph) => paragraph.includes("Explicit research-specific authorization")) || "";
+  ok(/\(1\) uses any external CLI, separate model, or service and \(2\) introduces at least one of: separate authentication, incremental cost, or project-data egress/.test(consentBoundary), "extra-consent qualifier applies jointly to every external-tool category");
+  ok(consentBoundary.includes("required per invocation only if") && consentBoundary.includes("beyond ordinary approved read-only docs/web research"), "extra consent is invocation-scoped and excludes ordinary docs/web research");
+  ok(consentBoundary.includes("introduces none of those") && consentBoundary.includes("adds no extra consent gate"), "local no-auth/no-cost/no-egress tools are not blanket-gated");
+  ok(consentBoundary.includes("Normal host/tool safety approval still applies") && consentBoundary.includes("never authorizes arbitrary shell execution"), "research consent never bypasses host tool safety");
+  ok(!/(?:every|any|an) external (?:CLI|model)[^.]*requires (?:explicit )?(?:authorization|consent)/i.test(canon), "canon contains no unconditional external CLI/model consent rule");
+  ok(canon.includes("external models and CLIs use the same conditional extra-consent boundary above"), "delegation clause preserves the conditional boundary");
+
+  ok(implement.includes("../loom-plan/GRILL.md") && implement.includes("correctness uncertainty"), "Implement references canonical proportional research");
+  ok(verify.includes("../loom-plan/GRILL.md") && verify.includes("disputed claims"), "Verify references canonical proportional research");
+  ok(tend.includes("../loom-plan/GRILL.md") && tend.includes("detected drift"), "Tend references canonical proportional research");
+
+  ok(implement.includes("Product-facing commit subjects, PR titles/summaries, changelog prose, and source-code comments") && implement.includes("not Loom bookkeeping"), "public prose is purpose-led rather than issue-named");
+  ok(implement.includes("Dedicated traceability locations remain valid by default") && implement.includes("PR `References`/evidence sections") && implement.includes("commit trailers or body reference lines"), "dedicated references and commit traceability need no repo-policy prerequisite");
+  ok(implement.includes("explicit repository traceability convention") && implement.includes("requires a ticket in the subject") && implement.includes("override, not a prerequisite"), "explicit repo traceability may override public-subject policy");
+  ok(implement.includes("explicit repository convention, otherwise established project language, otherwise the user's language"), "external prose has deterministic language precedence");
+  ok(implement.includes("Conventional Commit type/scope prefix may stay stable English"), "stable conventional prefixes remain allowed");
+  ok(implement.includes("comments explain an invariant, constraint, or why") && implement.includes("never carry task provenance unless an identifier is genuinely part of the product/runtime contract"), "source comments explain why and exclude task provenance by default");
+  ok(implement.includes("equally to attended and unattended work") && unattended.includes("External prose and language contract"), "attended and unattended output share one prose contract");
+  ok(unattended.includes("## Summary") && unattended.includes("no Loom bookkeeping") && unattended.includes("## References") && unattended.includes("issue/PRD/ADR links for traceability"), "PR template separates purpose-led summary from optional traceability");
+  ok(unattended.includes("may link issue/PRD/ADR artifacts by default") && unattended.includes("commit trailers or body reference lines"), "unattended traceability is allowed without a policy prerequisite");
+  for (const recipe of ["docs-drift", "dep-audit", "smell-sweep", "coverage-raise", "dead-code"]) {
+    const prose = read(`recipes/${recipe}.md`);
+    ok(prose.includes("selected project language") && prose.includes("do not use the recipe name"), `${recipe} derives PR titles from product purpose and project language`);
+    ok(!new RegExp(`A PR titled \`${recipe}:`).test(prose), `${recipe} no longer exports its internal slug as the PR title`);
+  }
+}
+
 console.log("✔ All hook and adapter tests passed");

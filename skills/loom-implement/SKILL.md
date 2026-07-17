@@ -15,6 +15,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 - Active issue path (`.loom/<feature>/issues/<NN>-*.md`)
 - Parent PRD
 - Project conventions (git style, test/lint commands)
+- The canonical research contract in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md), used only to resolve implementation correctness uncertainty
 - **Fresh session:** PRD + this issue only
 
 ## Batch mode ("do all the issues", host goal/loop features)
@@ -37,6 +38,12 @@ A user may explicitly invoke the `loom-implement` precision entrypoint for a rea
 ## Execution consent
 
 Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions.
+
+## External prose and language contract
+
+Product-facing commit subjects, PR titles/summaries, changelog prose, and source-code comments describe product purpose, not Loom bookkeeping such as internal issue/ADR numbers, names, slugs, or paths. Dedicated traceability locations remain valid by default: PR `References`/evidence sections may link issue/PRD/ADR artifacts, commit trailers or body reference lines may carry useful identifiers/URLs, and internal `.loom`, `## Log`, and `## Verify` remain unchanged. Follow an explicit repository traceability convention when present, including one that requires a ticket in the subject; that is the override, not a prerequisite for dedicated references.
+
+Language precedence is: explicit repository convention, otherwise established project language, otherwise the user's language. A Conventional Commit type/scope prefix may stay stable English while its subject/body use the selected language. Source comments explain an invariant, constraint, or why; they never carry task provenance unless an identifier is genuinely part of the product/runtime contract. This contract applies equally to attended and unattended work.
 
 ## Outputs
 

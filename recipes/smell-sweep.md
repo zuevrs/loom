@@ -20,7 +20,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per smell cluster (not per instance — group by module) under `.loom/maintenance/issues/`.
-- A PR titled `smell-sweep: {date}` with the stubs; description = table of possible smells with file references. Zero findings → no PR; state "no smells above baseline" in the runner log and exit clean.
+- A PR whose title summarizes the affected product/module concern in the selected project language, with the stubs; description = table of possible smells with file references; do not use the recipe name or date as the title. Zero findings → no PR; state "no smells above baseline" in the runner log and exit clean.
 
 ## Hard stops
 

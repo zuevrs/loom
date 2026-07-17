@@ -6,6 +6,20 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.25.1] - 2026-07-18
+
+### Changed
+
+- **Proportional research.** Loom now starts with local project evidence, automatically performs narrow primary-source checks when correctness depends on current or disputed facts, and stops once the evidence is sufficient for the decision.
+- **Bounded research delegation.** Read-heavy evidence gathering may be delegated when the question and source bounds are clear, while the main agent retains synthesis and decisions.
+- **Purpose-led external prose.** Commit subjects, PR titles and summaries, and source comments describe product purpose, following repository convention, then project language, then user language. Recipe PR titles likewise describe the product outcome instead of an internal recipe slug or date.
+- **Traceability by default.** PR References/evidence sections and commit trailers or body reference lines may preserve useful issue, PRD, and ADR links without crowding product-facing prose.
+
+### Safety
+
+- **Conditional external-tool consent.** Per-invocation research consent is required only when an external tool introduces separate authentication, incremental cost, or project-data egress; ordinary approved read-only documentation and web research remains available without an extra research gate.
+- **Semantic canaries.** Release checks now guard research ownership, conditional consent boundaries, purpose-led prose, language precedence, traceability, and recipe title behavior against drift.
+
 ## [0.25.0] - 2026-07-17
 
 A single outcome-first entry now routes users into the right Loom ritual while preserving direct ritual commands for precision.
@@ -1048,7 +1062,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.25.1...HEAD
+[0.25.1]: https://github.com/zuevrs/loom/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v0.25.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
 [0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9

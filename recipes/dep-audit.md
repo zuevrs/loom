@@ -19,7 +19,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per actionable finding (three lines: package, vulnerability/rot, suggested action) under `.loom/maintenance/issues/`.
-- A PR titled `dep-audit: {date}` with the stubs; description leads with counts by severity, then the noise you dismissed and why. Zero findings → no PR; state "no actionable findings" in the runner log and exit clean.
+- A PR whose title summarizes the actionable dependency risk in the selected project language, with the stubs; description leads with counts by severity, then the noise you dismissed and why; do not use the recipe name or date as the title. Zero findings → no PR; state "no actionable findings" in the runner log and exit clean.
 
 ## Hard stops
 

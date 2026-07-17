@@ -20,7 +20,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per confirmed drift (three lines: what drifted, evidence, where) under the active `.loom/` pack or `.loom/maintenance/issues/`.
-- A PR titled `docs-drift: {date}` containing the stubs, with the findings table in the description. Zero findings → no PR; state "no drift found" in the runner log and exit clean.
+- A PR whose title names the confirmed documentation mismatch in the selected project language, with the findings table in the description; do not use the recipe name or date as the title. Zero findings → no PR; state "no drift found" in the runner log and exit clean.
 
 ## Hard stops
 

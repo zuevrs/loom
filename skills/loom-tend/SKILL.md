@@ -15,6 +15,7 @@ Keep the warp current and debts from rotting — without inventing feature scope
 - CONTEXT/ADRs, PRODUCT.md, DESIGN.md (when present)
 - `.loom/*/issues/` statuses
 - Recent diffs / gate outputs when relevant
+- Canonical research contract: [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md), used only to confirm detected drift
 
 ## Outputs
 

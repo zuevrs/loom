@@ -19,7 +19,7 @@ Running attended (a human asked for this in chat)? Same task, discipline, and ve
 
 ## Output
 
-- A PR titled `dead-code: {date}` — deletions only, suite green, verify digest included; description lists each deletion with its proof line.
+- A PR whose title describes the obsolete product behavior or surface removed in the selected project language — deletions only, suite green, verify digest included; description lists each deletion with its proof line; do not use the recipe name or date as the title.
 - Anything you suspect but cannot prove → `needs-triage` stub, not a deletion.
 
 ## Hard stops

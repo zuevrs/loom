@@ -15,6 +15,7 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 - Diff since issue start (`git diff <base>...HEAD` or user-fixed point)
 - Issue `## Log` when present — the maker's claimed decisions/deviations; check claims against the actual diff, and flag undeclared deviations
 - Standards sources: ADRs, CONTEXT, project conventions
+- Canonical research contract: [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md), used narrowly to check disputed claims
 
 ## Outputs
 

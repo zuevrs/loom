@@ -23,7 +23,7 @@ Route an explicit Loom entry to exactly one existing ritual without duplicating 
 
 ## Process
 
-1. Reconstruct relevant state project-nonmutatingly. Inspect a dirty tree with `git status` and diff before associating it with any issue; never assign it blindly.
+1. Reconstruct only enough relevant state to route project-nonmutatingly. Inspect a dirty tree with `git status` and diff before associating it with any issue; never assign it blindly. The dispatcher does no subject-matter research: once routed, the selected ritual owns any deeper local or external investigation under the canonical research contract in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md).
 2. Classify exactly one outcome:
    - **Resolve locally** — investigate, question, or small local fix → load `loom-grill`.
    - **Plan work** — define scope, PRD, or issue pack → load `loom-plan`.

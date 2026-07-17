@@ -38,7 +38,7 @@ One safe, idempotent project setup for persistent `.loom` pack/enforcement capab
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.25.0 -->
+<!-- loom:begin version=v0.25.1 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.

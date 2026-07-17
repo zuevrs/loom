@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "0.25.0",
+  "version": "0.25.1",
   "description": "Loom agent entry plus six precision rituals",
   "prompt": "Universal Loom floor: Ordinary prompts remain normal agent mode; apply lazy discipline, trust/safety/privacy/secrets/data-loss/accessibility care, never auto-merge/publish, and existing .loom issues marked done require an APPROVE Verify signal. Choosing the Loom agent/skill is explicit entry: load the registered loom skill, which is the canonical dispatcher. Precision loom-* skills remain direct entries.",
   "tools": [

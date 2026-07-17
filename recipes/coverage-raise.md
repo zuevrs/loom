@@ -19,7 +19,7 @@ Running attended (a human asked for this in chat)? Same task, discipline, and ve
 
 ## Output
 
-- A PR titled `coverage-raise: {module}` — tests only, suite green, coverage delta for the module in the description, verify digest included.
+- A PR whose title describes the behavior now protected in the selected project language — tests only, suite green, coverage delta for the module in the description, verify digest included; do not use the recipe name as the title.
 - Any discovered bugs as `needs-triage` stubs in the same PR.
 
 ## Hard stops
