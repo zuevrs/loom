@@ -3,7 +3,7 @@
 // session_start: context pointers. before_agent_start: invariants + role.
 // tool_call/tool_result: goal-completion gate. session_stop: verify gate.
 // Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
-// Loom planning in OMP is the /loom-plan command only.
+// Preferred entry is /loom; /loom-plan remains the precision planning route.
 //
 // Ref: can1357/oh-my-pi extensibility/extensions/types.ts
 
@@ -25,11 +25,9 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.10";
+const MANAGED_BLOCK_VERSION = "v0.25.0";
 
-const INVARIANTS = `${PRE_LLM}
-
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.`;
+const INVARIANTS = PRE_LLM;
 
 const ROLES = {
   maker: "Ship one vertical slice. Do not self-approve. Leave runnable check.",
@@ -115,8 +113,8 @@ export default function loomExtension(pi) {
         ...(snapshot ? ["", snapshot] : []),
         "",
         snapshot
-          ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
-          : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
+          ? "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."
+          : "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
       ];
       process.stdout.write(lines.join("\n") + "\n");
     } catch {

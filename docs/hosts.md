@@ -2,15 +2,24 @@
 
 The [README](../README.md) carries the quick path: install, upgrade, uninstall, and the one-paragraph enforcement story. This file is the depth — what each host actually gets, how enforcement is wired per host, and the full Loom + OMP workflow. Install **status** (verified vs implemented) lives only in the README install tables; this file never restates it.
 
-## What each host gets
+## Entry and capabilities by host
 
-| Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor | Windsurf | Kiro | Hermes | Cline | Droid | OpenClaw |
-|---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
-| Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 2 | — | yes | — |
-| Enforcement | Hard | Hard (Unverified) | Convention-only | Hard | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
-| Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | AGENTS.md |
+| Host | Preferred Loom entry | Precision entrypoints | Capability note |
+|---|---|---|---|
+| Claude Code | `/loom:loom` | `/loom:loom-*` | Plugin namespace; `.claude-plugin/plugin.json` keeps `commands: []` so skills are not double-registered |
+| Codex | `/loom` | `/loom-*` | Command directory plus skills |
+| Pi | `loom` skill | `loom-*` skills | Skills; no claimed custom slash command |
+| OMP | `/loom` | `/loom-*` | Command/skill discovery plus hard Stop gate |
+| OpenCode | `/loom` | `/loom-*` | Skill-backed command entry; system prose is lane-scoped |
+| Cursor | `/loom` | `/loom-*` | Installed skills and hooks |
+| Windsurf | `loom` skill | `loom-*` skills | Skill invocation |
+| Kiro | Loom agent/skill | `loom-*` skills | No custom slash-command claim |
+| Hermes | `/loom` | `/loom-*` | Exact dispatcher command and skill registered |
+| Cline | `loom` skill | `loom-*` skills | Skills/AGENTS.md |
+| Droid | `/loom:loom` where Claude-plugin namespace is exposed | namespaced precision skills | Claude-plugin format |
+| OpenClaw | `loom` skill | `loom-*` skills | Skills/AGENTS.md |
+
+`/loom` is the preferred spelling only where the host supports a command-like skill entry. Capability claims remain separate from live verification evidence.
 
 `Hooks` counts callbacks that perform observable work, not registered names. OMP's three are `session_start`, `before_agent_start`, and `session_stop`. Hermes has two working callbacks (`on_session_start` and `pre_llm_call`); its registered no-op `subagent_start` callback is not counted. OpenClaw has no shipped extension.
 
@@ -96,8 +105,8 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
-| **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
-| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; materialize inline with gates; upgrade to `/loom-plan` if scope grows |
+| **Plan** | `/loom` → Plan work (or precision `/loom-plan`) | — | Dispatcher selects the canonical Plan ritual; native `/plan` stays stock OMP |
+| **Resolve locally** | `/loom` → Resolve locally (or precision `/loom-grill`) | — | Project-nonmutating investigation with bounded apply; scope growth recommends Plan |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
@@ -119,21 +128,21 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 ### Planning on OMP
 
-Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
+The preferred OMP entry is **`/loom`** with outcome **Plan work**; **`/loom-plan`** remains the precision shortcut — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
 
 **Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ### Example session
 
 ```
-> Plan JWT auth feature                    # → /loom-plan (grill → PRD → issues)
-> Implement issue 001-auth-endpoint        # → loom-implement
+> /loom Plan work: JWT authentication       # dispatcher → loom-plan
+> /loom-implement .loom/jwt/issues/001-auth-endpoint.md  # precision selected-issue entry
 > Verify                                   # → task: loom-verify-spec + loom-verify-standards
 > (agent writes ## Verify, sets Status: done)
 > Implement issue 002-token-refresh        # → next ready-for-agent issue
 ```
 
-For unattended multi-issue runs — the prompt carries the fresh-session contract (each issue gets a clean sub-agent with PRD + that one issue, so context never accumulates across issues):
+Release 1 can prepare (but does not launch or harden) this exact user handoff. It does not guarantee a non-default branch, checkpoint commits, per-issue HEAD fixed points, or stop-all semantics (each issue gets a clean sub-agent with PRD + that one issue, so context never accumulates across issues):
 
 ```
 omp goal "Work through .loom/jwt-auth/issues/ in order. For each issue spawn a

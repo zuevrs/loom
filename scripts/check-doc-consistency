@@ -243,12 +243,45 @@ fi
 if ! grep -Fq 'No verify digest' "$INIT_SKILL"; then
   errors+=("skills/loom-init/SKILL.md missing 'No verify digest' invariant")
 fi
-if ! grep -Fq 'No verify digest' "$INVARIANTS_SRC"; then
-  errors+=("hooks/invariants.cjs missing 'No verify digest' invariant")
+if grep -Fq 'No verify digest' "$INVARIANTS_SRC"; then
+  errors+=("hooks/invariants.cjs leaks lane-only no-verify-no-done into ordinary prompts")
 fi
 if ! grep -Fq 'require("./invariants.cjs")' "$PRELLM_HOOK" && ! grep -Fq "require('./invariants.cjs')" "$PRELLM_HOOK"; then
   errors+=("hooks/loom-pre-llm.cjs must require hooks/invariants.cjs")
 fi
+
+
+# Unified entry semantic canaries.
+DISPATCHER="$ROOT/skills/loom/SKILL.md"
+COMMAND="$ROOT/commands/loom.md"
+GRILL_SKILL="$ROOT/skills/loom-grill/SKILL.md"
+VERIFY_SKILL="$ROOT/skills/loom-verify/SKILL.md"
+HERMES_YAML="$ROOT/hermes-plugin/plugin.yaml"
+KIRO_AGENT="$ROOT/kiro-agent.json"
+CLAUDE_PLUGIN="$ROOT/.claude-plugin/plugin.json"
+for f in "$DISPATCHER" "$COMMAND"; do
+  [ -f "$f" ] || errors+=("unified dispatcher target missing: ${f#$ROOT/}")
+done
+for phrase in 'Resolve locally' 'Plan work' 'Review ready work' 'Maintain project'; do
+  grep -Fq "$phrase" "$DISPATCHER" 2>/dev/null || errors+=("dispatcher missing outcome: $phrase")
+  grep -Fq "$phrase" "$README" 2>/dev/null || errors+=("README missing outcome: $phrase")
+done
+grep -Fq 'Explicit outcome or named target wins' "$DISPATCHER" || errors+=("dispatcher must prefer explicit route over persisted state")
+grep -Fq 'Multiple candidates' "$DISPATCHER" || errors+=("dispatcher must ask on multiple resume candidates")
+grep -Eq '^slash: true$' "$DISPATCHER" || errors+=("dispatcher must opt into OpenCode slash registration")
+grep -Fq 'No project-file or external-state write before' "$GRILL_SKILL" || errors+=("Grill must prohibit project writes before bounded apply")
+grep -Fq 'Gate 1' "$PLAN_SKILL" && grep -Fq 'Gate 2' "$PLAN_SKILL" || errors+=("Plan must expose two preview-before-write gates")
+grep -Fq 'confirmed PRD without issues is valid completion' "$PLAN_SKILL" || errors+=("Plan must allow PRD-only completion")
+grep -Fq 'Do not implement in the planning context' "$PLAN_SKILL" || errors+=("Plan must forbid same-context implementation")
+grep -Fq 'ADR-FORMAT.md' "$GRILL_SKILL" || errors+=("Grill must use canonical ADR format")
+grep -Fq 'auth/security/privacy/secrets' "$GRILL_SKILL" || errors+=("Grill must carry upward-only Verify trigger")
+grep -Fq 'Spec unavailable' "$VERIFY_SKILL" || errors+=("Verify must describe review without a spec")
+grep -Eq '^  - loom$' "$HERMES_YAML" || errors+=("Hermes must register exact loom command/skill")
+grep -Fq 'No custom slash-command claim' "$HOSTS_DOC" || errors+=("Kiro host spelling truth missing")
+grep -Fq '/loom:loom' "$README" || errors+=("Claude namespaced entry missing")
+node -e 'const p=require(process.argv[1]); process.exit(Array.isArray(p.commands)&&p.commands.length===0?0:1)' "$CLAUDE_PLUGIN" || errors+=("Claude plugin commands must remain empty")
+grep -Fq 'Ordinary prompts remain normal agent mode' "$AGENTS" || errors+=("managed block must scope ordinary prompts outside Loom lane")
+grep -Fq 'The Loom lane begins only after explicit' "$AGENTS" || errors+=("managed block must scope ritual rules to explicit Loom entry")
 
 if [ ${#errors[@]} -eq 0 ]; then
   echo '{"status":"clean","message":"Docs consistency checks passed"}'

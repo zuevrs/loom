@@ -69,19 +69,20 @@ if [ -f "$opencode" ] && [ -n "$pkg_version" ]; then
 fi
 
 # Check all skills referenced in AGENTS.md router exist
-for skill in loom-init loom-plan loom-grill loom-implement loom-verify loom-tend; do
+for skill in loom loom-init loom-plan loom-grill loom-implement loom-verify loom-tend; do
   if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then
     errors+=("router references $skill but skills/$skill/SKILL.md missing")
   fi
 done
 
-# Check managed block mentions all skills from skills/
+# Check managed block names the dispatcher; ritual bodies intentionally stay out of the managed block.
+if ! grep -q '`loom` dispatcher' "$AGENTS"; then errors+=("managed block does not name the canonical loom dispatcher"); fi
+
+# Every installed skill still needs a canonical file.
 for skill_dir in "$SKILLS_DIR"/*/; do
   [ -d "$skill_dir" ] || continue
   skill_name=$(basename "$skill_dir")
-  if ! grep -q "$skill_name" "$AGENTS" 2>/dev/null; then
-    errors+=("skills/$skill_name exists but not mentioned in AGENTS.md")
-  fi
+  [ -f "$skill_dir/SKILL.md" ] || errors+=("skills/$skill_name missing SKILL.md")
 done
 
 # Checker manifests exist in two dialects (agents/ = OMP-style, .claude-plugin/agents/ = Claude-style).

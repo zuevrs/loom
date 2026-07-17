@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.10";
+const MANAGED_BLOCK_VERSION = "v0.25.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -52,7 +52,7 @@ function run() {
 
   if (pointers.length === 0) {
     pointers.push(
-      "No Loom project detected. Run loom-init to set up this project."
+      "No persistent Loom project setup detected. Explicit Loom work may offer loom-init just before .loom pack/enforcement capability is needed."
     );
   }
 
@@ -65,8 +65,8 @@ function run() {
     ...(snapshot ? ["", snapshot] : []),
     "",
     snapshot
-      ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
-      : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
+      ? "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."
+      : "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
   ].join("\n");
 
   // loom: output format varies by host — Claude reads plain stdout

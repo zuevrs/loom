@@ -6,6 +6,36 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.25.0] - 2026-07-17
+
+A single outcome-first entry now routes users into the right Loom ritual while preserving direct ritual commands for precision.
+
+### Highlights
+
+- **Unified `/loom` dispatcher.** Start from an outcome—set up Loom, plan a feature, resolve something locally, implement work, review changes, or maintain a project—and Loom hands off exactly once to the existing ritual that owns it.
+- **Bounded write consent.** Plan and Grill begin without project mutation. Before writing, they preview exact targets, actions, and current bases; changed scope or targets require renewed confirmation.
+- **Just-in-time Init.** Work that needs persistent `.loom` state can offer setup at the point it becomes necessary, then resume the selected ritual directly.
+- **Two explicit Plan gates.** Gate 1 confirms the PRD and domain/research delta; Gate 2 separately confirms the complete issue pack. A confirmed PRD without issues is a valid stopping point.
+- **Standards-only ad-hoc review.** When no issue, PRD, or user contract exists, Verify runs only the Standards checker, records Spec as unavailable, and never completes a Loom issue or changes its status.
+
+### Migration steps
+
+- Upgrade or reinstall the host adapter, restart the host, then invoke `/loom`. Existing precision commands such as `/loom-plan` and `/loom-verify` remain available.
+- Run `loom-init` in existing projects when prompted to refresh the managed block to v0.25.0.
+- Automation that invokes a specific ritual may continue unchanged; use `/loom` for interactive outcome-based routing.
+
+### Adapter impacts
+
+- **Claude Code, Codex, OMP, Cursor, OpenCode, Kiro, and Hermes:** manifests, entry surfaces, routing instructions, and adapter skill discovery align with the unified dispatcher.
+- **OMP and Cursor:** unified entry was live-smoked for this release. Claude Code unified entry remains unverified because its CLI was unavailable; this release records an explicit waiver rather than extending the verified claim.
+- **Other hosts:** unified entry remains implemented/unverified until directly smoked.
+
+### Safety changes
+
+- Route selection alone authorizes no mutation; Plan, Grill, and maintenance flows require bounded consent before project-file or external-state writes.
+- Mutating verification commands belong in the apply proposal, inherited red baselines stop attribution, and failed recovery that exceeds confirmed scope returns to the user.
+- Standards-only review cannot manufacture Spec evidence, approve a Loom issue, or change issue status.
+
 ## [0.24.10] - 2026-07-15
 
 Correctness fixes for verification state and host project discovery.
@@ -1018,7 +1048,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.10...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v0.25.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
 [0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9
 [0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8

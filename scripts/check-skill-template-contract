@@ -30,7 +30,7 @@ for skill_dir in "$SKILLS_DIR"/*/; do
 
   if ! grep -q '^disable-model-invocation:' "$skill" 2>/dev/null; then
     if [ "$name" != "loom-verify" ]; then
-      errors+=("$name: ritual skill should declare disable-model-invocation in frontmatter")
+      errors+=("$name: dispatcher/ritual skill should declare disable-model-invocation in frontmatter")
     fi
   fi
 done

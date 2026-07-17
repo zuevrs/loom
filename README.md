@@ -8,7 +8,7 @@
 
 A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
 
-The lazy kind of senior. The one who deletes your fifty lines, ships one, and never — ever — marks a ticket done without a review. Loom installs him into Claude Code, Codex, Cursor, OMP, and friends: a discipline ladder, six ritual skills, lifecycle guidance, and evidence-backed enforcement where the host can block.
+The lazy kind of senior. The one who deletes your fifty lines, ships one, and never — ever — marks a ticket done without a review. Loom installs him into Claude Code, Codex, Cursor, OMP, and friends: a discipline ladder, one dispatcher plus six ritual skills, lifecycle guidance, and evidence-backed enforcement where the host can block.
 
 ## Sixty seconds of Loom
 
@@ -34,7 +34,7 @@ Now `done` means reviewed-and-done. That loop — plan in issues, implement one 
   <img src="assets/pipeline.png" width="720" alt="The Loom pipeline: grill, prd·adr, slices, implement, verify, done — rejected work loops back to implement, tend arcs back over the whole run">
 </p>
 
-**Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
+**Loom is:** a markdown-native harness — one outcome dispatcher, six precision rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
 
 **Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service. Cold agents guess intent, over-engineer, skip verification, and lose context between sessions; Loom closes these gaps with on-disk conventions — no lock-in.
 
@@ -57,7 +57,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live sessions) |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
-| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (live smoke: managed block + 6 skills in context) |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (historical live smoke: managed block + 6 ritual skills in context); unified `/loom` dispatcher entry implemented, **unverified** |
 | Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) | `droid plugin uninstall loom` | implemented |
 | Windsurf | `node ~/.loom/scripts/install.mjs --windsurf` | `node ~/.loom/scripts/install.mjs --uninstall --windsurf` | implemented |
 | Kiro | `node ~/.loom/scripts/install.mjs --kiro` | `node ~/.loom/scripts/install.mjs --uninstall --kiro` | implemented |
@@ -67,12 +67,17 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 
 Uninstall removes what Loom owns and leaves foreign files untouched. Project files are yours either way: remove `<!-- loom:begin -->…<!-- loom:end -->` from `AGENTS.md` and delete `.loom/` per project if wanted.
 
-## Quickstart
+## Quick Start
 
-1. **Install** Loom for your host (above).
-2. In your project, invoke **`loom-init`** — confirm the write plan.
-3. **`loom-plan`** for multi-session work (or **`loom-implement`** directly for a small fix).
-4. **`loom-implement`** one issue at a time; ensure a **`loom-verify`** digest exists before marking done (auto-invoked on some hosts, manual on others).
+1. **Install** Loom for your host.
+2. Enter Loom once: use **`/loom`** on OMP, Codex, Cursor, OpenCode, and Hermes; **`/loom:loom`** in the Claude plugin; choose the **Loom agent/skill** in Kiro. Other skills-only hosts invoke the `loom` skill.
+3. State the outcome (or let a bare entry recommend one resume candidate):
+   - **Resolve locally** — investigate, question, or small local fix
+   - **Plan work** — PRD and optional issue pack
+   - **Review ready work** — evidence-backed review
+   - **Maintain project** — audit first, then bounded maintenance apply
+
+The dispatcher loads exactly one existing ritual and disappears. Interviews begin project-nonmutating; project writes require an exact bounded apply confirmation.
 
 ## Upgrade
 
@@ -90,16 +95,18 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 - **Hooks not taking effect:** confirm entries in host config, restart the host session, then `--doctor`.
 - **Managed block version mismatch:** re-run `loom-init` in the affected project.
 
-## Skills
+## Precision entrypoints
 
-| Skill | Purpose |
+Use these advanced shortcuts when the ritual is already known; they remain normative and installed.
+
+| Entry | Purpose |
 |---|---|
-| `loom-init` | Project setup: managed block, `.loom/` |
-| `loom-plan` | Scope interview → PRD + issue pack |
-| `loom-grill` | Investigate, decide, act — disciplined exploration with confirmation gates; ADR + CONTEXT.md + verified code changes, no PRD/issues |
-| `loom-implement` | Ship one issue with minimal diff |
-| `loom-verify` | Fresh checker: Spec + Standards in parallel. Auto-invoked by `loom-implement` — you rarely call it; invoke directly only for ad-hoc review of an arbitrary diff |
-| `loom-tend` | Warp maintenance, stale issues, capture learning |
+| `loom-init` | JIT persistent `.loom` setup; direct setup shortcut |
+| `loom-plan` | Scope interview → confirmed PRD → optional confirmed issue pack |
+| `loom-grill` | Resolve a local question or small fix with bounded apply |
+| `loom-implement` | Execute one selected issue in fresh maker context |
+| `loom-verify` | Judge ready work; Spec + Standards when a spec exists |
+| `loom-tend` | Audit and propose bounded maintenance |
 
 ## Hooks & enforcement
 
@@ -128,8 +135,8 @@ omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ```
-> Plan JWT auth feature                    # → /loom-plan (grill → PRD → issues)
-> Implement issue 001-auth-endpoint        # → loom-implement
+> /loom Plan work: JWT authentication       # dispatcher → loom-plan
+> /loom-implement .loom/jwt/issues/001-auth-endpoint.md  # precision selected-issue entry
 > Verify                                   # → task: loom-verify-spec + loom-verify-standards
 > (agent writes ## Verify, sets Status: done — session_stop gate checks it)
 ```

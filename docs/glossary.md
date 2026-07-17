@@ -28,17 +28,25 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **`loom:`** — Marker used only for deliberate simplifications that cut a real corner; must name the ceiling and upgrade path.
 
-## Rituals
+## Dispatcher and rituals
 
-**Ritual** — Named flow: Init, Plan, Grill, Implement, Verify, Tend.
+**Dispatcher** — The non-ritual `loom` skill. It reconstructs state, selects one public outcome, loads exactly one ritual, and disappears.
 
-**Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
+**Ritual** — One of six normative flows: Init, Plan, Grill, Implement, Verify, Tend.
 
-**Grill** — Investigate/explore/debug/decide flow for undefined scope: disciplined interview with confirmation-gated materialization. No PRD/issues and no digest file.
+**Loom lane** — Opt-in ritual discipline activated by explicit Loom entry, a precision `loom-*` shortcut, or selected Loom issue work. Ordinary prompts stay normal agent mode.
+
+**Project-nonmutating** — Reads and commands reasonably expected not to modify tracked/generated project content or external state.
+
+**Apply gate** — Explicit consent bound to exact targets/actions and current base; changed scope or base renews the gate.
+
+**Plan** — Project-nonmutating scope interview → confirmed PRD → optional confirmed issue pack.
+
+**Grill** — Resolve locally: disciplined investigation, question, or small fix with bounded apply. No PRD/issues.
 
 **Implement** — Ship one issue with minimal diff; leave one runnable check.
 
-**Verify** — Fresh checker: parallel Spec + Standards sub-agents; structured digest; never fixes.
+**Verify** — Judge-only structured digest. Spec-backed changes use fresh Spec + Standards checkers; when no issue, PRD, or user contract exists, Verify runs Standards-only, marks Spec unavailable, and cannot complete a Loom issue.
 
 **Tend** — Maintain warp and issue state; pay down `loom:` debt; no feature scope.
 

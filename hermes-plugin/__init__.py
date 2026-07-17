@@ -13,18 +13,16 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.24.10"
+MANAGED_BLOCK_VERSION = "v0.25.0"
 
-DISCIPLINE = """# Loom invariants (pre-turn guard)
+DISCIPLINE = """# Loom universal invariants (pre-turn guard)
 
-- Router is active: map intent → ritual skill before acting.
+- Ordinary prompts remain normal agent mode.
+- Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
+- Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
 - Human gate: never auto-merge, never auto-publish.
-- One issue at a time; fresh session per issue for Implement.
-- Maker/checker separation: Implement never self-approves.
-- No verify digest → no done.
-- Work needing human judgement → ready-for-human at slicing time.
-- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
+- Existing .loom issues marked done require an APPROVE Verify signal.
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path)."""
 
 ROLES = {
     "maker": "Ship one vertical slice. Do not self-approve. Leave runnable check.",
@@ -34,11 +32,11 @@ ROLES = {
 }
 
 SKILL_NAMES = [
-    "loom-init", "loom-plan", "loom-grill",
+    "loom", "loom-init", "loom-plan", "loom-grill",
     "loom-implement", "loom-verify", "loom-tend",
 ]
 
-RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]
+COMMAND_NAMES = SKILL_NAMES
 
 
 def _find_project_root():
@@ -385,13 +383,13 @@ def _build_context_pointers(root: Path) -> str:
         lines.append(f".loom/: {loom_dir}/")
 
     if len(lines) == 2:
-        lines.append("No Loom project detected. Run loom-init to set up this project.")
+        lines.append("No persistent Loom project setup detected. Explicit Loom work may offer loom-init just before .loom pack/enforcement capability is needed.")
 
     snapshot = _state_snapshot(root)
     if snapshot:
-        lines.extend(["", snapshot, "", "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."])
+        lines.extend(["", snapshot, "", "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."])
     else:
-        lines.extend(["", "Keep discipline + router active. Reconstruct state from .loom/ before acting."])
+        lines.extend(["", "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent."])
     return "\n".join(lines)
 
 
@@ -433,7 +431,7 @@ def register(ctx):
     ctx.register_hook("subagent_start", on_subagent_start)
 
     # --- Slash commands ---
-    for name in RITUAL_NAMES:
+    for name in COMMAND_NAMES:
         skill_path = SKILLS_DIR / name / "SKILL.md"
 
         def make_handler(p):

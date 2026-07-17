@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Goal
 
-One safe, idempotent project setup: managed block, `.loom/` — then hand off to `loom-plan`.
+One safe, idempotent project setup for persistent `.loom` pack/enforcement capability; internal invocation returns to its originating ritual.
 
 ## Inputs
 
@@ -30,7 +30,7 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
 5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
-6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
+6. Print summary: changed / checked-not-changed / warnings. Internal invocation returns to the originating route; direct Init may recommend Plan. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for recurring audits.
 7. If nothing needed: `No changes needed` + what was checked.
 
 ### Managed block to write
@@ -38,62 +38,38 @@ One safe, idempotent project setup: managed block, `.loom/` — then hand off to
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.24.10 -->
+<!-- loom:begin version=v0.25.0 -->
 ## Loom Base Rule
 
-Always keep Loom discipline and router active in context.
+Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
 
-### Discipline
+### Always-on discipline
 
 Lazy senior dev mode: **the best code is the code you never wrote.** Lazy means efficient, not careless.
 
 Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
 
 - Prefer minimal working change over broad rewrites.
-- No unrelated refactors while implementing an issue.
-- One issue at a time; respect blocker order.
 - Mark `loom:` comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
-- Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
-- Non-trivial logic leaves one runnable check before `done`.
-- Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
-- No verify digest → no done.
-- Run verification commands before marking `done`.
+- Not lazy about: trust-boundary validation, security, privacy, secrets, data-loss errors, accessibility, explicit requests.
+- Waits are work time: no back-to-back no-op polls — block, or space polls with prepared work between them.
 - Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
-- Confirm before project writes in setup/apply flows.
-- Match the user's language for project content; ritual names and `loom:` markers stay English.
-
-### Invariants
-
-- Router is active: map intent → ritual skill before acting.
 - Human gate: never auto-merge, never auto-publish.
-- Maker/checker separation: Implement never self-approves.
+- The Stop gate protects existing `.loom` issues: `Status: done` requires an APPROVE Verify signal: a line in `## Verify`.
 
-### Router
+### Loom lane
 
-Map intent to ritual skills:
+The Loom lane begins only after explicit `/loom` entry (host spelling may differ), an advanced `loom-*` shortcut, or explicit work on a selected Loom issue. Ordinary prompts remain normal agent mode.
 
-- setup/install/project wiring → `loom-init`
-- planning/scope/prd/issues/slicing → `loom-plan`
-- investigate/explore/ask/"why/how"/debug/decide → `loom-grill`
-- implementation/build/fix for a selected issue → `loom-implement`
-- review/check/gates/acceptance → `loom-verify`
-- maintenance/status cleanup/knowledge capture → `loom-tend`
-- recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
+Inside the lane:
 
-**Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
-
-**Scope routing:**
-
-- Small single-session fix → `loom-implement` directly.
-- Multi-session or inbound underspecified work → `loom-plan` first.
-- **Fresh session per issue** for Implement — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue.
-- Domain breadth (security/perf/CI) → recommend host-native skills; do not fold into Loom core.
-
-**Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
-
-### Session state
-
-Before acting, reconstruct state from `.loom/` (active PRD, issue cards, statuses, blocker graph) and project docs/ADRs.
+- Use the `loom` dispatcher for outcome routing; do not maintain a second intent router here.
+- Ritual routing, Maker/checker separation, No-verify-no-done, and fresh-context/pack transitions apply.
+- Reconstruct `.loom/` state before selecting persisted work; explicit outcome or target always wins.
+- Project-nonmutating interviews may read and run commands reasonably expected not to modify tracked/generated project content or external state. Writes require a Bounded apply confirmation gate naming exact targets/actions; changed scope or base requires renewed consent.
+- Named issue execution consent includes issue-scoped project changes, `## Log`, Verify verdict write-back, and `Status: done` only after APPROVE. It excludes scope expansion and external actions.
+- One issue at a time; respect blocker order. Fresh maker context per issue.
+- No verify digest → no done. Implement never self-approves.
 
 ### Status vocabulary
 

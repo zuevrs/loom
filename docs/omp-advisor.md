@@ -24,13 +24,13 @@ Step 2 appends — if `.omp/config.yml` already exists, merge the `advisor.enabl
 
 ## What changes day to day
 
-Nothing in your commands — `/loom-plan`, `loom-implement`, verify all run as before. The advisor is passive until a signature fires:
+Enter with `/loom` (or a precision `/loom-*` shortcut). The advisor is passive until a signature fires:
 
 | Severity | Delivery | Loom signatures |
 |---|---|---|
-| `blocker` | interrupts the turn | materializing PRD/issues/code before the explicit go; done/`Status: done` without a `## Verify` APPROVE; project writes in setup flows without confirmation |
+| `blocker` | interrupts the turn | materializing PRD/issues/code before the explicit go; done/`Status: done` without a `## Verify` APPROVE; project writes before bounded consent, including CONTEXT.md/ADRs |
 | `concern` | interrupts the turn | batched questions in a grill; interview shrinking after an interruption; edits before the pre-flight baseline; diff beyond the issue's scope; silently invented load-bearing decision |
-| `nit` | folds in at the next step boundary | CONTEXT.md not updated inline; missing `## Log` bullet at a decision moment |
+| `nit` | folds in at the next step boundary | pending conversational domain delta not updated before the next question, or not shown at a checkpoint/action gate; missing `## Log` bullet at a decision moment |
 
 Outside Loom rituals the profile stays silent by contract. Note that enabling the advisor also enables OMP's **baseline** advisor behavior (generic review: premature "done", thin verification, rabbit holes) — that's a feature, but it is why the profile is per-project rather than global: the shadow lives only where you asked for it.
 

@@ -92,4 +92,4 @@ omp plugin install git:github.com/zuevrs/loom --force
 2. `git rev-parse --short vX.Y.Z`
 3. Confirm both hashes match.
 4. `gh release view vX.Y.Z` — confirm Latest.
-5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md) checklist (maintainer ledger).
+5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md): record unified-entry evidence for OMP, Cursor, and Claude, allowing an explicit release-specific N/A reason; mark only directly live-smoked hosts verified and leave all others implemented/unverified.

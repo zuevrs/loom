@@ -32,7 +32,11 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 
 ## Direct small-fix (no issue file)
 
-The router sends small single-session fixes here without a PRD or issue file. The whole process applies **except the file writes have nowhere to go**: `## Log` (step 12) and the verify verdict live in the **chat** (attended) or the **PR description** (unattended) instead of an issue file. Steps that read the issue file read the **user's fix request** instead — it is the spec source for step 1 (nothing to unblock), step 3 (ask the user directly; there is no PRD to consult), and step 11's verification evidence. Step 14's handoff has no pack to point at — skip it. The stop gate has nothing to check — there is no `Status: done` to guard — but the discipline is unchanged: no verify digest → don't declare the fix complete. If the "small fix" grows past one session or sprouts questions only Plan can answer, stop and route to `loom-plan` — that's no longer a small fix.
+A user may explicitly invoke the `loom-implement` precision entrypoint for a ready small fix without a PRD or issue file, and automation may do the same. Canonical `/loom` Resolve locally uses `loom-grill`; this direct lane remains available and keeps Implement's full Verify contract. The whole process applies **except the file writes have nowhere to go**: `## Log` (step 12) and the verify verdict live in the **chat** (attended) or the **PR description** (unattended) instead of an issue file. Steps that read the issue file read the **user's fix request** instead — it is the spec source for step 1 (nothing to unblock), step 3 (ask the user directly; there is no PRD to consult), and step 11's verification evidence. Step 14's handoff has no pack to point at — skip it. The stop gate has nothing to check — there is no `Status: done` to guard — but the discipline is unchanged: no verify digest → don't declare the fix complete. If the "small fix" grows past one session or sprouts questions only Plan can answer, stop and route to `loom-plan` — that's no longer a small fix.
+
+## Execution consent
+
+Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions.
 
 ## Outputs
 

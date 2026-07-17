@@ -1,22 +1,18 @@
-// loom: canonical invariant phrases — single source for hooks and drift checks
+// loom: canonical universal invariant phrases — single source for unconditional hooks
 "use strict";
 
-const PRE_LLM = `# Loom invariants (pre-turn guard)
+const PRE_LLM = `# Loom universal invariants (pre-turn guard)
 
-- Router is active: map intent → ritual skill before acting.
+- Ordinary prompts remain normal agent mode.
+- Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
+- Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
 - Human gate: never auto-merge, never auto-publish.
-- One issue at a time; fresh session per issue for Implement.
-- Maker/checker separation: Implement never self-approves.
-- No verify digest → no done.
-- Work needing human judgement → ready-for-human at slicing time.
+- Existing .loom issues marked done require an APPROVE Verify signal.
 - Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).`;
 
-/** Load-bearing phrases every discipline injection must include. */
 const REQUIRED_PHRASES = [
-  "Router is active",
+  "normal agent mode",
   "never auto-merge",
-  "Maker/checker separation",
-  "No verify digest",
+  "APPROVE Verify signal",
 ];
-
 module.exports = { PRE_LLM, REQUIRED_PHRASES };

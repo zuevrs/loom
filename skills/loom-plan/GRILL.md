@@ -19,7 +19,7 @@ Read project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` packs) an
 
 The same applies **outside the repo**: before grilling a technology choice (library, API, protocol), check the current docs with the host's research tools (web search, docs MCP) when available. A recommendation built on stale training data is a silent invention; a question the ecosystem already answers wastes the user's turn. Research informs the recommendation — the user still decides.
 
-Research discipline when you do it: **primary sources over write-ups** — official docs, source code, specs; follow a claim to the source that owns it. When the host can spawn a background/sub-agent, delegate the reading (pass `loomRole: "researcher"` in spawn data — the hook injects the primary-sources/cite-everything constraint) and keep grilling — don't stall the interview. Findings that shaped a decision are persisted with citations (a `.loom/research/YYYY-MM-DD-<slug>.md` note, or inline in the PRD's Implementation Decisions with links) — "some blog said so" is not provenance a future session can check.
+Research discipline when you do it: **primary sources over write-ups** — official docs, source code, specs; follow a claim to the source that owns it. When the host can spawn a background/sub-agent, delegate the reading (pass `loomRole: "researcher"` in spawn data — the hook injects the primary-sources/cite-everything constraint) and keep grilling — don't stall the interview. Findings that shape decisions stay pending with citations. Gate 1 persists them in the PRD's Implementation Decisions when applicable; otherwise it previews a `.loom/research/YYYY-MM-DD-<slug>.md` target. Nothing is written before bounded confirmation — "some blog said so" is not provenance a future session can check.
 
 ## Interview rules
 
@@ -43,8 +43,8 @@ The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.
 - **Sharpen fuzzy language.** Vague or overloaded term → propose a precise canonical one ("'account' — the Customer or the User? Different things.").
 - **Invent edge-case scenarios.** Stress-test domain relationships with concrete scenarios that force the user to be precise about boundaries.
 - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
-- **Write `CONTEXT.md` inline, automatically.** The moment a term is resolved, update the glossary **before asking the next question**. Write each resolved term at that point; keep the glossary free of implementation detail. ([CONTEXT-FORMAT.md](CONTEXT-FORMAT.md))
-- **Offer an ADR** only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Ask the user to approve it, skip it when a condition is missing, and name the real target path (`docs/adr/NNNN-slug.md`). ([ADR-FORMAT.md](ADR-FORMAT.md))
+- **Maintain a pending domain delta inline.** The moment a term is resolved, update the conversational delta before asking the next question and use the accepted term immediately. Do not write project files yet. Show the compact delta only at a checkpoint/action gate. ([CONTEXT-FORMAT.md](CONTEXT-FORMAT.md))
+- **Offer an ADR** only when **all three** hold: hard to reverse **+** surprising without context **+** the result of a real trade-off. Add it to the pending gate preview, skip it when a condition is missing, and name the real target path (`docs/adr/NNNN-slug.md`). ([ADR-FORMAT.md](ADR-FORMAT.md))
 - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately. Drafting in English and rewriting later is a defect, not a workflow.
 
 ## The cadence, worked
@@ -55,9 +55,9 @@ One exchange showing the moves — one question, recommendation first, inline CO
 >
 > **User:** Filtered. And "report" is wrong — we call it a "ledger view" internally.
 >
-> **Agent:** *(updates `CONTEXT.md`: "Ledger view — the filtered, user-visible projection of the ledger; exports always mirror it" — before asking anything else)* That export contract is hard to reverse once users share CSVs, it'd surprise a newcomer, and we just traded completeness for predictability — want an ADR for it? *(waits; writes it only on yes)*
+> **Agent:** *(updates the pending domain delta: "Ledger view — the filtered, user-visible projection of the ledger; exports always mirror it" — before asking anything else)* That export contract is hard to reverse once users share CSVs, it'd surprise a newcomer, and we just traded completeness for predictability — I recommend adding this canonical ADR at Gate 1 — include it in the pending delta? *(waits; keeps it pending only on yes)*
 
-Ten flat multiple-choice questions in a row with no doc writes is the anti-pattern this file exists to prevent.
+Ten flat multiple-choice questions in a row with no evolving domain delta is the anti-pattern this file exists to prevent.
 
 ## Exit gate
 
@@ -66,7 +66,7 @@ Exit only when BOTH hold:
 1. The user confirms shared understanding — every load-bearing branch resolved.
 2. The user gives an explicit go ("write the PRD", "materialize", or equivalent).
 
-Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Slicing into issues happens in Phase 3, not here.
+Then read [`TO-PRD.md`](TO-PRD.md) for Gate 1. No project writes occurred during this interview.
 
 ## Hard stops
 
@@ -79,7 +79,7 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 
 | Symptom | Response |
 |---|---|
-| User wants implementation mid-interview | Finish the grill or scope down to single-session (`loom-implement`) |
+| User wants implementation mid-interview | Stop planning; offer a fresh-context handoff or the exact next precision invocation. Never implement in this planning context. |
 | Conflicting ADRs | Surface conflict; ask one resolving question |
 | User says "just do it" without clarity | Push back once ("I need to understand X before a coherent PRD"), then comply if they insist |
 | Stream drops / user says "continue" | Re-read this file; restate the last unanswered question; resume at that point |
@@ -93,9 +93,9 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 | "The ask tool accepts an array — one call, many questions" | That is batching. One question object per call. |
 | "Enough for a coherent PRD — stop asking" | The bar is every decision-tree branch resolved, not minimum-viable PRD. Keep grilling. |
 | "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it, or record it as an assumption to confirm. |
-| "Just ask the questions, skip writing CONTEXT/ADR" | The inline docs ARE the discipline — challenge, sharpen, write `CONTEXT.md` inline, offer ADRs. A flat multiple-choice quiz is not a grill. |
-| "I'll write all the CONTEXT terms at the gate" | Batching at the gate is the deviation this rule exists for. Term resolved → written before the next question. |
-| "The brownfield boot already wrote CONTEXT.md — I'll true it up at the gate" | The draft is the floor, not the final. The inline cadence is unchanged by a pre-existing file. |
+| "Just ask the questions, skip the pending CONTEXT/ADR delta" | The inline docs ARE the discipline — challenge, sharpen, maintain the pending domain delta inline, offer ADRs. A flat multiple-choice quiz is not a grill. |
+| "I'll write all the CONTEXT terms at the gate" | Batching at the gate is the deviation this rule exists for. Term resolved → pending delta updated before the next question. |
+| "The brownfield boot already drafted CONTEXT.md — I'll true it up at the gate" | The draft is the floor, not the final. Keep the conversational delta current and apply it only at Gate 1. |
 | "User seems impatient / said 'continue', wrap up" | Resume the grill where it stopped. One more question now saves a bad PRD later. |
 | "I already know what they want" | You know what YOU would build — ask what THEY need |
 | "User said ok, that's their decision" | An accepted recommendation is not a stated preference. Name the proposal's origin in the PRD. |

@@ -31,9 +31,10 @@ advisors:
         question.
       - PRD, issues, or implementation materialized before the user's explicit
         go ("write the PRD", "materialize", or equivalent) → blocker.
-      - A term was resolved but CONTEXT.md was not updated before the next
-        question → nit. Contract: write the glossary inline, never batch at
-        the exit gate.
+      - A resolved term was not added to the pending conversational domain
+        delta before the next question, or the accepted term was not used in
+        discussion → nit. Show the compact pending delta at a checkpoint or
+        action gate; writing CONTEXT.md before bounded consent → blocker.
       - After an interruption or pushback the interview visibly shrinks —
         rushed exit, remaining topics batched → concern.
 
@@ -51,8 +52,8 @@ advisors:
       Any ritual:
       - A load-bearing decision invented silently where the issue, PRD, and
         user gave no answer — instead of asking or logging it → concern.
-      - Project files written in setup/apply flows without user confirmation
-        → blocker.
+      - Project files written before bounded consent naming exact targets and
+        actions — including CONTEXT.md and ADRs — → blocker.
 
       In every note: cite the exact contract line or file line you are
       enforcing, then offer the corrective move in one sentence.

@@ -1,10 +1,10 @@
 # Authoring guide (maintainers)
 
-Standards for writing Loom skills, hooks, and templates. End users invoke rituals — they do not read this file.
+Standards for writing Loom skills, hooks, and templates. End users normally enter through the dispatcher and may invoke precision rituals — they do not read this file.
 
 ## Skill contract
 
-Every `skills/<name>/SKILL.md` must include:
+Every dispatcher or ritual `skills/<name>/SKILL.md` must include:
 
 | Section | Purpose |
 |---------|---------|
@@ -18,7 +18,8 @@ Every `skills/<name>/SKILL.md` must include:
 
 ### Frontmatter
 
-- **Rituals** (user-invoked): `disable-model-invocation: true`
+- **Dispatcher** (`loom`, non-ritual) and user-invoked rituals: `disable-model-invocation: true`
+- Dispatcher prose contains routing only; ritual bodies stay canonical in their six skill files
 - **`loom-verify`**: model-invoked (exception — post-Implement trigger)
 
 ## Templates
@@ -35,7 +36,7 @@ Follow ADR contracts (Matt core + Addy guards for PRD; vertical slice for issues
 
 ## Hooks
 
-Author invariants once in `hooks/invariants.cjs`. Adapters inject — they do not fork behavior.
+Author universal invariants once in `hooks/invariants.cjs`. The opt-in router lives once in `skills/loom/SKILL.md`; adapters expose it and state host spelling, but must not create a competing router. Maintainers own router drift across command/skill manifests, host prose, docs, and semantic canaries.
 
 Three plugin-tier hooks:
 

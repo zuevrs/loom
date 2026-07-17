@@ -25,8 +25,8 @@ function run(script, env = {}) {
 // pre-llm
 {
   const out = run("loom-pre-llm.cjs");
-  ok(out.includes("Loom invariants"), "pre-llm emits invariants");
-  ok(out.includes("Router is active"), "pre-llm contains router rule");
+  ok(out.includes("Loom universal invariants"), "pre-llm emits universal invariants");
+  ok(out.includes("Ordinary prompts remain normal agent mode"), "pre-llm scopes router to explicit Loom entry");
 }
 
 // subagent (generic)
@@ -351,10 +351,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
   ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
 
-  // Dialect parity: ready-for-human invariant present everywhere discipline is injected.
-  for (const p of ["hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
-    ok(read(p).includes("ready-for-human"), `${p} carries ready-for-human invariant`);
-  }
+  // Lane scoping: ready-for-human is ritual-time slicing policy, not an ordinary-prompt invariant.
+  ok(read("skills/loom-plan/TO-ISSUES.md").includes("ready-for-human"), "slicing carries ready-for-human policy");
+  ok(!read("hooks/invariants.cjs").includes("ready-for-human"), "ordinary prompt invariant omits ritual-time slicing policy");
   ok(
     read("hooks/loom-subagent-cursor.cjs").includes("warp + discipline + conventions"),
     "cursor standards-checker role matches generic hook"
@@ -367,10 +366,19 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
 // --- Adapter smoke imports ---
 
-// opencode-plugin.mjs exports a function
+// OpenCode discovers the unified slash entry through its registered skills path.
 {
-  const mod = await import(pathToFileURL(resolve(__dirname, "..", "opencode-plugin.mjs")).href);
+  const root = resolve(__dirname, "..");
+  const dispatcher = readFileSync(resolve(root, "skills", "loom", "SKILL.md"), "utf8");
+  ok(/^slash: true$/m.test(dispatcher), "loom dispatcher opts into OpenCode slash registration");
+  ok(/^disable-model-invocation: true$/m.test(dispatcher), "loom dispatcher remains explicitly user-invoked on other hosts");
+
+  const mod = await import(pathToFileURL(resolve(root, "opencode-plugin.mjs")).href);
   ok(typeof mod.default === "function", "opencode-plugin exports default function");
+  const plugin = await mod.default();
+  const config = {};
+  await plugin.config(config);
+  deepStrictEqual(config.skills.paths, [resolve(root, "skills")], "OpenCode adapter registers the skills path containing loom dispatcher");
 }
 
 // omp-extension.mjs — invariants + verify gate + goal gate; NO plan-mode patching (withdrawn)
@@ -384,7 +392,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(typeof handlers.before_agent_start === "function", "registers before_agent_start");
   const res = handlers.before_agent_start({ systemPrompt: "BASE" });
   ok(res && res.systemPrompt.startsWith("BASE"), "before_agent_start appends to base prompt");
-  ok(res.systemPrompt.includes("Loom invariants"), "invariants injected");
+  ok(res.systemPrompt.includes("Loom universal invariants"), "invariants injected");
   ok(!res.systemPrompt.includes("Loom grill"), "no grill overlay in system prompt");
 
   strictEqual(handlers.context, undefined, "no context handler — native /plan left untouched");
@@ -633,13 +641,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   }
   // 3. wait discipline binds every lane on every host (goal-lane polls were outside
   // the verify-only prose that already existed)
-  for (const [p, label] of [
-    ["AGENTS.md", "managed block"],
-    ["skills/loom-init/SKILL.md", "init template"],
-    ["opencode-plugin.mjs", "opencode injection"],
-  ]) {
+  for (const [p, label] of [["AGENTS.md", "managed block"], ["skills/loom-init/SKILL.md", "init template"]]) {
     ok(read(p).includes("Waits are work time: no back-to-back no-op polls"), `${label} carries the wait-discipline line`);
   }
+  ok(!read("opencode-plugin.mjs").includes("Waits are work time"), "OpenCode adapter does not duplicate universal discipline prose");
 
   // v0.23.2 evidence-first verify: sources converge (Osmani "evidence as hard exit
   // criterion" / reviewers refuse diffs without test output; 0xCodez "second agent
@@ -662,18 +667,14 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(verify.includes("evidence beats opinion"), "verify pins gates as verdict input");
     ok(verify.includes("Empty **Checks executed** → no approve"), "hard stop: empty Checks executed blocks approve");
     // and the reverse guard: green gates never replace the checkers
-    ok(verify.includes("Green gates earn checkers, not an APPROVE"), "verify forbids objective-only approve");
+    ok(verify.includes("Green gates earn the branch-required checker(s), not an APPROVE"), "verify forbids objective-only approve");
 
     const impl = read("skills/loom-implement/SKILL.md");
     ok(impl.includes("silent pass, loud fail"), "implement captures evidence silent-pass loud-fail");
     ok(impl.includes("verification ladder") && impl.includes("smoke run"), "implement carries the static→tests→smoke ladder");
 
     // managed block carries the output-economy line on every surface
-    for (const [p, label] of [
-      ["AGENTS.md", "managed block"],
-      ["skills/loom-init/SKILL.md", "init template"],
-      ["opencode-plugin.mjs", "opencode injection"],
-    ]) {
+    for (const [p, label] of [["AGENTS.md", "managed block"], ["skills/loom-init/SKILL.md", "init template"]]) {
       ok(read(p).includes("Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim."), `${label} carries the silent-pass loud-fail line`);
     }
 
@@ -774,38 +775,15 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     strictEqual((std.match(/^- (Replace|Collapse|Separate|Move|Reuse|Make|Delete|Extract)/gm) || []).length, 8, `${p} carries 8 named moves`);
   }
 
-  // v0.24.0 — loom-grill redesign: think+act unified (no more digest-only)
-  {
-    const grill = read("skills/loom-grill/SKILL.md");
-    const canon = read("skills/loom-plan/GRILL.md");
-    ok(grill.includes("Explore with discipline. Act with confirmation. Leave a trace."), "grill carries the unified tagline");
-    ok(grill.includes("Action gate"), "grill has an explicit action gate step");
-    ok(grill.includes("Wait for explicit user confirmation"), "grill requires confirm before materialization");
-    ok(grill.includes("lightweight ADR"), "grill writes lightweight ADRs as trace");
-    ok(grill.includes("Question / Decision / Why"), "grill ADR format is three-section lightweight");
-    ok(grill.includes("run the repo's objective gates"), "grill runs gates after code changes");
-    ok(grill.includes(">3 files"), "grill has scope threshold signal");
-    ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
-    ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids old enact hard stop");
-    ok(grill.includes("Never materialize a code write or ADR without explicit user confirmation"), "grill guards materialization with confirm");
-    ok(grill.includes("Never write PRD or issue cards"), "grill still forbids PRD/issues (Plan territory)");
-    ok(grill.includes("../loom-plan/GRILL.md") && canon.includes("One `ask` call = exactly ONE question"), "grill loads the canon that owns one-question discipline");
-    ok(grill.includes("decisions owned by the user") && canon.includes("Facts vs decisions"), "grill directs facts and decisions through the canon");
-
-    // router update
-    for (const [p, label] of [
-      ["AGENTS.md", "managed block"],
-      ["skills/loom-init/SKILL.md", "init template"],
-    ]) {
-      const content = read(p);
-      ok(content.includes("investigate/explore/ask"), `${label} router routes investigate/explore to grill`);
-      ok(content.includes("exploring/asking/debugging → Grill"), `${label} confusable-pairs updated`);
-      ok(!content.includes("no docs wanted"), `${label} drops old 'no docs wanted' grill description`);
-    }
-
-    const ocp = read("opencode-plugin.mjs");
-    ok(ocp.includes("investigate/explore/decide/act"), "opencode injection describes grill as investigate/explore/decide/act");
-  }
+  // Release 1 supersedes the v0.24 Grill materialization contract: project-nonmutating until bounded apply.
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const grill = read("skills/loom-grill/SKILL.md");
+  ok(grill.includes("Project-nonmutating investigation"), "Grill begins project-nonmutating");
+  ok(grill.includes("bounded action gate"), "Grill has bounded apply consent");
+  ok(grill.includes("ADR-FORMAT.md"), "Grill uses canonical ADR format");
+  ok(grill.includes("No PRD or issue cards"), "Grill excludes Plan artifacts");
+}
 }
 
 // loom-plan phase files — thin router + self-contained phases with ordered gates
@@ -821,15 +799,15 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
   ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
   ok(grill.includes("Resume after interruptions"), "grill has interruption-resume rule");
-  ok(grill.includes("Write `CONTEXT.md` inline"), "grill writes CONTEXT inline");
+  ok(grill.includes("Maintain a pending domain delta inline"), "grill keeps CONTEXT changes pending");
   ok(grill.includes("before asking the next question"), "grill writes each term before the next question, not batched");
   ok(grill.includes("Project language from the first write"), "grill writes CONTEXT/ADR in project language immediately");
   ok(grill.includes("The interview runs in the user's language"), "grill interview itself runs in the user's language");
   ok(grill.includes("Offer an ADR"), "grill offers ADRs, never silent");
-  ok(toPrd.includes("Do NOT re-interview"), "to-prd is pure synthesis");
-  ok(toPrd.includes("explicit user confirmation"), "to-prd has PRD confirmation gate");
-  ok(toIssues.includes("Quiz the user"), "to-issues quizzes granularity");
-  ok(toIssues.includes("Do NOT write issue files before approval"), "to-issues writes only after approval");
+  ok(toPrd.includes("Synthesize without re-interviewing"), "to-prd is pure synthesis");
+  ok(toPrd.includes("explicit confirmation"), "to-prd has PRD confirmation gate");
+  ok(toIssues.includes("Present the complete numbered breakdown"), "to-issues previews complete granularity");
+  ok(toIssues.includes("Write no issue file before that approval"), "to-issues writes only after bounded final approval");
 }
 
 // loom-implement TDD phase file — Pocock tdd distill at pre-agreed seams
@@ -861,12 +839,12 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("one fresh implement sub-agent per issue"), "batch mode spawns fresh sub-agent per issue");
   ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
   for (const doc of [agents, initSkill]) {
-    ok(doc.includes("in batch/goal runs spawn a fresh sub-agent per issue"), "managed block extends fresh-session rule to batch runs");
+    ok(doc.includes("Fresh maker context per issue"), "managed block keeps fresh-context lane invariant");
   }
   ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
   ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
   ok(verify.includes("Prefer the host's blocking wait"), "verify has host-neutral wait rule");
-  ok(verify.includes("Named checker agents: attempted this session"), "digest records named-agent attempt outcome");
+  ok(verify.includes("Named checker agents required by this branch"), "digest records branch-required named-agent outcome");
 }
 
 // issue 02 — Standards checker ratchet + agreed-seam contract is parity-pinned
@@ -969,64 +947,24 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const s of smellNames) ok(claudeStd.includes(s), `Claude standards checker carries ${s}`);
 }
 
-// loom-grill — think+act unified: investigate, decide, materialize with confirmation
-{
-  const { readFileSync: rf } = await import("node:fs");
-  const grill = rf(resolve(__dirname, "..", "skills", "loom-grill", "SKILL.md"), "utf8");
-  const canon = rf(resolve(__dirname, "..", "skills", "loom-plan", "GRILL.md"), "utf8");
-  const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
-  const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
-
-  ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
-  ok(grill.includes("../loom-plan/GRILL.md") && canon.includes("One `ask` call = exactly ONE question"), "loom-grill loads canonical one-question discipline");
-  ok(grill.includes("Never write PRD or issue cards"), "loom-grill forbids PRD/issues (Plan territory)");
-  ok(grill.includes("Never materialize a code write or ADR without explicit user confirmation"), "loom-grill requires confirm before action");
-  ok(grill.includes("lightweight ADR"), "loom-grill writes lightweight ADRs for decisions");
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("loom-grill"), "managed block routes loom-grill");
-  }
-  ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill command exists");
-}
-
-// issue 03 — Plan owns the shared interview canon; Grill keeps only its ritual delta
+// loom-grill — shared interview canon plus bounded local apply
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
-  const canon = read("skills/loom-plan/GRILL.md");
   const grill = read("skills/loom-grill/SKILL.md");
+  const canon = read("skills/loom-plan/GRILL.md");
+  ok(grill.includes("disable-model-invocation: true"), "loom-grill is user-invoked");
+  ok(grill.includes("../loom-plan/GRILL.md") && canon.includes("One `ask` call = exactly ONE question"), "loom-grill loads canonical interview discipline");
+  ok(grill.includes("No PRD or issue cards"), "loom-grill excludes Plan artifacts");
+  ok(grill.includes("No project-file or external-state write before an exact bounded apply confirmation"), "loom-grill requires bounded confirmation");
+  ok(grill.includes("ADR-FORMAT.md"), "loom-grill uses canonical ADR format");
+  ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill precision command exists");
 
-  ok(canon.includes("sole canonical source for the interview discipline shared by Plan and Grill"), "Plan GRILL declares the single shared interview canon");
-  ok(grill.includes("read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md)"), "Grill loads the Plan interview canon");
-
-  for (const phrase of [
-    "One `ask` call = exactly ONE question.",
-    "Resolve decision dependencies in order.",
-    "Probe for unstated constraints.",
-    "Invent edge-case scenarios",
-    '"The ask tool accepts an array — one call, many questions"',
-  ]) {
+  for (const phrase of ["One `ask` call = exactly ONE question.", "Resolve decision dependencies in order.", "Probe for unstated constraints.", "Invent edge-case scenarios"]) {
     ok(canon.includes(phrase), `Plan canon owns shared rule: ${phrase}`);
     ok(!grill.includes(phrase), `Grill does not duplicate shared rule: ${phrase}`);
   }
-
-  const excuses = (body) => new Set([...body.matchAll(/^\| "([^"]+)" \|/gm)].map((match) => match[1]));
-  const canonExcuses = excuses(canon);
-  deepStrictEqual([...excuses(grill)].filter((excuse) => canonExcuses.has(excuse)), [], "Grill carries no duplicate canonical anti-rationalization rows");
-  const normalCanon = canon.split("## Hard stops")[0];
-  const normalGrill = grill.split("## Hard stops")[0];
-  ok(!/\b(?:Never|never|Do NOT|do not)\b/.test(normalCanon), "Plan expresses normal interview instructions positively");
-  ok(!/\b(?:Never|never|Do NOT|do not)\b/.test(normalGrill), "Grill expresses normal ritual instructions positively");
-
-  ok(canon.includes("## Exit gate") && canon.includes("TO-PRD.md") && canon.includes("Slicing into issues happens in Phase 3"), "Plan retains its PRD and issue exit gates");
-  ok(!canon.includes("## Action gate"), "Plan does not inherit Grill action behavior");
-  for (const phrase of [
-    "**Action gate**",
-    "explicit user confirmation",
-    "Pre-materialize edge-case checkpoint",
-    "objective gates",
-    "Never publish, deploy",
-    "irreversible action",
-    "Never expand scope",
-  ]) ok(grill.includes(phrase), `Grill retains critical action/consent/gate contract: ${phrase}`);
+  ok(canon.includes("## Exit gate") && canon.includes("TO-PRD.md"), "Plan canon exits to Gate 1");
+  ok(grill.includes("bounded action gate") && grill.includes("objective gates"), "Grill owns local action and verification delta");
 }
 
 // v0.7.0 — routing negative examples, implement Log handoff
@@ -1039,8 +977,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   // every skill description names when NOT to use it (OpenAI eval-skills: negative examples lift routing accuracy)
   const notFor = {
     "loom-init": /[Nn]ot for planning/,
-    "loom-plan": /Not for investigate\/explore\/debug sessions/,
-    "loom-grill": /Not for planning buildable work/,
+    "loom-plan": /not for local investigation\/small fixes/i,
+    "loom-grill": /Not for planning multi-session work/,
     "loom-implement": /Not for scoping new work/,
     "loom-verify": /not for fixing findings/,
     "loom-tend": /not feature building/,
@@ -1050,7 +988,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(re.test(desc), `${skill} description carries a negative example`);
   }
   for (const doc of [agents, initSkill]) {
-    ok(doc.includes("**Confusable pairs:**"), "managed block disambiguates confusable ritual pairs");
+    ok(doc.includes("do not maintain a second intent router"), "managed block defers outcome routing to dispatcher");
   }
 
   // implement Log — maker's claim survives the session; verify checks it against the diff
@@ -1195,16 +1133,16 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ];
   for (const f of surfaces) {
     const body = rf(resolve(__dirname, "..", f), "utf8");
-    ok(!/SAFETY\.md|denylist/i.test(body), `${f} carries no denylist/SAFETY.md vestige`);
+    ok(!/SAFETY\.md/i.test(body), `${f} carries no SAFETY.md vestige`);
   }
   ok(!existsSync(resolve(__dirname, "..", "skills", "loom-init", "SAFETY-TEMPLATE.md")), "SAFETY template removed");
   const toIssues = rf(resolve(__dirname, "..", "skills", "loom-plan", "TO-ISSUES.md"), "utf8");
   ok(toIssues.includes("ready-for-human"), "slicing still routes human-judgement work to ready-for-human");
 
-  // ponytail parity — all six ritual commands ship
+  // ponytail parity — six ritual commands plus one dispatcher ship
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
-  const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md"];
-  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships exactly the six rituals (got: ${cmds.join(", ")})`);
+  const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md", "loom.md"];
+  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships six rituals plus dispatcher (got: ${cmds.join(", ")})`);
 }
 
 // v0.10.0 — unattended lane + recipes + ritual upgrades (a–g)
@@ -1263,7 +1201,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(read("skills/loom-implement/SKILL.md").includes("DIAGNOSE.md"), "implement routes bugs to DIAGNOSE.md");
 
   ok(read("skills/loom-plan/GRILL.md").includes("primary sources over write-ups"), "grill research uses primary sources");
-  ok(read("skills/loom-plan/GRILL.md").includes(".loom/research/"), "research findings persist with citations");
+  ok(read("skills/loom-plan/GRILL.md").includes("stay pending with citations"), "research findings remain pending with citations before apply");
   ok(read("skills/loom-grill/SKILL.md").includes("../loom-plan/GRILL.md"), "loom-grill loads canonical primary-source research discipline");
 
   ok(read("docs/unattended.md").includes("Runaway protection"), "unattended doc has runaway semantics");
@@ -1405,11 +1343,9 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(tend.includes("Recipe check"), "tend offers graduating recurring audits to recipes");
   ok(tend.includes(".loom/maintenance/issues/"), "tend knows the recipe stub inbox");
 
-  const routerLine = "recurring audit on a schedule";
-  ok(read("AGENTS.md").includes(routerLine), "managed block routes recurring audits to recipes");
-  ok(read("skills/loom-init/SKILL.md").includes(routerLine), "init template carries the recipes route");
-  ok(read("opencode-plugin.mjs").includes("Recurring audits"), "opencode router mentions recipes");
-  ok(read("kiro-agent.json").includes("Recurring audits"), "kiro router mentions recipes");
+  ok(read("skills/loom/SKILL.md").includes("Maintain project"), "dispatcher routes maintenance outcome");
+  ok(read("skills/loom-tend/SKILL.md").includes("recurs tend after tend"), "Tend owns recurring recipe routing");
+  ok(!read("AGENTS.md").includes("recurring audit on a schedule"), "managed block does not compete with dispatcher routing");
   ok(read("skills/loom-init/SKILL.md").includes("scheduled recipes"), "init summary names the maintenance pair");
 
   ok(read("scripts/check-drift").includes("checker manifest body drift"), "drift canary compares manifest bodies");
@@ -1569,7 +1505,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
     timeout: 5000,
   });
   ok(!cleanOut.includes("Loom alert"), "pre-LLM stays silent on a clean project");
-  ok(cleanOut.includes("Loom invariants"), "static invariants still present");
+  ok(cleanOut.includes("Loom universal invariants"), "static invariants still present");
 
   writeFileSync(join(cleanDir, "002.md"), "# B\n\n## Status\n\nStatus: needs-info\n");
   writeFileSync(join(cleanDir, "003.md"), "# C\n\n## Status\n\nStatus: done\n");
@@ -1683,16 +1619,15 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   ok(impl.includes("amendment route"), "wrong-PRD failure mode points at the amendment route");
 
   const verify = read("skills/loom-verify/SKILL.md");
-  ok(verify.includes("**No issue file**"), "verify defines the no-issue digest deliverable");
+  ok(verify.includes("**Review branches:**") && verify.includes("**Standards-only**"), "verify defines review without issue/spec");
   ok(verify.includes("Two strikes rule"), "verify carries the attended stagnation mirror");
   ok(verify.includes("loom-plan` § Route scope"), "two-strikes fork names the amendment path");
 
   const plan = read("skills/loom-plan/SKILL.md");
-  ok(plan.includes("**Amendment**"), "plan has the amendment route");
-  ok(plan.includes("Grill ONLY the delta"), "amendment grills the delta, not the world");
-  ok(plan.includes("## Amendments` section"), "PRD edits leave a dated amendment trail");
-  ok(plan.includes("Re-quiz ONLY the slices the change touches"), "amendment re-quizzes only affected slices");
-  ok(plan.includes("Amendment balloons into new scope"), "ballooning amendment routes to the full ritual");
+  ok(plan.includes("## Route scope") && plan.includes("### Amendment"), "plan has named amendment route");
+  ok(plan.includes("contradiction and its blast radius"), "amendment grills only contradiction and blast radius");
+  ok(plan.includes("Gate 1 previews the exact PRD/domain delta"), "amendment reuses bounded PRD gate");
+  ok(plan.includes("Gate 2 previews and rewrites only affected slices"), "amendment reuses affected slice gate");
 
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("riskiest seam"), "first slice crosses the riskiest seam");
 
@@ -1775,7 +1710,7 @@ for x in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(x)`,
     { cwd: big, encoding: "utf8", timeout: 5000 }
   );
   ok(!preLlmOut.includes("Loom alert"), "pre-LLM skips the alert above the ceiling");
-  ok(preLlmOut.includes("Loom invariants"), "static invariants survive the ceiling");
+  ok(preLlmOut.includes("Loom universal invariants"), "static invariants survive the ceiling");
   try {
     const pyAlert = execFileSync(
       "python3",
@@ -1915,8 +1850,8 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize materialization");
-  ok(read("skills/loom-grill/SKILL.md").includes("Never materialize a code write or ADR without explicit user confirmation"), "loom-grill: materialization requires explicit confirm");
-  ok(/^description: Investigate/m.test(read("skills/loom-grill/SKILL.md")), "loom-grill description leads with investigate");
+  ok(read("skills/loom-grill/SKILL.md").includes("bounded apply confirmation"), "loom-grill: materialization requires bounded confirm");
+  ok(/^description: Resolve locally/m.test(read("skills/loom-grill/SKILL.md")), "loom-grill description leads with public outcome");
   ok(/^description: Grill /m.test(read("commands/loom-grill.md")), "loom-grill command description leads with grill verb");
 }
 
@@ -1931,9 +1866,9 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(verify.includes("is an opinion, not evidence"), "example names the bar");
 
   const toIssues = read("skills/loom-plan/TO-ISSUES.md");
-  ok(toIssues.includes("A well-cut slice, filled"), "TO-ISSUES carries a filled issue example");
-  ok(toIssues.includes("# CSV export downloads the current filter view"), "example issue is end-to-end behavioral");
-  ok(/````markdown[\s\S]*```bash[\s\S]*````/.test(toIssues), "nested fences use a 4-backtick outer block");
+  ok(toIssues.includes("complete numbered breakdown"), "TO-ISSUES requires a complete issue preview");
+  ok(toIssues.includes("thin vertical tracer-bullet issues"), "issue slices are end-to-end behavioral");
+  ok(toIssues.includes("verification command"), "issue preview includes runnable verification");
 
   const impl = read("skills/loom-implement/SKILL.md");
   ok(impl.includes("- Decision: streamed the CSV"), "implement carries a ## Log example");
@@ -1941,8 +1876,8 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
 
   const grill = read("skills/loom-plan/GRILL.md");
   ok(grill.includes("## The cadence, worked"), "GRILL.md carries a worked exchange");
-  ok(grill.includes("updates `CONTEXT.md`"), "worked exchange shows the inline CONTEXT write");
-  ok(grill.includes("want an ADR for it?"), "worked exchange offers (not writes) the ADR");
+  ok(grill.includes("updates the pending domain delta"), "worked exchange shows pending CONTEXT delta");
+  ok(grill.includes("canonical ADR at Gate 1"), "worked exchange queues canonical ADR");
 
   // No-op sweep: restatements removed, semantics still carried by their owners.
   ok(!verify.includes("Neither checker fixes work"), "verify: judge-only restatement removed from process");
@@ -1950,7 +1885,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(!/Rules:.*deletion over addition/.test(impl), "implement: ladder Rules no longer duplicates step 5");
   ok(impl.includes("5. Prefer deletion over addition."), "deletion-over-addition survives as step 5");
   ok(!verify.includes("Aggregate structured verdicts into the digest above"), "OMP workflow trimmed to OMP-specific facts");
-  ok(verify.includes("the general contract applies unchanged"), "OMP workflow defers to the general contract");
+  ok(verify.includes("The general digest, gate, and write-back rules apply"), "OMP workflow defers to the general contract");
 }
 
 // v0.16.2 — field-run fixes round 2: direction-aware version drift, OMP witness
@@ -2103,7 +2038,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   ok(read("skills/loom-plan/ADR-FORMAT.md").includes("carry their source links"), "ADR-FORMAT requires source links on research-shaped decisions");
-  ok(read("skills/loom-plan/TO-PRD.md").includes("research-shaped decisions keep their source links"), "TO-PRD restates the citation rule at the write point");
+  ok(read("skills/loom-plan/TO-PRD.md").includes("Research that shapes a PRD decision keeps citations"), "TO-PRD restates durable citation rule at write point");
   ok(read("skills/loom-plan/GRILL.md").includes("name the real target path (`docs/adr/NNNN-slug.md`)"), "GRILL ADR offer names docs/adr/ path");
 }
 
@@ -2142,17 +2077,17 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     // version=v<digit> anchors past the "vX.Y.Z" placeholder in loom-init's Outputs prose
     const block = read(p).match(/<!-- loom:begin version=v\d[\s\S]*?loom:end -->/)[0];
     // universal sections survive
-    for (const keep of ["### Discipline", "### Invariants", "### Router", "**Confusable pairs:**", "### Session state", "### Status vocabulary", "needs-triage`, `needs-info"])
+    for (const keep of ["### Always-on discipline", "### Loom lane", "Ordinary prompts remain normal agent mode", "do not maintain a second intent router", "### Status vocabulary", "needs-triage`, `needs-info"])
       ok(block.includes(keep), `${p} block keeps universal section: ${keep}`);
     // ritual-time content is out — carried by GRILL.md, loom-verify, TO-ISSUES.md instead
     for (const gone of ["Invocation policy", "Transitions: unlabeled", "Transition rules live", "After Verify passes", "Model-invoked"])
       ok(!block.includes(gone), `${p} block sheds ritual-time content: ${gone}`);
     // ceiling = post-trim size (59) + small headroom, well under the pre-trim 73
-    ok(block.split("\n").length <= 65, `${p} block stays under the 65-line ceiling`);
+    ok(block.split("\n").length <= 55, `${p} block stays under the 55-line ceiling`);
   }
   // the moved rules still exist at their ritual homes (no rule was lost, only relocated)
   ok(read("skills/loom-plan/GRILL.md").includes("Transitions: unlabeled"), "transitions relocated to plan triage");
-  ok(read("skills/loom-verify/SKILL.md").includes("set issue `Status: done`"), "verify carries the done transition");
+  ok(read("skills/loom-verify/SKILL.md").includes("set `Status: done`"), "verify carries the spec-backed done transition");
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("ready-for-human"), "slicing carries the human-judgement route");
 }
 
@@ -2170,7 +2105,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   // exact excuse the field run produced, in GRILL's anti-rationalization table.
   ok(read("skills/loom-plan/BROWNFIELD.md").includes("before the next question"), "BROWNFIELD handoff restates the inline write cadence");
   ok(read("skills/loom-plan/BROWNFIELD.md").includes("the draft is the floor, not the final"), "BROWNFIELD names the draft's role at the handoff");
-  ok(read("skills/loom-plan/GRILL.md").includes("The brownfield boot already wrote CONTEXT.md"), "GRILL anti-rationalization covers the brownfield excuse");
+  ok(read("skills/loom-plan/GRILL.md").includes("The brownfield boot already drafted CONTEXT.md"), "GRILL anti-rationalization covers the brownfield excuse");
 
   // F2: planners annotate blocker refs in prose — the edge must still resolve.
   const { lintWarnings, stateSnapshot } = requireCjs(resolve(hooksDir, "stop-gate-logic.cjs"));
@@ -2213,23 +2148,16 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   rmSync(tmp, { recursive: true });
 }
 
-// v0.17.0 — brownfield boot phase + maker self-review
+// Brownfield boot remains mined, project-nonmutating, and provenance-backed.
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const brown = read("skills/loom-plan/BROWNFIELD.md");
-  ok(brown.includes("Mine first; interview only the remainder"), "BROWNFIELD leads with mine-before-interview");
-  ok(/package scripts, Makefile, CI config/.test(brown), "BROWNFIELD mines commands from real carriers");
-  ok(brown.includes("each non-obvious claim names its source file"), "BROWNFIELD draft carries provenance");
-  ok(brown.includes("Unknowns stay unknown"), "BROWNFIELD forbids invented conventions");
-  ok(/before the grill starts/.test(brown), "BROWNFIELD gates the draft with the user before the interview");
-  ok(/Sample, don't exhaust/.test(brown), "BROWNFIELD timeboxes the mining");
-  ok(brown.includes("a README or scattered docs do NOT skip the boot"), "BROWNFIELD skip clause is unambiguous on mature repos");
-  ok(/brownfield check.*BROWNFIELD\.md/s.test(read("skills/loom-plan/SKILL.md")), "plan step 1 routes to BROWNFIELD.md on trigger");
+  ok(brown.includes("Sample entry points, manifests, checks"), "BROWNFIELD mines before interview");
+  ok(brown.includes("unknowns remain unknown") && brown.includes("cite sources"), "BROWNFIELD is honest and provenance-backed");
+  ok(brown.includes("do not write it") && brown.includes("Gate 1"), "BROWNFIELD stays nonmutating until Gate 1");
+  ok(read("skills/loom-plan/SKILL.md").includes("BROWNFIELD.md"), "Plan routes first brownfield adoption to boot");
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("Self-review, then verify."), "implement step 13 opens with self-review");
-  ok(/read your own full diff top-to-bottom/.test(impl), "self-review reads the full diff");
-  ok(impl.includes("Self-review replaces neither checker"), "self-review does not replace maker/checker separation");
-  ok(/do not yield.*until a verify digest exists/s.test(impl), "step 13 verify mandate survives the self-review fold");
+  ok(impl.includes("Self-review, then verify."), "Implement retains self-review before Verify");
 }
 
 // v0.20.0 — dispatch withdrawn (parked): the capability must leave no dangling routes behind
@@ -2251,13 +2179,14 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/one ask call = exactly ONE\s+question/.test(tpl) && /question arrays.*→ concern/s.test(tpl), "batched grill questions → concern");
   ok(/before the user's explicit\s+go.*→ blocker/s.test(tpl), "materialization before go → blocker");
   ok(/APPROVE line\s+in the issue's `## Verify` section → blocker/.test(tpl), "done without verify APPROVE → blocker");
-  ok(/without user confirmation\s+→ blocker/.test(tpl), "unconfirmed project writes → blocker");
+  ok(/before bounded consent[\s\S]*CONTEXT\.md and ADRs[\s\S]*→ blocker/.test(tpl), "project writes before bounded consent → blocker");
   ok(/pre-flight baseline.*→ concern/s.test(tpl), "edits before pre-flight → concern");
   ok(/interview visibly shrinks.*→ concern/s.test(tpl), "post-interruption shrink → concern");
   ok(/exceeds the issue's scope.*→ concern/s.test(tpl), "scope creep → concern");
   ok(/load-bearing decision invented silently.*→ concern/s.test(tpl), "silent load-bearing invention → concern");
   ok(/no `## Log` bullet.*→ nit/s.test(tpl), "missing Log bullet → nit");
-  ok(/CONTEXT\.md was not updated.*→ nit/s.test(tpl), "batched CONTEXT writes → nit");
+  ok(tpl.includes("pending conversational domain") && tpl.includes("checkpoint or") && tpl.includes("action gate"), "advisor pins pending domain delta visibility");
+  ok(!tpl.includes("CONTEXT.md was not updated before the next") && !tpl.includes("write the glossary inline"), "advisor rejects stale inline CONTEXT write contract");
   ok(/# model:/.test(tpl), "model line ships commented — advisor role by default, no hardcoded model");
   const doc = read("docs/omp-advisor.md");
   ok(doc.includes("templates/WATCHDOG.yml"), "advisor doc points at the template");
@@ -2265,6 +2194,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(doc.includes("/advisor on") && doc.includes("/advisor dump"), "advisor doc lists the host controls");
   ok(/OMP-only/.test(doc), "advisor doc is honest about the host boundary");
   ok(/baseline.*advisor behavior/s.test(doc), "advisor doc warns the baseline advisor comes with the toggle");
+  ok(doc.includes("pending conversational domain delta") && doc.includes("checkpoint/action gate"), "advisor doc teaches pending delta visibility");
+  ok(!doc.includes("CONTEXT.md not updated inline"), "advisor doc drops stale inline-write rule");
   ok(read("docs/hosts.md").includes("omp-advisor.md"), "hosts doc routes to the advisor profile doc");
   // Core stays untouched: the profile must not leak into rituals or the managed block.
   for (const p of ["AGENTS.md", "skills/loom-implement/SKILL.md", "skills/loom-plan/SKILL.md", "skills/loom-init/SKILL.md", "skills/loom-grill/SKILL.md", "skills/loom-verify/SKILL.md", "skills/loom-tend/SKILL.md"])
@@ -2279,9 +2210,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const canon = read("skills/loom-plan/GRILL.md");
   ok(canon.includes("conflicts with existing `CONTEXT.md` language"), "canonical grill challenges against existing glossary");
   ok(canon.includes("Invent edge-case scenarios"), "canonical grill invents edge-case scenarios to force precision");
-  ok(canon.includes("persisted with citations"), "canonical grill requires research provenance with citations");
-  ok(grill.includes("Enthusiasm is not a go"), "grill action gate: enthusiasm is not a go");
-  ok(grill.includes("resolves a branch, not an action gate"), "grill hard stop clarifies enthusiasm vs confirmation");
+  ok(canon.includes("stay pending with citations"), "canonical grill keeps research provenance pending until apply");
+  ok(grill.includes("bounded action gate"), "grill carries bounded action gate");
 }
 
 // v0.24.3 — grill plan-parity surgical: ask-tool batching, research file,
@@ -2292,23 +2222,20 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const canon = read("skills/loom-plan/GRILL.md");
   ok(canon.includes("One `ask` call = exactly ONE question"), "canonical grill pins ask-tool one-question rule");
   ok(canon.includes("The ask tool accepts an array"), "canonical grill anti-rat blocks ask-tool batching");
-  ok(canon.includes(".loom/research/YYYY-MM-DD"), "canonical grill persists research to .loom/research/");
-  ok(canon.includes("Offer an ADR") && canon.includes("Ask the user to approve it"), "canonical grill offers ADR before writing");
+  ok(canon.includes("stay pending with citations"), "canonical grill defers research writes to bounded apply");
+  ok(canon.includes("Offer an ADR") && canon.includes("pending gate preview"), "canonical grill queues ADR before writing");
   ok(canon.includes("re-read this file"), "canonical grill re-reads itself on interruption");
   ok(canon.includes("CONTEXT-FORMAT.md") && canon.includes("ADR-FORMAT.md"), "canonical grill links format references");
   ok(canon.includes("Conflicting ADRs"), "canonical grill carries ADR-conflict response");
   ok(canon.includes('just do it'), "canonical grill handles premature closure");
-  ok(canon.includes("want an ADR for it?"), "canonical worked example shows ADR offer");
+  ok(canon.includes("canonical ADR at Gate 1"), "canonical worked example shows ADR offer");
 }
 
 // v0.24.5 — grill depth: pre-materialize edge-case checkpoint for code changes
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const grill = read("skills/loom-grill/SKILL.md");
-  ok(grill.includes("Pre-materialize edge-case checkpoint"), "grill adds pre-materialize edge-case checkpoint");
-  ok(grill.includes("Complete the pre-materialize edge-case checkpoint"), "grill hard stop requires edge-case checkpoint");
-  ok(grill.includes("Pre-materialize edge case is unresolved"), "grill failure mode blocks materialization on unresolved edge-case");
-  ok(grill.includes("We'll handle edge cases after coding"), "grill anti-rationalization rejects post-code edge handling");
+  ok(grill.includes("ask one adversarial edge-case question"), "grill adds pre-materialize edge-case checkpoint");
 }
 
 // v0.24.7 — marker narrowing: loom: comments only for real corner-cuts
@@ -2320,12 +2247,106 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     "skills/loom-init/SKILL.md",
     "skills/loom-implement/SKILL.md",
     "hooks/invariants.cjs",
-    "opencode-plugin.mjs",
     "hermes-plugin/__init__.py",
     "docs/glossary.md",
   ]) {
     ok(read(p).includes(phrase), `${p} narrows loom marker to real corner-cuts`);
   }
+}
+
+
+// Release 1 — unified dispatcher composition and restored contracts
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const section = (body, heading, next) => body.split(heading)[1]?.split(next)[0] || "";
+  const dispatcher = read("skills/loom/SKILL.md");
+  const dispatcherPath = resolve(__dirname, "..", "skills", "loom", "SKILL.md");
+  ok(existsSync(dispatcherPath) && existsSync(resolve(__dirname, "..", "commands", "loom.md")), "dispatcher skill and command targets exist");
+  for (const [outcome, ritual] of [["Resolve locally", "loom-grill"], ["Plan work", "loom-plan"], ["Review ready work", "loom-verify"], ["Maintain project", "loom-tend"]]) {
+    ok(dispatcher.includes(outcome) && dispatcher.includes(ritual), `${outcome} routes to ${ritual}`);
+    ok(existsSync(resolve(__dirname, "..", "skills", ritual, "SKILL.md")), `${ritual} handoff target exists`);
+  }
+  ok(dispatcher.includes("host skill mechanism") && dispatcher.includes("selected sibling `skills/<ritual>/SKILL.md`"), "dispatcher has portable executable handoff");
+  ok(dispatcher.includes("same skill-or-sibling-file handoff") && dispatcher.includes("without re-entering the dispatcher"), "JIT Init uses portable return handoff");
+  ok(!read("commands/loom.md").includes("(`skills/loom/SKILL.md`)") && read("commands/loom.md").includes("this command's Loom installation"), "command stub uses installed-tree fallback, not cwd-relative path");
+  ok(dispatcher.includes("A named issue/pack is an explicit target") && dispatcher.includes("relevant rework or interrupted-work evidence"), "bare resume excludes implicit named targets and orders evidence first");
+  ok(dispatcher.includes("Multiple candidates") && dispatcher.includes("exactly one question"), "ambiguous resume asks one question");
+
+  const agents = read("AGENTS.md");
+  const always = section(agents, "### Always-on discipline", "### Loom lane");
+  const lane = section(agents, "### Loom lane", "### Status vocabulary");
+  for (const forbidden of ["Project-nonmutating", "Maker/checker", "No verify digest", "Fresh maker context", "pack transitions"]) {
+    ok(!always.includes(forbidden), `always-on section excludes lane-only contract: ${forbidden}`);
+  }
+  for (const required of ["Project-nonmutating", "Maker/checker", "No verify digest", "Fresh maker context", "pack transitions"]) {
+    ok(lane.includes(required), `Loom lane contains scoped contract: ${required}`);
+  }
+  const unconditional = ["hooks/invariants.cjs", "hermes-plugin/__init__.py"];
+  for (const file of unconditional) {
+    const body = read(file).split("ROLES =")[0];
+    for (const forbidden of ["Project-nonmutating", "Maker/checker", "No verify digest", "fresh session per issue", "ready-for-human at slicing"]) {
+      ok(!body.includes(forbidden), `${file} unconditional injection excludes lane-only prose: ${forbidden}`);
+    }
+  }
+  const adapters = ["opencode-plugin.mjs", "kiro-agent.json", "hermes-plugin/__init__.py", "omp-extension.mjs"];
+  for (const file of adapters) {
+    const body = read(file);
+    ok(!/Resolve locally\s*→|Plan work\s*→|Review ready work\s*→|Maintain project\s*→/.test(body), `${file} does not duplicate dispatcher route arrows`);
+  }
+  ok(read("opencode-plugin.mjs").includes("dispatcher is the canonical owner") && read("kiro-agent.json").includes("canonical dispatcher"), "adapters point to canonical dispatcher");
+
+  const implement = read("skills/loom-implement/SKILL.md");
+  ok(implement.includes("explicitly invoke") && implement.includes("Canonical `/loom` Resolve locally uses `loom-grill`"), "direct small-fix is precision-only, not removed");
+  ok(implement.includes("full Verify contract"), "direct precision small-fix retains full Verify");
+
+  const plan = read("skills/loom-plan/SKILL.md");
+  const amendment = section(plan, "### Amendment", "## Hard stops");
+  for (const contract of ["contradiction and its blast radius", "`## Amendments`", "Preserve untouched issues", "statuses, acceptance criteria, and blockers", "`needs-info`", "`ready-for-agent`", "Gate 2 previews and rewrites only affected slices", "new scope"]) {
+    ok(amendment.includes(contract), `amendment contract preserves: ${contract}`);
+  }
+  ok(plan.includes("Gate 1") && plan.includes("Gate 2") && plan.includes("confirmed PRD without issues is valid completion"), "Plan keeps two gates and PRD-only completion");
+  ok(read("skills/loom-plan/GRILL.md").includes("Never implement in this planning context"), "Plan interview cannot escape to same-context implementation");
+
+  const issues = read("skills/loom-plan/TO-ISSUES.md");
+  for (const human of ["live credentials/secrets", "auth/security/privacy policy", "payments or movement of money", "irreversible/destructive data migration"]) ok(issues.includes(human), `slicing human-routes ${human}`);
+  ok(issues.includes("High-risk code that is fully specified, reversible, and objectively verifiable may remain `ready-for-agent`"), "human routing is judgment-based, not blanket risk");
+  for (const review of ["granularity", "dependency", "merge/split", "revise and re-preview until"]) ok(issues.includes(review), `Gate 2 iterates ${review}`);
+
+  const verify = read("skills/loom-verify/SKILL.md");
+  const branches = section(verify, "**Review branches:**", "## Process");
+  ok(branches.includes("Standards-only") && branches.includes("Do not spawn, require, or simulate a Spec checker"), "Standards-only branch forbids Spec checker");
+  ok(verify.includes("Gates green → choose the review branch before spawning") && verify.includes("spawn only the Standards checker"), "process executes Standards-only branch");
+  ok(verify.includes("not required — Standards-only") && verify.includes("Standards-only never completes a Loom issue"), "digest/evidence/completion adapt to Standards-only");
+  ok(verify.includes("Spec-backed requires Spec+Standards; Standards-only still requires its Standards checker"), "anti-rationalization is branch-aware");
+  const ompWorkflow = section(verify, "### OMP verify workflow", "## Done when");
+  ok(ompWorkflow.includes("Spec-backed") && ompWorkflow.includes("`loom-verify-spec`") && ompWorkflow.includes("`loom-verify-standards`"), "OMP Spec-backed tries both named checkers");
+  const ompStandards = ompWorkflow.split("**Standards-only:**")[1] || "";
+  ok(ompStandards.includes("only `loom-verify-standards`") && ompStandards.includes("Do not attempt or spawn `loom-verify-spec`"), "OMP Standards-only tries only Standards");
+  ok(ompStandards.includes("unavailable / not required") && ompStandards.includes("generic Standards task"), "OMP Standards-only evidence and fallback are satisfiable");
+
+  const grill = read("skills/loom-grill/SKILL.md");
+  ok(grill.includes("establish an attributable baseline") && grill.includes("target behavior's path is already red"), "Grill restores attributable baseline and red-path stop");
+  ok(grill.includes("If a final gate fails, fix inline within the confirmed scope") && grill.includes("Never declare the materialization done while a required gate is red"), "Grill recovers final gate failures without red done");
+  ok(grill.includes("changed scope/targets or a user decision") && grill.includes("renewed bounded consent or return to the interview"), "Grill stops recovery when old consent no longer covers it");
+  ok(grill.includes("more than 3 files OR require more than 1 commit") && grill.includes("independent of the full-Verify trigger"), "Grill scope signal is deterministic and independent");
+  ok(grill.includes("auth/security/privacy/secrets") && grill.includes("accessibility"), "Grill retains full-Verify deny-list trigger");
+
+  const canon = read("skills/loom-plan/GRILL.md");
+  const toPrd = read("skills/loom-plan/TO-PRD.md");
+  ok(canon.includes("`.loom/research/YYYY-MM-DD-<slug>.md`") && canon.includes("Nothing is written before bounded confirmation"), "research stays pending with durable target");
+  ok(toPrd.includes("PRD decision keeps citations") && toPrd.includes("`.loom/research/YYYY-MM-DD-<slug>.md`"), "Gate 1 persists research provenance for fresh context");
+
+  const glossary = read("docs/glossary.md");
+  ok(glossary.includes("Spec-backed changes use fresh Spec + Standards") && glossary.includes("Verify runs Standards-only") && glossary.includes("cannot complete a Loom issue"), "glossary defines both Verify branches accurately");
+  const readme = read("README.md");
+  ok(readme.includes("OpenCode") && readme.includes("historical live smoke: managed block + 6 ritual skills") && readme.includes("dispatcher entry implemented, **unverified**"), "OpenCode preserves historical evidence and marks dispatcher unverified");
+  ok(!/OpenCode[^\n]*verified[^\n]*(dispatcher|unified `\/loom`)[^\n]*(live|smoke)/i.test(readme), "README makes no unsupported OpenCode dispatcher-live claim");
+  ok(read("docs/evidence/HOST-INSTALL.md").includes("Unified `/loom` dispatcher entry is implemented/unverified pending a new live smoke"), "evidence ledger records OpenCode dispatcher gap");
+  deepStrictEqual(JSON.parse(read(".claude-plugin/plugin.json")).commands, [], "Claude command duplication stays disabled");
+  ok(read("README.md").includes("/loom:loom") && read("README.md").includes("Loom agent/skill"), "README states Claude and Kiro entry truth");
+  ok(/provides_commands:\n  - loom\n/.test(read("hermes-plugin/plugin.yaml")), "Hermes registers exact loom command");
+  ok(read("omp-extension.mjs").includes("Preferred entry is /loom; /loom-plan remains the precision planning route"), "OMP comment states preferred and precision entry truth");
+  ok(!/\n2\. \*\*`loom:` debt/.test(read("skills/loom-tend/SKILL.md")), "Tend numbering is not duplicated");
 }
 
 console.log("✔ All hook and adapter tests passed");

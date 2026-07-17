@@ -1,68 +1,69 @@
 ---
 name: loom-plan
-description: Convert an idea into an executable PRD and issue pack. Use when scope is non-trivial, multi-session, or inbound/underspecified. Not for investigate/explore/debug sessions with undefined scope (loom-grill) or a small ready-to-build fix (loom-implement).
+description: Plan work into a confirmed PRD and optional issue pack. Use for defined non-trivial or multi-session scope; not for local investigation/small fixes (loom-grill).
 disable-model-invocation: true
 ---
 
-**NEVER write PRD/issues without explicit user go-ahead.**
+**Project-nonmutating interview. Two preview-before-write gates. No implementation here.**
 
 ## Goal
 
-Produce a verifiable PRD + issue pack under `.loom/<feature-slug>/` without starting implementation.
+Produce a user-confirmed PRD and, optionally, a confirmed issue pack without starting implementation.
 
 ## Inputs
 
-- User intent (greenfield, extension, or inbound bug/report)
-- Project docs: ADRs, CONTEXT/warp, existing `.loom/` packs
+- User intent and current project evidence
+- Project docs/ADRs and existing `.loom/` packs when present
 
 ## Outputs
 
-- `.loom/<feature-slug>/PRD.md` + `issues/<NN>-<slug>.md` (each `Status: ready-for-agent`)
-- `CONTEXT.md` glossary updates and ADRs captured during the grill
-- `PRODUCT.md` (first adoption) / `DESIGN.md` (user-facing UI) when applicable
+- Gate 1: confirmed `CONTEXT.md`/ADR/PRD (plus PRODUCT/DESIGN when applicable)
+- Gate 2, when requested: confirmed `.loom/<feature>/issues/*.md`
+- A stop or host-native fresh-context handoff; never implementation in this context
+
+## Process
+
+1. Stay project-nonmutating during interview. Read [`GRILL.md`](GRILL.md); for first brownfield adoption also read [`BROWNFIELD.md`](BROWNFIELD.md). Accumulate pending domain changes in conversation and a full PRD draft via [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md), with pending domain changes via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md). Use accepted vocabulary immediately, but write nothing yet.
+2. **Gate 1 — knowledge + PRD apply.** Read [`TO-PRD.md`](TO-PRD.md). Put the immutable full draft in host scratch outside the worktree when available, otherwise show it in chat. The user must be able to access all content. Preview exact target paths and all scope, assumptions, decisions, seams, pending `CONTEXT.md` delta, and ADRs via [`ADR-FORMAT.md`](ADR-FORMAT.md); include [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md)/[`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) only when applicable. Bind confirmation to the draft hash and base hashes of existing targets. Drift or changed targets/scope/base requires recompute and renewed confirmation. On confirmation, write the listed targets. If `.loom` persistence/enforcement is first needed, offer internal `loom-init` immediately before this write with its exact setup plan, then return here.
+3. A confirmed PRD without issues is valid completion. If the user wants slicing, read [`TO-ISSUES.md`](TO-ISSUES.md).
+4. **Gate 2 — issue pack apply.** Preview the complete issue breakdown before any issue files. On confirmation, write all issue files via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md). If PRD content changes during preview, return to a bounded Gate-1 PRD delta, recompute affected slices, and confirm again.
+5. After pack confirmation offer only: stop; start the first issue in a fresh maker context (or show the exact next invocation if fresh context is unavailable); prepare a host-native whole-pack handoff. On OMP Release 1, show an exact `/goal` prompt for the user to launch; do not launch it or promise branch/checkpoint/fixed-point guarantees.
+6. Apply the `## Route scope` amendment contract below when correcting an existing pack.
+7. Before compaction/interruption, offer a checkpoint preview; never write silently.
 
 ## Route scope
 
-- **User explicitly invoked `loom-plan`** → run the three-phase ritual below. **Never auto-handoff to `loom-implement`** — the user chose Plan; offer the PRD pack or ask them to confirm a deliberate skip.
-- **Small / single-session** (router only, user did NOT invoke Plan) → skip PRD pack; hand off to `loom-implement` (YAGNI).
-- **Multi-session / large / inbound underspecified** → full ritual below.
-- **Amendment** (an existing pack's PRD is wrong or outgrown — usually a `needs-info` issue naming a contradiction, or the verify two-strikes fork) → **do not re-run the full ritual.** Grill ONLY the delta: the contradiction, its blast radius, nothing else. Then amend the PRD in place — change the affected lines and append one dated line to an `## Amendments` section (create it once) saying what changed and why. Re-quiz ONLY the slices the change touches (statuses, acceptance criteria, blockers); untouched issues stay untouched. Exit gate: user confirms the amendment, affected `needs-info` issues flip back to `ready-for-agent`. Both user gates still exist — they just cover the delta, not the world.
-- Write PRD/issues in the project's language; ritual names and `loom:` markers stay English.
+### Amendment
 
-## Process — three phases, three files
+Use this route when an existing pack's PRD is contradicted or outgrown, including a `needs-info` issue that names the contradiction or the Verify two-strikes fork.
 
-Run the phases strictly in order. Read ONLY the current phase file — do NOT open a later phase file before its gate. Each file is self-contained for its phase; reading ahead pulls your attention out of the phase you are in.
-
-1. **Grill** — first, brownfield check: mature repo with no `CONTEXT.md`/`PRODUCT.md` and no prior `.loom` pack? Read [`BROWNFIELD.md`](BROWNFIELD.md) and mine the repo into a draft `CONTEXT.md` before any interview. Then read [`GRILL.md`](GRILL.md) NOW and follow it. Relentless scope interview, one question per `ask` call, domain modeled inline (`CONTEXT.md` via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), ADRs via [`ADR-FORMAT.md`](ADR-FORMAT.md)). Exit gate: user confirms shared understanding AND gives an explicit go.
-2. **PRD** — only after that go: read [`TO-PRD.md`](TO-PRD.md). Pure synthesis via [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md) (+ [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) / [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) when applicable), no re-interview. Exit gate: user confirms the PRD.
-3. **Issues** — only after PRD confirmation: read [`TO-ISSUES.md`](TO-ISSUES.md). Vertical slices, granularity quiz, then write issue files via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md).
-
-If a phase is interrupted (dropped connection, error, user says "continue"), re-read the CURRENT phase file and resume exactly where you stopped — an interruption never advances a phase or shrinks it.
-
-## Handoff
-
-Fresh session per issue is recommended — pass PRD + one issue only to each Implement session.
-
-- Pick the **lowest-numbered unblocked** issue when no specific one requested.
-- One issue per session; separate sessions claim separate issues.
+- Grill only the contradiction and its blast radius; if that becomes new scope, stop and run full Plan.
+- Gate 1 previews the exact PRD/domain delta. Append one dated line to the PRD's `## Amendments` section (create it once) describing what changed and why; bind confirmation to the changed target/base hashes.
+- Preserve untouched issues. Re-evaluate only affected issue statuses, acceptance criteria, and blockers against the amended contract.
+- An answered `needs-info` issue returns to `ready-for-agent` only after the amendment resolves its contract and the affected rewrite is approved.
+- Gate 2 previews and rewrites only affected slices; iterate their breakdown until approved. Unaffected issue files remain byte-for-byte untouched.
 
 ## Hard stops
 
-- NEVER write PRD/issues without explicit user go-ahead.
-- NEVER open a later phase file before its gate (grill → go → PRD → confirm → issues).
-- Phase-specific hard stops live in the phase files — they bind while that phase runs.
+- No project-file write before the bounded gate that names exact targets/actions.
+- No later phase read before its gate; no issue files before Gate 2.
+- Changed target, scope, draft, or base hash invalidates consent.
+- Do not implement in the planning context.
+- Do not promise hardened local-goal branch, checkpoint commit, per-issue HEAD, or stop-all semantics.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
-| Tempted to skip a phase or its gate | Stop; the gate is the user's, not yours |
-| Interrupted mid-phase (drop, "continue") | Re-read the current phase file; resume where you stopped |
-| Amendment balloons into new scope | That's not an amendment — stop and run the full ritual for the new scope |
-| Phase-specific failures | See the failure table inside the active phase file |
+| Interview is interrupted | Re-read the current phase and offer a checkpoint; resume without writing |
+| Draft or target base drifts | Recompute preview/hash and ask again |
+| PRD changes during slicing | Return to bounded Gate-1 delta; recompute affected slices |
+| Amendment expands into new scope | Stop the amendment route and run full Plan |
+| User stops after PRD | Complete successfully; later Loom entry recommends continuing slicing |
+| Scope is only a local question/fix | Recommend Resolve locally (`loom-grill`) |
 
 ## Done when
 
-- All three phases completed in order, both user gates passed (PRD confirmed; slices approved)
-- Full checklist in [`TO-ISSUES.md`](TO-ISSUES.md) § "Done when" satisfied
-- Amendment route instead: delta grilled, PRD amended with a dated `## Amendments` entry, affected slices re-quizzed, user confirmed, affected `needs-info` issues flipped back to `ready-for-agent`
+- Gate 1 produced a confirmed PRD, with domain targets applied only as previewed
+- Optional Gate 2 produced a confirmed issue pack
+- No implementation occurred; handoff is stop or explicit fresh/host-native next invocation
