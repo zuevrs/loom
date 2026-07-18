@@ -95,7 +95,7 @@ Status effects for a Spec-backed Loom issue: **APPROVE** → write `## Verify`, 
 
 **Two strikes rule** (attended mirror of the unattended stagnation rule): a second REJECT on the same issue whose blockers overlap the first is a stop signal, not a third lap — re-implementing against an unchanged misunderstanding spends checkers to stand still. Present the user the fork explicitly: Plan re-entry (amend the PRD/issue — see `loom-plan` § Route scope), accept the finding as explicit `loom:` debt, or drop the issue. The `## Verify` section already holds both REJECT lines as evidence.
 
-**ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. Delivery: attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue plus a **draft PR** whose description leads with the escalation (see loom-implement § Unattended mode). Issue status stays untouched.
+**ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. Delivery: attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue/report; a configured runner may open a draft PR whose description leads with the escalation (see loom-implement § Unattended mode). Issue status stays untouched.
 
 ## Issue file write-back (enforcement contract)
 

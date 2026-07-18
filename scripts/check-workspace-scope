@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+// loom: generic runner gate for workspace target boundaries.
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
+const { findWorkspace, validateWorkspaceRepositories, validateTaskManifest, changedRepositories, repositoryState, unexpectedGitRoots, profileFingerprint } = createRequire(import.meta.url)("../hooks/workspace.cjs");
+
+
+function defaultBranch(repoPath) {
+  try {
+    const remoteHead = execFileSync("git", ["-C", repoPath, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], { encoding: "utf8" }).trim();
+    if (remoteHead) return remoteHead.replace(/^origin\//, "");
+  } catch {}
+  for (const candidate of ["main", "master"]) {
+    try { execFileSync("git", ["-C", repoPath, "show-ref", "--verify", `refs/heads/${candidate}`]); return candidate; } catch {}
+  }
+  return null;
+}
+
+const [manifestFile, start = process.cwd(), baselineFile, mode = "preflight"] = process.argv.slice(2);
+if (!manifestFile || !["preflight", "postflight"].includes(mode)) { console.error("usage: check-workspace-scope <manifest.json> <workspace-or-repo> <baseline.json> [preflight|postflight]"); process.exit(2); }
+const profile = findWorkspace(start);
+if (!profile || profile.invalid) { console.error("workspace profile missing or invalid"); process.exit(1); }
+try {
+  validateWorkspaceRepositories(profile);
+  const manifest = JSON.parse(readFileSync(resolve(manifestFile), "utf8"));
+  const normalized = validateTaskManifest(manifest, profile);
+  if (manifest.workspace_id !== profile.workspace_id) throw new Error("manifest workspace_id must match workspace profile");
+  if (normalized.profile_fingerprint !== profileFingerprint(profile)) throw new Error("manifest is bound to a different workspace profile");
+  if (manifest.frozen !== true) throw new Error("manifest must be frozen before an unattended run");
+  const unexpected = unexpectedGitRoots(profile);
+  if (unexpected.length) throw new Error(`unregistered Git repository: ${unexpected.join(", ")}`);
+  if (!baselineFile) throw new Error("baseline file is required for unattended scope validation");
+  {
+    const baseline = JSON.parse(readFileSync(resolve(baselineFile), "utf8"));
+    const current = changedRepositories(profile);
+    if (!baseline || baseline.manifest_hash !== manifest.manifest_hash || baseline.profile_fingerprint !== normalized.profile_fingerprint || !Array.isArray(baseline.repositories)) throw new Error("baseline is not bound to manifest/profile");
+    if (mode === "preflight" && current.length) throw new Error(`baseline is not clean: ${current.join(", ")}`);
+    for (const repo of profile.repositories) {
+      const state = repositoryState(profile, repo.path);
+      const recorded = baseline.repositories.find((item) => item.path === repo.path);
+      if (!recorded || !recorded.clean) throw new Error(`baseline identity mismatch: ${repo.path}`);
+      const baseBranch = defaultBranch(resolve(profile.root, repo.path));
+      if (normalized.targets.includes(repo.path)) {
+        if (!baseBranch) throw new Error(`cannot establish default branch: ${repo.path}`);
+        if (!state.branch || state.branch === baseBranch) throw new Error(`target must use a dedicated non-default branch: ${repo.path}`);
+      }
+      if (recorded.branch !== state.branch) {
+        throw new Error(`baseline branch mismatch: ${repo.path}`);
+      }
+      if (mode === "preflight" && recorded.head !== state.head) {
+        throw new Error(`baseline identity mismatch: ${repo.path}`);
+      }
+    }
+  }
+  const changed = changedRepositories(profile, JSON.parse(readFileSync(resolve(baselineFile), "utf8")));
+  const targets = new Set(normalized.targets);
+  const outside = changed.filter((path) => !targets.has(path));
+  if (outside.length) throw new Error(`changed repository is outside targets: ${outside.join(", ")}`);
+  if (mode === "preflight" && changed.length) throw new Error(`preflight repositories changed: ${changed.join(", ")}`);
+  process.stdout.write(`workspace scope valid: ${manifest.task_id}\n`);
+} catch (error) {
+  console.error(`workspace scope invalid: ${error.message}`);
+  process.exit(1);
+}

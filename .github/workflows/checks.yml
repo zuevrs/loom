@@ -14,6 +14,7 @@ jobs:
       - run: scripts/check-installers
       - run: scripts/check-skill-template-contract
       - run: scripts/check-template-sections
+      - run: node --check scripts/check-workspace-scope
   # Hooks are pure Node — prove it on Windows (canaries are bash dev-tooling, ubuntu-only).
   check-windows:
     runs-on: windows-latest

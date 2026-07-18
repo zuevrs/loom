@@ -10,10 +10,30 @@ disable-model-invocation: true
 
 One safe, idempotent project setup for persistent `.loom` pack/enforcement capability; internal invocation returns to its originating ritual.
 
+A **workspace setup** is an explicit opt-in branch for a parent meta-repo containing independent Git repositories. It never changes the canonical one-Git-repo/one-Loom default and never writes Loom artifacts into registered service repositories.
+
 ## Inputs
 
 - Global Loom install on host (skills already available via plugin or host-native install)
 - Current repo state (`AGENTS.md`, `.loom/`)
+- For workspace setup: the user's explicit request, parent directory, and a read-only scan of bounded nested Git roots, remotes, and local docs/config
+
+### Workspace profile
+
+Use `.loom/workspace.json` only after explicit workspace setup. It is generated and validated by Loom; it is not required in a canonical repo-only project:
+
+```json
+{
+  "workspace_id": "payments-platform",
+  "repositories": [
+    { "path": "services/api", "remote": "git.example.com/team/api" },
+    { "path": "services/auth", "remote": "git.example.com/team/auth" }
+  ],
+  "context_paths": ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"]
+}
+```
+
+Relative repository paths must remain inside the workspace and must identify independent Git roots. Registered service repos are context/execution targets, not additional Loom roots.
 
 ## Outputs
 
@@ -29,7 +49,7 @@ One safe, idempotent project setup for persistent `.loom` pack/enforcement capab
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`.
+5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, these durable documents belong in the meta-repo; do not create them in a registered service repo.
 6. Print summary: changed / checked-not-changed / warnings. Internal invocation returns to the originating route; direct Init may recommend Plan. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for recurring audits.
 7. If nothing needed: `No changes needed` + what was checked.
 
@@ -38,7 +58,7 @@ One safe, idempotent project setup for persistent `.loom` pack/enforcement capab
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.25.1 -->
+<!-- loom:begin version=v0.26.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -76,6 +96,17 @@ Inside the lane:
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 <!-- loom:end -->
 ```
+
+## Workspace setup branch
+
+When the user explicitly asks to set up a multi-repo workspace:
+
+1. Read the bounded directory structure and identify nested Git roots, remotes, existing Loom artifacts, and obvious local documentation/config. Do not run service tests during setup.
+2. Show the exact meta-repo path, profile content, ignored service paths, and migration candidates.
+3. Ask for one bounded confirmation before `git init`, `.gitignore`, `.loom/workspace.json`, or migration writes. Do not create a remote, push, or commit.
+4. A valid workspace profile owns the workspace Loom context. If a registered service repo contains `.loom`, `CONTEXT.md`, `docs/adr/`, or a Loom-managed `AGENTS.md` block, report it and offer a separate migration plan; never delete or silently merge it.
+5. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init. A user may explicitly detach a service before using canonical repo-only Init.
+6. Workspace task artifacts and Verify records live in the meta-repo task pack or an approved external sidecar. Product service repos receive only product-facing changes.
 
 ## Hard stops
 

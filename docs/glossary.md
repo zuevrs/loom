@@ -65,3 +65,14 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
 After Verify APPROVE → write `## Verify` section, then set `Status: done`. Work needing human judgement → `ready-for-human`.
+
+
+### Workspace terms
+
+**Workspace mode**: An explicit opt-in profile for a parent meta-repo containing independent Git repositories. It does not change the canonical repository mode.
+
+**Workspace profile**: `.loom/workspace.json`, the validated map of workspace identity, registered repository paths, expected remotes, and allowlisted context paths. It contains stable structure, not per-task write permissions.
+
+**Workspace task**: A bounded task whose manifest names repositories to change (`targets`) and repositories to read (`context`). Each target keeps its own branch, baseline, checks, and product commits.
+
+**Runner**: An external scheduler or invocation tool that starts a Loom recipe and supplies checkout, budget, and report boundaries. Loom is runner-agnostic.

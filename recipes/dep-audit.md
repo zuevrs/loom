@@ -6,7 +6,7 @@ cadence: weekly
 
 # Recipe: dep-audit — vulnerabilities and rot in dependencies
 
-You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code or lockfiles** — your diff contains only `.loom/` stub issues and your report.
+You are running unattended. Contract: `docs/unattended.md` (dedicated branch → report, never merge). Discovery tier: **do not modify code or lockfiles** — your diff contains only `.loom/` stub issues and your report.
 
 Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
 
@@ -19,7 +19,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per actionable finding (three lines: package, vulnerability/rot, suggested action) under `.loom/maintenance/issues/`.
-- A PR whose title summarizes the actionable dependency risk in the selected project language, with the stubs; description leads with counts by severity, then the noise you dismissed and why; do not use the recipe name or date as the title. Zero findings → no PR; state "no actionable findings" in the runner log and exit clean.
+- A report whose summary summarizes the actionable dependency risk in the selected project language, with the stubs; report leads with counts by severity, then the noise you dismissed and why; do not use the recipe name or date as the title. Zero findings → no product changes; state "no actionable findings" in the runner log and exit clean.
 
 ## Hard stops
 

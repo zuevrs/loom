@@ -6,6 +6,27 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.26.0] - 2026-07-18
+
+### Highlights
+
+- **Opt-in multi-repo workspace foundation.** A validated `.loom/workspace.json` profile keeps shared Loom context and task records in a meta-repo while preserving canonical one-Git-repository/one-Loom mode by default.
+- **Daytime workspace scope contract.** Confirmed `targets` and read-only `context` boundaries support cross-service work with per-repository verification and runner-neutral handoff.
+
+### Safety changes
+
+- Workspace profiles and frozen task manifests are fingerprint-bound, strictly validated, and protected against repository escape, rogue Git roots, branch drift, and cross-platform path aliases.
+- Host evidence now separates install, integration, and model-runtime status; unsupported or blocked runtimes remain explicitly qualified.
+- Autonomous overnight improvement remains deferred to a later package.
+
+### Migration steps
+
+- Existing single-repository Loom users need no changes. Workspace mode is opt-in through `.loom/workspace.json`; see [`docs/workspaces.md`](docs/workspaces.md).
+
+### Adapter impacts
+
+- OMP has full workspace E2E evidence. Cursor has installer and fixture evidence. OpenCode has adapter evidence but its model runtime remains unverified in the current environment. Hermes remains guidance-only/unverified.
+
 ## [0.25.1] - 2026-07-18
 
 ### Changed
@@ -1062,7 +1083,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.25.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/zuevrs/loom/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/zuevrs/loom/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v0.25.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10

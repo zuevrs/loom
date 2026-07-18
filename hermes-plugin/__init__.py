@@ -13,7 +13,12 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.25.1"
+MANAGED_BLOCK_VERSION = "v0.26.0"
+
+WORKSPACE_DISCIPLINE = """
+
+Workspace profiles are opt-in. If `.loom/workspace.json` is present, the meta-repo owns workspace context and invalid profiles must be repaired before state work; registered service repositories remain separate roots.
+"""
 
 DISCIPLINE = """# Loom universal invariants (pre-turn guard)
 
@@ -39,7 +44,28 @@ SKILL_NAMES = [
 COMMAND_NAMES = SKILL_NAMES
 
 
+def _workspace_profile():
+    """Best-effort workspace context discovery; scope enforcement is not Hermes-owned."""
+    for parent in [Path.cwd(), *Path.cwd().parents][:20]:
+        profile = parent / ".loom" / "workspace.json"
+        if not profile.exists():
+            continue
+        try:
+            import json
+            value = json.loads(profile.read_text())
+            if not isinstance(value, dict) or not value.get("workspace_id"):
+                return {"invalid": True, "path": profile}
+            repos = value.get("repositories")
+            return {"root": parent, "path": profile, "id": value["workspace_id"], "repos": len(repos) if isinstance(repos, list) else 0, "guidance_only": True}
+        except Exception:
+            return {"invalid": True, "path": profile}
+    return None
+
+
 def _find_project_root():
+    workspace = _workspace_profile()
+    if workspace and not workspace.get("invalid"):
+        return workspace["root"]
     cwd = Path.cwd()
     for parent in [cwd, *cwd.parents]:
         if (parent / "AGENTS.md").exists():
@@ -412,7 +438,10 @@ def register(ctx):
     # --- Hook: pre_llm_call (per-turn invariants + role context + anomaly alert) ---
     def pre_llm_hook(messages=None, **kwargs):
         role = os.environ.get("LOOM_ROLE", "").lower()
-        ctx_text = DISCIPLINE
+        workspace = _workspace_profile()
+        ctx_text = DISCIPLINE + WORKSPACE_DISCIPLINE
+        if workspace and workspace.get("invalid"):
+            ctx_text += f"\n\n# Loom workspace error\nInvalid profile: {workspace['path']}\nRepair it before reading or writing state."
         if role in ROLES:
             ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
         try:

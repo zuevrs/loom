@@ -16,6 +16,90 @@ function run(script, env = {}) {
   });
 }
 
+// Explicit workspace profile is opt-in and validates repo boundaries.
+{
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { findWorkspace, workspaceRoot, validateWorkspaceProfile, validateTaskManifest, freezeTaskManifest, allowedRepositoryPaths, profileFingerprint, canonicalManifest } = await import(pathToFileURL(resolve(__dirname, "..", "hooks", "workspace.cjs")));
+  const tmp = mkdtempSync(join(tmpdir(), "loom-workspace-test-"));
+  mkdirSync(join(tmp, ".loom"));
+  mkdirSync(join(tmp, "api", ".git"), { recursive: true });
+  mkdirSync(join(tmp, "api", ".loom"));
+  execFileSync("git", ["-C", join(tmp, "api"), "init", "-q"]);
+  writeFileSync(join(tmp, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "test", repositories: [{ path: "api" }] }));
+  const profile = findWorkspace(join(tmp, "api"));
+  strictEqual(profile.workspace_id, "test", "nested service discovers explicit workspace profile");
+  strictEqual(workspaceRoot(join(tmp, "api")), tmp, "workspace profile outranks nested service Loom root");
+  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "../outside" }] }, tmp); ok(false, "profile rejects escaping repo"); } catch { ok(true, "profile rejects escaping repo"); }
+  for (const absolutePath of ["C:\\outside", "\\\\server\\share", "\\outside"]) {
+    try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: absolutePath }] }, tmp); ok(false, `profile rejects portable absolute path: ${absolutePath}`); } catch (error) { ok(error.message.includes("relative"), `profile rejects portable absolute path: ${absolutePath}`); }
+  }
+  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "api" }], policy: {} }, tmp); ok(false, "profile rejects unbound fields"); } catch (error) { ok(error.message.includes("unknown profile field"), "profile rejects unbound fields"); }
+  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "api" }], context_paths: ["docs", "docs\\."] }, tmp); ok(false, "profile rejects canonical context path duplicates"); } catch (error) { ok(error.message.includes("duplicates"), "profile rejects canonical context path duplicates"); }
+  writeFileSync(join(tmp, ".loom", "workspace.json"), "{");
+  strictEqual(workspaceRoot(join(tmp, "api")), null, "invalid profile does not redirect to an operational workspace root");
+  mkdirSync(join(tmp, "worker", ".git"), { recursive: true });
+  execFileSync("git", ["-C", join(tmp, "worker"), "init", "-q"]);
+  writeFileSync(join(tmp, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "test", repositories: [{ path: "api" }, { path: "worker" }], context_paths: ["CONTEXT.md"] }));
+  const profileWithServices = findWorkspace(join(tmp, "api"));
+  const task = freezeTaskManifest({ task_id: "fix-auth", targets: ["api"], context: ["worker"] }, profileWithServices);
+  validateTaskManifest(task, profileWithServices);
+  strictEqual(allowedRepositoryPaths(task).has("api"), true, "task targets define allowed repository paths");
+  try { validateTaskManifest({ task_id: "bad", targets: ["api"], context: ["api"] }, profile); ok(false, "task rejects target/context overlap"); } catch (error) { ok(error.message.includes("both target and context"), "task rejects target/context overlap"); }
+  try { validateTaskManifest({ task_id: "bad", targets: ["../api"], context: [] }, profile); ok(false, "task rejects traversal"); } catch (error) { ok(error.message.includes("traversal"), "task rejects traversal"); }
+  for (const badPath of ["..\\outside", "services\\..\\auth", "C:\\outside", "\\\\server\\share", "\\outside"]) {
+    try { validateTaskManifest({ task_id: "bad", targets: [badPath], context: [] }, profile); ok(false, `task rejects Windows traversal: ${badPath}`); } catch (error) { ok(error.message.includes("traversal") || error.message.includes("relative"), `task rejects Windows traversal/absolute: ${badPath}`); }
+  }
+  try { validateTaskManifest({ task_id: "bad", targets: ["api", "api\\."], context: [] }, profile); ok(false, "task rejects mixed-separator duplicate"); } catch (error) { ok(error.message.includes("duplicates"), "task rejects mixed-separator duplicate"); }
+  try { validateTaskManifest({ task_id: "bad", targets: ["api"], context: ["worker", "worker\\."] }, profileWithServices); ok(false, "task rejects canonical context duplicates"); } catch (error) { ok(error.message.includes("duplicates"), "task rejects canonical context duplicates"); }
+  const slashManifest = { task_id: "same", targets: ["api"], context: ["worker"] };
+  const backslashManifest = { task_id: "same", targets: ["api\\."], context: ["worker\\."] };
+  strictEqual(canonicalManifest(slashManifest), canonicalManifest(backslashManifest), "manifest canonicalization is separator-insensitive");
+  try { validateTaskManifest({ task_id: "bad", workspace_id: "other", targets: ["api"], context: [], extra: true }, profile); ok(false, "task rejects mismatched/extra fields"); } catch (error) { ok(error.message.includes("unknown manifest field") || error.message.includes("workspace_id"), "task rejects mismatched/extra fields"); }
+  try { validateTaskManifest({ task_id: "bad", targets: [], context: [] }, profile); ok(false, "task rejects empty targets"); } catch (error) { ok(error.message.includes("target"), "task rejects empty targets"); }
+  const manifestPath = join(tmp, "manifest.json");
+  writeFileSync(manifestPath, JSON.stringify(task));
+  writeFileSync(join(tmp, "api", "README.md"), "# fixture\n");
+  writeFileSync(join(tmp, "worker", "README.md"), "# worker\n");
+  execFileSync("git", ["-C", join(tmp, "api"), "add", "."]);
+  execFileSync("git", ["-C", join(tmp, "worker"), "add", "."]);
+  execFileSync("git", ["-C", join(tmp, "api"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
+  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-qb", "loom-test"]);
+  execFileSync("git", ["-C", join(tmp, "api"), "add", "."]);
+  execFileSync("git", ["-C", join(tmp, "api"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "--allow-empty", "-qm", "baseline"]);
+  execFileSync("git", ["-C", join(tmp, "worker"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
+  const branch = execFileSync("git", ["-C", join(tmp, "api"), "branch", "--show-current"], { encoding: "utf8" }).trim();
+  const head = execFileSync("git", ["-C", join(tmp, "api"), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  const workerBranch = execFileSync("git", ["-C", join(tmp, "worker"), "branch", "--show-current"], { encoding: "utf8" }).trim();
+  const workerHead = execFileSync("git", ["-C", join(tmp, "worker"), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  const baselinePath = join(tmp, "baseline.json");
+  writeFileSync(baselinePath, JSON.stringify({ manifest_hash: task.manifest_hash, profile_fingerprint: profileFingerprint(profileWithServices), repositories: [{ path: "api", branch, head, clean: true }, { path: "worker", branch: workerBranch, head: workerHead, clean: true }] }));
+  const scopeGate = resolve(__dirname, "..", "scripts", "check-workspace-scope");
+  const scopeOut = execFileSync(scopeGate, [manifestPath, tmp, baselinePath, "preflight"], { encoding: "utf8", timeout: 5000 });
+  ok(scopeOut.includes("workspace scope valid"), "public workspace scope gate validates frozen manifest");
+  mkdirSync(join(tmp, "api", "vendor", "rogue", ".git"), { recursive: true });
+  writeFileSync(join(tmp, "api", "vendor", "rogue", ".git", "config"), "rogue\n");
+  const nestedRogue = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
+  strictEqual(nestedRogue.status, 1, "scope gate rejects Git roots nested inside registered repositories");
+  rmSync(join(tmp, "api", "vendor"), { recursive: true, force: true });
+  writeFileSync(join(tmp, "api", "feature.txt"), "target change\n");
+  const postflight = execFileSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
+  ok(postflight.includes("workspace scope valid"), "postflight permits target-only changes");
+  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-qb", "wrong-branch"]);
+  const branchMismatch = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
+  strictEqual(branchMismatch.status, 1, "postflight rejects target branch changes");
+  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-q", branch]);
+  writeFileSync(join(tmp, "worker", "forbidden.txt"), "context change\n");
+  const rejected = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
+  strictEqual(rejected.status, 1, "postflight rejects context repository changes");
+  mkdirSync(join(tmp, "nested"), { recursive: true });
+  execFileSync("git", ["-C", join(tmp, "nested"), "init", "-q"]);
+  const rogue = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
+  strictEqual(rogue.status, 1, "scope gate rejects unregistered nested Git roots");
+  rmSync(tmp, { recursive: true, force: true });
+}
+
 // session-start
 {
   const out = run("loom-session-start.cjs");
@@ -761,7 +845,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(readme.includes("opencode plugin -g github:zuevrs/loom"), "README OpenCode install carries -g (bare command lands in the project's .opencode/)");
     ok(readme.includes("/loom:loom-init"), "README names the plugin-namespaced ritual invocation for Claude Code");
     ok(readme.includes("Responses API"), "README names the Codex model-leg upstream block (Responses-only host, z.ai serves none)");
-    ok(/Codex.*verified.*install\/discovery\/uninstall/s.test(readme), "README Codex row claims only what ran (no full-cycle overclaim)");
+    ok(/Codex.*install \+ integration verified.*runtime blocked/s.test(readme), "README Codex row separates install/integration from blocked runtime");
     ok(readme.includes("exit 2") && readme.includes("one forced lap"), "README stop-gate section documents the exit-2 block and one-forced-lap rule");
     ok(read("docs/unattended.md").includes("< /dev/null"), "unattended docs name the piped-but-empty stdin hang and its fix");
   }
@@ -1159,7 +1243,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
 
   const doc = read("docs/unattended.md");
-  for (const phrase of ["Branch, not trunk", "PR is the exit", "Verify still runs", "draft PR"]) {
+  for (const phrase of ["Branch, not trunk", "report plus local branch", "Verify still runs", "Report is the exit"]) {
     ok(doc.includes(phrase), `unattended doc states: ${phrase}`);
   }
   ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
@@ -2339,9 +2423,9 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const glossary = read("docs/glossary.md");
   ok(glossary.includes("Spec-backed changes use fresh Spec + Standards") && glossary.includes("Verify runs Standards-only") && glossary.includes("cannot complete a Loom issue"), "glossary defines both Verify branches accurately");
   const readme = read("README.md");
-  ok(readme.includes("OpenCode") && readme.includes("historical live smoke: managed block + 6 ritual skills") && readme.includes("dispatcher entry implemented, **unverified**"), "OpenCode preserves historical evidence and marks dispatcher unverified");
+  ok(readme.includes("OpenCode") && readme.includes("adapter/integration verified") && readme.includes("model runtime timed out"), "OpenCode evidence separates adapter and runtime status");
   ok(!/OpenCode[^\n]*verified[^\n]*(dispatcher|unified `\/loom`)[^\n]*(live|smoke)/i.test(readme), "README makes no unsupported OpenCode dispatcher-live claim");
-  ok(read("docs/evidence/HOST-INSTALL.md").includes("Unified `/loom` dispatcher entry is implemented/unverified pending a new live smoke"), "evidence ledger records OpenCode dispatcher gap");
+  ok(read("docs/evidence/HOST-INSTALL.md").includes("model-backed `opencode run` timed out before first event"), "evidence ledger records OpenCode runtime block");
   deepStrictEqual(JSON.parse(read(".claude-plugin/plugin.json")).commands, [], "Claude command duplication stays disabled");
   ok(read("README.md").includes("/loom:loom") && read("README.md").includes("Loom agent/skill"), "README states Claude and Kiro entry truth");
   ok(/provides_commands:\n  - loom\n/.test(read("hermes-plugin/plugin.yaml")), "Hermes registers exact loom command");

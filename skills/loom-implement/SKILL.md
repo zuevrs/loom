@@ -27,9 +27,9 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 No human is watching, so the human gate moves to the PR. See [`docs/unattended.md`](../../docs/unattended.md) for host wiring; the contract:
 
 - Work in a **dedicated branch**. Committing there is expected — the "never auto-commit" hard stop is an attended-mode rule. **Never push to the default branch, never merge** — that stays human.
-- Finish = push the branch and **open a PR**: diff summary, verify digest, `## Log`, open questions — the PR description is the report channel, and its section shape is fixed (see `docs/unattended.md` § PR body contract; empty sections are dropped, draft PRs lead with the blocker).
-- `loom-verify` stays mandatory before the PR. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
-- Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — write the status and the question into the issue file, then open a **draft PR** with whatever exists and the blocker named in the description. Silent death is the only forbidden exit.
+- Finish = leave a clean dedicated branch and a report: diff summary, verify digest, `## Log`, open questions. If a runner turns that report into a PR, use the fixed `docs/unattended.md` PR body contract; Loom does not require push/PR/merge and never does them by default.
+- `loom-verify` stays mandatory before the report. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
+- Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, `ESCALATE_HUMAN` — writes the status, question, and evidence into the issue/report. A configured runner may open a draft PR, but Loom does not require PR creation. Silent death is the only forbidden exit.
 
 ## Direct small-fix (no issue file)
 

@@ -6,7 +6,7 @@ cadence: weekly
 
 # Recipe: docs-drift — does the warp still match the code?
 
-You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
+You are running unattended. Contract: `docs/unattended.md` (dedicated branch → report, never merge). Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
 
 Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
 
@@ -20,7 +20,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per confirmed drift (three lines: what drifted, evidence, where) under the active `.loom/` pack or `.loom/maintenance/issues/`.
-- A PR whose title names the confirmed documentation mismatch in the selected project language, with the findings table in the description; do not use the recipe name or date as the title. Zero findings → no PR; state "no drift found" in the runner log and exit clean.
+- A report whose summary names the confirmed documentation mismatch in the selected project language, with the findings table in the description; do not use the recipe name or date as the title. Zero findings → no product changes; state "no drift found" in the runner log and exit clean.
 
 ## Hard stops
 

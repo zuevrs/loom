@@ -17,5 +17,6 @@ run bash scripts/check-doc-consistency
 run bash scripts/check-installers
 run bash scripts/check-skill-template-contract
 run bash scripts/check-template-sections
+run node --check scripts/check-workspace-scope
 
 echo '{"status":"pass","message":"Structural smoke passed"}'

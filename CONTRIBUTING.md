@@ -79,5 +79,6 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
 - `scripts/check-skill-template-contract` — skill section contract canary.
 - `scripts/check-template-sections` — user-artifact template section contract canary.
+- `node --check scripts/check-workspace-scope` — validates the workspace scope gate syntax.
 - `scripts/smoke` — runs all structural checks.
 - CI runs these checks on every push.

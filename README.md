@@ -48,24 +48,28 @@ Terms live in [`docs/glossary.md`](docs/glossary.md); per-host depth in [`docs/h
 
 Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom ~/.loom`); the installer is pure Node, no bash required. Plugin-native hosts need nothing.
 
-**Status legend** (kept honest, see [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md)): **verified** = exercised in live sessions or CI; *implemented* = built against the host's official plugin/skill docs, not yet verified end-to-end — reports welcome.
+**Evidence legend** (details in [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md)): **install verified** means installation/discovery/uninstall was exercised; **integration verified** means the Loom adapter or hooks ran; **runtime verified** means a model-backed host session completed. A blocked or timed-out model session is reported separately and never upgraded to runtime verified.
 
 | Host | Install | Uninstall | Status |
 |------|---------|-----------|--------|
-| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | **verified** (live full cycle: init → implement → checkers → stop gate) |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live sessions) |
-| Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
-| Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
-| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (historical live smoke: managed block + 6 ritual skills in context); unified `/loom` dispatcher entry implemented, **unverified** |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | install verified; runtime blocked by Claude billing in current smoke |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | install + integration verified; runtime blocked upstream (Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | install + integration + runtime verified; workspace E2E passed |
+| Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | install + integration verified; fixture runtime smoke passed |
+| Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | install verified; runtime smoke timed out |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | install + adapter/integration verified; model runtime timed out |
 | Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) | `droid plugin uninstall loom` | implemented |
 | Windsurf | `node ~/.loom/scripts/install.mjs --windsurf` | `node ~/.loom/scripts/install.mjs --uninstall --windsurf` | implemented |
 | Kiro | `node ~/.loom/scripts/install.mjs --kiro` | `node ~/.loom/scripts/install.mjs --uninstall --kiro` | implemented |
-| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` | `rm -rf ~/.hermes/plugins/loom` | implemented |
+| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` | `rm -rf ~/.hermes/plugins/loom` | guidance-only; workspace validation parity unverified |
 | Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) | `node ~/.loom/scripts/install.mjs --uninstall --agents` | implemented |
 | OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` | If installed via `clawhub`: remove via the clawhub plugin manager. If installed via `install-agents-skills`: `node ~/.loom/scripts/install.mjs --uninstall --agents` | implemented |
 
 Uninstall removes what Loom owns and leaves foreign files untouched. Project files are yours either way: remove `<!-- loom:begin -->…<!-- loom:end -->` from `AGENTS.md` and delete `.loom/` per project if wanted.
+
+## Multi-repo workspaces
+
+Loom remains `1 Git repository = 1 Loom` by default. For a parent directory containing independent service repositories, explicitly set up a workspace meta-repo and use `.loom/workspace.json`; see [`docs/workspaces.md`](docs/workspaces.md). This is opt-in and does not add Loom files to registered service repositories.
 
 ## Quick Start
 
@@ -112,7 +116,7 @@ Use these advanced shortcuts when the ritual is already known; they remain norma
 
 Where the host supports them, Loom uses up to three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
 
-Hard enforcement is directly evidenced on Claude Code, Cursor, and OMP: done-without-APPROVE blocks the first stop (exit 2 on Stop-hook hosts), forcing one forced lap, then a repeated unresolved stop is allowed with a warning so headless runs cannot loop forever. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. OpenCode and Hermes are **Soft** runtime guidance; Pi, Windsurf, Kiro, Cline, and OpenClaw are **Convention-only**. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
+Hard enforcement is directly evidenced on OMP and Cursor in the current release checks: done-without-APPROVE blocks the first stop (exit 2), then a repeated unresolved stop is permitted after one forced lap. Claude Code has the shipped Stop hook but its current model smoke is billing-blocked; OpenCode is adapter-verified but model-runtime-blocked; Hermes is guidance-only until profile-validation parity is proven. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. Pi, Windsurf, Kiro, Cline, and OpenClaw are Convention-only. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
 
 Checkers default to the host's **fast/cheap tier** — judging is cheaper than making — and your host config always wins.
 
@@ -120,7 +124,7 @@ Per-host wiring, the full feature matrix, checker-model overrides, linter/witnes
 
 ## Unattended lane
 
-Loom ships no runner — your host already has one (background agents, cron + headless CLI, goal loops). Loom adds the **contract** that keeps an unwatched run safe — dedicated branch, verify before PR, blockers exit as draft PRs, never merge — and a **recipe catalog** for recurring maintenance: [`recipes/`](recipes/) has three discovery recipes that only file `needs-triage` stubs (`docs-drift`, `dep-audit`, `smell-sweep`) and two change recipes that go through the full implement + verify lane (`coverage-raise`, `dead-code`). Wiring: [`docs/unattended.md`](docs/unattended.md).
+Loom ships no runner — use cron, CI, OMP, Orca, Cursor, Codex, or a shell wrapper. Loom adds the **contract** that keeps an unwatched run safe — dedicated branch, verify before report, blockers enter the report, never merge — and a **recipe catalog** for recurring maintenance: [`recipes/`](recipes/) has three discovery recipes that only file `needs-triage` stubs (`docs-drift`, `dep-audit`, `smell-sweep`) and two change recipes that go through the full implement + verify lane (`coverage-raise`, `dead-code`). Wiring: [`docs/unattended.md`](docs/unattended.md).
 
 ## Loom + OMP
 

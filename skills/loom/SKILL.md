@@ -15,6 +15,7 @@ Route an explicit Loom entry to exactly one existing ritual without duplicating 
 
 - The user's explicit outcome or target, if any
 - Read-only project evidence: `.loom/` packs/issues, PRDs, issue verdicts/logs, project docs, and `git status`/`git diff`
+- If a parent `.loom/workspace.json` exists: workspace profile, registered repositories, and service-root location
 
 ## Outputs
 
@@ -29,10 +30,11 @@ Route an explicit Loom entry to exactly one existing ritual without duplicating 
    - **Plan work** — define scope, PRD, or issue pack → load `loom-plan`.
    - **Review ready work** — judge a diff/branch/ready issue → load `loom-verify`.
    - **Maintain project** — audit status, warp, debt, or stale packs → load `loom-tend`.
-3. Obvious explicit intent routes immediately into project-nonmutating analysis. Explicit outcome or named target wins over persisted work.
-4. For bare Loom entry, recommend one deterministic resume candidate in this order: relevant rework or interrupted-work evidence; then exactly one actionable pack, next-up issue, or confirmed PRD awaiting slicing. A named issue/pack is an explicit target from the user's request, not a bare-entry candidate. Multiple candidates or unresolved dirty-tree attribution require exactly one question with a recommended route.
-5. **Execute the one-hop handoff.** If the host skill mechanism permits invoking the explicitly selected user-invoked ritual, invoke that skill. Otherwise locate and read the selected sibling `skills/<ritual>/SKILL.md` from the same installed Loom tree as this dispatcher and follow it in the current context. Transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This fallback is direct instruction loading, not spawning, recursive dispatch, or lifecycle orchestration.
-6. If persistent `.loom` pack/enforcement capability becomes necessary and is absent, the chosen ritual offers `loom-init` just in time with an exact setup preview. Invoke Init through the same skill-or-sibling-file handoff; after Init completes, return directly to the calling ritual without re-entering the dispatcher or requiring a nested slash command.
+3. If a valid workspace profile is discovered from a service directory, treat the meta-repo as the Loom context owner and offer handoff before any local setup or write. An invalid profile is a hard stop.
+4. Obvious explicit intent routes immediately into project-nonmutating analysis. Explicit outcome or named target wins over persisted work.
+5. For bare Loom entry, recommend one deterministic resume candidate in this order: relevant rework or interrupted-work evidence; then exactly one actionable pack, next-up issue, or confirmed PRD awaiting slicing. A named issue/pack is an explicit target from the user's request, not a bare-entry candidate. Multiple candidates or unresolved dirty-tree attribution require exactly one question with a recommended route.
+6. **Execute the one-hop handoff.** If the host skill mechanism permits invoking the explicitly selected user-invoked ritual, invoke that skill. Otherwise locate and read the selected sibling `skills/<ritual>/SKILL.md` from the same installed Loom tree as this dispatcher and follow it in the current context. Transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This fallback is direct instruction loading, not spawning, recursive dispatch, or lifecycle orchestration.
+7. If persistent `.loom` pack/enforcement capability becomes necessary and is absent, the chosen ritual offers `loom-init` just in time with an exact setup preview. Invoke Init through the same skill-or-sibling-file handoff; after Init completes, return directly to the calling ritual without re-entering the dispatcher or requiring a nested slash command.
 
 ## Hard stops
 

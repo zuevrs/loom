@@ -27,7 +27,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -80,11 +80,21 @@ function fail(msg) {
 // Link src → dest. Symlink preferred; copy fallback for hosts without symlink rights.
 function linkOrCopy(src, dest, { isDir }) {
   if (existsSync(dest) || isSymlink(dest)) {
-    if (isSymlink(dest) && resolve(readlinkSync(dest)) === resolve(src)) {
-      return "already-linked";
+    if (isSymlink(dest)) {
+      const target = resolve(readlinkSync(dest));
+      if (target === resolve(src)) return "already-linked";
+      // Replace stale Loom-owned links, including links from an older ~/.loom clone.
+      // Foreign links and real directories remain untouched.
+      if (target.endsWith(`${sep}skills${sep}${basename(src)}`)) {
+        rmSync(dest, { recursive: true, force: true });
+      } else {
+        skipped += 1;
+        return "skipped-exists";
+      }
+    } else {
+      skipped += 1;
+      return "skipped-exists";
     }
-    skipped += 1;
-    return "skipped-exists";
   }
   try {
     symlinkSync(src, dest, isDir && IS_WIN ? "junction" : undefined);

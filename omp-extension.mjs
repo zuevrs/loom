@@ -24,8 +24,9 @@ const {
   unwitnessedApproved,
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
+const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.25.1";
+const MANAGED_BLOCK_VERSION = "v0.26.0";
 
 const INVARIANTS = PRE_LLM;
 
@@ -38,7 +39,10 @@ const ROLES = {
 };
 
 function findProjectRoot() {
-  return witnessRoot(process.env.PI_PROJECT_DIR || process.cwd());
+  const start = process.env.PI_PROJECT_DIR || process.cwd();
+  const workspace = workspaceState(start);
+  if (workspace?.invalid) return workspace.root;
+  return workspaceRoot(start) || witnessRoot(start);
 }
 
 // Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
@@ -71,6 +75,7 @@ function anomalyAlert(root) {
 
 function buildContextPointers(root) {
   const pointers = [];
+  pointers.push(...workspacePointers(findWorkspace(root)));
 
   const agentsPath = resolve(root, "AGENTS.md");
   if (existsSync(agentsPath)) {
@@ -126,7 +131,10 @@ export default function loomExtension(pi) {
   pi.on("before_agent_start", (event) => {
     try {
       const role = (process.env.LOOM_ROLE || "").toLowerCase();
-      let injection = INVARIANTS;
+      const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
+      let injection = workspace?.invalid
+        ? `# Loom workspace error\nWorkspace profile is invalid: ${workspace.profilePath} (${workspace.error})\nRepair the profile before reading or writing project state.`
+        : INVARIANTS;
       if (role && ROLES[role]) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
         if (/-checker$/.test(role)) {
@@ -216,6 +224,10 @@ export default function loomExtension(pi) {
   // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)
   pi.on("session_stop", () => {
     try {
+      const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
+      if (workspace?.invalid) {
+        return { continue: true, additionalContext: `BLOCKED: invalid workspace profile ${workspace.profilePath}: ${workspace.error}. Repair the profile before continuing.` };
+      }
       const root = findProjectRoot();
       const blocked = findUnverifiedDoneIssues(root).sort();
       if (blocked.length > 0) {

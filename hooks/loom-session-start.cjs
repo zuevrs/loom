@@ -7,8 +7,9 @@
 const fs = require("fs");
 const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
+const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.25.1";
+const MANAGED_BLOCK_VERSION = "v0.26.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -20,8 +21,14 @@ function findProjectRoot() {
 }
 
 function run() {
-  const root = findProjectRoot();
+  const workspace = workspaceState(process.cwd());
+  if (workspace?.invalid) {
+    process.stdout.write(`# Loom session context\n\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\n\nWorkspace setup is blocked until the profile is repaired.\n`);
+    return;
+  }
+  const root = workspaceRoot(process.cwd()) || findProjectRoot();
   const pointers = [];
+  pointers.push(...workspacePointers(findWorkspace(process.cwd())));
 
   const agentsPath = path.join(root, "AGENTS.md");
   if (fs.existsSync(agentsPath)) {

@@ -19,6 +19,12 @@ try {
     witnessRoot,
   } = require("./stop-gate-logic.cjs");
   const { basename } = require("node:path");
+  const { workspaceState, workspacePointers, findWorkspace } = require("./workspace.cjs");
+  const workspace = workspaceState(process.cwd());
+  if (workspace?.invalid) {
+    process.stdout.write(`\n# Loom workspace error\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\nRepair the profile before reading or writing project state.\n`);
+    return;
+  }
 
   const root = witnessRoot(process.cwd());
   if (!alertScanAllowed(root)) return; // ceiling: see stop-gate-logic.cjs

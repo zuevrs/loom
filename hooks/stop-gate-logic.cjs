@@ -12,6 +12,7 @@ const {
 } = require("node:fs");
 const { join, basename, resolve, dirname } = require("node:path");
 const { tmpdir } = require("node:os");
+const { workspaceRoot, workspaceState } = require("./workspace.cjs");
 const { createHash } = require("node:crypto");
 
 /** @returns {Record<string, string[]>} pack name → issue paths */
@@ -232,7 +233,9 @@ const WITNESS_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Nearest ancestor with .loom/; nearest AGENTS.md only if no .loom exists. */
 function witnessRoot(start) {
-  const initial = resolve(start || process.cwd());
+  const state = workspaceState(start || process.cwd());
+  const configured = workspaceRoot(start || process.cwd());
+  const initial = state?.invalid ? state.root : (configured || resolve(start || process.cwd()));
   let dir = initial;
   let agentsRoot = null;
   for (let i = 0; i < 20; i++) {
@@ -477,6 +480,11 @@ function findUnverifiedDoneIssues(root) {
  * runner has no witness file and must not warn about it.
  */
 function check(root, opts = {}) {
+  const workspace = workspaceState(root);
+  if (workspace?.invalid) {
+    process.stderr.write(`BLOCKED: invalid workspace profile ${workspace.profilePath}: ${workspace.error}\n`);
+    return 1;
+  }
   for (const w of lintWarnings(root)) {
     process.stderr.write(`LINT: ${w}\n`);
   }

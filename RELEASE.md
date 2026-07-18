@@ -92,4 +92,5 @@ omp plugin install git:github.com/zuevrs/loom --force
 2. `git rev-parse --short vX.Y.Z`
 3. Confirm both hashes match.
 4. `gh release view vX.Y.Z` — confirm Latest.
-5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md): record unified-entry evidence for OMP, Cursor, and Claude, allowing an explicit release-specific N/A reason; mark only directly live-smoked hosts verified and leave all others implemented/unverified.
+5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md): record workspace evidence for OMP, Cursor, and the available hosts; separate install, integration, and runtime status; mark blocked hosts explicitly.
+6. `node --check scripts/check-workspace-scope`

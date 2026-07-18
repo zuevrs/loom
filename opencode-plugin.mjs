@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.25.1
+// loom — OpenCode plugin adapter. Version: 0.26.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -13,9 +13,17 @@ import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
+const { findWorkspace, workspacePointers } = require("./hooks/workspace.cjs");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillsDir = path.resolve(__dirname, "skills");
+
+function workspaceInjection() {
+  const profile = findWorkspace(process.cwd());
+  if (!profile) return "";
+  if (profile.invalid) return `\n\n# Loom workspace error\n${workspacePointers(profile).join("\n")}\nRepair the profile before reading or writing project state.`;
+  return `\n\n# Loom workspace\n${workspacePointers(profile).join("\n")}\nWorkspace tasks own scope; service repositories are not additional Loom roots.`;
+}
 
 const SYSTEM_INJECTION = `${PRE_LLM}
 
@@ -34,7 +42,7 @@ export default async ({ client } = {}) => {
     },
 
     "experimental.chat.system.transform": async (_input, output) => {
-      output.system.push(SYSTEM_INJECTION);
+      output.system.push(SYSTEM_INJECTION + workspaceInjection());
     },
   };
 };

@@ -34,18 +34,19 @@ Plugin presence, integration tier, and hook count describe delivery and wiring. 
 
 ### Convention-only hosts
 
-Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through skills and managed instructions without a runtime gate. OpenClaw remains Convention-only until Loom ships and verifies an extension. Add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) when done-without-APPROVE must block at PR level regardless of host.
+Hermes, Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through guidance/skills without a canonical runtime scope gate. OpenClaw remains Convention-only until Loom ships and verifies an extension. Add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) when done-without-APPROVE must block at PR level regardless of host.
 
 ## Host-native enforcement
 
 | Host | Tier | Mechanism | Evidence-backed claim |
 |------|------|-----------|----------------------|
 | **OMP** | Hard | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | `session_stop` prevents the first unresolved stop; TTSR and agents are additional reminder/review layers |
-| **Claude Code** | Hard | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Live stop contract prevents done-without-APPROVE once, then permits the repeated state |
+| **Claude Code** | Hard (Runtime unverified) | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Live stop contract prevents done-without-APPROVE once, then permits the repeated state |
 | **Codex** | Hard (Unverified) | Same shipped `Stop` hook | Plugin-root expansion and stop blocking still need live-host evidence |
 | **Cursor** | Hard | Generated `Stop` hook invokes `node hooks/stop-gate-logic.cjs --hook` | Installed-command regression exercises exit 2 for unresolved state and exit 0 for verified state |
 | **Droid (Factory)** | Hard (Unverified) | Shipped `Stop` hook via `.claude-plugin` format | Plugin-root expansion and stop blocking still need live-host evidence |
-| **OpenCode / Hermes** | Soft | System transform / two working lifecycle callbacks | Runtime context is injected, but no stop primitive prevents completion |
+| **OpenCode** | Soft (Adapter verified, runtime unverified) | System transform | Context is injected; current model-backed smoke timed out and no stop primitive prevents completion |
+| **Hermes** | Guidance-only (Unverified) | Two lifecycle callbacks with a weaker independent profile parser | Context guidance only; canonical workspace enforcement remains the external CLI gate |
 | **Pi / Windsurf / Kiro / Cline / OpenClaw** | Convention-only | Skills and managed instructions | No shipped lifecycle stop gate; OpenClaw has no extension |
 
 **OMP:** the first stop for a done-without-APPROVE state returns control to the agent. A repeated stop with the same unresolved issue set is permitted with an explicit warning; resolution or any change to that set resets the forced lap. TTSR remains the stream reminder, and custom agents provide structured verify.
