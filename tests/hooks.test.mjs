@@ -383,7 +383,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   deepStrictEqual(config.skills.paths, [resolve(root, "skills")], "OpenCode adapter registers the skills path containing loom dispatcher");
 }
 
-// omp-extension.mjs — invariants + verify gate + goal gate; NO plan-mode patching (withdrawn)
+// omp-extension.mjs — invariants + witness + complementary goal/turn-stop gates
 {
   const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
   ok(typeof mod.default === "function", "omp-extension exports default function");
@@ -399,6 +399,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   strictEqual(handlers.context, undefined, "no context handler — native /plan left untouched");
   ok(typeof handlers.session_stop === "function", "registers session_stop verify gate");
+  ok(typeof handlers.tool_call === "function", "registers goal-complete pre-commit blocker");
+  strictEqual(handlers.tool_result, undefined, "does not register a goal-result note");
 }
 
 // OMP session_stop — one forced correction lap, bounded by unresolved state
@@ -499,65 +501,37 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   }
 }
 
-// --- v0.22.0: goal gate — maker/checker on the goal stop condition ---
+// OMP goal-complete pre-commit gate complements session_stop; no result augmentation.
 {
   const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
   const handlers = {};
   mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
-  ok(typeof handlers.tool_call === "function", "registers tool_call goal gate");
-  ok(typeof handlers.tool_result === "function", "registers tool_result leftover note");
-
-  const tmp = mkdtempSync(join(tmpdir(), "loom-goalgate-"));
+  const tmp = mkdtempSync(join(tmpdir(), "loom-goal-precommit-"));
   const issueDir = join(tmp, ".loom", "pack", "issues");
   mkdirSync(issueDir, { recursive: true });
-  writeFileSync(join(tmp, "AGENTS.md"), "x"); // findProjectRoot anchor
-  const prevDir = process.env.PI_PROJECT_DIR;
+  writeFileSync(join(tmp, "AGENTS.md"), "# Project\n");
+  const issue = join(issueDir, "01.md");
+  const previous = process.env.PI_PROJECT_DIR;
   process.env.PI_PROJECT_DIR = tmp;
-
   try {
-    // done-without-APPROVE → completion blocked, reason names APPROVE and the escape hatches
-    writeFileSync(join(issueDir, "01-a.md"), "# A\n\n## Status\n\nStatus: done\n");
+    writeFileSync(issue, "# Issue\n\n## Status\n\nStatus: done\n");
     const blocked = handlers.tool_call({ toolName: "goal", input: { op: "complete" } });
-    ok(blocked && blocked.block === true, "goal complete blocked over unverified done");
-    ok(/APPROVE/.test(blocked.reason) && /pause|drop/.test(blocked.reason), "block reason names APPROVE and pause/drop escape");
-
-    // other goal ops and other tools pass through
-    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "create" } }), undefined, "goal create untouched");
-    strictEqual(handlers.tool_call({ toolName: "bash", input: {} }), undefined, "non-goal tools untouched");
-
-    // verified done → completion allowed
-    writeFileSync(
-      join(issueDir, "01-a.md"),
-      "# A\n\n## Verify\n\nAPPROVE — spec pass, standards pass\n\n## Status\n\nStatus: done\n"
-    );
-    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "complete" } }), undefined, "verified done completes freely");
-
-    // leftover ready-for-agent → note appended to completion result, original content kept
-    writeFileSync(join(issueDir, "02-b.md"), "# B\n\n## Status\n\nStatus: ready-for-agent\n");
-    const noted = handlers.tool_result({
-      toolName: "goal",
-      input: { op: "complete" },
-      content: [{ type: "text", text: "Goal complete." }],
-      isError: false,
-    });
-    ok(noted && noted.content.length === 2, "leftover note appended after original content");
-    ok(/ready-for-agent/.test(noted.content[1].text) && /02-b\.md/.test(noted.content[1].text), "note names the leftover issue");
-
-    // errored completion (e.g. blocked by the gate) gets no note; clean pack gets no note
-    strictEqual(
-      handlers.tool_result({ toolName: "goal", input: { op: "complete" }, content: [], isError: true }),
-      undefined,
-      "errored completion gets no leftover note"
-    );
-    rmSync(join(issueDir, "02-b.md"));
-    strictEqual(
-      handlers.tool_result({ toolName: "goal", input: { op: "complete" }, content: [], isError: false }),
-      undefined,
-      "clean pack completes without a note"
-    );
+    ok(blocked?.block, "unverified done blocks native goal completion");
+    ok(blocked.reason.includes("APPROVE") && /pause|drop/.test(blocked.reason) && blocked.reason.includes("report"), "block explains remediation and escape");
+    const windowsIssue = join(issueDir, String.raw`C:\repo\.loom\pack\issues\02-windows.md`);
+    writeFileSync(windowsIssue, "# Windows issue\n\n## Status\n\nStatus: done\n");
+    const windowsBlocked = handlers.tool_call({ toolName: "goal", input: { op: "complete" } });
+    ok(windowsBlocked.reason.includes("02-windows.md"), "Windows-shaped issue filename appears in block reason");
+    ok(!windowsBlocked.reason.includes("C:\\repo") && !windowsBlocked.reason.includes(".loom\\pack"), "Windows-shaped issue path is not exposed in block reason");
+    rmSync(windowsIssue);
+    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "create" } }), undefined, "non-complete goal operation passes");
+    strictEqual(handlers.tool_call({ toolName: "bash", input: {} }), undefined, "non-goal operation passes");
+    writeFileSync(issue, "# Issue\n\n## Verify\n\nAPPROVE — spec pass, standards pass\n\n## Status\n\nStatus: done\n");
+    strictEqual(handlers.tool_call({ toolName: "goal", input: { op: "complete" } }), undefined, "verified done permits native goal completion");
+    strictEqual(handlers.tool_result, undefined, "does not register leftover-ready result augmentation");
   } finally {
-    if (prevDir === undefined) delete process.env.PI_PROJECT_DIR;
-    else process.env.PI_PROJECT_DIR = prevDir;
+    if (previous === undefined) delete process.env.PI_PROJECT_DIR;
+    else process.env.PI_PROJECT_DIR = previous;
     rmSync(tmp, { recursive: true });
   }
 }
@@ -597,17 +571,14 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(impl.includes("`**Verdict: APPROVE**` does not satisfy the stop gate"), "implement names the observed prose failure mode");
   }
 
-  // field run 8: an omp -p verify run spawned generic task agents instead of the
-  // named checkers — the tier pin and role manifests ride on the names.
-  ok(read("skills/loom-verify/SKILL.md").includes("Spawn the named checker agents"), "verify prefers named checker agents over generic sub-agents");
-
-  // field run 9: one batch-level agent field over two prompts ran standards under
-  // the spec label; and a checker yielded null (13s spawn wasted). Both pinned.
-  ok(read("skills/loom-verify/SKILL.md").includes("Each checker prompt carries its own agent binding"), "verify pins per-item agent binding for batched spawns");
-  for (const p of ["agents/loom-verify-spec.md", "agents/loom-verify-standards.md"]) {
-    ok(read(p).includes("Yield contract:"), `${p} carries the yield contract`);
-    ok(read(p).includes("never an empty yield"), `${p} forbids the observed null yield`);
+  // Native OMP Verify: one shared batch context, one bundled reviewer per axis,
+  // and role binding per item. Compatibility manifests remain installed but optional.
+  const verifyContract = read("skills/loom-verify/SKILL.md");
+  for (const phrase of ["one native `task` batch call", "bundled reviewer agents", "shared packet once as batch context", "`Spec checker` / `Standards checker` role"]) {
+    ok(verifyContract.includes(phrase), `native OMP Verify contract carries: ${phrase}`);
   }
+  ok(/standard OMP Verify does not depend on Loom's named custom checker agents/i.test(verifyContract), "standard OMP Verify is independent of custom agent discovery");
+  for (const p of ["agents/loom-verify-spec.md", "agents/loom-verify-standards.md"]) ok(read(p).includes("name: loom-verify-"), `${p} remains a compatibility entrypoint`);
   for (const p of [".claude-plugin/agents/loom-verify-spec.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
     ok(read(p).includes("never end empty, prose-only, or cancelled"), `${p} forbids empty/prose-only/cancel-with-text final messages`);
   }
@@ -618,31 +589,16 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(read("docs/unattended.md").includes("omp -p --auto-approve"), "unattended doc teaches the real OMP headless flag");
   ok(!read("docs/hosts.md").includes("-p --approve ") && !read("docs/unattended.md").includes("-p --approve "), "no doc resurrects the nonexistent --approve flag");
 
-  // field run 10 (deck run, measured): 9 checkers spent 199 turns / ~4.8M cache-read
-  // re-deriving evidence the orchestrator already had (pointer-only briefing), two
-  // spawns died to null yields, and the goal lane burned 4 blocks of back-to-back
-  // no-op polls. Three fixes pinned below.
+  // Shared evidence remains normative; OMP transport and lifecycle are host-owned.
   {
     const verify = read("skills/loom-verify/SKILL.md");
-    // 1a. briefing carries the evidence itself, with a size valve for big diffs
-    ok(verify.includes("The briefing carries evidence, not pointers"), "verify briefing ships evidence, not pointers");
-    ok(verify.includes("diff text itself"), "briefing embeds the diff text, not just the command");
-    ok(verify.includes("issue card verbatim"), "briefing embeds the issue card verbatim");
-    ok(verify.includes("Size valve"), "briefing has a size valve for oversized diffs");
-    // 1b. checkers start from the briefing; soft turn budget rides on all four manifests
-    for (const p of [
-      "agents/loom-verify-spec.md", "agents/loom-verify-standards.md",
-      ".claude-plugin/agents/loom-verify-spec.md", ".claude-plugin/agents/loom-verify-standards.md",
-    ]) {
-      ok(read(p).includes("Evidence economy:"), `${p} carries the evidence-economy rule`);
-      ok(read(p).includes("~12 tool calls"), `${p} carries the soft turn budget`);
-    }
-    // 2. null yield burns a spawn: one respawn max, then fail — never a third
-    ok(verify.includes("Respawn that checker **once**"), "verify caps null-yield respawns at one");
-    ok(verify.includes("never a third spawn"), "verify forbids a third spawn on repeated null yields");
+    ok(verify.includes("one shared evidence packet"), "verify gives all axes one shared evidence packet");
+    ok(verify.includes("diff text itself"), "evidence packet embeds the diff text, not just the command");
+    ok(verify.includes("issue card verbatim"), "evidence packet embeds the issue card verbatim");
+    ok(verify.includes("Size valve"), "evidence packet has a size valve for oversized diffs");
+    ok(!verify.includes("Respawn that checker **once**") && !verify.includes("never a third spawn"), "Verify does not own OMP yield recovery");
   }
-  // 3. wait discipline binds every lane on every host (goal-lane polls were outside
-  // the verify-only prose that already existed)
+  // Universal wait discipline remains outside Verify's host execution mechanics.
   for (const [p, label] of [["AGENTS.md", "managed block"], ["skills/loom-init/SKILL.md", "init template"]]) {
     ok(read(p).includes("Waits are work time: no back-to-back no-op polls"), `${label} carries the wait-discipline line`);
   }
@@ -829,7 +785,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(tdd.includes("Refactoring is not part of the loop"), "TDD.md pushes refactoring out of the loop");
 }
 
-// batch mode + verify discovery/wait — distilled from the first full goal-mode lifecycle run
+// batch mode + native Verify contract
 {
   const { readFileSync: rf } = await import("node:fs");
   const impl = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
@@ -840,13 +796,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("## Batch mode"), "implement documents batch mode");
   ok(impl.includes("one fresh implement sub-agent per issue"), "batch mode spawns fresh sub-agent per issue");
   ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("Fresh maker context per issue"), "managed block keeps fresh-context lane invariant");
-  }
-  ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
-  ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
-  ok(verify.includes("Prefer the host's blocking wait"), "verify has host-neutral wait rule");
-  ok(verify.includes("Named checker agents required by this branch"), "digest records branch-required named-agent outcome");
+  for (const doc of [agents, initSkill]) ok(doc.includes("Fresh maker context per issue"), "managed block keeps fresh-context lane invariant");
+  ok(verify.includes("OMP v17.0.4+ native path"), "Verify documents the tested OMP minimum");
+  ok(verify.includes("independent sequential contexts") && verify.includes("fail closed"), "Verify keeps the cross-host capability fallback");
 }
 
 // issue 02 — Standards checker ratchet + agreed-seam contract is parity-pinned
@@ -926,10 +878,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const claudeStd = rf(resolve(__dirname, "..", ".claude-plugin", "agents", "loom-verify-standards.md"), "utf8");
   const claudePlugin = rf(resolve(__dirname, "..", ".claude-plugin", "plugin.json"), "utf8");
 
-  ok(verify.includes("Checker model tier"), "verify documents the checker model tier rule");
-  ok(verify.includes("user's host config always wins"), "user config beats the tier default");
-  ok(verify.includes("Checker model tier: fast/cheap tier"), "digest records the tier used");
-  ok(ompSpec.includes("model: pi/smol") && ompStd.includes("model: pi/smol"), "OMP checkers pin the fast tier via the smol model role (bare `fast` is a raw name pattern, not a role — it silently falls back to the session model)");
+  ok(verify.includes("host owns execution, role binding, model routing"), "Verify delegates model routing to the host");
+  ok(verify.includes("User host configuration wins"), "user host config wins");
+  ok(verify.includes("Host/model routing: host-managed"), "digest records host-managed routing");
+  ok(ompSpec.includes("name: loom-verify-spec") && ompStd.includes("name: loom-verify-standards"), "OMP compatibility checker entrypoints remain available");
   ok(claudeSpec.includes("model: haiku") && claudeStd.includes("model: haiku"), "Claude checkers pin the haiku tier");
   // Field run 8: Claude Code's manifest schema rejects a directory string for
   // `agents` ("Invalid input") — only an array of explicit .md file paths installs.
@@ -1886,8 +1838,8 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(verify.includes("**Judge only. Never fix.**") && verify.includes("Do not fix code during verify"), "judge-only survives in banner + hard stop");
   ok(!/Rules:.*deletion over addition/.test(impl), "implement: ladder Rules no longer duplicates step 5");
   ok(impl.includes("5. Prefer deletion over addition."), "deletion-over-addition survives as step 5");
-  ok(!verify.includes("Aggregate structured verdicts into the digest above"), "OMP workflow trimmed to OMP-specific facts");
-  ok(verify.includes("The general digest, gate, and write-back rules apply"), "OMP workflow defers to the general contract");
+  ok(!verify.includes("Aggregate structured verdicts into the digest above"), "OMP workflow avoids duplicate aggregation prose");
+  ok(verify.includes("Verify policy is host-neutral"), "OMP execution remains under host-neutral Verify policy");
 }
 
 // v0.16.2 — field-run fixes round 2: direction-aware version drift, OMP witness
@@ -2065,10 +2017,9 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(/no snapshot → grep `Status:`/.test(impl), "implement falls back to grepping statuses, not full card reads");
   ok(impl.includes("Never read sibling issue cards in full"), "implement forbids full sibling card reads");
   const verify = read("skills/loom-verify/SKILL.md");
-  ok(verify.includes("**Shared briefing:**"), "verify codifies the shared checker briefing");
-  ok(/scratch file outside the repo worktree/.test(verify), "briefing scratch lives outside the worktree");
-  ok(verify.includes("The wait is work time."), "verify turns the checker wait into work time");
-  ok(/pre-assemble the digest frame/.test(verify), "verify pre-assembles the digest during the wait");
+  ok(verify.includes("one shared evidence packet"), "verify codifies one shared evidence packet");
+  ok(verify.includes("host owns execution") && verify.includes("worker lifecycle"), "host owns native worker lifecycle");
+  ok(!verify.includes("scratch file outside the repo worktree"), "Verify no longer prescribes scratch-file transport");
 }
 
 // v0.18.0 — managed-block trim: every always-injected line must be universal;
@@ -2317,14 +2268,13 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const verify = read("skills/loom-verify/SKILL.md");
   const branches = section(verify, "**Review branches:**", "## Process");
   ok(branches.includes("Standards-only") && branches.includes("Do not spawn, require, or simulate a Spec checker"), "Standards-only branch forbids Spec checker");
-  ok(verify.includes("Gates green → choose the review branch before spawning") && verify.includes("spawn only the Standards checker"), "process executes Standards-only branch");
+  ok(verify.includes("Gates green → choose the review branch") && verify.includes("Standards-only submits only Standards"), "process executes Standards-only branch");
   ok(verify.includes("not required — Standards-only") && verify.includes("Standards-only never completes a Loom issue"), "digest/evidence/completion adapt to Standards-only");
   ok(verify.includes("Spec-backed requires Spec+Standards; Standards-only still requires its Standards checker"), "anti-rationalization is branch-aware");
-  const ompWorkflow = section(verify, "### OMP verify workflow", "## Done when");
-  ok(ompWorkflow.includes("Spec-backed") && ompWorkflow.includes("`loom-verify-spec`") && ompWorkflow.includes("`loom-verify-standards`"), "OMP Spec-backed tries both named checkers");
-  const ompStandards = ompWorkflow.split("**Standards-only:**")[1] || "";
-  ok(ompStandards.includes("only `loom-verify-standards`") && ompStandards.includes("Do not attempt or spawn `loom-verify-spec`"), "OMP Standards-only tries only Standards");
-  ok(ompStandards.includes("unavailable / not required") && ompStandards.includes("generic Standards task"), "OMP Standards-only evidence and fallback are satisfiable");
+  const ompWorkflow = section(verify, "For OMP, the tested minimum", "## Done when");
+  ok(ompWorkflow.includes("one native `task` batch") && ompWorkflow.includes("shared batch context") && ompWorkflow.includes("per-item role binding"), "OMP Verify uses the native batch contract");
+  ok(verify.includes("Spec-backed submits both items; Standards-only submits only Standards"), "OMP branch shape controls native batch items");
+  ok(verify.includes("independent sequential contexts") && verify.includes("fail closed"), "cross-host fallback preserves independent review");
 
   const grill = read("skills/loom-grill/SKILL.md");
   ok(grill.includes("establish an attributable baseline") && grill.includes("target behavior's path is already red"), "Grill restores attributable baseline and red-path stop");

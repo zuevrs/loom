@@ -34,16 +34,15 @@ With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Veri
 
 1. Pin fixed point; confirm diff is non-empty.
 2. **Run the objective gates before spawning anyone**: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE. Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. And a cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence. **Any red gate short-circuits: REJECT now**, blockers name the failing commands, write-back happens as usual, and checkers are **not spawned** (record in Sub-agent evidence: `not spawned — objective gate red`) — judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
-3. Gates green → choose the review branch before spawning:
-   - **Spec-backed:** spawn two parallel checker sub-agents. Spec judges the supplied contract and quotes it (`loomRole: "spec-checker"`); Standards judges warp, discipline, conventions, and whether the runnable check can fail (`loomRole: "standards-checker"`).
-   - **Standards-only:** spawn only the Standards checker (`loomRole: "standards-checker"`). Put `Spec unavailable` in the digest and Spec evidence; no Spec agent attempt is required. All checker mechanics below apply to the checker(s) this branch requires.
-   - **Named checker agents:** if the host ships pre-configured checker agents (e.g. OMP plugin agents `loom-verify-spec` / `loom-verify-standards`), **attempt them once per session** — never assume unavailability without one recorded attempt. Record the outcome (found / not found) in Sub-agent evidence and reuse it for every subsequent verify in the session. On not-found, fall back to generic sub-agents with the checker manifests inlined.
-   - **Spawn the named checker agents when the host lists them** (`loom-verify-spec` / `loom-verify-standards` in the sub-agent type list) — a generic task/reviewer sub-agent is the fallback for hosts that don't, not a peer option. The names carry the manifests: role constraints and the model tier below ride on them.
-   - **Each checker prompt carries its own agent binding.** Batch the two spawns for parallelism only if the interface binds the agent per item; a single agent field spanning two prompts runs both under one checker's manifest and the other axis silently loses its role and tier (seen live on OMP: standards ran under the spec label).
-   - **Checker model tier:** checkers run on the host's **fast/cheap tier** when a model can be chosen — named checker manifests already pin it (OMP `model: pi/smol`, Claude `model: haiku`); when spawning generic sub-agents through an interface that exposes model selection, pick the host's fast/cheap tier yourself. The **user's host config always wins** (model roles, redefined agents, user rules); when no tier is discernible, inherit the session model. Record the tier used in Sub-agent evidence either way.
-   - **Shared briefing:** write the checker context **once** to a scratch file outside the repo worktree (`$TMPDIR` or the host's scratch, e.g. OMP `local://`) and hand both spawns the same reference plus their own axis. Two hand-copied prompts drift; one briefing guarantees both checkers judge the same input, and scratch outside the repo keeps the judged diff clean.
-   - **The briefing carries evidence, not pointers.** Contents: the **diff text itself** (not just the command), the **issue card verbatim** (acceptance criteria included), the `## Log` claims, the fixed point, **the step-2 gate results** (checkers judge with facts, not the maker's word), and PRD/standards **paths** for deeper dives. You already computed the diff in step 1 — a checker re-deriving it read-by-read is the single biggest verify cost on record (field run: 9 checkers, 199 turns, most spent re-assembling evidence the orchestrator had). Size valve: past ~400 diff lines, embed the file list + per-file hunk summary instead and let checkers read the changed files themselves.
-4. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15s or more). Either way, fill the wait with the verify-session's own remaining tasks: pre-assemble the digest frame — scope, fixed point, step-2 gate results in their slots — so checker verdicts drop into a prepared digest instead of starting it after they land. No empty rapid-fire polls: a field run burned 6 consecutive no-op polls exactly here.
+3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers:
+   - **Spec-backed:** obtain two independent reviews. The Spec checker judges the supplied contract and quotes it; the Standards checker judges warp, discipline, conventions, and whether the runnable check can fail.
+   - **Standards-only:** obtain only the independent Standards review. Put `Spec unavailable` in the digest and Spec evidence; no Spec checker is required.
+   - The packet carries the **diff text itself** (not just the command), the **issue card verbatim** when present, the `## Log` claims, the fixed point, **the step-2 gate results**, and PRD/standards **paths** for deeper dives. Both axes must judge the same packet. Size valve: past ~400 diff lines, include the file list + per-file hunk summary instead and let checkers read changed files themselves.
+   - Checker contexts are independent from the maker and from each other. Bind each required axis to its own role: `Spec checker` or `Standards checker`. Checkers judge only and never fix.
+   - Use the host's native parallel-worker facility when available; the host owns execution, role binding, model routing, blocking/waiting, yield recovery, and worker lifecycle. User host configuration wins.
+   - **OMP v17.0.4+ native path:** make one native `task` batch call using bundled reviewer agents, pass the shared packet once as batch context, and submit one task item per required axis with its own `Spec checker` / `Standards checker` role. Spec-backed submits both items; Standards-only submits only Standards. Standard OMP Verify does not depend on Loom's named custom checker agents; the root `agents/loom-verify-*.md` files remain advanced compatibility entrypoints.
+   - **Capability fallback:** if parallel workers are unavailable, run the required axes in independent sequential contexts and record the limitation. If an independent review cannot be obtained, fail closed with `ESCALATE_HUMAN`; never simulate the missing checker in the maker context.
+4. Collect the branch-required independent verdicts through the host's lifecycle. Do not add a Loom-specific transport, polling cadence, or retry loop around host-native execution.
 5. Aggregate digest; blocking findings first. Gate results are verdict input, not decoration — **evidence beats opinion**, and an APPROVE whose Checks executed section is empty is unearned by definition.
 
 ## Output format
@@ -65,9 +64,9 @@ APPROVE | REJECT | ESCALATE_HUMAN
 ## Sub-agent evidence
 - Spec sub-agent: invoked (yes/no/not required — Standards-only) | tool/host used
 - Standards sub-agent: invoked (yes/no) | tool/host used
-- Named checker agents required by this branch: attempted this session (yes/no/not required) → found / not found
-- Checker model tier: fast/cheap tier | inherited session model | user-configured (which)
-- If a Spec-backed review cannot spawn parallel sub-agents: document limitation; run sequential checks in separate context windows
+- Review execution: host-native parallel batch | independent sequential fallback (limitation recorded)
+- Role binding: Spec checker (yes/no/not required) | Standards checker (yes/no)
+- Host/model routing: host-managed; record an explicit user override when relevant
 
 ## Risk/Scope notes
 
@@ -112,7 +111,7 @@ REJECT — {date} — blockers: {one line per blocker, semicolon-separated}
 APPROVE — {date} — spec pass, standards pass
 ```
 
-Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status: done` only when a `## Verify` section contains a line starting with `APPROVE`; (2) memory — the digest in chat dies with the session, so a REJECT that isn't written back is invisible to the next fresh session, which would re-derive the same mistake. OMP also injects a TTSR reminder when you write `Status: done` mid-stream.
+Two reasons: (1) enforcement — Stop hooks and OMP lifecycle gates require a `## Verify` line starting with `APPROVE` before accepting `Status: done`; OMP blocks native `goal complete` before persistence and uses `session_stop` for general turn-stop correction; (2) memory — the digest in chat dies with the session, so a REJECT that isn't written back is invisible to the next fresh session, which would re-derive the same mistake. OMP also injects a TTSR reminder when you write `Status: done` mid-stream.
 
 **The APPROVE is witnessed.** On hosts with sub-agent spawn hooks (Claude Code, Codex, Cursor) the hook records every checker spawn; the Stop gate warns when a fresh APPROVE appears with no witnessed checker run (`LOOM_WITNESS=strict` turns the warning into a block, `LOOM_WITNESS=off` disables). Writing the APPROVE line without actually spawning checkers is therefore visible — don't.
 
@@ -130,10 +129,9 @@ Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status
 |---|---|
 | Empty diff | Stop; pin fixed point and confirm scope |
 | Objective gate red (step 2) | REJECT without spawning checkers; blockers name the failing commands, digest notes `not spawned — objective gate red` |
-| Host cannot spawn sub-agents | Spec-backed: sequential Spec then Standards; Standards-only: run Standards in a separate context; document the limitation |
-| OMP `task` agent not found | Fall back to host `reviewer` or sequential sub-agents with `loomRole`; document in Sub-agent evidence |
-| Sub-agents unavailable | ESCALATE_HUMAN with explicit limitation |
-| Checker yields null/empty (host glitch) | Respawn that checker **once**; a second null/empty counts as `verdict: fail` with blocker "checker yield lost (host glitch)" — never a third spawn |
+| Parallel workers unavailable | Run required axes in independent sequential contexts; document the limitation |
+| Independent checker context unavailable | ESCALATE_HUMAN with the explicit capability limitation; fail closed |
+| Host worker fails or yields no verdict | Let the host own recovery; without a branch-required independent verdict, fail closed |
 | Conflicting spec vs standards | Spec-backed only: REJECT with both cited |
 | Checker tries to fix | Stop checker; re-run with role manifest |
 
@@ -146,28 +144,15 @@ Two reasons: (1) enforcement — Stop hooks and OMP `session_stop` allow `Status
 | "Checkers passed, the maker said tests pass" | The maker's word is a claim; Checks executed holds commands verify ran itself |
 | "I'll fix it myself in verify" | Verify judges; hand back to implement |
 | "Approve with known gap" | REJECT or ESCALATE_HUMAN with explicit debt marker |
-| "Named agents probably aren't discoverable — straight to fallback" | One recorded attempt per session first; assumption is not evidence |
 
 ## Host limitations
 
-Documented parallel sub-agent support today:
+Verify policy is host-neutral. Hosts with native parallel workers run the branch-required checker roles over one shared evidence packet. Hosts without parallel workers run those roles in independent sequential contexts and record the limitation. If the host cannot provide an independent checker context, Verify fails closed with `ESCALATE_HUMAN`.
 
-| Capability | Claude Code | Codex | Cursor | OpenCode | OMP |
-|---|:-:|:-:|:-:|:-:|:-:|
-| Parallel sub-agents | yes | yes | yes | yes | yes (when plugin agents discovered) |
+For OMP, the tested minimum for native Verify is **v17.0.4**. Standard OMP Verify uses one native `task` batch with bundled reviewer agents, shared batch context, and per-item role binding. OMP owns execution and lifecycle; Loom does not layer custom agent discovery, scratch transport, polling, or yield-retry mechanics over it. User OMP configuration wins.
 
-**OMP agent discovery caveat:** `discoverAgents` in some OMP versions scans Claude marketplace plugins only — not OMP npm plugins (`omp plugin install`). Custom agents in Loom's `agents/` may return "agent not found" via `task`. **Fallback is branch-specific:** Spec-backed spawns generic Spec + Standards with their `loomRole` values (or sequential separate contexts); Standards-only spawns only generic Standards (`loomRole: "standards-checker"`). TTSR and `session_stop` gates are unaffected. Upstream fix tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi) (`packages/coding-agent/src/task/discovery.ts`).
+The root OMP checker manifests remain backward-compatible advanced entrypoints for this minor release, including headless `LOOM_ROLE` use, but the standard workflow does not depend on them. Claude checker manifests are unchanged.
 
-For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), treat parallel support as unavailable unless documented. Spec-backed runs Spec then Standards sequentially in separate contexts; Standards-only runs only Standards in a separate context. Document the limitation in Sub-agent evidence.
-
-### OMP verify workflow
-
-Choose the review branch first:
-
-- **Spec-backed:** on the first Verify of the session, attempt both named agents through `task`: `loom-verify-spec` and `loom-verify-standards`. Spawn both when found and record both outcomes. If unavailable, fall back to generic Spec + Standards tasks with `loomRole: "spec-checker"` and `loomRole: "standards-checker"` (or sequential separate contexts).
-- **Standards-only:** attempt and spawn only `loom-verify-standards`; record Spec as `unavailable / not required — Standards-only`. If unavailable, fall back only to a generic Standards task with `loomRole: "standards-checker"` or one separate Standards context. Do not attempt or spawn `loom-verify-spec`.
-
-Reuse the branch-relevant discovery result for later verifies in the session. The general digest, gate, and write-back rules apply; OMP's `session_stop` remains the Stop-gate equivalent.
 ## Done when
 
 - Objective gates ran first — results in the digest and the briefing (or the red-gate short-circuit REJECT was delivered)

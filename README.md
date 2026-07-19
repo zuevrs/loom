@@ -22,7 +22,7 @@ $ agent tries to stop
    back to ready-for-agent / needs-triage / wontfix. Do not fabricate an APPROVE.
 ```
 
-So the agent runs `loom-verify`: two fresh-context checker sub-agents (Spec and Standards, on the host's cheap tier) read the diff and write their verdict into the issue file:
+So the agent runs `loom-verify`: independent Spec and Standards checkers read one shared evidence packet and write their aggregate verdict into the issue file:
 
 ```
 APPROVE — 2026-07-05 — spec pass, standards pass
@@ -54,7 +54,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 |------|---------|-----------|--------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | install verified; runtime blocked by Claude billing in current smoke |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | install + integration verified; runtime blocked upstream (Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | installed-plugin v1.0.0 discovery/health and workspace setup/profile runtime verified on OMP v17.0.4; optional handoff, other workspace flows, and other hosts remain unverified |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | installed-plugin v1.0.0 discovery/health and workspace setup/profile runtime verified; native Verify batch smoke passed on OMP v17.0.4 (tested minimum); optional handoff, other workspace flows, and other hosts remain unverified |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | install + integration verified; fixture runtime smoke passed |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | install verified; runtime smoke timed out |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | install + adapter/integration verified; model runtime timed out |
@@ -114,13 +114,13 @@ Use these advanced shortcuts when the ritual is already known; they remain norma
 
 ## Hooks & enforcement
 
-Where the host supports them, Loom uses up to three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
+Where the host supports them, Loom uses light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
 
 Hard enforcement is directly evidenced on OMP and Cursor in the current release checks: done-without-APPROVE blocks the first stop (exit 2), then a repeated unresolved stop is permitted after one forced lap. Claude Code has the shipped Stop hook but its current model smoke is billing-blocked; OpenCode is adapter-verified but model-runtime-blocked; Hermes is guidance-only until profile-validation parity is proven. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. Pi, Windsurf, Kiro, Cline, and OpenClaw are Convention-only. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
 
-Checkers default to the host's **fast/cheap tier** — judging is cheaper than making — and your host config always wins.
+Checker model routing belongs to the host, and your host config always wins.
 
-Per-host wiring, the full feature matrix, checker-model overrides, linter/witness details, and known host limitations: [`docs/hosts.md`](docs/hosts.md).
+Per-host wiring, the full feature matrix, checker execution/model routing, linter/witness details, and known host limitations: [`docs/hosts.md`](docs/hosts.md).
 
 ## Unattended lane
 
@@ -141,15 +141,15 @@ omp plugin install git:github.com/zuevrs/loom --force
 ```
 > /loom Plan work: JWT authentication       # dispatcher → loom-plan
 > /loom-implement .loom/jwt/issues/001-auth-endpoint.md  # precision selected-issue entry
-> Verify                                   # → task: loom-verify-spec + loom-verify-standards
-> (agent writes ## Verify, sets Status: done — session_stop gate checks it)
+> Verify                                   # → one native task batch, Spec + Standards roles
+> (goal completion is pre-commit guarded; session_stop checks general turn stops)
 ```
 
-Three enforcement layers (TTSR reminder, `session_stop` hard gate, custom verify agents), goal-mode exit guarding for batch runs, and an advisor discipline profile — the full daily workflow and feature table: [`docs/hosts.md`](docs/hosts.md#loom--omp-maximum-synergy).
+The standard path uses OMP v17.0.4+ native task batching for Verify, plus complementary enforcement: an early `goal complete` pre-commit blocker protects native goal state, while `session_stop` handles general turn-stop correction; TTSR remains the reminder layer. The optional Advisor profile and backward-compatible checker entrypoints are advanced additions — the full workflow and feature table: [`docs/hosts.md`](docs/hosts.md#loom--omp-maximum-synergy).
 
 ## Safety
 
-- Hooks are non-mutating — they never edit files; enforcement blocks only at the Stop gate.
+- Hooks are non-mutating — they never edit files. Blocking occurs only at host-supported enforcement seams, including OMP's early goal-complete gate and the general Stop/`session_stop` gate.
 - Work needing human judgement (auth, payments, secrets) is routed `ready-for-human` at planning time.
 - No auto-merge, no auto-publish, no silent self-rewrite.
 - `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.

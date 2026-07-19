@@ -1,7 +1,8 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
 // session_start: context pointers. before_agent_start: invariants + role.
-// tool_call/tool_result: goal-completion gate. session_stop: verify gate.
+// tool_call: goal pre-commit gate. tool_execution_start: checker witness.
+// session_stop: general turn-stop verify gate.
 // Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
 // Preferred entry is /loom; /loom-plan remains the precision planning route.
 //
@@ -179,14 +180,8 @@ export default function loomExtension(pi) {
     return undefined;
   });
 
-  // Goal gate — maker/checker on the stop condition. In goal mode the agent
-  // declares its own success (`goal` tool, op "complete") after a self-audit;
-  // nothing else reviews that call, and session_stop fires too late to shape
-  // the completion report. Two hands, sized to certainty:
-  //  - block completion on done-without-APPROVE (never legitimate — the same
-  //    invariant session_stop enforces, applied to the stop-condition judge);
-  //  - leftover ready-for-agent issues get a note appended to the completion
-  //    result instead (a narrow goal legitimately leaves pack work behind).
+  // Goal completion persists native state before session_stop can correct the turn.
+  // Block that commit point while any issue is done without an APPROVE digest.
   pi.on("tool_call", (event) => {
     try {
       if (event.toolName !== "goal" || (event.input || {}).op !== "complete") return undefined;
@@ -196,28 +191,6 @@ export default function loomExtension(pi) {
       return {
         block: true,
         reason: `Loom goal gate: ${names} marked done without an APPROVE verify digest. Run loom-verify and write its APPROVE verdict into the issue's ## Verify section, then complete the goal — or pause/drop the goal explicitly and report the blocker.`,
-      };
-    } catch {
-      return undefined;
-    }
-  });
-
-  pi.on("tool_result", (event) => {
-    try {
-      if (event.toolName !== "goal" || (event.input || {}).op !== "complete" || event.isError) {
-        return undefined;
-      }
-      const ready = findIssuesByStatus(findProjectRoot(), "ready-for-agent");
-      if (!ready.length) return undefined;
-      const names = ready.map((p) => p.split(/[\\/]/).pop()).join(", ");
-      return {
-        content: [
-          ...(event.content || []),
-          {
-            type: "text",
-            text: `Loom note: ready-for-agent issues remain (${names}). If they were in this goal's scope, resume instead of completing; either way name them in your final report.`,
-          },
-        ],
       };
     } catch {
       return undefined;

@@ -24,7 +24,7 @@ Release-gate template. Fill one row per supported host before tagging a release.
 | Codex | `codex plugin add loom@loom` | hooks + commands registered; Hard stop remains Unverified until live plugin-root expansion and stop blocking are recorded |
 | Cursor | `~/.loom/scripts/install-cursor` | 4 hooks in `~/.cursor/hooks.json`; generated stop command includes `--hook` and fixture checks pin exit 2 unresolved / exit 0 verified. Skills symlinked; `install.mjs --doctor` exits 0. Unified entry live-smoked locally on 2026-07-16. Windows path: CI `check-windows` runs install → doctor → uninstall → doctor on `windows-latest` — cite the release run URL |
 | Pi | `pi install git:github.com/zuevrs/loom` | Install/list/uninstall verified; model-backed smoke timed out. Runtime remains unverified. |
-| OMP | `omp plugin install git:github.com/zuevrs/loom` | extension (session_start + before_agent_start + session_stop) + TTSR rules + verify agents; `omp plugin doctor loom` clean. Unified entry live-smoked locally on 2026-07-16. |
+| OMP | `omp plugin install git:github.com/zuevrs/loom` | extension (session_start + before_agent_start + task-spawn witness + session_stop) + TTSR rules; `omp plugin doctor loom` clean. Native Verify tested minimum is v17.0.4. Unified entry live-smoked locally on 2026-07-16. |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` | Install/uninstall and direct adapter hook smoke verified; model-backed `opencode run` timed out before first event. Runtime remains unverified. |
 | Droid | `droid plugin install zuevrs/loom` | `.claude-plugin/` format loads; Hard stop remains Unverified until live plugin-root expansion and stop blocking are recorded |
 | Windsurf | `install-windsurf` | skills symlinked |
@@ -33,14 +33,19 @@ Release-gate template. Fill one row per supported host before tagging a release.
 | Cline | `install-agents-skills` | skills + AGENTS.md |
 | OpenClaw | `install-agents-skills` or clawhub | skills discoverable; no Loom extension ships, so enforcement is Convention-only |
 
-## Current workspace release evidence — v1.0.0 (2026-07-19)
+## Current release evidence — v1.0.0 (2026-07-19)
 
-Only installed-plugin workspace setup/profile is live-verified for this release. The optional handoff was not exercised live, and other workspace flows and hosts remain unverified; installation or generic runtime evidence does not imply workspace verification. Dependency-free executable fixture coverage remains in `tests/workspace.test.mjs` and the repository structural smoke.
+Installed-plugin workspace setup/profile and native OMP Verify are live-verified for this release. The optional workspace handoff was not exercised live, and other workspace flows and hosts remain unverified; installation or generic runtime evidence does not imply workspace verification. Dependency-free executable fixture coverage remains in `tests/workspace.test.mjs` and the repository structural smoke.
 
 | Evidence | Invocation | Result |
 |----------|------------|--------|
 | OMP v17.0.4 installed plugin discovery and health | `omp plugin link /Users/zuevrs/Projects/loom --force`; then plugin list and doctor | Plugin list reported enabled `loom` version `1.0.0` at `~/.omp/plugins/node_modules/loom`; doctor reported 4 ok, 0 warnings, and 0 errors. |
+| OMP v17.0.4 native Verify batch smoke | one native batch `task` call with two bundled reviewer agents, shared context, and per-item `Spec checker` / `Standards checker` roles | Printed `OMP_NATIVE_VERIFY_OK`; confirms the standard native Verify contract and tested minimum. |
 | OMP v17.0.4 installed-plugin model-backed setup/profile E2E | `omp -p --cwd /tmp/loom-workspace-installed-v100 --model aijws-hr/gpt-5.6-sol --thinking low --no-session --max-time 180 --auto-approve '<explicit /loom setup workspace prompt>'` (no `--plugin-dir`) | Printed `INSTALLED_V100_WORKSPACE_OK`; exit 0 in 48.485s; profile exact ID `loom-workspace-installed-v100` with repositories `api` / `auth`. |
+
+### Local modified-plugin goal-gate reproduction (not installed-release evidence)
+
+On OMP v17.0.4 with the locally modified plugin, native `goal({op: "complete"})` persisted goal status `complete` and returned `Goal achieved` before `session_stop` injected Loom's BLOCKED correction. Because that correction cannot undo native completed goal state, the early `tool_call` goal-complete blocker is required alongside `session_stop`.
 
 ## Historical unified-entry release evidence — v0.25.0 (2026-07-17)
 

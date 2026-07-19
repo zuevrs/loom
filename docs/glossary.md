@@ -16,9 +16,9 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Unverified** — Qualifier for an implemented capability whose live host contract has not been evidenced; not a fourth enforcement tier.
 
-**TTSR rule** — Time-Traveling Stream Rule (OMP-specific). Regex condition on the agent's output stream that injects corrective guidance at zero upfront token cost. Loom uses TTSR as a reminder layer; the hard gate is `session_stop`.
+**TTSR rule** — Time-Traveling Stream Rule (OMP-specific). Regex condition on the agent's output stream that injects corrective guidance at zero upfront token cost. Loom uses TTSR as a reminder layer; OMP hard enforcement combines the early goal-complete pre-commit gate with the general `session_stop` correction gate.
 
-**Verify signal** — The `## Verify` section written into an issue file by `loom-verify` (every verdict — REJECT lines included). Stop hooks and OMP `session_stop` require a line starting with `APPROVE` in it before allowing `Status: done`.
+**Verify signal** — The `## Verify` section written into an issue file by `loom-verify` (every verdict — REJECT lines included). Stop hooks and OMP lifecycle gates require a line starting with `APPROVE` in it before accepting `Status: done`; OMP checks both native goal completion and general turn stop.
 
 **Objective gate** — Automated pass/fail command (test, build, linter) that stops bad iterations without human judgment.
 

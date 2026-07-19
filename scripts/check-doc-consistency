@@ -68,6 +68,14 @@ fi
 if ! grep -Fq 'omp plugin install git:github.com/zuevrs/loom --force' "$README"; then
   errors+=("README Upgrade section must document OMP --force for updates")
 fi
+# OMP has an early native goal-complete blocker as well as the general stop gate.
+# Reject Stop-only safety claims without pinning the full prose.
+if grep -Eiq 'blocks? only at (the )?(Stop|session_stop) gate' "$README"; then
+  errors+=("README Safety must not describe blocking as Stop-only")
+fi
+if ! grep -Eiq 'goal-complete.*(Stop|session_stop)|(Stop|session_stop).*goal-complete' "$README"; then
+  errors+=("README Safety must mention both OMP goal-complete and general stop enforcement")
+fi
 GLOSSARY_DOC="$ROOT/docs/glossary.md"
 AUTHORING_DOC="$ROOT/docs/authoring.md"
 if [ ! -f "$GLOSSARY_DOC" ]; then

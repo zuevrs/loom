@@ -1,5 +1,7 @@
 # Loom discipline profile for the OMP advisor
 
+> Advanced opt-in. Basic Loom + OMP is complete without Advisor; enable this only when a second-model shadow is worth the added cost and noise.
+
 Loom's enforcement fires **before** the turn (managed block, pre-LLM invariants) and **after** it (stop gate, checkers, witness). OMP's advisor fills the missing middle: a second model that shadows the main agent, sees every turn incrementally (thoughts included), and injects notes **while the turn is happening**. A collapsed grill gets called out on the turn it collapses — not in next-day dump archaeology.
 
 The profile is one YAML file: [`templates/WATCHDOG.yml`](../templates/WATCHDOG.yml). It teaches the advisor Loom's ritual contracts as narrow fire-only-on signatures. No skills, hooks, or managed block are touched — this is optional, additive, and OMP-only (the advisor is a host feature, and Loom's boundary rule is to recommend host-native capabilities, not absorb them into core).
@@ -22,7 +24,7 @@ Plugin-install users without a `~/.loom` clone: take the template from [the repo
 
 Step 2 appends — if `.omp/config.yml` already exists, merge the `advisor.enabled: true` key by hand instead. Prefer toggling per session? Skip step 2 and use `/advisor on` (or launch with `--advisor`).
 
-## What changes day to day
+## Optional day-to-day behavior
 
 Enter with `/loom` (or a precision `/loom-*` shortcut). The advisor is passive until a signature fires:
 
