@@ -32,8 +32,8 @@ Use `.loom/workspace.json` only after explicit workspace setup. The canonical sc
 ## Process
 
 1. Inspect: `AGENTS.md`, `.loom/`, managed block version vs installed Loom.
-2. Prepare write plan — show exactly what will change.
-3. Ask explicit confirmation before any write.
+2. Prepare the exact durable-write preview for canonical managed-block/directory setup or workspace-profile setup. Every Init preview warns when the Loom artifact owner is not a Git root because the write lacks an owner-level Git safety net.
+3. Ask explicit confirmation before any write. A changed target, action, scope, or base invalidates confirmation; recompute the preview and obtain renewed confirmation.
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
@@ -88,7 +88,7 @@ Inside the lane:
 
 ## Workspace profile setup
 
-When explicitly routed `/loom setup workspace`, Init resolves `scripts/setup-workspace` from the same installed Loom tree as this skill and invokes `node <absolute-setup-utility> <root> [--depth <positive-integer>]` in proposal mode. Preview the exact profile write and ask for confirmation, then apply through the utility's validated `--profile <confirmed-profile.json> --confirm` path, forwarding the same depth. Report `existing_profile_error` and the proposed recovery when the profile is malformed or stale; only an explicitly confirmed valid profile may replace it. The utility owns inventory, profile validation, identity matching, curated-profile preservation, and drift reporting; [`docs/workspaces.md`](../../docs/workspaces.md) owns the workspace contract.
+When explicitly routed `/loom setup workspace`, every profile proposal preview repeats the non-Git artifact-owner warning when applicable. Init resolves `scripts/setup-workspace` from the same installed Loom tree as this skill and invokes `node <absolute-setup-utility> <root> [--depth <positive-integer>]` in proposal mode. Preview the exact profile write and ask for confirmation, then apply through the utility's validated `--profile <confirmed-profile.json> --confirm` path, forwarding the same depth. Report `existing_profile_error` and the proposed recovery when the profile is malformed or stale; only an explicitly confirmed valid profile may replace it. The utility owns inventory, profile validation, identity matching, curated-profile preservation, and drift reporting; [`docs/workspaces.md`](../../docs/workspaces.md) owns the workspace contract.
 
 After profile setup, Init may offer exactly one optional handoff to ordinary Plan, Grill, or Tend based on the user's desired outcome, then stops. Init does not own onboarding or migration. The workspace root owns Loom documents and state; service product docs remain in their repositories. Any later normalization uses the selected ritual's ordinary bounded gates, validates destinations, and requires separate consent before deleting sources.
 

@@ -4,7 +4,7 @@ Workspace mode is an opt-in root/context adapter for ordinary Loom. It is not a 
 
 ## Modes
 
-Canonical repository mode remains the default: one Git repository owns its `.loom/`, `CONTEXT.md`, ADRs, and managed block. A workspace profile activates only at the workspace root or from inside one of its registered repositories. An unregistered sibling remains canonical; Loom may mention the nearby workspace as optional guidance.
+Canonical repository mode remains the default: one Git repository owns its `.loom/`, `CONTEXT.md`, ADRs, and managed block. A workspace profile activates only at the workspace root or from inside one of its registered repositories. An unregistered sibling remains canonical.
 
 Workspace mode uses `<workspace>/.loom/workspace.json`:
 
@@ -37,8 +37,9 @@ After profile setup, Init may offer exactly one handoff to ordinary Plan, Grill,
 
 Registered repositories are readable evidence in explicit Loom work. Service changes use the ritual's existing bounded apply gate: one preview names repositories, exact targets/actions, and base evidence. A new repository, target, action, scope, or changed base renews consent. Git/external actions keep their own gates.
 
-Session pointers expose only validated `context_paths`, progressively, rather than injecting their contents. Only profile-listed paths are exposed.
+Ordinary valid session start is topology-quiet: it exposes no owner/artifact/execution roots, `context_paths`, project-document pointers, dirty-service recovery, or `.loom` snapshot. Explicit `/loom`, selected-issue and precision contexts, resume, and Tend reconstruct owner/context progressively when their work needs it; those explicit recovery paths may inspect dirty registered services.
 
-The workspace root need not be Git. Session recovery still reports dirty registered services, and invoking the public Stop-gate CLI with a registered service path inspects workspace-root `.loom` state. Invalid profiles fail closed for explicit Loom work, while ordinary hooks warn and disable workspace behavior without blocking project work. Malformed JSON is exceptional: repository membership cannot be proven, so descendants—including otherwise unregistered siblings—may see the recovery warning. With a valid profile, unregistered siblings remain canonical.
+The workspace root need not be Git. Invoking the public Stop-gate CLI with a registered service path inspects workspace-root `.loom` state. Invalid profiles are the ordinary-session exception: hooks emit an actionable pathful warning and disable workspace behavior without blocking project work, while explicit Loom work fails closed. Malformed JSON is exceptional because repository membership cannot be proven, so descendants—including otherwise unregistered siblings—may see the warning. With a valid profile, unregistered siblings remain canonical.
+Canonical Node adapters (JS hooks, OMP, and OpenCode) use `hooks/workspace.cjs` for these ownership semantics. Hermes remains a guidance-only baseline bridge in this slice: its topology-quiet, urgent-only delivery scans only the locally provable project root, so workspace-owner state delivery is deferred to the measured thin bridge in Issue 03.
 
 Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots. A non-Git workspace root means Loom artifacts are unversioned, and setup must say so.

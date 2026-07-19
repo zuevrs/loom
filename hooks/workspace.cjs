@@ -107,6 +107,8 @@ function profileApplies(profile, start) {
 
 function findWorkspace(start) {
   const initial = resolve(start || process.cwd());
+  // No profile means ancestor existence checks only. A discovered profile must be
+  // read to prove registration; malformed data fails closed because membership is unknowable.
   let dir = initial;
   while (true) {
     const profile = readWorkspaceProfile(dir);
@@ -166,6 +168,58 @@ function workspaceRoot(start) {
   return state && state.valid ? state.root : null;
 }
 
+function findGitRoot(start) {
+  try {
+    return resolve(execFileSync("git", ["-C", resolve(start), "rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim());
+  } catch {
+    return null;
+  }
+}
+
+function findProjectRoot(start) {
+  let dir = resolve(start || process.cwd());
+  let agentsRoot = null;
+  while (true) {
+    if (existsSync(resolve(dir, ".loom"))) return dir;
+    if (!agentsRoot && existsSync(resolve(dir, "AGENTS.md"))) agentsRoot = dir;
+    const parent = dirname(dir);
+    if (parent === dir) return agentsRoot || resolve(start || process.cwd());
+    dir = parent;
+  }
+}
+
+function projectContext(start) {
+  const initial = resolve(start || process.cwd());
+  const state = workspaceState(initial);
+  if (state?.invalid) {
+    const gitRoot = findGitRoot(state.root);
+    return { mode: "invalid", invalid: true, ownerRoot: state.root, artifactRoot: state.root, executionRoots: [], profilePath: state.profilePath, error: state.error, nonGitOwner: gitRoot !== resolve(state.root) };
+  }
+  if (state?.valid) {
+    return { mode: "workspace", ownerRoot: state.root, artifactRoot: state.root, executionRoots: state.profile.repositories.map((repo) => resolve(state.root, repo.path)), profile: state.profile, nonGitOwner: findGitRoot(state.root) !== resolve(state.root) };
+  }
+  const gitRoot = findGitRoot(initial);
+  const root = gitRoot || findProjectRoot(initial);
+  return { mode: "canonical", ownerRoot: root, artifactRoot: root, executionRoots: [root], nonGitOwner: gitRoot !== resolve(root) };
+}
+
+function nonGitOwnerWarning(context) {
+  return context?.nonGitOwner ? `Warning: Loom artifact owner is not a Git root: ${context.artifactRoot}. Durable Loom writes have no owner-level Git safety net.` : null;
+}
+
+function projectContextPointers(context) {
+  if (!context) return [];
+  if (context.invalid) return [`Project context invalid: ${context.profilePath} (${context.error})`];
+  const pointers = [
+    `Loom owner root: ${context.ownerRoot}`,
+    `Loom artifact root: ${context.artifactRoot}`,
+    `Execution roots: ${context.executionRoots.join(", ")}`,
+  ];
+  const warning = nonGitOwnerWarning(context);
+  if (warning) pointers.push(warning);
+  return pointers;
+}
+
 function workspacePointers(profile) {
   if (!profile) return [];
   if (profile.invalid) return [`Workspace profile invalid: ${profile.profilePath} (${profile.error})`];
@@ -181,4 +235,4 @@ function workspacePointers(profile) {
   return pointers;
 }
 
-module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers };
+module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextPointers, nonGitOwnerWarning };

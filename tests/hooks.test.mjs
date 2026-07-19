@@ -127,7 +127,7 @@ function run(script, env = {}) {
 
 // --- Stop gate tests ---
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, symlinkSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, realpathSync, existsSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -351,7 +351,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
   ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
-  ok(read("skills/loom-verify/SKILL.md").includes("Run each ordinary existing Git diff/check command in the relevant registered service repository"), "verify declares workspace-owner and service-repo execution contract");
+  ok(read("skills/loom-verify/SKILL.md").includes("Run each touched root's own ordinary Git diff and existing gate commands"), "verify declares neutral multi-root execution contract");
   ok(read("skills/loom-tend/SKILL.md").includes("Run each ordinary existing Git diff/check command in the relevant registered service repository"), "tend declares workspace-owner and service-repo execution contract");
 
   // Lane scoping: ready-for-human is ritual-time slicing policy, not an ordinary-prompt invariant.
@@ -369,39 +369,199 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
 // --- Adapter smoke imports ---
 
-// OpenCode discovers the unified slash entry through its registered skills path.
+// Two-layer Issue 01 matrix: adapters exercise read-only runtime delivery only;
+// durable-write consent/warnings stay in the separate semantic owner matrix below.
 {
-  const root = resolve(__dirname, "..");
-  const dispatcher = readFileSync(resolve(root, "skills", "loom", "SKILL.md"), "utf8");
+  const repoRoot = resolve(__dirname, "..");
+  const dispatcher = readFileSync(resolve(repoRoot, "skills", "loom", "SKILL.md"), "utf8");
   ok(/^slash: true$/m.test(dispatcher), "loom dispatcher opts into OpenCode slash registration");
   ok(/^disable-model-invocation: true$/m.test(dispatcher), "loom dispatcher remains explicitly user-invoked on other hosts");
+  ok(/explicit `\/loom`[\s\S]{0,160}reconstruct[\s\S]{0,160}full `?\.loom/i.test(dispatcher), "explicit /loom reconstructs full persisted state before routing");
+  ok(/Implement selected work[\s\S]{0,100}loom-implement/.test(dispatcher), "dispatcher routes selected work to Implement");
+  ok(/Bare `\/loom`[\s\S]{0,180}(wait|confirmation)[\s\S]{0,100}maker handoff/i.test(dispatcher), "bare dispatcher waits before maker handoff");
+  const verify = readFileSync(resolve(repoRoot, "skills", "loom-verify", "SKILL.md"), "utf8");
+  ok(/one issue verdict[\s\S]{0,100}combined evidence/i.test(verify) && /each touched root[\s\S]{0,100}(diff|gate)/i.test(verify), "Verify combines one verdict while gating each touched root");
 
-  const mod = await import(pathToFileURL(resolve(root, "opencode-plugin.mjs")).href);
-  ok(typeof mod.default === "function", "opencode-plugin exports default function");
-  const plugin = await mod.default();
+  // Layer 1: no adapter runner performs a write; fixtures prepare state, runners only deliver it.
+  const ompMod = await import(pathToFileURL(resolve(repoRoot, "omp-extension.mjs")).href);
+  const openCodeMod = await import(pathToFileURL(resolve(repoRoot, "opencode-plugin.mjs")).href);
+  const openCode = await openCodeMod.default();
   const config = {};
-  await plugin.config(config);
-  deepStrictEqual(config.skills.paths, [resolve(root, "skills")], "OpenCode adapter registers the skills path containing loom dispatcher");
+  await openCode.config(config);
+  deepStrictEqual(config.skills.paths, [resolve(repoRoot, "skills")], "OpenCode adapter registers the dispatcher skill path");
+
+  const adapters = [
+    ["JS", async (cwd) => {
+      const session = execFileSync(process.execPath, [resolve(repoRoot, "hooks", "loom-session-start.cjs")], { cwd, encoding: "utf8" });
+      const turn = execFileSync(process.execPath, [resolve(repoRoot, "hooks", "loom-pre-llm.cjs")], { cwd, encoding: "utf8" });
+      return `${session}\n${turn}`;
+    }],
+    ["OMP", async (cwd) => {
+      const handlers = {};
+      ompMod.default({ on: (event, handler) => { handlers[event] = handler; } });
+      const previous = process.env.PI_PROJECT_DIR;
+      process.env.PI_PROJECT_DIR = cwd;
+      let session = "";
+      const write = process.stdout.write;
+      process.stdout.write = (chunk) => { session += String(chunk); return true; };
+      try {
+        handlers.session_start();
+        return `${session}\n${handlers.before_agent_start({ systemPrompt: "BASE" }).systemPrompt}`;
+      } finally {
+        process.stdout.write = write;
+        if (previous === undefined) delete process.env.PI_PROJECT_DIR; else process.env.PI_PROJECT_DIR = previous;
+      }
+    }],
+    ["OpenCode", async (cwd) => {
+      const previous = process.cwd();
+      process.chdir(cwd);
+      try {
+        const output = { system: [] };
+        await openCode["experimental.chat.system.transform"]({}, output);
+        return output.system.join("\n");
+      } finally { process.chdir(previous); }
+    }],
+  ];
+
+  const makeRepo = (path) => { mkdirSync(path, { recursive: true }); execFileSync("git", ["-C", path, "init", "-q"]); };
+  const writeIssue = (root, name, verified = false) => {
+    const dir = join(root, ".loom", "pack", "issues");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, name), `# Issue\n\n${verified ? "## Verify\n\nAPPROVE — test\n\n" : ""}## Status\n\nStatus: done\n`);
+  };
+  const runtimeCases = [
+    ["canonical-clean", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-canonical-")); makeRepo(root); writeFileSync(join(root, "AGENTS.md"), "<!-- loom:begin version=v1.1.0 -->\n<!-- loom:end -->\n"); writeFileSync(join(root, "CONTEXT.md"), "# Context\n"); return { root, cwd: root, quiet: true }; }],
+    ["registered-service-clean", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-workspace-")); const cwd = join(root, "service"); makeRepo(cwd); mkdirSync(join(root, ".loom")); writeFileSync(join(root, "AGENTS.md"), "# Owner\n"); writeFileSync(join(root, "CONTEXT.md"), "# Context\n"); writeFileSync(join(root, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "matrix-workspace", repositories: [{ path: "service" }], context_paths: ["CONTEXT.md"] })); return { root, cwd, quiet: true }; }],
+    ["valid-unregistered-sibling", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-sibling-")); const service = join(root, "service"); const cwd = join(root, "sibling"); makeRepo(service); makeRepo(cwd); mkdirSync(join(root, ".loom")); writeFileSync(join(root, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "matrix-owner", repositories: [{ path: "service" }] })); writeIssue(root, "owner-only.md"); return { root, cwd, absent: ["owner-only.md", "# Loom workspace error"] }; }],
+    ["invalid-profile", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-invalid-")); const cwd = join(root, "service"); makeRepo(cwd); mkdirSync(join(root, ".loom")); const profilePath = join(root, ".loom", "workspace.json"); writeFileSync(profilePath, "{"); writeIssue(root, "must-not-scan.md"); return { root, cwd, invalid: profilePath, absent: ["must-not-scan.md", "done without APPROVE"] }; }],
+    ["deep-canonical-urgent", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-deep-")); makeRepo(root); writeIssue(root, "deep-unverified.md"); let cwd = root; for (let index = 0; index < 25; index++) cwd = join(cwd, `level-${index}`); mkdirSync(cwd, { recursive: true }); return { root, cwd, urgent: "deep-unverified.md" }; }],
+    ["clean-verified-silence", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-verified-")); makeRepo(root); writeIssue(root, "verified.md", true); return { root, cwd: root, quiet: true, absent: ["# Loom alert", "done without APPROVE"] }; }],
+    ["unverified-done-urgent", () => { const root = mkdtempSync(join(tmpdir(), "loom-matrix-urgent-")); makeRepo(root); writeIssue(root, "unverified.md"); return { root, cwd: root, urgent: "unverified.md" }; }],
+  ];
+  const topologyTokens = ["Loom owner root:", "Loom artifact root:", "Execution roots:", "Workspace context:", "CONTEXT.md:", ".loom/:", "## .loom state"];
+  for (const [caseName, build] of runtimeCases) {
+    const fixture = build();
+    try {
+      for (const [adapterName, runAdapter] of adapters) {
+        const output = await runAdapter(fixture.cwd);
+        const label = `${adapterName}/${caseName}`;
+        if (fixture.invalid) {
+          ok(output.includes(fixture.invalid) && /workspace (?:profile )?error|Invalid profile|Project context invalid/i.test(output), `${label}: invalid profile is actionable`);
+        } else {
+          ok(!output.includes(fixture.root) && !output.includes(fixture.cwd), `${label}: no absolute project path leak`);
+          for (const token of topologyTokens) ok(!output.includes(token), `${label}: topology quiet (${token})`);
+        }
+        if (fixture.urgent) ok(output.includes("done without APPROVE") && output.includes(fixture.urgent), `${label}: urgent basename delivered`);
+        if (fixture.quiet) ok(!output.includes("# Loom alert"), `${label}: clean/verified dynamic silence`);
+        for (const absent of fixture.absent || []) ok(!output.includes(absent), `${label}: excludes ${absent}`);
+      }
+    } finally { rmSync(fixture.root, { recursive: true, force: true }); }
+  }
+
+  // Layer 2: semantic policy ownership only. This is the accepted no-coordinator seam;
+  // it proves every durable-write preview owner carries both consent invalidation and warning.
+  const previewOwners = [
+    ["Init", "skills/loom-init/SKILL.md"],
+    ["Grill", "skills/loom-grill/SKILL.md"],
+    ["Gate 1", "skills/loom-plan/TO-PRD.md"],
+    ["Gate 2", "skills/loom-plan/TO-ISSUES.md"],
+    ["Tend", "skills/loom-tend/SKILL.md"],
+    ["Named-issue Implement", "skills/loom-implement/SKILL.md"],
+  ];
+  for (const [owner, file] of previewOwners) {
+    const contract = readFileSync(resolve(repoRoot, file), "utf8");
+    const consentClause = contract.match(/[^.\n]*(?:changed|changes)[^.\n]*(?:consent|confirmation)[^.\n]*[.]/i)?.[0] || contract.match(/[^.\n]*(?:consent|confirmation)[^.\n]*(?:changed|changes)[^.\n]*[.]/i)?.[0] || "";
+    for (const concept of ["target", "action", "scope", "base"]) ok(new RegExp(concept, "i").test(consentClause), `${owner}: consent invalidation covers changed ${concept}`);
+    ok(/invalidates|renew|regenerate|new preview/i.test(consentClause), `${owner}: changed ownership invalidates consent`);
+    const warningClause = contract.match(/[^.\n]*preview[^.\n]*(?:not a Git root|non-Git)[^.\n]*[.]/i)?.[0] || "";
+    ok(/warn/i.test(warningClause) && /safety net|durable Loom write/i.test(warningClause), `${owner}: non-Git durable-write preview warning`);
+  }
+
+  deepStrictEqual(runtimeCases.map(([name]) => name), ["canonical-clean", "registered-service-clean", "valid-unregistered-sibling", "invalid-profile", "deep-canonical-urgent", "clean-verified-silence", "unverified-done-urgent"], "runtime layer enumerates corrected Issue 01 adapter cases");
+  deepStrictEqual(previewOwners.map(([name]) => name), ["Init", "Grill", "Gate 1", "Gate 2", "Tend", "Named-issue Implement"], "semantic layer enumerates every durable-write preview owner");
 }
 
-// omp-extension.mjs — invariants + witness + complementary goal/turn-stop gates
+// Hermes remains guidance-only and scans only a locally provable root until Issue 03.
 {
-  const mod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
-  ok(typeof mod.default === "function", "omp-extension exports default function");
+  const root = mkdtempSync(join(tmpdir(), "loom-hermes-local-delivery-"));
+  const service = join(root, "service");
+  const sibling = join(root, "sibling");
+  mkdirSync(join(root, ".loom", "pack", "issues"), { recursive: true });
+  mkdirSync(service);
+  mkdirSync(sibling);
+  execFileSync("git", ["-C", service, "init", "-q"]);
+  execFileSync("git", ["-C", sibling, "init", "-q"]);
+  writeFileSync(join(root, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "guidance-only", repositories: [{ path: "service" }] }));
+  writeFileSync(join(root, ".loom", "pack", "issues", "owner-done.md"), "# Owner\n\n## Status\n\nStatus: done\n");
+  writeFileSync(join(sibling, "AGENTS.md"), "# Sibling\n");
+  mkdirSync(join(sibling, ".loom", "pack", "issues"), { recursive: true });
+  writeFileSync(join(sibling, ".loom", "pack", "issues", "local-done.md"), "# Local\n\n## Status\n\nStatus: done\n");
+  const profilePath = join(root, ".loom", "workspace.json");
+  const probe = `import importlib.util, os, sys
+spec=importlib.util.spec_from_file_location("loom_hermes", sys.argv[1]); mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+class C:
+ def __init__(self): self.hooks={}
+ def register_skill(self,*a): pass
+ def register_hook(self,n,f): self.hooks[n]=f
+ def register_command(self,*a): pass
+os.chdir(sys.argv[2]); c=C(); mod.register(c); print(c.hooks["on_session_start"]()); print("---PRE---"); print(c.hooks["pre_llm_call"]()["context"])`;
+  const runHermes = (cwd) => execFileSync("python3", ["-c", probe, resolve(__dirname, "..", "hermes-plugin", "__init__.py"), cwd], { encoding: "utf8", timeout: 10000 });
+  const split = (output) => { const [session, pre] = output.split("---PRE---"); return { session, pre }; };
+  try {
+    const siblingDelivery = split(runHermes(sibling));
+    ok(siblingDelivery.pre.includes("local-done.md") && !siblingDelivery.pre.includes("owner-done.md"), "Hermes valid-profile sibling scans local owner only");
+    const serviceDelivery = split(runHermes(service));
+    ok(!serviceDelivery.pre.includes("owner-done.md"), "Hermes registered service does not claim workspace-owner alert before Issue 03");
+    for (const value of [root, service, sibling, "AGENTS.md:", "CONTEXT.md:", ".loom/:", "## .loom state"]) ok(!serviceDelivery.session.includes(value), `Hermes ordinary delivery hides topology: ${value}`);
 
-  const handlers = {};
-  mod.default({ on: (evt, fn) => { handlers[evt] = fn; } });
+    writeFileSync(profilePath, "{");
+    const invalid = split(runHermes(service));
+    ok(invalid.session.includes(profilePath) && invalid.session.includes("Invalid workspace profile"), "Hermes malformed ancestor warning remains actionable");
+    ok(!invalid.pre.includes("owner-done.md"), "Hermes invalid context skips state scan");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  } finally { rmSync(root, { recursive: true, force: true }); }
+}
 
-  ok(typeof handlers.before_agent_start === "function", "registers before_agent_start");
-  const res = handlers.before_agent_start({ systemPrompt: "BASE" });
-  ok(res && res.systemPrompt.startsWith("BASE"), "before_agent_start appends to base prompt");
-  ok(res.systemPrompt.includes("Loom universal invariants"), "invariants injected");
-  ok(!res.systemPrompt.includes("Loom grill"), "no grill overlay in system prompt");
 
-  strictEqual(handlers.context, undefined, "no context handler — native /plan left untouched");
-  ok(typeof handlers.session_stop === "function", "registers session_stop verify gate");
-  ok(typeof handlers.tool_call === "function", "registers goal-complete pre-commit blocker");
-  strictEqual(handlers.tool_result, undefined, "does not register a goal-result note");
+// Deep canonical descendants resolve urgent alerts through the canonical Node owner.
+{
+  const root = mkdtempSync(join(tmpdir(), "loom-deep-canonical-"));
+  execFileSync("git", ["-C", root, "init", "-q"]);
+  const issueDir = join(root, ".loom", "pack", "issues");
+  mkdirSync(issueDir, { recursive: true });
+  writeFileSync(join(issueDir, "01-deep-unverified.md"), "# Deep\n\n## Status\n\nStatus: done\n");
+  let deep = root;
+  for (let index = 0; index < 25; index++) deep = join(deep, `level-${index}`);
+  mkdirSync(deep, { recursive: true });
+  const forbidden = [root, deep, "Loom owner root:", "Loom artifact root:", "Execution roots:"];
+  try {
+    const js = execFileSync(process.execPath, [resolve(__dirname, "..", "hooks", "loom-pre-llm.cjs")], { cwd: deep, encoding: "utf8" });
+    ok(js.includes("done without APPROVE") && js.includes("01-deep-unverified.md"), "JS pre-LLM resolves deep canonical owner");
+    for (const value of forbidden) ok(!js.includes(value), `JS deep alert hides path/topology: ${value}`);
+
+    const ompMod = await import(pathToFileURL(resolve(__dirname, "..", "omp-extension.mjs")).href);
+    const ompHandlers = {}; ompMod.default({ on: (event, handler) => { ompHandlers[event] = handler; } });
+    const previousProject = process.env.PI_PROJECT_DIR;
+    process.env.PI_PROJECT_DIR = deep;
+    try {
+      const omp = ompHandlers.before_agent_start({ systemPrompt: "BASE" }).systemPrompt;
+      ok(omp.includes("done without APPROVE") && omp.includes("01-deep-unverified.md"), "OMP resolves deep canonical owner");
+      for (const value of forbidden) ok(!omp.includes(value), `OMP deep alert hides path/topology: ${value}`);
+    } finally {
+      if (previousProject === undefined) delete process.env.PI_PROJECT_DIR; else process.env.PI_PROJECT_DIR = previousProject;
+    }
+
+    const openCodeMod = await import(pathToFileURL(resolve(__dirname, "..", "opencode-plugin.mjs")).href);
+    const openCode = await openCodeMod.default();
+    const previousCwd = process.cwd(); process.chdir(deep);
+    try {
+      const output = { system: [] }; await openCode["experimental.chat.system.transform"]({}, output);
+      const prompt = output.system.join("\n");
+      ok(prompt.includes("done without APPROVE") && prompt.includes("01-deep-unverified.md"), "OpenCode resolves deep canonical owner");
+      for (const value of forbidden) ok(!prompt.includes(value), `OpenCode deep alert hides path/topology: ${value}`);
+    } finally { process.chdir(previousCwd); }
+  } finally { rmSync(root, { recursive: true, force: true }); }
 }
 
 // OMP session_stop — one forced correction lap, bounded by unresolved state
@@ -489,7 +649,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     } finally {
       process.stdout.write = write;
     }
-    ok(sessionOut.includes("## .loom state") && sessionOut.includes("01-parent.md"), "OMP snapshot uses the same parent .loom root");
+    for (const forbidden of [tmp, "AGENTS.md:", "Loom owner root:", "Loom artifact root:", "Execution roots:", "Workspace context:", "CONTEXT.md:", ".loom/:", "## .loom state"]) {
+      ok(!sessionOut.includes(forbidden), `OMP ordinary session hides project context: ${forbidden}`);
+    }
 
     const prompt = handlers.before_agent_start({ systemPrompt: "BASE" });
     ok(prompt?.systemPrompt.includes("done without APPROVE") && prompt.systemPrompt.includes("01-parent.md"), "OMP alert uses the same parent .loom root");
@@ -1246,15 +1408,16 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
     if (e.code !== "ENOENT" && e.code !== "ETIMEDOUT") throw e; // no python3 on this runner → skip parity exec
   }
 
-  // Session-start hook carries the snapshot (cwd = project root, AGENTS.md marks it).
+  // Ordinary session-start carries neutral pointers, not the full snapshot.
   writeFileSync(join(tmp, "AGENTS.md"), "<!-- loom:begin version=v0.12.0 -->\n<!-- loom:end -->\n");
   const sessionOut = execFileSync(
     process.execPath,
     [resolve(__dirname, "..", "hooks", "loom-session-start.cjs")],
     { cwd: tmp, encoding: "utf8", timeout: 5000 }
   );
-  ok(sessionOut.includes("## .loom state"), "session-start injects the state snapshot");
-  ok(sessionOut.includes("read the issue files before acting"), "snapshot is advisory, files stay canonical");
+  ok(!sessionOut.includes(tmp) && !sessionOut.includes("AGENTS.md:"), "ordinary session-start with AGENTS.md leaks no project path");
+  ok(!sessionOut.includes("## .loom state"), "ordinary session-start omits the state snapshot");
+  ok(sessionOut.includes("reconstruct .loom state only after explicit Loom/precision/selected-issue intent"), "explicit Loom contexts reconstruct state on demand");
 
   rmSync(tmp, { recursive: true });
 
@@ -1473,7 +1636,8 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   });
   ok(dirtyOut.includes("# Loom alert"), "pre-LLM raises the alert block when dirty");
   ok(dirtyOut.includes("done without APPROVE") && dirtyOut.includes("003.md"), "alert pre-warns the stop gate");
-  ok(dirtyOut.includes("needs-info awaiting answers") && dirtyOut.includes("002.md"), "alert surfaces needs-info");
+  ok(!dirtyOut.includes("needs-info awaiting answers") && !dirtyOut.includes("002.md"), "per-turn alert omits needs-info");
+  ok(!dirtyOut.includes("lint warning"), "per-turn alert omits full lint");
 
   // --- Hermes Python mirror: identical lint warnings for the same tree ---
   try {
@@ -2335,7 +2499,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const tend = read("skills/loom-tend/SKILL.md");
   const unattended = read("docs/unattended.md");
 
-  ok(dispatcher.includes("only enough relevant state to route") && dispatcher.includes("does no subject-matter research"), "dispatcher routes without owning subject research");
+  ok((dispatcher.includes("only enough relevant state to route") || dispatcher.includes("only enough relevant state to route project-nonmutatingly")) && dispatcher.includes("does no subject-matter research"), "dispatcher routes without owning subject research");
   for (const [claim, message] of [
     [canon.includes("code, tests, types, installed dependency versions") && canon.includes("do not ask the user for facts available there"), "research starts with discoverable project facts"],
     [canon.includes("automatically and narrowly") && canon.includes("Normal read-only web/docs research needs no research-specific permission"), "ordinary current-doc research remains automatic"],

@@ -238,7 +238,7 @@ function witnessRoot(start) {
   const initial = state?.invalid ? state.root : (configured || resolve(start || process.cwd()));
   let dir = initial;
   let agentsRoot = null;
-  for (let i = 0; i < 20; i++) {
+  while (true) {
     if (existsSync(join(dir, ".loom"))) return dir;
     if (!agentsRoot && existsSync(join(dir, "AGENTS.md"))) agentsRoot = dir;
     const parent = dirname(dir);

@@ -28,7 +28,7 @@ Structured digest (below), persisted into the issue's `## Verify` section on **e
 
 ## Workspace ownership
 
-With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner. Run each ordinary existing Git diff/check command in the relevant registered service repository; this is not aggregate Verify and adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
+With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner. Produce one issue verdict over combined evidence from all touched execution roots. Run each touched root's own ordinary Git diff and existing gate commands in that root; this adds no coordinator, manifest, per-root verdict protocol, or lifecycle.
 
 ## Process
 

@@ -16,16 +16,13 @@ const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const {
   findUnverifiedDoneIssues,
-  findIssuesByStatus,
-  lintWarnings,
   alertScanAllowed,
-  stateSnapshot,
   versionDriftWarning,
   recordWitness,
   unwitnessedApproved,
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
-const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
+const { projectContext, projectContextPointers, workspaceState } = require("./hooks/workspace.cjs");
 
 const MANAGED_BLOCK_VERSION = "v1.1.0";
 
@@ -39,11 +36,12 @@ const ROLES = {
     "Read primary sources, not summaries. Cite every claim with its source. Do not modify code.",
 };
 
+function findProjectContext() {
+  return projectContext(process.env.PI_PROJECT_DIR || process.cwd());
+}
+
 function findProjectRoot() {
-  const start = process.env.PI_PROJECT_DIR || process.cwd();
-  const workspace = workspaceState(start);
-  if (workspace?.invalid) return workspace.root;
-  return workspaceRoot(start) || witnessRoot(start);
+  return findProjectContext().artifactRoot;
 }
 
 // Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
@@ -59,27 +57,14 @@ function anomalyAlert(root) {
       `done without APPROVE (stop gate will block): ${unverified.map(name).join(", ")}`
     );
   }
-  const needsInfo = findIssuesByStatus(root, "needs-info");
-  if (needsInfo.length) {
-    alerts.push(`needs-info awaiting answers: ${needsInfo.map(name).join(", ")}`);
-  }
-  const lint = lintWarnings(root);
-  if (lint.length) {
-    alerts.push(
-      `${lint.length} .loom lint warning(s) — run \`node stop-gate-logic.cjs --lint\` (first: ${lint[0]})`
-    );
-  }
-
   if (!alerts.length) return "";
   return "\n\n# Loom alert\n" + alerts.map((a) => `- ${a}`).join("\n");
 }
 
-function buildContextPointers(root) {
+function buildSessionPointers(context) {
+  if (context.invalid) return projectContextPointers(context);
   const pointers = [];
-  const activeWorkspace = findWorkspace(root);
-  pointers.push(...workspacePointers(activeWorkspace));
-
-  const agentsPath = resolve(root, "AGENTS.md");
+  const agentsPath = resolve(context.artifactRoot, "AGENTS.md");
   if (existsSync(agentsPath)) {
     const content = readFileSync(agentsPath, "utf8");
     const match = content.match(/<!-- loom:begin version=([^\s]+)/);
@@ -91,19 +76,7 @@ function buildContextPointers(root) {
         "run `omp plugin install git:github.com/zuevrs/loom --force`, then restart"
       );
     if (drift) pointers.push(drift);
-    pointers.push(`AGENTS.md: ${agentsPath}`);
   }
-
-  if (!activeWorkspace) {
-    const contextPath = resolve(root, "CONTEXT.md");
-    if (existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
-  }
-
-  const loomDir = resolve(root, ".loom");
-  if (existsSync(loomDir)) {
-    pointers.push(`.loom/: ${loomDir}/`);
-  }
-
   return pointers;
 }
 
@@ -112,18 +85,13 @@ export default function loomExtension(pi) {
   let lastWitnessState = null;
   pi.on("session_start", () => {
     try {
-      const root = findProjectRoot();
-      const pointers = buildContextPointers(root);
-      const snapshot = stateSnapshot(root);
+      const context = findProjectContext();
+      const pointers = buildSessionPointers(context);
       const lines = [
         "# Loom session context",
+        ...(pointers.length ? ["", ...pointers] : []),
         "",
-        ...pointers,
-        ...(snapshot ? ["", snapshot] : []),
-        "",
-        snapshot
-          ? "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."
-          : "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
+        "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
       ];
       process.stdout.write(lines.join("\n") + "\n");
     } catch {
@@ -150,7 +118,7 @@ export default function loomExtension(pi) {
           }
         }
       }
-      injection += anomalyAlert(findProjectRoot());
+      if (!workspace?.invalid) injection += anomalyAlert(findProjectRoot());
       const base = Array.isArray(event.systemPrompt)
         ? event.systemPrompt.join("\n\n")
         : event.systemPrompt || "";

@@ -20,6 +20,8 @@ Use CONTEXT/ADRs, PRODUCT/DESIGN when present, issue statuses, and relevant diff
 
 ## Process
 
+Every bounded preview for a durable Loom write warns when the resolved artifact owner is not a Git root; the write then lacks an owner-level Git safety net.
+
 1. If the user names a maintenance outcome, inspect only enough evidence to establish it. Bare Tend samples the available signals and recommends/selects the single strongest evidence-backed finding; it does not mandate a full sweep.
 2. Candidate signals include warp/ADR drift, `loom:` debt, stale `ready-for-agent`, `needs-info`, or `needs-triage` issue state, install freshness, orphaned grill/research notes, completed-pack archiving, or recurring maintenance evidence. Use the deterministic linter when issue state is the candidate: `node ~/.loom/hooks/stop-gate-logic.cjs --lint .`.
 3. Present one outcome and its evidence. If it requires writes, propose exact targets/actions and current bases; changed target, action, scope, or base requires renewed confirmation. Apply only after confirmation.

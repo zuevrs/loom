@@ -13,16 +13,23 @@ import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
-const { findWorkspace, workspacePointers } = require("./hooks/workspace.cjs");
+const { findUnverifiedDoneIssues, alertScanAllowed } = require("./hooks/stop-gate-logic.cjs");
+const { findWorkspace, projectContext } = require("./hooks/workspace.cjs");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillsDir = path.resolve(__dirname, "skills");
 
 function workspaceInjection() {
   const profile = findWorkspace(process.cwd());
-  if (!profile) return "";
-  if (profile.invalid) return `\n\n# Loom workspace error\n${workspacePointers(profile).join("\n")}\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`;
-  return `\n\n# Loom workspace\n${workspacePointers(profile).join("\n")}\nThe workspace root owns Loom state; registered service repositories remain ordinary execution targets.`;
+  if (!profile?.invalid) return "";
+  return `\n\n# Loom workspace error\nInvalid profile: ${profile.profilePath} (${profile.error})\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`;
+}
+
+function urgentAlert(root) {
+  if (!alertScanAllowed(root)) return "";
+  const unverified = findUnverifiedDoneIssues(root);
+  if (!unverified.length) return "";
+  return `\n\n# Loom alert\n- done without APPROVE (stop gate will block): ${unverified.map((issue) => path.basename(issue)).join(", ")}`;
 }
 
 const SYSTEM_INJECTION = `${PRE_LLM}
@@ -42,7 +49,8 @@ export default async ({ client } = {}) => {
     },
 
     "experimental.chat.system.transform": async (_input, output) => {
-      output.system.push(SYSTEM_INJECTION + workspaceInjection());
+      const workspace = workspaceInjection();
+      output.system.push(SYSTEM_INJECTION + workspace + (workspace ? "" : urgentAlert(projectContext(process.cwd()).artifactRoot)));
     },
   };
 };

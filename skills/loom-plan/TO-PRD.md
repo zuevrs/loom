@@ -4,6 +4,8 @@ Entry condition: the interview has resolved load-bearing branches and the user a
 
 ## Build the full preview
 
+Every bounded preview for a durable Loom write warns when the resolved artifact owner is not a Git root; the write then lacks an owner-level Git safety net.
+
 Synthesize without re-interviewing:
 
 - Pending `CONTEXT.md` delta via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md)
@@ -16,6 +18,6 @@ Use immutable host scratch outside the worktree when supported; otherwise presen
 
 ## Apply gate
 
-Ask for explicit confirmation bound to those hashes and exact writes. Changed content, path, scope, or base means regenerate and ask again. On confirmation write only the previewed targets. If `.loom` setup is absent, offer internal Init immediately before the first persistent pack write and return here afterward.
+Ask for explicit confirmation bound to those hashes and exact writes. Changed target, action, scope, content, or base invalidates consent: regenerate and ask again. On confirmation write only the previewed targets. If `.loom` setup is absent, offer internal Init immediately before the first persistent pack write and return here afterward.
 
 A confirmed PRD without issues is valid completion. Offer slicing; do not imply it is mandatory.

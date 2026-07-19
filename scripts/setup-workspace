@@ -65,7 +65,7 @@ try {
     ...(existingProfileError ? { existing_profile_error: existingProfileError } : {}),
     inventory: { root_is_git: inventory.root_is_git, root_git_state: inventory.root_git_state, repositories: inventory.git_roots },
     inventory_drift: inventoryDrift,
-    warnings: inventory.warnings,
+    warnings: [...inventory.warnings, ...(!inventory.root_is_git ? [`Loom artifact owner is not a Git root: ${root}. Durable Loom writes have no owner-level Git safety net.`] : [])],
     unregistered_git_roots: inventory.unregistered_git_roots,
     symlinked_git_roots: inventory.symlinked_git_roots,
     errors: inventory.errors,

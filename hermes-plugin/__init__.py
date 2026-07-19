@@ -1,7 +1,7 @@
 """Loom plugin for Hermes Agent.
 
 Registers skills, slash commands, and lifecycle hooks:
-- on_session_start: context pointers + managed-block version check
+- on_session_start: generic safety guidance + managed-block version check
 - pre_llm_call: per-turn invariant injection (can return context)
 - subagent_start: loomRole detection for delegate_task children
 
@@ -63,12 +63,10 @@ def _workspace_profile():
 
 
 def _find_project_root():
-    workspace = _workspace_profile()
-    if workspace and not workspace.get("invalid"):
-        return workspace["root"]
+    """Safest local-only delivery root until Issue 03 supplies the canonical bridge."""
     cwd = Path.cwd()
     for parent in [cwd, *cwd.parents]:
-        if (parent / "AGENTS.md").exists():
+        if any((parent / marker).exists() for marker in ("AGENTS.md", ".loom", ".git")):
             return parent
     return cwd
 
@@ -347,7 +345,7 @@ ALERT_SCAN_CEILING = 200
 
 
 # loom: Python mirror of anomalyAlert in omp-extension.mjs / loom-pre-llm.cjs — keep in sync.
-def _anomaly_alert(root: Path) -> str:
+def _anomaly_alert(root: Path, urgent_only: bool = False) -> str:
     import re
 
     loom_dir = root / ".loom"
@@ -365,7 +363,7 @@ def _anomaly_alert(root: Path) -> str:
     for f in issue_files:
         text = re.sub(r"<!--[\s\S]*?-->", "", f.read_text())
         m = re.search(r"^Status:\s*(\S+)", text, re.M)
-        if m and m.group(1) == "needs-info":
+        if not urgent_only and m and m.group(1) == "needs-info":
             needs_info.append(f.name)
         if re.search(r"^Status:\s*done\b", text, re.M) and _latest_verify_verdict(text) != "APPROVE":
             unverified.append(f.name)
@@ -375,47 +373,37 @@ def _anomaly_alert(root: Path) -> str:
         alerts.append(f"done without APPROVE (stop gate will block): {', '.join(unverified)}")
     if needs_info:
         alerts.append(f"needs-info awaiting answers: {', '.join(needs_info)}")
-    lint = _lint_warnings(root)
-    if lint:
-        alerts.append(f"{len(lint)} .loom lint warning(s) — run `node stop-gate-logic.cjs --lint` (first: {lint[0]})")
+    if not urgent_only:
+        lint = _lint_warnings(root)
+        if lint:
+            alerts.append(f"{len(lint)} .loom lint warning(s) — run `node stop-gate-logic.cjs --lint` (first: {lint[0]})")
 
     if not alerts:
         return ""
     return "\n\n# Loom alert\n" + "\n".join(f"- {a}" for a in alerts)
 
 
-def _build_context_pointers(root: Path) -> str:
-    lines = ["# Loom session context", ""]
+def _build_session_guidance(root: Path, workspace=None) -> str:
+    """Topology-quiet ordinary delivery; profile semantics remain guidance-only."""
+    if workspace and workspace.get("invalid"):
+        return (
+            "# Loom session context\n\n"
+            f"Invalid workspace profile: {workspace['path']}\n"
+            "Workspace behavior is disabled until repaired. Ordinary project work remains available; explicit Loom work must stop."
+        )
+    lines = ["# Loom session context"]
     agents = root / "AGENTS.md"
     if agents.exists():
         import re
         content = agents.read_text()
-        m = re.search(r"<!-- loom:begin version=(\S+)", content)
-        drift = m and _version_drift_warning(
-            m.group(1),
-            MANAGED_BLOCK_VERSION,
+        match = re.search(r"<!-- loom:begin version=(\S+)", content)
+        drift = match and _version_drift_warning(
+            match.group(1), MANAGED_BLOCK_VERSION,
             "pull the ~/.loom clone (the hermes plugin is a symlink into it)",
         )
         if drift:
-            lines.append(drift)
-        lines.append(f"AGENTS.md: {agents}")
-
-    context = root / "CONTEXT.md"
-    if context.exists():
-        lines.append(f"CONTEXT.md: {context}")
-
-    loom_dir = root / ".loom"
-    if loom_dir.is_dir():
-        lines.append(f".loom/: {loom_dir}/")
-
-    if len(lines) == 2:
-        lines.append("No persistent Loom project setup detected. Explicit Loom work may offer loom-init just before .loom pack/enforcement capability is needed.")
-
-    snapshot = _state_snapshot(root)
-    if snapshot:
-        lines.extend(["", snapshot, "", "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."])
-    else:
-        lines.extend(["", "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent."])
+            lines.extend(["", drift])
+    lines.extend(["", "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent."])
     return "\n".join(lines)
 
 
@@ -425,11 +413,11 @@ def register(ctx):
         if skill_path.exists():
             ctx.register_skill(name, str(skill_path))
 
-    # --- Hook: session start (one-shot context pointers) ---
+    # --- Hook: session start (one-shot generic safety/version guidance) ---
     def on_session_start(**kwargs):
         try:
-            root = _find_project_root()
-            return _build_context_pointers(root)
+            workspace = _workspace_profile()
+            return _build_session_guidance(_find_project_root(), workspace)
         except Exception:
             return None
 
@@ -445,7 +433,8 @@ def register(ctx):
         if role in ROLES:
             ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
         try:
-            ctx_text += _anomaly_alert(_find_project_root())
+            if not (workspace and workspace.get("invalid")):
+                ctx_text += _anomaly_alert(_find_project_root(), urgent_only=True)
         except Exception:
             pass  # alert is best-effort — never break a turn over it
         return {"context": ctx_text}

@@ -28,7 +28,7 @@ A direct `loom-implement` invocation without a named issue delegates exactly one
 
 ## Execution consent
 
-Selecting a named issue explicitly authorizes issue-scoped project changes within the already confirmed repositories/targets/base, workspace-root `## Log` updates, Verify verdict write-back, and `Status: done` only after APPROVE. In workspace mode, any new repository, target, action, scope, or changed base returns to the existing bounded apply gate. Loom artifacts remain at workspace root. It does not authorize external actions.
+Selecting a named issue explicitly authorizes issue-scoped project changes within the already confirmed repositories/targets/base, workspace-root `## Log` updates, Verify verdict write-back, and `Status: done` only after APPROVE. In workspace mode, any changed repository, target, action, scope, or base invalidates consent and returns to the existing bounded apply preview; that preview warns when the artifact owner is not a Git root because durable Loom writes then lack an owner-level Git safety net. Loom artifacts remain at workspace root. It does not authorize external actions.
 
 ## External prose and language contract
 

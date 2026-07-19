@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -56,9 +56,20 @@ try {
 
   const found = workspace.findWorkspace(api);
   strictEqual(found.workspace_id, "curated-id");
+  const serviceContext = workspace.projectContext(api);
+  strictEqual(serviceContext.mode, "workspace", "registered service resolves workspace context");
+  strictEqual(serviceContext.ownerRoot, ws);
+  strictEqual(serviceContext.artifactRoot, ws);
+  deepStrictEqual(serviceContext.executionRoots, [api], "registered execution roots come from the profile allowlist");
+  strictEqual(serviceContext.nonGitOwner, true, "non-Git workspace owner is explicit in neutral context");
+  ok(workspace.projectContextPointers(serviceContext).some((line) => line.includes("no owner-level Git safety net")), "non-Git owner warning is available to every preview");
   strictEqual(workspace.workspaceRoot(api), ws, "registered service activates parent workspace");
   strictEqual(workspace.findWorkspace(sibling), null, "unregistered sibling does not activate parent workspace");
   strictEqual(workspace.workspaceRoot(sibling), null, "unregistered sibling remains canonical");
+  const siblingContext = workspace.projectContext(sibling);
+  strictEqual(siblingContext.mode, "canonical", "valid profile leaves an unregistered sibling canonical after membership check");
+  strictEqual(siblingContext.ownerRoot, realpathSync(sibling));
+  deepStrictEqual(siblingContext.executionRoots, [realpathSync(sibling)]);
   let deepDescendant = api;
   for (let index = 0; index < 21; index++) deepDescendant = join(deepDescendant, `level-${index}`);
   mkdirSync(deepDescendant, { recursive: true });
@@ -75,6 +86,7 @@ try {
   const unrelatedCwd = join(tmp, "unrelated-cwd");
   mkdirSync(unrelatedCwd);
   const proposal = JSON.parse(execFileSync(process.execPath, [setup, ws], { cwd: unrelatedCwd, encoding: "utf8" }));
+  ok(proposal.warnings.some((line) => line.includes("no owner-level Git safety net")), "every non-Git workspace setup proposal warns about owner safety");
   strictEqual(proposal.mode, "proposal", "absolute installed setup utility runs outside its Loom tree");
   strictEqual(proposal.profile.workspace_id, "curated-id", "repeated setup preserves workspace ID");
   deepStrictEqual(proposal.profile.repositories.map((item) => item.path), ["api"], "repeated setup preserves curated allowlist");
@@ -86,26 +98,48 @@ try {
   writeFileSync(join(ws, ".loom", "pack", "issues", "01.md"), "# Issue\n\n## Verify\n\n## Status\n\nStatus: done\n");
   strictEqual(spawnSync(process.execPath, [stopGate, api, "--ci"], { encoding: "utf8" }).status, 1, "service-path stop gate inspects workspace-root state");
   writeFileSync(join(api, "dirty.txt"), "dirty\n");
+  writeFileSync(join(ws, "AGENTS.md"), "<!-- loom:begin version=v1.1.0 -->\n<!-- loom:end -->\n");
   let session = execFileSync(process.execPath, [sessionStart], { cwd: api, encoding: "utf8" });
-  ok(session.includes("registered service working trees dirty: api"), "recovery reports dirty services under non-Git root");
+  for (const forbidden of [ws, api, "AGENTS.md:", "Execution roots:", "Workspace context:", "## .loom state", join(ws, "CONTEXT.md")]) {
+    ok(!session.includes(forbidden), `registered-service ordinary session hides topology: ${forbidden}`);
+  }
 
   const broken = join(ws, "broken");
   mkdirSync(broken);
   writeFileSync(join(broken, ".git"), "gitdir: missing\n");
   profile(ws, { workspace_id: "curated-id", repositories: [{ path: "api", remote: "git@example.test/api.git" }, { path: "broken" }] });
   session = execFileSync(process.execPath, [sessionStart], { cwd: api, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  ok(session.includes("registered service working trees dirty: api"), "one failed status does not suppress dirty repositories");
-  ok(session.includes("registered service status unavailable: broken"), "recovery visibly reports per-repository status failure");
+  ok(!session.includes("registered service status unavailable"), "ordinary session does not scan registered-service status");
 
   writeFileSync(join(ws, ".loom", "workspace.json"), "{");
   const descendant = join(api, "src");
   mkdirSync(descendant);
   strictEqual(workspace.workspaceState(descendant)?.invalid, true, "corrupted parent surfaces from a registered-service descendant");
   strictEqual(workspace.workspaceState(sibling)?.invalid, true, "malformed parent warns descendants when membership is unknowable");
+  const invalidContext = workspace.projectContext(descendant);
+  strictEqual(invalidContext.mode, "invalid", "invalid applicable profile remains distinguishable");
+  deepStrictEqual(invalidContext.executionRoots, [], "invalid profile exposes no execution roots");
   session = execFileSync(process.execPath, [sessionStart], { cwd: sibling, encoding: "utf8" });
-  ok(session.includes("Workspace behavior is disabled") && session.includes("Ordinary project work remains available"), "ordinary hooks warn without blocking on malformed ancestor");
+  ok(session.includes("Project context invalid:") && session.includes("Workspace behavior is disabled") && session.includes("Ordinary project work remains available"), "malformed ancestor warns because membership cannot be proven without blocking ordinary work");
+  ok(session.includes(join(ws, ".loom", "workspace.json")), "malformed warning identifies the discovered profile");
   strictEqual(spawnSync(process.execPath, [stopGate, descendant, "--ci"], { encoding: "utf8" }).status, 1, "explicit Loom contract fails closed for corrupted ancestor");
   strictEqual(workspace.workspaceState(ws)?.invalid, true, "invalid profile fails closed at explicit workspace root");
+
+  const canonicalRoot = join(tmp, "canonical");
+  const canonicalNested = join(canonicalRoot, "src");
+  repo(canonicalRoot);
+  mkdirSync(canonicalNested);
+  const canonicalContext = workspace.projectContext(canonicalNested);
+  strictEqual(canonicalContext.mode, "canonical");
+  strictEqual(canonicalContext.ownerRoot, realpathSync(canonicalRoot), "canonical owner is ordinary Git root");
+  strictEqual(canonicalContext.artifactRoot, realpathSync(canonicalRoot));
+  deepStrictEqual(canonicalContext.executionRoots, [realpathSync(canonicalRoot)]);
+  strictEqual(canonicalContext.nonGitOwner, false);
+  writeFileSync(join(canonicalRoot, "AGENTS.md"), "<!-- loom:begin version=v1.1.0 -->\n<!-- loom:end -->\n");
+  const canonicalSession = execFileSync(process.execPath, [sessionStart], { cwd: canonicalNested, encoding: "utf8" });
+  for (const forbidden of [canonicalRoot, "AGENTS.md:", "Loom owner root:", "Loom artifact root:", "Execution roots:", "CONTEXT.md:", "ADRs:", ".loom/:", "## .loom state"]) {
+    ok(!canonicalSession.includes(forbidden), `canonical ordinary session hides project context: ${forbidden}`);
+  }
 
   const writerRoot = join(tmp, "writer");
   repo(join(writerRoot, "api"));
@@ -184,8 +218,8 @@ try {
   writeFileSync(join(pointerRoot, "LISTED.md"), "# Listed\n");
   profile(pointerRoot, { workspace_id: "pointers", repositories: [{ path: "api" }], context_paths: ["LISTED.md"] });
   const pointerSession = execFileSync(process.execPath, [sessionStart], { cwd: pointerRepo, encoding: "utf8" });
-  ok(pointerSession.includes(join(pointerRoot, "LISTED.md")), "session emits listed workspace context");
-  ok(!pointerSession.includes(join(pointerRoot, "CONTEXT.md")), "session omits unlisted root CONTEXT in workspace mode");
+  ok(!pointerSession.includes(join(pointerRoot, "LISTED.md")), "ordinary session omits listed workspace context");
+  ok(!pointerSession.includes(join(pointerRoot, "CONTEXT.md")), "ordinary session omits unlisted workspace context");
 
   console.log("workspace tests passed");
 } finally {
