@@ -73,6 +73,4 @@ After Verify APPROVE → write `## Verify` section, then set `Status: done`. Wor
 
 **Workspace profile**: `.loom/workspace.json`, the validated map of workspace identity, registered repository paths, expected remotes, and allowlisted context paths. It contains stable structure, not per-task write permissions.
 
-**Workspace task**: A bounded task whose manifest names repositories to change (`targets`) and repositories to read (`context`). Each target keeps its own branch, baseline, checks, and product commits.
-
 **Runner**: An external scheduler or invocation tool that starts a Loom recipe and supplies checkout, budget, and report boundaries. Loom is runner-agnostic.

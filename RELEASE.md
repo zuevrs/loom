@@ -54,7 +54,7 @@ Update these files to `X.Y.Z`:
 ## 4) Run checks
 
 ```bash
-node tests/hooks.test.mjs
+npm test
 bash scripts/check-drift
 bash scripts/check-doc-consistency
 bash scripts/check-installers
@@ -93,4 +93,3 @@ omp plugin install git:github.com/zuevrs/loom --force
 3. Confirm both hashes match.
 4. `gh release view vX.Y.Z` — confirm Latest.
 5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md): record workspace evidence for OMP, Cursor, and the available hosts; separate install, integration, and runtime status; mark blocked hosts explicitly.
-6. `node --check scripts/check-workspace-scope`

@@ -71,7 +71,7 @@ Stub issues from recipes that run outside a feature pack go to `.loom/maintenanc
 
 ## Host wiring
 
-Workspace target/context boundaries are documented in [`docs/workspaces.md`](workspaces.md); the runner itself remains outside Loom.
+Workspace mode only changes context/root ownership as documented in [`docs/workspaces.md`](workspaces.md); unattended runs otherwise use the same single-issue contract, with no workspace manifest or coordinator. The runner remains outside Loom.
 
 The recipe file is the prompt. Point your runner at it.
 

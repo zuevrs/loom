@@ -4,9 +4,13 @@ import { existsSync, lstatSync, readdirSync, realpathSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, relative, sep } from "node:path";
 
-const [rootArg, flag] = process.argv.slice(2);
-if (!rootArg || (flag && flag !== "--json")) {
-  console.error("usage: inspect-workspace <root> [--json]");
+const [rootArg, ...flags] = process.argv.slice(2);
+const depthIndex = flags.indexOf("--depth");
+const depthValue = depthIndex >= 0 ? flags[depthIndex + 1] : "2";
+const maxDepth = Number(depthValue);
+const allowed = new Set(["--json", "--depth"]);
+if (!rootArg || !Number.isInteger(maxDepth) || maxDepth < 1 || flags.some((flag, index) => !allowed.has(flag) && !(depthIndex >= 0 && index === depthIndex + 1))) {
+  console.error("usage: inspect-workspace <root> [--json] [--depth <positive-integer>]");
   process.exit(2);
 }
 const root = resolve(rootArg);
@@ -52,9 +56,8 @@ function walk(dir, depth, ancestorGit = false) {
       continue;
     }
     if (!entry.isDirectory()) continue;
-    let stat;
-    try { stat = lstatSync(candidate); } catch (error) { errors.push({ path: rel(candidate), error: error.message }); continue; }
-    if (depth >= 2) continue;
+    try { lstatSync(candidate); } catch (error) { errors.push({ path: rel(candidate), error: error.message }); continue; }
+    if (depth >= maxDepth) continue;
     const hasGit = existsSync(resolve(candidate, ".git"));
     if (hasGit) {
       record(candidate);
@@ -71,8 +74,9 @@ if (existsSync(resolve(root, ".git"))) record(root);
 walk(root, 0, existsSync(resolve(root, ".git")));
 const allNested = [];
 for (const candidate of roots) {
-  const base = candidate.path === "." ? "" : `${candidate.path}/`;
-  for (const possible of roots) if (possible.path.startsWith(base) && possible.path !== candidate.path) allNested.push(possible.path);
+  if (candidate.path === ".") continue;
+  const base = `${candidate.path}/`;
+  for (const possible of roots) if (possible.path.startsWith(base)) allNested.push(possible.path);
 }
 const nestedSet = new Set(allNested);
 const gitRoots = roots.filter((item) => item.path !== "." && !nestedSet.has(item.path)).sort((a, b) => a.path.localeCompare(b.path));

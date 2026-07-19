@@ -54,7 +54,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 |------|---------|-----------|--------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | install verified; runtime blocked by Claude billing in current smoke |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | install + integration verified; runtime blocked upstream (Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | install + integration + runtime verified; workspace E2E passed |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | installed-plugin v1.0.0 discovery/health and workspace setup/profile runtime verified on OMP v17.0.4; optional handoff, other workspace flows, and other hosts remain unverified |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | install + integration verified; fixture runtime smoke passed |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | install verified; runtime smoke timed out |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | install + adapter/integration verified; model runtime timed out |
@@ -69,7 +69,7 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 
 ## Multi-repo workspaces
 
-Loom remains `1 Git repository = 1 Loom` by default. In a directory containing independent service repositories, run **`/loom setup workspace`**: the agent inventories the repositories, shows the proposed allowlist and warnings, asks once for confirmation, then safely creates `.loom/workspace.json`. This is opt-in and adds no Loom files to registered service repositories. See [`docs/workspaces.md`](docs/workspaces.md).
+Loom remains `1 Git repository = 1 Loom` by default. In a directory containing independent service repositories, **`/loom setup workspace`** routes to Init to configure an opt-in root/context profile, then may offer one handoff to ordinary Plan, Grill, or Tend. All Loom artifacts stay at workspace root; normal rituals operate afterward without a workspace coordinator. See [`docs/workspaces.md`](docs/workspaces.md).
 
 ## Quick Start
 

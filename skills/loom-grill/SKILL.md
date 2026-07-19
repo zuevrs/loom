@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Workspace scope
 
-When an explicit `.loom/workspace.json` profile is present, treat the workspace root as the Loom context owner. A service-root invocation hands off to that workspace context; it does not silently initialize or write service-local Loom state. Before any write, derive a task manifest with `targets` (repositories allowed to change) and `context` (read-only repositories), show it, and obtain bounded confirmation. Expand `targets` only after evidence and renewed confirmation; never write Loom artifacts into registered service repositories. Run the workspace preflight before apply and postflight after apply; postflight must reject changes in `context` or unlisted repositories. Without the profile, preserve canonical one-Git-repository/one-Loom behavior.
+With a valid active workspace profile, the workspace root owns Loom context, packs, logs, ADRs, managed blocks, and Verify records. Registered repositories are readable evidence. Include every service repository write in Grill's existing bounded apply preview with exact targets/actions and base evidence; changed repository, target, action, scope, or base renews consent. Never write Loom artifacts into service repositories. Without an applicable profile, preserve canonical repository mode.
 
 ## Goal
 

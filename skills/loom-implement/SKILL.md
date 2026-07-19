@@ -37,7 +37,7 @@ A user may explicitly invoke the `loom-implement` precision entrypoint for a rea
 
 ## Execution consent
 
-Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions.
+Selecting a named issue explicitly authorizes issue-scoped project changes within the already confirmed repositories/targets/base, workspace-root `## Log` updates, Verify verdict write-back, and `Status: done` only after APPROVE. In workspace mode, any new repository, target, action, scope, or changed base returns to the existing bounded apply gate. Loom artifacts remain at workspace root. It does not authorize external actions.
 
 ## External prose and language contract
 

@@ -26,7 +26,7 @@ const {
 } = require("./hooks/stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.27.0";
+const MANAGED_BLOCK_VERSION = "v1.0.0";
 
 const INVARIANTS = PRE_LLM;
 
@@ -75,7 +75,8 @@ function anomalyAlert(root) {
 
 function buildContextPointers(root) {
   const pointers = [];
-  pointers.push(...workspacePointers(findWorkspace(root)));
+  const activeWorkspace = findWorkspace(root);
+  pointers.push(...workspacePointers(activeWorkspace));
 
   const agentsPath = resolve(root, "AGENTS.md");
   if (existsSync(agentsPath)) {
@@ -92,8 +93,10 @@ function buildContextPointers(root) {
     pointers.push(`AGENTS.md: ${agentsPath}`);
   }
 
-  const contextPath = resolve(root, "CONTEXT.md");
-  if (existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+  if (!activeWorkspace) {
+    const contextPath = resolve(root, "CONTEXT.md");
+    if (existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+  }
 
   const loomDir = resolve(root, ".loom");
   if (existsSync(loomDir)) {
@@ -133,7 +136,7 @@ export default function loomExtension(pi) {
       const role = (process.env.LOOM_ROLE || "").toLowerCase();
       const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
       let injection = workspace?.invalid
-        ? `# Loom workspace error\nWorkspace profile is invalid: ${workspace.profilePath} (${workspace.error})\nRepair the profile before reading or writing project state.`
+        ? `# Loom workspace error\nWorkspace profile is invalid: ${workspace.profilePath} (${workspace.error})\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`
         : INVARIANTS;
       if (role && ROLES[role]) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
@@ -225,9 +228,6 @@ export default function loomExtension(pi) {
   pi.on("session_stop", () => {
     try {
       const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
-      if (workspace?.invalid) {
-        return { continue: true, additionalContext: `BLOCKED: invalid workspace profile ${workspace.profilePath}: ${workspace.error}. Repair the profile before continuing.` };
-      }
       const root = findProjectRoot();
       const blocked = findUnverifiedDoneIssues(root).sort();
       if (blocked.length > 0) {

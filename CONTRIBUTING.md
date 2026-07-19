@@ -41,7 +41,7 @@ tests/           ← hook tests and canaries
    ```
    Or individually:
    ```bash
-   node tests/hooks.test.mjs
+   npm test
    bash scripts/check-drift
    bash scripts/check-doc-consistency
    bash scripts/check-installers
@@ -73,12 +73,12 @@ Keep messages product-facing. Describe what changed for users, not internal mech
 
 ## Tests
 
-- `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
+- `tests/hooks.test.mjs` — general hook/adapter contract tests (Node, no dependencies).
+- `tests/workspace.test.mjs` — focused executable workspace adapter tests (Node, no dependencies).
 - `scripts/check-drift` — adapter drift canary.
 - `scripts/check-doc-consistency` — user-facing docs drift canary (README/install facts, changelog links, command-set parity, template inventory + references).
 - `scripts/check-installers` — installer script canary (syntax + key target contracts).
 - `scripts/check-skill-template-contract` — skill section contract canary.
 - `scripts/check-template-sections` — user-artifact template section contract canary.
-- `node --check scripts/check-workspace-scope` — validates the workspace scope gate syntax.
 - `scripts/smoke` — runs all structural checks.
 - CI runs these checks on every push.

@@ -22,7 +22,7 @@ try {
   const { workspaceState, workspacePointers, findWorkspace } = require("./workspace.cjs");
   const workspace = workspaceState(process.cwd());
   if (workspace?.invalid) {
-    process.stdout.write(`\n# Loom workspace error\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\nRepair the profile before reading or writing project state.\n`);
+    process.stdout.write(`\n# Loom workspace error\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\nWorkspace behavior is disabled until repaired. Continue ordinary project work canonically; explicit Loom work must stop.\n`);
     return;
   }
 

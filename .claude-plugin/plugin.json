@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "0.27.0",
+  "version": "1.0.0",
   "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
   "author": {
     "name": "zuevrs",

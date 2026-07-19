@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "0.27.0",
+  "version": "1.0.0",
   "description": "Skills-first harness for agent workflows",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -13,7 +13,18 @@
   "omp": {
     "name": "loom",
     "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
-    "extensions": ["./omp-extension.mjs"]
+    "extensions": [
+      "./omp-extension.mjs"
+    ]
   },
-  "keywords": ["agent", "harness", "skills", "enforcement", "discipline"]
+  "keywords": [
+    "agent",
+    "harness",
+    "skills",
+    "enforcement",
+    "discipline"
+  ],
+  "scripts": {
+    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs"
+  }
 }

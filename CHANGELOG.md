@@ -6,6 +6,36 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [1.0.0] - 2026-07-19
+
+### Highlights
+
+- **Workspace mode is now a root/context adapter for ordinary Loom.** The workspace root owns Loom artifacts, while registered repositories remain ordinary execution targets and keep their product documentation.
+- **Focused workspace setup.** `/loom setup workspace` routes to Init, which configures or updates the workspace profile and may then offer exactly one handoff to ordinary Plan, Grill, or Tend. Init does not own onboarding or migration.
+
+### Breaking changes
+
+- Removed the old runner-only frozen workspace manifest, fingerprint/baseline, scope-runner, and aggregate lifecycle primitives without replacement. Any private automation that invoked those primitives must stop using them.
+
+### Migration steps
+
+- Normal users should update or reinstall the Loom plugin, restart the host, and refresh the managed block when prompted. No workspace-content migration is implemented or implied by this release.
+- Existing workspace users may rerun `/loom setup workspace` to configure the profile, then use one ordinary ritual handoff for any separately confirmed follow-up work.
+
+### Adapter impacts
+
+- Workspace discovery applies only at the workspace root or within a registered repository. Inventory supports bounded `--depth`; recovery reports dirty registered repositories under non-Git roots; service-path Stop checks resolve workspace-root state.
+- OMP v17.0.4 loaded the linked v1.0.0 plugin from `~/.omp/plugins/node_modules/loom`; plugin discovery reported it enabled and doctor reported 4 ok with 0 warnings/errors. Other hosts remain unverified for the workspace flow.
+
+### Safety changes
+
+- Workspace-owned Loom state stays at the workspace root, registered repositories are bounded readable evidence, and later writes still require the ordinary ritual's explicit scope and consent gates.
+- Repeat setup preserves a valid curated profile while reporting inventory drift; invalid workspace behavior fails closed without blocking ordinary non-Loom work.
+
+### Evidence
+
+- Dependency-free executable workspace tests and structural smoke cover the local adapters. On OMP v17.0.4, a model-backed installed-plugin run without `--plugin-dir` completed explicit `/loom setup workspace`, wrote the exact `loom-workspace-installed-v100` profile for `api` and `auth`, printed `INSTALLED_V100_WORKSPACE_OK`, and exited 0 in 48.485s. Only setup/profile is live-verified; the optional handoff and all other hosts remain unverified.
+
 ## [0.27.0] - 2026-07-19
 
 ### Highlights
@@ -1102,7 +1132,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/zuevrs/loom/compare/v0.27.0...v1.0.0
 [0.27.0]: https://github.com/zuevrs/loom/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/zuevrs/loom/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/zuevrs/loom/compare/v0.25.0...v0.25.1

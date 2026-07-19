@@ -23,6 +23,10 @@ Keep the warp current and debts from rotting — without inventing feature scope
 - Maintenance edit list
 - Optional capture-learning proposal (human-approved writes only)
 
+## Workspace ownership
+
+With a valid active workspace profile, resolve Loom issue/PRD/context/ADR/archive/log paths and stop/lint scans from the workspace owner. Run each ordinary existing Git diff/check command in the relevant registered service repository; Tend adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
+
 ## Process
 
 1. **Audit first; route choice authorizes no mutation.** Gather all findings before proposing changes. Then present one bounded apply proposal naming exact targets/actions; apply only after confirmation.

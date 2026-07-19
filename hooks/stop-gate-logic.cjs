@@ -12,7 +12,7 @@ const {
 } = require("node:fs");
 const { join, basename, resolve, dirname } = require("node:path");
 const { tmpdir } = require("node:os");
-const { workspaceRoot, workspaceState } = require("./workspace.cjs");
+const { dirtyRepositories, workspaceRoot, workspaceState } = require("./workspace.cjs");
 const { createHash } = require("node:crypto");
 
 /** @returns {Record<string, string[]>} pack name → issue paths */
@@ -439,6 +439,12 @@ function stateSnapshot(root) {
       `working tree: ${dirty} uncommitted change(s) — possibly interrupted work; check git status/diff before picking an issue`
     );
   }
+  const workspace = workspaceState(root);
+  if (workspace?.valid) {
+    const services = dirtyRepositories(workspace.profile);
+    if (services.length) lines.push(`registered service working trees dirty: ${services.join(", ")} — possibly interrupted work; check each git status/diff`);
+    if (services.errors.length) lines.push(`registered service status unavailable: ${services.errors.map(({ path }) => path).join(", ")} — run git status in each service and repair Git state`);
+  }
 
   if (!lines.length) return null;
   return ["## .loom state", ...lines].join("\n");
@@ -480,11 +486,13 @@ function findUnverifiedDoneIssues(root) {
  * runner has no witness file and must not warn about it.
  */
 function check(root, opts = {}) {
-  const workspace = workspaceState(root);
+  const requestedRoot = root;
+  const workspace = workspaceState(requestedRoot);
   if (workspace?.invalid) {
     process.stderr.write(`BLOCKED: invalid workspace profile ${workspace.profilePath}: ${workspace.error}\n`);
     return 1;
   }
+  root = workspace?.valid ? workspace.root : requestedRoot;
   for (const w of lintWarnings(root)) {
     process.stderr.write(`LINT: ${w}\n`);
   }

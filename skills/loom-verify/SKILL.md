@@ -26,6 +26,10 @@ Structured digest (below), persisted into the issue's `## Verify` section on **e
 - **Spec-backed** — an issue, PRD, or explicit user contract exists. Run normal Spec + Standards Verify. A direct small-fix's explicit request is a spec even without an issue file; deliver its digest in chat/PR and set no status.
 - **Standards-only** — no issue, PRD, or user contract exists. Run Standards/code review only; state `Spec unavailable — no issue/PRD/user contract supplied`. Do not spawn, require, or simulate a Spec checker. Its verdict cannot complete a Loom issue or authorize any Loom status change.
 
+## Workspace ownership
+
+With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner. Run each ordinary existing Git diff/check command in the relevant registered service repository; this is not aggregate Verify and adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
+
 ## Process
 
 1. Pin fixed point; confirm diff is non-empty.

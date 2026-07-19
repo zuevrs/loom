@@ -143,12 +143,11 @@ fi
 
 # Contributing/CI parity for mandatory checks.
 for cmd in \
-  'node tests/hooks.test.mjs' \
+  'npm test' \
   'bash scripts/check-drift' \
   'bash scripts/check-doc-consistency' \
   'bash scripts/check-installers' \
-  'bash scripts/check-skill-template-contract' \
-  'node --check scripts/check-workspace-scope'
+  'bash scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$cmd" "$CONTRIBUTING_DOC"; then
     errors+=("CONTRIBUTING is missing required check command: $cmd")
@@ -159,12 +158,11 @@ do
 done
 
 for ci_cmd in \
-  'node tests/hooks.test.mjs' \
+  'npm test' \
   'scripts/check-drift' \
   'scripts/check-doc-consistency' \
   'scripts/check-installers' \
-  'scripts/check-skill-template-contract' \
-  'node --check scripts/check-workspace-scope'
+  'scripts/check-skill-template-contract'
 do
   if ! grep -Fq "$ci_cmd" "$CHECKS_WORKFLOW"; then
     errors+=("checks.yml is missing required CI step: $ci_cmd")

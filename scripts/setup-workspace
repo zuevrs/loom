@@ -4,33 +4,80 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve, basename } from "node:path";
 import { createRequire } from "node:module";
-const { writeWorkspaceProfile } = createRequire(import.meta.url)("../hooks/workspace.cjs");
-const [rootArg, ...flags] = process.argv.slice(2);
-const confirm = flags.includes("--confirm");
-const profileFlag = flags.findIndex((flag) => flag === "--profile");
-const profileFile = profileFlag >= 0 ? flags[profileFlag + 1] : null;
-const allowedFlags = new Set(["--confirm", "--profile"]);
-if (!rootArg || (profileFlag >= 0 && (!profileFile || profileFile.startsWith("--"))) || (confirm && !profileFile) || flags.some((flag, index) => !allowedFlags.has(flag) && !(profileFlag >= 0 && index === profileFlag + 1))) {
-  console.error("usage: setup-workspace <workspace-root> [--profile <profile.json>] [--confirm]");
+const { readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories } = createRequire(import.meta.url)("../hooks/workspace.cjs");
+
+const args = process.argv.slice(2);
+const rootArg = args.shift();
+let confirm = false;
+let profileFile = null;
+let depth = null;
+let usageError = !rootArg;
+for (let index = 0; index < args.length && !usageError; index++) {
+  const flag = args[index];
+  if (flag === "--confirm" && !confirm) confirm = true;
+  else if ((flag === "--profile" || flag === "--depth") && args[index + 1] && !args[index + 1].startsWith("--")) {
+    if (flag === "--profile" && profileFile === null) profileFile = args[++index];
+    else if (flag === "--depth" && depth === null) depth = args[++index];
+    else usageError = true;
+  } else usageError = true;
+}
+if (usageError || (confirm && !profileFile) || (depth !== null && (!/^\d+$/.test(depth) || Number(depth) < 1))) {
+  console.error("usage: setup-workspace <workspace-root> [--depth <positive-integer>] [--profile <profile.json>] [--confirm]");
   process.exit(2);
 }
+
 const root = resolve(rootArg);
+const canonical = (path) => path.replaceAll("\\", "/").toLowerCase();
 try {
-  const inventory = JSON.parse(execFileSync(resolve(import.meta.dirname, "inspect-workspace"), [root, "--json"], { encoding: "utf8" }));
+  const inspectArgs = [root, "--json", ...(depth === null ? [] : ["--depth", depth])];
+  const inventory = JSON.parse(execFileSync(resolve(import.meta.dirname, "inspect-workspace"), inspectArgs, { encoding: "utf8" }));
   const existingContext = ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"].filter((file) => existsSync(join(root, file)));
-  const proposed = {
-    workspace_id: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "workspace",
-    repositories: inventory.git_roots.filter((repo) => repo.path !== ".").map((repo) => ({ path: repo.path, ...(repo.remote ? { remote: repo.remote } : {}) })),
+  const inventoryProfile = {
+    workspace_id: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "workspace",
+    repositories: inventory.git_roots.map((repo) => ({ path: repo.path.replaceAll("\\", "/"), ...(repo.remote ? { remote: repo.remote } : {}) })),
     ...(existingContext.length ? { context_paths: existingContext } : {}),
   };
-  const profile = profileFile ? JSON.parse(readFileSync(resolve(profileFile), "utf8")) : proposed;
-  const proposal = { workspace_root: ".", profile, warnings: inventory.warnings, unregistered_git_roots: inventory.unregistered_git_roots, symlinked_git_roots: inventory.symlinked_git_roots, errors: inventory.errors };
+  const loadedProfile = readWorkspaceProfile(root);
+  let existingProfile = null;
+  let existingProfileError = null;
+  if (loadedProfile?.invalid) existingProfileError = loadedProfile.error;
+  else if (loadedProfile) {
+    existingProfile = {
+      workspace_id: loadedProfile.workspace_id,
+      repositories: loadedProfile.repositories,
+      ...(loadedProfile.context_paths !== undefined ? { context_paths: loadedProfile.context_paths } : {}),
+    };
+    try { validateWorkspaceRepositories(loadedProfile); }
+    catch (error) { existingProfileError = error.message; }
+  }
+  const proposed = existingProfileError ? inventoryProfile : existingProfile || inventoryProfile;
+  const profile = profileFile ? validateWorkspaceProfile(JSON.parse(readFileSync(resolve(profileFile), "utf8")), root) : proposed;
+  if (profile.repositories.length === 0) throw new Error(`no repositories found at depth ${depth ?? "2"}; retry /loom setup workspace with greater depth (or pass --depth <positive-integer> to this utility)`);
+  const proposedPaths = new Set((existingProfile || proposed).repositories.map((repo) => canonical(repo.path)));
+  const inventoryPaths = new Set(inventory.git_roots.map((repo) => canonical(repo.path)));
+  const inventoryDrift = existingProfile ? {
+    discovered_unregistered: inventory.git_roots.filter((repo) => !proposedPaths.has(canonical(repo.path))),
+    registered_missing_from_inventory: existingProfile.repositories.filter((repo) => !inventoryPaths.has(canonical(repo.path))).map((repo) => repo.path),
+  } : null;
+  const proposal = {
+    workspace_root: ".",
+    profile,
+    ...(existingProfileError ? { existing_profile_error: existingProfileError } : {}),
+    inventory: { root_is_git: inventory.root_is_git, root_git_state: inventory.root_git_state, repositories: inventory.git_roots },
+    inventory_drift: inventoryDrift,
+    warnings: inventory.warnings,
+    unregistered_git_roots: inventory.unregistered_git_roots,
+    symlinked_git_roots: inventory.symlinked_git_roots,
+    errors: inventory.errors,
+  };
   if (!confirm) {
     process.stdout.write(`${JSON.stringify({ mode: "proposal", ...proposal }, null, 2)}\n`);
     process.exit(0);
   }
-  const result = writeWorkspaceProfile(profile, root);
-  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath }, null, 2)}\n`);
+  const validatedProfile = validateWorkspaceProfile(profile, root);
+  validateWorkspaceRepositories({ ...validatedProfile, root });
+  const result = writeWorkspaceProfile(validatedProfile, root);
+  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, profile: validatedProfile, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath }, null, 2)}\n`);
 } catch (error) {
   console.error(`workspace setup failed: ${error.message}`);
   process.exit(1);

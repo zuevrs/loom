@@ -33,17 +33,14 @@ Release-gate template. Fill one row per supported host before tagging a release.
 | Cline | `install-agents-skills` | skills + AGENTS.md |
 | OpenClaw | `install-agents-skills` or clawhub | skills discoverable; no Loom extension ships, so enforcement is Convention-only |
 
-## Current workspace release evidence — 2026-07-18
+## Current workspace release evidence — v1.0.0 (2026-07-19)
 
-This section is the current evidence for the workspace release. The fixture used for these checks was disposable and temporary under `/tmp`; no product repository was used as test state. Host rows above are the install/integration/runtime status surface; this section records the exact current checks.
+Only installed-plugin workspace setup/profile is live-verified for this release. The optional handoff was not exercised live, and other workspace flows and hosts remain unverified; installation or generic runtime evidence does not imply workspace verification. Dependency-free executable fixture coverage remains in `tests/workspace.test.mjs` and the repository structural smoke.
 
-| Host | Current result |
-|------|----------------|
-| OMP 17.0.4 | Full E2E: install, doctor, service-root workspace handoff, model-backed read-only session, preflight/postflight scope, context rejection, Stop/session_stop block, uninstall — pass |
-| OpenCode 1.18.3 | Install/uninstall and direct adapter hook smoke — pass; model-backed `run` timed out before first event — runtime unverified |
-| Cursor Agent 2026.07.08 | Workspace read-only and service-root handoff smoke — pass |
-| Claude Code 2.1.214 | Plugin install/list/uninstall — pass; model smoke blocked by `Credit balance is too low` |
-| Pi 0.73.1 | Package install/list/uninstall — pass; model smoke timed out |
+| Evidence | Invocation | Result |
+|----------|------------|--------|
+| OMP v17.0.4 installed plugin discovery and health | `omp plugin link /Users/zuevrs/Projects/loom --force`; then plugin list and doctor | Plugin list reported enabled `loom` version `1.0.0` at `~/.omp/plugins/node_modules/loom`; doctor reported 4 ok, 0 warnings, and 0 errors. |
+| OMP v17.0.4 installed-plugin model-backed setup/profile E2E | `omp -p --cwd /tmp/loom-workspace-installed-v100 --model aijws-hr/gpt-5.6-sol --thinking low --no-session --max-time 180 --auto-approve '<explicit /loom setup workspace prompt>'` (no `--plugin-dir`) | Printed `INSTALLED_V100_WORKSPACE_OK`; exit 0 in 48.485s; profile exact ID `loom-workspace-installed-v100` with repositories `api` / `auth`. |
 
 ## Historical unified-entry release evidence — v0.25.0 (2026-07-17)
 

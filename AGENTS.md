@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v0.27.0 -->
+<!-- loom:begin version=v1.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -31,6 +31,7 @@ Inside the lane:
 - Ritual routing, Maker/checker separation, No-verify-no-done, and fresh-context/pack transitions apply.
 - Reconstruct `.loom/` state before selecting persisted work; explicit outcome or target always wins.
 - Project-nonmutating interviews may read and run commands reasonably expected not to modify tracked/generated project content or external state. Writes require a Bounded apply confirmation gate naming exact targets/actions; changed scope or base requires renewed consent.
+- With a valid active workspace profile, registered repositories are readable evidence and the workspace root owns all Loom artifacts. The existing Bounded apply gate must name each repository plus exact targets/actions and base evidence; a new repository, target, action, scope, or changed base requires renewed consent. It authorizes no branch, commit, push, PR, merge, or external action.
 - Named issue execution consent includes issue-scoped project changes, `## Log`, Verify verdict write-back, and `Status: done` only after APPROVE. It excludes scope expansion and external actions.
 - One issue at a time; respect blocker order. Fresh maker context per issue.
 - No verify digest → no done. Implement never self-approves.

@@ -16,173 +16,6 @@ function run(script, env = {}) {
   });
 }
 
-// Explicit workspace profile is opt-in and validates repo boundaries.
-{
-  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const { findWorkspace, workspaceRoot, validateWorkspaceProfile, validateTaskManifest, freezeTaskManifest, allowedRepositoryPaths, profileFingerprint, canonicalManifest } = await import(pathToFileURL(resolve(__dirname, "..", "hooks", "workspace.cjs")));
-  const tmp = mkdtempSync(join(tmpdir(), "loom-workspace-test-"));
-  mkdirSync(join(tmp, ".loom"));
-  mkdirSync(join(tmp, "api", ".git"), { recursive: true });
-  mkdirSync(join(tmp, "api", ".loom"));
-  execFileSync("git", ["-C", join(tmp, "api"), "init", "-q"]);
-  writeFileSync(join(tmp, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "test", repositories: [{ path: "api" }] }));
-  const profile = findWorkspace(join(tmp, "api"));
-  strictEqual(profile.workspace_id, "test", "nested service discovers explicit workspace profile");
-  strictEqual(workspaceRoot(join(tmp, "api")), tmp, "workspace profile outranks nested service Loom root");
-  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "../outside" }] }, tmp); ok(false, "profile rejects escaping repo"); } catch { ok(true, "profile rejects escaping repo"); }
-  for (const absolutePath of ["C:\\outside", "\\\\server\\share", "\\outside"]) {
-    try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: absolutePath }] }, tmp); ok(false, `profile rejects portable absolute path: ${absolutePath}`); } catch (error) { ok(error.message.includes("relative"), `profile rejects portable absolute path: ${absolutePath}`); }
-  }
-  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "api" }], policy: {} }, tmp); ok(false, "profile rejects unbound fields"); } catch (error) { ok(error.message.includes("unknown profile field"), "profile rejects unbound fields"); }
-  try { validateWorkspaceProfile({ workspace_id: "x", repositories: [{ path: "api" }], context_paths: ["docs", "docs\\."] }, tmp); ok(false, "profile rejects canonical context path duplicates"); } catch (error) { ok(error.message.includes("duplicates"), "profile rejects canonical context path duplicates"); }
-  writeFileSync(join(tmp, ".loom", "workspace.json"), "{");
-  strictEqual(workspaceRoot(join(tmp, "api")), null, "invalid profile does not redirect to an operational workspace root");
-  mkdirSync(join(tmp, "worker", ".git"), { recursive: true });
-  execFileSync("git", ["-C", join(tmp, "worker"), "init", "-q"]);
-  writeFileSync(join(tmp, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "test", repositories: [{ path: "api" }, { path: "worker" }], context_paths: ["CONTEXT.md"] }));
-  const profileWithServices = findWorkspace(join(tmp, "api"));
-  const task = freezeTaskManifest({ task_id: "fix-auth", targets: ["api"], context: ["worker"] }, profileWithServices);
-  validateTaskManifest(task, profileWithServices);
-  strictEqual(allowedRepositoryPaths(task).has("api"), true, "task targets define allowed repository paths");
-  try { validateTaskManifest({ task_id: "bad", targets: ["api"], context: ["api"] }, profile); ok(false, "task rejects target/context overlap"); } catch (error) { ok(error.message.includes("both target and context"), "task rejects target/context overlap"); }
-  try { validateTaskManifest({ task_id: "bad", targets: ["../api"], context: [] }, profile); ok(false, "task rejects traversal"); } catch (error) { ok(error.message.includes("traversal"), "task rejects traversal"); }
-  for (const badPath of ["..\\outside", "services\\..\\auth", "C:\\outside", "\\\\server\\share", "\\outside"]) {
-    try { validateTaskManifest({ task_id: "bad", targets: [badPath], context: [] }, profile); ok(false, `task rejects Windows traversal: ${badPath}`); } catch (error) { ok(error.message.includes("traversal") || error.message.includes("relative"), `task rejects Windows traversal/absolute: ${badPath}`); }
-  }
-  try { validateTaskManifest({ task_id: "bad", targets: ["api", "api\\."], context: [] }, profile); ok(false, "task rejects mixed-separator duplicate"); } catch (error) { ok(error.message.includes("duplicates"), "task rejects mixed-separator duplicate"); }
-  try { validateTaskManifest({ task_id: "bad", targets: ["api"], context: ["worker", "worker\\."] }, profileWithServices); ok(false, "task rejects canonical context duplicates"); } catch (error) { ok(error.message.includes("duplicates"), "task rejects canonical context duplicates"); }
-  const slashManifest = { task_id: "same", targets: ["api"], context: ["worker"] };
-  const backslashManifest = { task_id: "same", targets: ["api\\."], context: ["worker\\."] };
-  strictEqual(canonicalManifest(slashManifest), canonicalManifest(backslashManifest), "manifest canonicalization is separator-insensitive");
-  try { validateTaskManifest({ task_id: "bad", workspace_id: "other", targets: ["api"], context: [], extra: true }, profile); ok(false, "task rejects mismatched/extra fields"); } catch (error) { ok(error.message.includes("unknown manifest field") || error.message.includes("workspace_id"), "task rejects mismatched/extra fields"); }
-  try { validateTaskManifest({ task_id: "bad", targets: [], context: [] }, profile); ok(false, "task rejects empty targets"); } catch (error) { ok(error.message.includes("target"), "task rejects empty targets"); }
-  const manifestPath = join(tmp, "manifest.json");
-  writeFileSync(manifestPath, JSON.stringify(task));
-  writeFileSync(join(tmp, "api", "README.md"), "# fixture\n");
-  writeFileSync(join(tmp, "worker", "README.md"), "# worker\n");
-  execFileSync("git", ["-C", join(tmp, "api"), "add", "."]);
-  execFileSync("git", ["-C", join(tmp, "worker"), "add", "."]);
-  execFileSync("git", ["-C", join(tmp, "api"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
-  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-qb", "loom-test"]);
-  execFileSync("git", ["-C", join(tmp, "api"), "add", "."]);
-  execFileSync("git", ["-C", join(tmp, "api"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "--allow-empty", "-qm", "baseline"]);
-  execFileSync("git", ["-C", join(tmp, "worker"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
-  const branch = execFileSync("git", ["-C", join(tmp, "api"), "branch", "--show-current"], { encoding: "utf8" }).trim();
-  const head = execFileSync("git", ["-C", join(tmp, "api"), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  const workerBranch = execFileSync("git", ["-C", join(tmp, "worker"), "branch", "--show-current"], { encoding: "utf8" }).trim();
-  const workerHead = execFileSync("git", ["-C", join(tmp, "worker"), "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  const baselinePath = join(tmp, "baseline.json");
-  writeFileSync(baselinePath, JSON.stringify({ manifest_hash: task.manifest_hash, profile_fingerprint: profileFingerprint(profileWithServices), repositories: [{ path: "api", branch, head, clean: true }, { path: "worker", branch: workerBranch, head: workerHead, clean: true }] }));
-  const scopeGate = resolve(__dirname, "..", "scripts", "check-workspace-scope");
-  const scopeOut = execFileSync(scopeGate, [manifestPath, tmp, baselinePath, "preflight"], { encoding: "utf8", timeout: 5000 });
-  ok(scopeOut.includes("workspace scope valid"), "public workspace scope gate validates frozen manifest");
-  mkdirSync(join(tmp, "api", "rogue", ".git"), { recursive: true });
-  writeFileSync(join(tmp, "api", "rogue", ".git", "config"), "rogue\n");
-  const nestedRogue = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
-  strictEqual(nestedRogue.status, 1, "scope gate rejects Git roots nested inside registered repositories");
-  rmSync(join(tmp, "api", "rogue"), { recursive: true, force: true });
-  writeFileSync(join(tmp, "api", "feature.txt"), "target change\n");
-  const postflight = execFileSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
-  ok(postflight.includes("workspace scope valid"), "postflight permits target-only changes");
-  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-qb", "wrong-branch"]);
-  const branchMismatch = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
-  strictEqual(branchMismatch.status, 1, "postflight rejects target branch changes");
-  execFileSync("git", ["-C", join(tmp, "api"), "checkout", "-q", branch]);
-  writeFileSync(join(tmp, "worker", "forbidden.txt"), "context change\n");
-  const rejected = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
-  strictEqual(rejected.status, 1, "postflight rejects context repository changes");
-  mkdirSync(join(tmp, "nested"), { recursive: true });
-  execFileSync("git", ["-C", join(tmp, "nested"), "init", "-q"]);
-  const rogue = spawnSync(scopeGate, [manifestPath, tmp, baselinePath, "postflight"], { encoding: "utf8", timeout: 5000 });
-  strictEqual(rogue.status, 1, "scope gate rejects unregistered nested Git roots");
-  rmSync(tmp, { recursive: true, force: true });
-}
-
-// Workspace inventory is a read-only, stable public seam.
-{
-  const { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const tmp = mkdtempSync(join(tmpdir(), "loom-inventory-test-"));
-  mkdirSync(join(tmp, "api"), { recursive: true });
-  mkdirSync(join(tmp, "nested", "auth"), { recursive: true });
-  for (const repo of [join(tmp, "api"), join(tmp, "nested", "auth")]) {
-    execFileSync("git", ["-C", repo, "init", "-q"]);
-    writeFileSync(join(repo, "README.md"), "fixture\n");
-    execFileSync("git", ["-C", repo, "add", "."]);
-    execFileSync("git", ["-C", repo, "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
-  }
-  mkdirSync(join(tmp, "api", "rogue", ".git"), { recursive: true });
-  symlinkSync(join(tmp, "api"), join(tmp, "linked-api"), "dir");
-  const inspect = resolve(__dirname, "..", "scripts", "inspect-workspace");
-  const output = execFileSync("node", [inspect, tmp, "--json"], { encoding: "utf8" });
-  const inventory = JSON.parse(output);
-  strictEqual(inventory.schema_version, 1, "inventory has stable schema version");
-  strictEqual(inventory.root, ".", "inventory uses a stable root representation");
-  strictEqual(inventory.root_git_state, null, "non-Git workspace has no root Git state");
-  deepStrictEqual(inventory.git_roots.map((item) => item.path), ["api", "nested/auth"], "inventory sorts bounded Git roots");
-  ok(inventory.unregistered_git_roots.includes("api/rogue"), "inventory reports nested unregistered Git root");
-  ok(inventory.symlinked_git_roots.some((item) => item.path === "linked-api"), "inventory reports symlinked Git root separately");
-  rmSync(tmp, { recursive: true, force: true });
-}
-
-// Workspace profile writer is atomic, validated, and keeps one previous copy only on change.
-{
-  const { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const { writeWorkspaceProfile } = await import(pathToFileURL(resolve(__dirname, "..", "hooks", "workspace.cjs")));
-  const tmp = mkdtempSync(join(tmpdir(), "loom-profile-writer-test-"));
-  mkdirSync(join(tmp, "api"), { recursive: true });
-  execFileSync("git", ["-C", join(tmp, "api"), "init", "-q"]);
-  const profile = { workspace_id: "fixture", repositories: [{ path: "api" }] };
-  try { writeWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "missing" }] }, tmp); ok(false, "writer rejects invalid profile"); } catch { ok(true, "writer rejects invalid profile"); }
-  strictEqual(existsSync(join(tmp, ".loom")), false, "invalid profile does not create .loom");
-  const first = writeWorkspaceProfile(profile, tmp);
-  strictEqual(first.changed, true, "writer creates profile");
-  strictEqual(first.backupPath, null, "first profile has no backup");
-  const same = writeWorkspaceProfile(profile, tmp);
-  strictEqual(same.changed, false, "writer is idempotent");
-  strictEqual(same.backupPath, null, "unchanged profile has no backup");
-  const changed = writeWorkspaceProfile({ ...profile, context_paths: ["CONTEXT.md"] }, tmp);
-  strictEqual(changed.changed, true, "writer updates changed profile");
-  ok(existsSync(changed.backupPath), "changed profile keeps one backup");
-  strictEqual(JSON.parse(readFileSync(changed.backupPath, "utf8")).context_paths, undefined, "backup contains previous profile");
-  strictEqual(JSON.parse(readFileSync(join(tmp, ".loom", "workspace.json"), "utf8")).context_paths[0], "CONTEXT.md", "new profile is complete");
-  rmSync(tmp, { recursive: true, force: true });
-}
-
-// Workspace setup CLI exposes proposal and explicit confirm seams.
-{
-  const { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } = await import("node:fs");
-  const { tmpdir } = await import("node:os");
-  const { join } = await import("node:path");
-  const tmp = mkdtempSync(join(tmpdir(), "loom-setup-test-"));
-  mkdirSync(join(tmp, "api"), { recursive: true });
-  execFileSync("git", ["-C", join(tmp, "api"), "init", "-q"]);
-  writeFileSync(join(tmp, "api", "README.md"), "fixture\n");
-  execFileSync("git", ["-C", join(tmp, "api"), "add", "."]);
-  execFileSync("git", ["-C", join(tmp, "api"), "-c", "user.email=test@example.com", "-c", "user.name=Test", "commit", "-qm", "baseline"]);
-  const setup = resolve(__dirname, "..", "scripts", "setup-workspace");
-  const malformed = spawnSync("node", [setup, tmp, "--profile"], { encoding: "utf8" });
-  strictEqual(malformed.status, 2, "setup rejects missing profile path");
-  const proposal = JSON.parse(execFileSync("node", [setup, tmp], { encoding: "utf8" }));
-  strictEqual(proposal.mode, "proposal", "setup proposal is read-only");
-  strictEqual(readFileSync(join(tmp, "api", "README.md"), "utf8"), "fixture\n", "proposal does not mutate service");
-  strictEqual(existsSync(join(tmp, ".loom")), false, "proposal does not create profile");
-  const bypass = spawnSync("node", [setup, tmp, "--confirm"], { encoding: "utf8" });
-  strictEqual(bypass.status, 2, "setup rejects confirm without materialized profile");
-  strictEqual(existsSync(join(tmp, ".loom")), false, "rejected confirm creates no profile");
-  const confirmedProfile = join(tmp, "confirmed-profile.json");
-  writeFileSync(confirmedProfile, JSON.stringify(proposal.profile));
-  const applied = JSON.parse(execFileSync("node", [setup, tmp, "--profile", confirmedProfile, "--confirm"], { encoding: "utf8" }));
-  strictEqual(applied.mode, "applied", "setup applies only materialized confirmed profile");
-  strictEqual(JSON.parse(readFileSync(join(tmp, ".loom", "workspace.json"), "utf8")).repositories[0].path, "api", "setup writes proposed repository allowlist");
-  rmSync(tmp, { recursive: true, force: true });
-}
-
 // session-start
 {
   const out = run("loom-session-start.cjs");
@@ -517,6 +350,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
   ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
+  ok(read("skills/loom-verify/SKILL.md").includes("Run each ordinary existing Git diff/check command in the relevant registered service repository"), "verify declares workspace-owner and service-repo execution contract");
+  ok(read("skills/loom-tend/SKILL.md").includes("Run each ordinary existing Git diff/check command in the relevant registered service repository"), "tend declares workspace-owner and service-repo execution contract");
 
   // Lane scoping: ready-for-human is ritual-time slicing policy, not an ordinary-prompt invariant.
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("ready-for-human"), "slicing carries ready-for-human policy");
@@ -2514,10 +2349,11 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/provides_commands:\n  - loom\n/.test(read("hermes-plugin/plugin.yaml")), "Hermes registers exact loom command");
   ok(read("omp-extension.mjs").includes("Preferred entry is /loom; /loom-plan remains the precision planning route"), "OMP comment states preferred and precision entry truth");
   const loomEntry = read("skills/loom/SKILL.md");
-  ok(loomEntry.includes("Run the installed Loom utility `node scripts/setup-workspace <workspace-root>` in proposal mode"), "unified setup delegates proposal to shared utility");
-  ok(loomEntry.includes("Use AskUser exactly once for the apply decision"), "unified setup has one confirmation gate");
-  ok(loomEntry.includes("--profile <confirmed-profile.json> --confirm"), "unified setup applies only confirmed profile input");
-  ok(loomEntry.includes("never hand-write the profile"), "unified setup forbids model-written profile mutations");
+  const loomInit = read("skills/loom-init/SKILL.md");
+  ok(loomEntry.includes("load `loom-init`") && loomEntry.includes("Init solely owns deterministic inventory and profile proposal/apply"), "dispatcher routes workspace setup once to Init");
+  ok(!loomEntry.includes("scripts/setup-workspace <workspace-root>") && !loomEntry.includes("scripts/inspect-workspace <root>"), "dispatcher carries no executable setup orchestration");
+  ok(loomInit.includes("same installed Loom tree as this currently loaded Init skill") && loomInit.includes("node <absolute-setup-utility>"), "Init resolves and invokes the installed setup utility absolutely");
+  ok(!loomInit.includes("node scripts/setup-workspace"), "Init never invokes setup relative to the user workspace");
   ok(!/\n2\. \*\*`loom:` debt/.test(read("skills/loom-tend/SKILL.md")), "Tend numbering is not duplicated");
 }
 

@@ -9,7 +9,7 @@ const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.27.0";
+const MANAGED_BLOCK_VERSION = "v1.0.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -23,12 +23,13 @@ function findProjectRoot() {
 function run() {
   const workspace = workspaceState(process.cwd());
   if (workspace?.invalid) {
-    process.stdout.write(`# Loom session context\n\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\n\nWorkspace setup is blocked until the profile is repaired.\n`);
+    process.stdout.write(`# Loom session context\n\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\n\nWorkspace behavior is disabled until the profile is repaired. Ordinary project work remains available; explicit Loom work fails closed.\n`);
     return;
   }
+  const activeWorkspace = findWorkspace(process.cwd());
   const root = workspaceRoot(process.cwd()) || findProjectRoot();
   const pointers = [];
-  pointers.push(...workspacePointers(findWorkspace(process.cwd())));
+  pointers.push(...workspacePointers(activeWorkspace));
 
   const agentsPath = path.join(root, "AGENTS.md");
   if (fs.existsSync(agentsPath)) {
@@ -46,11 +47,13 @@ function run() {
     pointers.push(`AGENTS.md: ${agentsPath}`);
   }
 
-  const contextPath = path.join(root, "CONTEXT.md");
-  if (fs.existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+  if (!activeWorkspace) {
+    const contextPath = path.join(root, "CONTEXT.md");
+    if (fs.existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
 
-  const adrDir = path.join(root, "docs", "adr");
-  if (fs.existsSync(adrDir)) pointers.push(`ADRs: ${adrDir}/`);
+    const adrDir = path.join(root, "docs", "adr");
+    if (fs.existsSync(adrDir)) pointers.push(`ADRs: ${adrDir}/`);
+  }
 
   const loomDir = path.join(root, ".loom");
   if (fs.existsSync(loomDir)) {
