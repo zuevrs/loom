@@ -10,7 +10,7 @@ INIT_SKILL="$ROOT/skills/loom-init/SKILL.md"
 PLAN_SKILL="$ROOT/skills/loom-plan/SKILL.md"
 PRELLM_HOOK="$ROOT/hooks/loom-pre-llm.cjs"
 INVARIANTS_SRC="$ROOT/hooks/invariants.cjs"
-CHANGELOG="$ROOT/CHANGELOG.md"
+CHANGELOG="${LOOM_CHANGELOG_CHECK_FILE:-$ROOT/CHANGELOG.md}"
 RELEASE_DOC="$ROOT/RELEASE.md"
 PKG_JSON="$ROOT/package.json"
 CONTRIBUTING_DOC="$ROOT/CONTRIBUTING.md"
@@ -279,8 +279,8 @@ grep -Fq 'Multiple candidates' "$DISPATCHER" || errors+=("dispatcher must ask on
 grep -Eq '^slash: true$' "$DISPATCHER" || errors+=("dispatcher must opt into OpenCode slash registration")
 grep -Fq 'No project-file or external-state write before' "$GRILL_SKILL" || errors+=("Grill must prohibit project writes before bounded apply")
 grep -Fq 'Gate 1' "$PLAN_SKILL" && grep -Fq 'Gate 2' "$PLAN_SKILL" || errors+=("Plan must expose two preview-before-write gates")
-grep -Fq 'confirmed PRD without issues is valid completion' "$PLAN_SKILL" || errors+=("Plan must allow PRD-only completion")
-grep -Fq 'Do not implement in the planning context' "$PLAN_SKILL" || errors+=("Plan must forbid same-context implementation")
+grep -Fq 'PRD-only completion is valid' "$PLAN_SKILL" || errors+=("Plan must allow PRD-only completion")
+grep -Fq 'No implementation in this planning context' "$PLAN_SKILL" || errors+=("Plan must forbid same-context implementation")
 grep -Fq 'ADR-FORMAT.md' "$GRILL_SKILL" || errors+=("Grill must use canonical ADR format")
 grep -Fq 'auth/security/privacy/secrets' "$GRILL_SKILL" || errors+=("Grill must carry upward-only Verify trigger")
 grep -Fq 'Spec unavailable' "$VERIFY_SKILL" || errors+=("Verify must describe review without a spec")
@@ -291,6 +291,15 @@ node -e 'const p=require(process.argv[1]); process.exit(Array.isArray(p.commands
 grep -Fq 'Ordinary prompts remain normal agent mode' "$AGENTS" || errors+=("managed block must scope ordinary prompts outside Loom lane")
 grep -Fq 'The Loom lane begins only after explicit' "$AGENTS" || errors+=("managed block must scope ritual rules to explicit Loom entry")
 
+# Unattended ownership: docs/unattended.md is canonical; rituals link to it and no normative surface routes through the removed Implement section.
+if grep -REiq 'loom-implement[^\n]*(§|section)?[[:space:]]*Unattended mode|see[[:space:]]+Unattended mode' "$ROOT/docs" "$ROOT/skills"; then
+  errors+=("normative docs/skills reference removed loom-implement Unattended mode")
+fi
+for ritual in "$ROOT/skills/loom-implement/SKILL.md" "$ROOT/skills/loom-verify/SKILL.md"; do
+  if ! grep -Fq 'docs/unattended.md' "$ritual"; then
+    errors+=("${ritual#$ROOT/} must point to canonical docs/unattended.md")
+  fi
+done
 if ! grep -Fq 'Report is the exit' "$ROOT/docs/unattended.md"; then errors+=("unattended keeps report exit"); fi
 if ! grep -Fq 'Blockers surface in the report' "$ROOT/docs/unattended.md"; then errors+=("unattended blockers use report contract"); fi
 if grep -Fq 'draft PR opened with whatever exists' "$ROOT/docs/unattended.md"; then errors+=("unattended blockers still require a PR"); fi
@@ -299,7 +308,7 @@ if grep -Fq 'autonomous-improvement' "$ROOT/README.md" || grep -Fq 'autonomous-i
 for recipe in "$ROOT"/recipes/*.md; do
   if grep -Eq 'ends in (a )?(pull request|PR)|open a (draft )?PR|before (the )?PR|one run, one PR|PR whose title' "$recipe"; then errors+=("active recipe still requires PR delivery: ${recipe#$ROOT/}"); fi
 done
-if ! grep -Fq 'Loom does not require PR creation' "$ROOT/skills/loom-implement/SKILL.md"; then errors+=("implement keeps PR optional"); fi
+if ! grep -Fq 'docs/unattended.md' "$ROOT/skills/loom-implement/SKILL.md"; then errors+=("implement routes unattended intent to canonical contract"); fi
 
 if [ ${#errors[@]} -eq 0 ]; then
   echo '{"status":"clean","message":"Docs consistency checks passed"}'

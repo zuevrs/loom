@@ -8,4 +8,4 @@ Present the complete numbered breakdown with title, blocker, stories covered, cr
 
 If the breakdown reveals a PRD change, return to a bounded Gate-1 PRD delta confirmation and recompute affected slices. On approval write via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md).
 
-After write offer only: stop; fresh maker context for the first issue (or exact next invocation); prepare a host-native pack-run handoff. OMP Release 1 preparation is an exact `/goal ...` prompt for the user to launch, without branch/checkpoint/fixed-point guarantees.
+After write offer only: stop; fresh maker context for the first issue (or exact next invocation); prepare a capability-neutral host-native whole-pack handoff through [`docs/unattended.md`](../../docs/unattended.md). The host owns execution and lifecycle; Plan does not encode host commands.

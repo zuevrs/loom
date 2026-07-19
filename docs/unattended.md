@@ -6,7 +6,7 @@ Loom ships no runner (see ADR history: host-native execution won). Every host al
 
 ## The contract
 
-An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). The rules (canonical text: `loom-implement` § Unattended mode):
+An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). This is the canonical branch/report/never-merge contract; rituals link here rather than duplicating it:
 
 1. **Branch, not trunk.** All work happens in a dedicated branch. Commits there are expected. Pushing to the default branch or merging is never the agent's call.
 2. **Report is the exit for anything written.** A run that produced changes — code or stub issues — ends in a report plus local branch: diff, verify digest, issue `## Log`, open questions in the description. Commit subjects and any configured PR's public title/summary follow `loom-implement` § External prose and language contract: product purpose in the selected project language, no Loom bookkeeping. Dedicated `References`/evidence sections may link issue/PRD/ADR artifacts by default; commit trailers or body reference lines may likewise carry useful identifiers/URLs. The human gate that attended mode puts in the chat moves to the configured runner handoff. Two words govern that gate: **push right** — defer the checkpoint as far as it will go, do maximal work before involving the human so they are asked once, late, with everything prepared; and **brief** — the checkpoint presents a tight, decision-ready summary (what was produced, why, where to look), never the raw output. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
@@ -109,7 +109,7 @@ Codex Goal Mode (CLI v0.128.0+, GA 2026-05) is a natural carrier for the issue l
 
 ```text
 /goal Work through the Status: ready-for-agent issues in .loom/<pack>/ one at a time,
-following loom-implement § Unattended mode: dedicated branch, verify before report, report per issue.
+using a dedicated branch, one issue at a time, Verify before each report, and never merging automatically.
 Stop when none remain or a blocker surfaces (report, blocker named).
 ```
 
@@ -124,7 +124,7 @@ For a **local** recurring cadence there is also the `/loop` skill (Cursor 3.5+):
 ### OMP
 
 ```bash
-omp goal "Run the recipe in recipes/dep-audit.md. Follow loom-implement § Unattended mode: branch, verify, report."
+omp goal "Run the recipe in recipes/dep-audit.md on a dedicated branch. Verify before the report; never merge automatically."
 ```
 
 OMP owns goal execution and lifecycle. Loom uses two complementary seams for `Status: done` without APPROVE: an early `tool_call` blocker rejects native `goal complete` before OMP persists completed state, while `session_stop` provides the general turn-stop correction gate. Standard Verify on OMP v17.0.4+ uses one native `task` batch with bundled reviewers, one shared context, and distinct per-item Spec/Standards roles.

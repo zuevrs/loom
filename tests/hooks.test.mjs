@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const hooksDir = resolve(__dirname, "..", "hooks");
+await import("./changelog-boundary.test.mjs");
 
 function run(script, env = {}) {
   return execFileSync("node", [resolve(hooksDir, script)], {
@@ -346,7 +347,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(implement.includes("`wontfix` blocker does NOT unblock"), "wontfix blocker stops implement");
   ok(implement.includes("Status: needs-triage"), "scope creep writes needs-triage stub");
   ok(implement.includes("Status: needs-info"), "unanswerable question flips to needs-info");
-  ok(implement.includes("run by the **orchestrator**"), "batch mode: orchestrator owns verify");
+  ok(implement.includes("host owns whole-pack/background scheduling") && implement.includes("Verify before `done`"), "host owns orchestration while Implement preserves Verify");
 
   ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
   ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
@@ -668,7 +669,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(unattended.includes("### PR body contract"), "unattended doc fixes the PR description shape");
     ok(unattended.includes("drop a section entirely when it's empty"), "PR contract drops empty sections, not ceremony");
     ok(unattended.includes("lead with the blocker"), "draft PRs lead with the blocker");
-    ok(impl.includes("PR body contract"), "implement unattended mode points at the PR body contract");
+    ok(impl.includes("docs/unattended.md"), "implement points at the canonical unattended contract");
     // 4. simplify-while-green: maker-initiated subtraction pass between the
     // discipline ladder (prevent) and the standards checker (judge)
     ok(impl.includes("Simplify while green"), "self-review carries the simplification pass");
@@ -785,7 +786,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(tdd.includes("Refactoring is not part of the loop"), "TDD.md pushes refactoring out of the loop");
 }
 
-// batch mode + native Verify contract
+// Implement ownership + native Verify contract
 {
   const { readFileSync: rf } = await import("node:fs");
   const impl = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
@@ -793,9 +794,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
-  ok(impl.includes("## Batch mode"), "implement documents batch mode");
-  ok(impl.includes("one fresh implement sub-agent per issue"), "batch mode spawns fresh sub-agent per issue");
-  ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
+  ok(impl.includes("Implement owns one named issue only"), "implement owns exactly one issue");
+  ok(!impl.includes("## Batch mode") && !impl.includes("orchestrating session"), "implement excludes inline batch orchestration");
+  ok(impl.includes("docs/unattended.md") && impl.includes("host owns whole-pack/background"), "implement delegates whole-pack and unattended mechanics");
   for (const doc of [agents, initSkill]) ok(doc.includes("Fresh maker context per issue"), "managed block keeps fresh-context lane invariant");
   ok(verify.includes("OMP v17.0.4+ native path"), "Verify documents the tested OMP minimum");
   ok(verify.includes("independent sequential contexts") && verify.includes("fail closed"), "Verify keeps the cross-host capability fallback");
@@ -847,7 +848,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const s of smells) ok(agent.includes(s), `smell baseline carries: ${s}`);
 }
 
-// templates — prototype exception to the no-snippets rule; triage transitions live at triage time
+// templates — inspectable prototype evidence; triage transitions live at triage time
 {
   const { readFileSync: rf } = await import("node:fs");
   const planDir = resolve(__dirname, "..", "skills", "loom-plan");
@@ -857,12 +858,15 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const implement = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
   const grillPhase = rf(resolve(planDir, "GRILL.md"), "utf8");
 
-  ok(prd.includes("decision-rich snippet from a prototype"), "PRD template has prototype exception");
-  ok(prd.includes("prototype/<slug>") && prd.includes("never merged"), "PRD template records prototype branch pointer policy");
-  ok(issue.includes("decision-rich snippet from a prototype"), "issue template has prototype exception");
-  ok(issue.includes("branch + commit"), "issue template asks for prototype pointer in Log");
-  ok(toPrd.includes("Prototype as primary source"), "TO-PRD carries prototype-as-primary-source contract");
-  ok(implement.includes("Never merge prototype branches"), "implement keeps prototype branches as non-merge evidence");
+  for (const doc of [prd, issue, toPrd, implement]) {
+    ok(doc.includes("durable") && doc.includes("independently inspectable") && /accessible to later maker\/checker contexts|accessible to later maker and checker contexts/.test(doc), "prototype evidence survives later contexts");
+    ok(!/confirmed PRD content/i.test(doc), "PRD self-reference is not prototype evidence");
+    ok(/Ephemeral scratch is insufficient/i.test(doc), "ephemeral scratch is rejected as evidence");
+    ok(/user-owned assumption\/decision/i.test(doc), "inline user confirmation is classified as a decision");
+  }
+  ok(toPrd.includes("durable host artifact") && toPrd.includes("external primary source") && toPrd.includes("explicitly approved commit/artifact"), "prototype evidence accepts durable portable sources");
+  for (const doc of [prd, issue, toPrd, implement]) ok(!doc.includes("prototype/<slug>"), "prototype evidence has no mandatory branch lifecycle");
+  ok(implement.includes("cannot silently become production code") && implement.includes("Git write or commit requires existing"), "implement protects prototype promotion and Git authorization");
   // v0.18.0: ritual-time rules moved out of the managed block (ETH-lens trim) into the ritual that uses them
   ok(grillPhase.includes("Transitions: unlabeled"), "plan triage documents transitions");
   ok(grillPhase.includes("One category (bug/chore/feature/refactor/docs) + one state per issue"), "plan triage enforces one category + one state");
@@ -1103,11 +1107,11 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
-  // Unattended contract lives in the implement skill and the doc, and they agree.
+  // Unattended contract is canonical in docs; Implement links it when intent applies.
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("## Unattended mode"), "implement has the unattended section");
-  ok(impl.includes("Never push to the default branch, never merge"), "unattended: merge stays human");
-  ok(impl.includes("draft PR"), "unattended: blockers exit as draft PRs");
+  ok(impl.includes("## Whole-pack and unattended intent"), "implement has the unattended intent route");
+  ok(impl.includes("docs/unattended.md"), "implement links the canonical unattended contract");
+  ok(!impl.includes("draft PR") && !impl.includes("Never push to the default branch"), "implement does not duplicate unattended mechanics");
   ok(impl.includes("Pre-flight baseline"), "implement runs baseline before code");
   ok(impl.includes("Never invent a load-bearing decision silently"), "implement carries question calibration");
   ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
@@ -1116,7 +1120,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const phrase of ["Branch, not trunk", "report plus local branch", "Verify still runs", "Report is the exit"]) {
     ok(doc.includes(phrase), `unattended doc states: ${phrase}`);
   }
-  ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
+  ok(doc.includes("canonical branch/report/never-merge contract"), "unattended doc declares canonical ownership");
 
   // Recipe catalog: five files, valid tier frontmatter, discovery never edits code.
   const tiers = { "docs-drift": "discovery", "dep-audit": "discovery", "smell-sweep": "discovery", "coverage-raise": "change", "dead-code": "change" };
@@ -1169,7 +1173,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const hostsDoc = rf(resolve(__dirname, "..", "docs", "hosts.md"), "utf8");
   ok(readme.includes("--doctor"), "README documents the doctor");
   ok(readme.includes("--uninstall --cursor"), "README uninstall rows use the installer");
-  ok(hostsDoc.includes("fresh sub-agent with the PRD and that single issue"), "goal example carries the per-issue sub-agent contract");
+  ok(hostsDoc.includes("docs/unattended.md") && hostsDoc.includes("fresh maker context per issue"), "host docs route whole-pack work through canonical per-issue contract");
   ok(hostsDoc.includes("LOOM_ROLE=spec-checker"), "headless checker role documented");
   for (const tier of ["**Hard** —", "**Soft** —", "**Convention-only** —", "**Unverified** —"]) {
     ok(hostsDoc.includes(tier), `host matrix defines ${tier.split("**")[1]}`);
@@ -1182,8 +1186,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(readme.includes("Codex and Droid ship the intended hard path but remain **Hard (Unverified)**"), "README preserves Codex/Droid qualifier");
   ok(readme.includes("omp plugin doctor loom"), "OMP post-update doctor documented");
   const tend = rf(resolve(__dirname, "..", "skills", "loom-tend", "SKILL.md"), "utf8");
-  ok(tend.includes("Install freshness"), "tend audits managed-block staleness");
-  ok(tend.includes(".loom/grills/"), "tend audits leftover grill digests");
+  ok(tend.includes("install freshness"), "tend can select managed-block staleness");
+  ok(tend.includes("orphaned grill/research notes"), "tend can select leftover grill evidence");
   const ci = rf(resolve(__dirname, "..", ".github", "workflows", "checks.yml"), "utf8");
   ok(ci.includes("installer smoke"), "Windows CI exercises the installer end to end");
 }
@@ -1294,11 +1298,11 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(read("docs/unattended.md").includes("also run **attended**"), "unattended doc explains chat invocation");
 
   const tend = read("skills/loom-tend/SKILL.md");
-  ok(tend.includes("Recipe check"), "tend offers graduating recurring audits to recipes");
-  ok(tend.includes(".loom/maintenance/issues/"), "tend knows the recipe stub inbox");
+  ok(tend.includes("Recipe scheduling") && tend.includes("optional follow-ups"), "Tend keeps recipe routing optional");
+  ok(tend.includes("recurring maintenance evidence"), "Tend can select recurring maintenance as one finding");
 
   ok(read("skills/loom/SKILL.md").includes("Maintain project"), "dispatcher routes maintenance outcome");
-  ok(read("skills/loom-tend/SKILL.md").includes("recurs tend after tend"), "Tend owns recurring recipe routing");
+  ok(read("skills/loom-tend/SKILL.md").includes("Recipe scheduling"), "Tend owns optional recurring recipe routing");
   ok(!read("AGENTS.md").includes("recurring audit on a schedule"), "managed block does not compete with dispatcher routing");
   ok(read("skills/loom-init/SKILL.md").includes("scheduled recipes"), "init summary names the maintenance pair");
 
@@ -1565,8 +1569,9 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("## Direct small-fix (no issue file)"), "implement defines the no-issue lane");
-  ok(impl.includes("chat** (attended) or the **PR description"), "small-fix Log/verdict live in chat or PR");
+  ok(impl.includes("## No-issue compatibility route"), "implement defines no-issue compatibility routing");
+  ok(impl.includes("delegates exactly one hop") && impl.includes("loom-grill") && impl.includes("full `loom-verify` mandatory"), "no-issue invocation delegates one hop to Grill with full Verify");
+  ok(!impl.includes("Direct small-fix") && !impl.includes("chat** (attended) or the **PR description"), "implement does not retain a second small-fix process");
   ok(impl.includes("Close the session"), "implement ends with the handoff step");
   ok(impl.includes("Do not start the next issue in this session"), "handoff forbids same-session continuation");
   ok(impl.includes("Second REJECT from verify with overlapping blockers"), "implement knows the two-strikes stop");
@@ -1575,19 +1580,18 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   const verify = read("skills/loom-verify/SKILL.md");
   ok(verify.includes("**Review branches:**") && verify.includes("**Standards-only**"), "verify defines review without issue/spec");
   ok(verify.includes("Two strikes rule"), "verify carries the attended stagnation mirror");
-  ok(verify.includes("loom-plan` § Route scope"), "two-strikes fork names the amendment path");
+  ok(verify.includes("loom-plan/AMEND.md"), "two-strikes fork names the amendment helper");
 
   const plan = read("skills/loom-plan/SKILL.md");
-  ok(plan.includes("## Route scope") && plan.includes("### Amendment"), "plan has named amendment route");
-  ok(plan.includes("contradiction and its blast radius"), "amendment grills only contradiction and blast radius");
-  ok(plan.includes("Gate 1 previews the exact PRD/domain delta"), "amendment reuses bounded PRD gate");
-  ok(plan.includes("Gate 2 previews and rewrites only affected slices"), "amendment reuses affected slice gate");
+  const amend = read("skills/loom-plan/AMEND.md");
+  ok(plan.includes("## Process") && plan.includes("**Interview**") && plan.includes("TO-PRD.md") && plan.includes("TO-ISSUES.md"), "plan is a thin phase router");
+  ok(plan.includes("AMEND.md") && plan.includes("Do not load or run it for ordinary planning"), "plan conditionally routes amendment helper");
+  ok(amend.includes("contradiction and its blast radius") && amend.includes("Preserve untouched issues byte-for-byte"), "AMEND owns bounded amendment procedure");
 
   ok(read("skills/loom-plan/TO-ISSUES.md").includes("riskiest seam"), "first slice crosses the riskiest seam");
 
   const tend = read("skills/loom-tend/SKILL.md");
-  ok(tend.includes("Completed packs"), "tend offers pack archiving");
-  ok(tend.includes(".loom/archive/<pack>/"), "archive path named");
+  ok(tend.includes("completed-pack archiving"), "tend can select pack archiving as one outcome");
 
   // Behavioral guarantee the tend step relies on: archived packs are invisible
   // to gate, snapshot, and lint (both scan .loom/*/issues/, one level deep).
@@ -1687,7 +1691,7 @@ print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
   ok(read("omp-extension.mjs").includes("alertScanAllowed"), "OMP alert respects the ceiling");
 
   // G4 + G5: prose landed.
-  ok(read("skills/loom-tend/SKILL.md").includes(".loom/research/*.md"), "tend sweeps research notes");
+  ok(read("skills/loom-tend/SKILL.md").includes("orphaned grill/research notes"), "tend can select orphaned research evidence");
   ok(read("docs/hosts.md").includes("Known limitation (Codex)"), "hosts doc carries the Codex witness caveat");
 }
 
@@ -2012,9 +2016,9 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("one batch of parallel reads, not one file per turn"), "implement bootup requires batched reads");
-  ok(/next up:.*pointer names it/.test(impl), "implement trusts the snapshot next-up pointer");
-  ok(/no snapshot → grep `Status:`/.test(impl), "implement falls back to grepping statuses, not full card reads");
+  ok(impl.includes("Read issue + PRD in one parallel batch"), "implement bootup requires batched reads");
+  ok(impl.includes("Require exactly one named issue"), "implement requires explicit issue ownership");
+  ok(impl.includes("If none was named, use the one-hop Grill compatibility route"), "implement no-issue route is explicit");
   ok(impl.includes("Never read sibling issue cards in full"), "implement forbids full sibling card reads");
   const verify = read("skills/loom-verify/SKILL.md");
   ok(verify.includes("one shared evidence packet"), "verify codifies one shared evidence packet");
@@ -2249,15 +2253,25 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(read("opencode-plugin.mjs").includes("dispatcher is the canonical owner") && read("kiro-agent.json").includes("canonical dispatcher"), "adapters point to canonical dispatcher");
 
   const implement = read("skills/loom-implement/SKILL.md");
-  ok(implement.includes("explicitly invoke") && implement.includes("Canonical `/loom` Resolve locally uses `loom-grill`"), "direct small-fix is precision-only, not removed");
-  ok(implement.includes("full Verify contract"), "direct precision small-fix retains full Verify");
+  const noIssue = section(implement, "## No-issue compatibility route", "## Execution consent");
+  const grillPath = resolve(__dirname, "..", "skills", "loom-grill", "SKILL.md");
+  const grillRoute = read("skills/loom-grill/SKILL.md");
+  ok(/\]\(\.\.\/loom-grill\/SKILL\.md\)/.test(noIssue) && existsSync(grillPath), "no-issue Implement route targets the existing Grill skill");
+  ok(noIssue.includes("exactly one hop") && noIssue.includes("full `loom-verify` mandatory"), "compatibility route is one hop with full Verify");
+  ok(!/\]\(\.\.\/loom-implement\/SKILL\.md\)|\]\(\.\.\/loom\/SKILL\.md\)/.test(grillRoute), "Grill has no small-fix back-edge to Implement or dispatcher");
 
   const plan = read("skills/loom-plan/SKILL.md");
-  const amendment = section(plan, "### Amendment", "## Hard stops");
-  for (const contract of ["contradiction and its blast radius", "`## Amendments`", "Preserve untouched issues", "statuses, acceptance criteria, and blockers", "`needs-info`", "`ready-for-agent`", "Gate 2 previews and rewrites only affected slices", "new scope"]) {
-    ok(amendment.includes(contract), `amendment contract preserves: ${contract}`);
+  const amendment = read("skills/loom-plan/AMEND.md");
+  const amendProcedure = section(amendment, "## Procedure", "## Hard stops");
+  ok(/\]\(TO-PRD\.md\)/.test(amendProcedure) && /\]\(TO-ISSUES\.md\)/.test(amendProcedure), "AMEND routes through both gate helpers");
+  for (const boundary of ["target", "action", "scope", "draft", "base"]) ok(amendment.includes(boundary), `AMEND consent invalidates on changed ${boundary}`);
+  ok(/Gate 2[\s\S]*write no affected issue before bounded confirmation/.test(amendProcedure), "affected issue writes wait for Gate 2 confirmation");
+  ok(amendment.includes("No implementation") && amendment.includes("Do not implement"), "AMEND forbids implementation");
+  for (const contract of ["contradiction and its blast radius", "`## Amendments`", "Preserve untouched issues", "statuses, acceptance criteria, and blockers", "`needs-info`", "`ready-for-agent`", "only affected slices", "new scope"]) {
+    ok(amendment.includes(contract), `amendment helper preserves: ${contract}`);
   }
-  ok(plan.includes("Gate 1") && plan.includes("Gate 2") && plan.includes("confirmed PRD without issues is valid completion"), "Plan keeps two gates and PRD-only completion");
+  ok(plan.includes("Gate 1") && plan.includes("Gate 2") && plan.includes("PRD-only completion is valid"), "Plan keeps two gates and PRD-only completion");
+  ok(!plan.includes("exact `/goal`") && !read("skills/loom-plan/TO-ISSUES.md").includes("exact `/goal`"), "Plan handoff is host-neutral");
   ok(read("skills/loom-plan/GRILL.md").includes("Never implement in this planning context"), "Plan interview cannot escape to same-context implementation");
 
   const issues = read("skills/loom-plan/TO-ISSUES.md");
@@ -2280,7 +2294,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(grill.includes("establish an attributable baseline") && grill.includes("target behavior's path is already red"), "Grill restores attributable baseline and red-path stop");
   ok(grill.includes("If a final gate fails, fix inline within the confirmed scope") && grill.includes("Never declare the materialization done while a required gate is red"), "Grill recovers final gate failures without red done");
   ok(grill.includes("changed scope/targets or a user decision") && grill.includes("renewed bounded consent or return to the interview"), "Grill stops recovery when old consent no longer covers it");
-  ok(grill.includes("more than 3 files OR require more than 1 commit") && grill.includes("independent of the full-Verify trigger"), "Grill scope signal is deterministic and independent");
+  ok(grill.includes("coherent local, single-session resolution") && grill.includes("load-bearing decisions or issue slicing"), "Grill uses a semantic Plan boundary");
+  ok(!/>3 files|more than 3 files|more than 1 commit/.test(grill), "Grill has no arbitrary file/commit threshold");
   ok(grill.includes("auth/security/privacy/secrets") && grill.includes("accessibility"), "Grill retains full-Verify deny-list trigger");
 
   const canon = read("skills/loom-plan/GRILL.md");
@@ -2304,6 +2319,10 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(!loomEntry.includes("scripts/setup-workspace <workspace-root>") && !loomEntry.includes("scripts/inspect-workspace <root>"), "dispatcher carries no executable setup orchestration");
   ok(loomInit.includes("same installed Loom tree as this currently loaded Init skill") && loomInit.includes("node <absolute-setup-utility>"), "Init resolves and invokes the installed setup utility absolutely");
   ok(!loomInit.includes("node scripts/setup-workspace"), "Init never invokes setup relative to the user workspace");
+  const tendPolicy = section(read("skills/loom-tend/SKILL.md"), "## Process", "## Hard stops");
+  ok(tendPolicy.includes("current relevant diff/fixed point") && tendPolicy.includes("no relevant change after"), "Tend requires APPROVE coverage of current work");
+  ok(tendPolicy.includes("Existing APPROVE alone is insufficient") && tendPolicy.includes("fresh `loom-verify`"), "Tend rejects existing-APPROVE-only completion");
+  ok(!/may correct[^\n]*only when[^\n]*existing[^\n]*APPROVE already prove completion/i.test(tendPolicy), "Tend has no APPROVE-only authority shortcut");
   ok(!/\n2\. \*\*`loom:` debt/.test(read("skills/loom-tend/SKILL.md")), "Tend numbering is not duplicated");
 }
 

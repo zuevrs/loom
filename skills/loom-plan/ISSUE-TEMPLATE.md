@@ -4,7 +4,7 @@
 
 ## What to build
 
-{Vertical slice — end-to-end, independently shippable. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision. If a prototype branch informed this slice, add its pointer in `## Log` (branch + commit), never as merge target.}
+{Vertical slice — end-to-end, independently shippable. No file paths or code snippets — they go stale. A decision-rich prototype result may be inlined, but counts as evidence only with a stable pointer in `## Log` to a durable, independently inspectable source accessible to later maker/checker contexts. Ephemeral scratch is insufficient unless durably/accessibly persisted; a user-confirmed inline result is a user-owned assumption/decision, not prototype evidence. It cannot silently become production code.}
 
 ## Acceptance criteria
 

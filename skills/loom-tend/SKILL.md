@@ -1,90 +1,52 @@
 ---
 name: loom-tend
-description: Keep warp and issue state current. Use for maintenance between implementation steps — not feature building (loom-implement), not planning new scope (loom-plan).
+description: Keep warp and issue state current through one explicit maintenance outcome; not feature building, planning, or approval.
 disable-model-invocation: true
 ---
 
-**Never expand scope. Maintain what exists.**
+**One maintenance outcome. Never expand scope. Never create APPROVE.**
 
 ## Goal
 
-Keep the warp current and debts from rotting — without inventing feature scope.
+Produce exactly one evidence-backed maintenance outcome per invocation: a surfaced finding, a routed next action, or a bounded confirmed correction.
 
-## Inputs
+## Inputs and ownership
 
-- CONTEXT/ADRs, PRODUCT.md, DESIGN.md (when present)
-- `.loom/*/issues/` statuses
-- Recent diffs / gate outputs when relevant
-- Canonical research contract: [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md), used only to confirm detected drift
+Use CONTEXT/ADRs, PRODUCT/DESIGN when present, issue statuses, and relevant diffs/gate evidence. Read [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md) only to confirm detected drift. In workspace mode, Loom artifacts remain owned by the workspace root. Run each ordinary existing Git diff/check command in the relevant registered service repository and name any write there in the bounded proposal.
 
 ## Outputs
 
-- Stale-status corrections (proposed or applied with approval)
-- Maintenance edit list
-- Optional capture-learning proposal (human-approved writes only)
-
-## Workspace ownership
-
-With a valid active workspace profile, resolve Loom issue/PRD/context/ADR/archive/log paths and stop/lint scans from the workspace owner. Run each ordinary existing Git diff/check command in the relevant registered service repository; Tend adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
+- One surfaced, routed, or confirmed-and-applied maintenance outcome
 
 ## Process
 
-1. **Audit first; route choice authorizes no mutation.** Gather all findings before proposing changes. Then present one bounded apply proposal naming exact targets/actions; apply only after confirmation.
-
-2. **Warp audit** — CONTEXT/ADRs (+ PRODUCT/DESIGN when present) match the codebase.
-   - Use `rg` for terms defined in CONTEXT.md — any code using a rejected synonym?
-   - ADRs marked Accepted that describe behavior the code no longer implements?
-   - PRODUCT.md anti-references that have crept back in?
-
-3. **`loom:` debt** — surface `loom:` markers; pay down or re-mark with owner and upgrade path.
-   ```bash
-   rg -n "loom:" --glob "*.{ts,js,py}" .
-   ```
-   For each marker: is the ceiling still acceptable? Has the upgrade path become cheap?
-
-4. **Stale issues** — `ready-for-agent` that are already done or merged; fix status drift.
-   Start with the deterministic linter — it catches what eyes skip (status typos that hide issues from every scan, dangling/cyclic `Blocked by`, done-with-undone-blocker):
-   ```bash
-   node ~/.loom/hooks/stop-gate-logic.cjs --lint .
-   rg -l "Status: ready-for-agent" .loom/
-   ```
-   Cross-reference with git log — if the acceptance criteria commit exists and the `## Verify` section carries an APPROVE line, mark `done`. Without one, run `loom-verify` first (enforcement gate requires it).
-
-   Same sweep for triage stubs: `needs-triage` (scope creep captured by Implement) → route to `loom-plan` or `wontfix` with the user; `needs-info` → surface the written question to the user, flip back to `ready-for-agent` once answered.
-
-5. **Install freshness** — the AGENTS.md managed block version vs the installed Loom version (session-start warnings, or `<!-- loom:begin version=… -->` directly). Stale → recommend `loom-init`; on script hosts also `node ~/.loom/scripts/install.mjs --doctor`.
-
-6. **Grill digests** — `.loom/grills/*.md` that never became scope. For each: still relevant → offer handoff to `loom-plan`; dead → propose archiving (user approves deletion). Same sweep for `.loom/research/*.md` notes — research whose decision already shipped (or died) is provenance, not reading list: keep if an ADR/PRD cites it, propose archiving otherwise.
-
-   **Completed packs** — a pack whose issues are all `done`/`wontfix` is finished, not furniture: left in place it pads every session snapshot forever. Offer to move it to `.loom/archive/<pack>/` (git history preserved via `git mv`; user approves). Archived packs vanish from the snapshot and the stop gate automatically — both scan only `.loom/issues/` and `.loom/<pack>/issues/`, one pack level deep.
-
-7. **Recipe check** — an audit that recurs tend after tend belongs on a schedule. Same finding class again (docs drift, dep rot, smells)? Offer the matching recipe from `~/.loom/recipes/` — attended run in chat, or scheduled via the host runner (`docs/unattended.md` has the wiring). Stubs filed by scheduled recipes land in `.loom/maintenance/issues/`; the stale-issues sweep above covers them.
-
-8. **Comprehension** — remind to read shipped diffs / spot-check gates when relevant.
-   - After a burst of implement sessions: have you read what shipped?
-   - Any test flaking that hints at misunderstood behavior?
-
-9. **Capture learning** — if a run surfaced a durable pattern, ask whether to record in warp or project `skills/`; human approves before any write.
-
-When capture-learning approves a project skill: create `skills/<name>/SKILL.md` (minimal, domain-specific, not a duplicate of Loom rituals).
+1. If the user names a maintenance outcome, inspect only enough evidence to establish it. Bare Tend samples the available signals and recommends/selects the single strongest evidence-backed finding; it does not mandate a full sweep.
+2. Candidate signals include warp/ADR drift, `loom:` debt, stale `ready-for-agent`, `needs-info`, or `needs-triage` issue state, install freshness, orphaned grill/research notes, completed-pack archiving, or recurring maintenance evidence. Use the deterministic linter when issue state is the candidate: `node ~/.loom/hooks/stop-gate-logic.cjs --lint .`.
+3. Present one outcome and its evidence. If it requires writes, propose exact targets/actions and current bases; changed target, action, scope, or base requires renewed confirmation. Apply only after confirmation.
+4. For a stale `ready-for-agent` issue, Tend may correct it to `done` only when implementation evidence exists **and** a valid existing APPROVE is proven to cover the current relevant diff/fixed point, with no relevant change after that verdict. Existing APPROVE alone is insufficient. If identity/coverage cannot be proven, or behavior changed after APPROVE, surface the gap and route to a fresh `loom-verify`; do not change it to `done`. Tend never creates, fabricates, substitutes, or extends a verdict.
+5. Stop after that outcome. Recipe scheduling, capture-learning, and comprehension/spot-check prompts are optional follow-ups when directly supported by the finding, never mandatory phases.
 
 ## Hard stops
 
-- No autonomous long-term knowledge writes without user confirmation.
-- No feature expansion during maintenance — cut new issue instead.
-- No status changes to issues outside the Tend scope (e.g. marking issues `done`).
-- Do not delete or rewrite existing `loom:` debt markers — only pay them down with real code.
+- Exactly one explicit maintenance outcome per invocation.
+- No feature scope expansion; route new scope to Plan.
+- No write without bounded confirmation.
+- Never create or extend APPROVE, infer verdict coverage, or self-verify.
+- Do not delete/rewrite `loom:` markers unless paying down the documented debt with authorized code changes.
+- Research/capture uses the canonical facts-versus-decisions contract and remains pending until confirmed.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
-| Warp contradicts code | Propose doc fix; human approves |
-| Many stale issues | List all; prioritize by active build |
-| User asks for feature in tend | Route to `loom-plan` |
+| Multiple findings compete | Select the strongest evidence-backed one; leave others for later invocations |
+| Completion has only an existing APPROVE, lacks implementation evidence, cannot prove verdict coverage/current fixed point, or has relevant post-APPROVE changes | Route to fresh Verify; do not mark `done` |
+| Proposed maintenance becomes feature work | Stop and route to Plan |
+| Target/action/scope/base changes | Renew bounded confirmation |
 
 ## Done when
 
-- Stale `ready-for-agent` items surfaced or corrected
-- No scope creep into new features
-- Capture-learning proposals wait for explicit approval
+- One evidence-backed maintenance outcome was surfaced, routed, or applied
+- Any write matched the confirmed targets/actions/bases
+- A `ready-for-agent` → `done` correction, if any, relied on implementation evidence plus proven APPROVE coverage of the current relevant diff/fixed point and no relevant post-verdict changes
+- Optional follow-ups stayed optional and no feature scope was added

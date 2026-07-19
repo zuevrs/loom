@@ -24,7 +24,7 @@
 
 ## Implementation Decisions
 
-{Key technical choices settled during the interview: modules built/modified, interfaces, contracts, schema/API changes. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision, not a reference to code. If a prototype branch exists, include its pointer (`prototype/<slug>` + commit) as evidence; prototype branches are primary sources and are never merged.}
+{Key technical choices settled during the interview: modules built/modified, interfaces, contracts, schema/API changes. No file paths or code snippets — they go stale. Exception: a decision-rich prototype result (state machine, schema, type shape) may be inlined, but counts as evidence only with a stable pointer to a durable, independently inspectable source accessible to later maker/checker contexts. Valid sources include a durable host artifact, external primary source, or explicitly approved commit/artifact. Ephemeral scratch is insufficient unless durably/accessibly persisted; a user-confirmed inline result is a user-owned assumption/decision, not prototype evidence. Prototype evidence cannot silently become production code.}
 
 ## Assumptions
 

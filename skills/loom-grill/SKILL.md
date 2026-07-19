@@ -29,10 +29,10 @@ Resolve a local question or small fix without PRD/issues, then optionally materi
 1. Read and apply the shared interview canon in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md): facts owned by evidence versus decisions owned by the user, one question at a time, pending domain delta, interruption checkpoint.
 2. Investigate project-nonmutatingly: reads and commands reasonably expected not to modify tracked/generated project content or external state. Commands that may rewrite artifacts or external state belong in the apply proposal.
 3. Keep resolved terms and canonical ADR candidates pending in conversation; use accepted terms immediately. ADRs use [`../loom-plan/ADR-FORMAT.md`](../loom-plan/ADR-FORMAT.md) and its Status lifecycle.
-4. Before the first code apply, ask one adversarial edge-case question and run the relevant existing objective gates to establish an attributable baseline. Baseline commands must be project-nonmutating; any command that may rewrite tracked/generated content or external state belongs in the bounded proposal instead. If the target behavior's path is already red, report it and stop rather than attributing inherited failure to the proposed fix.
+4. Before the first code apply, ask one adversarial edge-case question only when behavior is non-trivial or risk/edge behavior remains uncertain. Run the relevant existing objective gates to establish an attributable baseline. Baseline commands must be project-nonmutating; any command that may rewrite tracked/generated content or external state belongs in the bounded proposal instead. If the target behavior's path is already red, report it and stop rather than attributing inherited failure to the proposed fix.
 5. Show a compact pending delta and bounded action gate: exact files/actions, any mutating gate commands, and current base. Changed target/scope/base requires renewed consent.
 6. On confirmation make the smallest change and run the relevant final objective gates again. If a final gate fails, fix inline within the confirmed scope, rerun the gates, and report the result. If recovery needs changed scope/targets or a user decision, stop and request renewed bounded consent or return to the interview. Never declare the materialization done while a required gate is red. If the change touches any upward-only trigger — auth/security/privacy/secrets, money, destructive/data migration, concurrency, public compatibility/API, dependencies, CI/release, accessibility — run full `loom-verify`; otherwise objective gates suffice. This is a trigger, not a generalized risk tier.
-7. **Scope signal:** when materialization would touch more than 3 files OR require more than 1 commit, say scope is growing, recommend Plan, and let the user choose. This measurable signal is independent of the full-Verify trigger. Before compaction/interruption, offer a checkpoint; never write silently.
+7. **Semantic boundary:** recommend Plan when the work no longer fits a coherent local, single-session resolution or needs load-bearing decisions or issue slicing. File and commit counts are not scope proxies. Before compaction/interruption, offer a checkpoint; never write silently.
 
 ## Hard stops
 
@@ -47,7 +47,7 @@ Resolve a local question or small fix without PRD/issues, then optionally materi
 | Symptom | Response |
 |---|---|
 | Investigation finds nothing actionable | End with the evidence-backed answer |
-| Proposed materialization exceeds >3 files or >1 commit | Give the scope signal; recommend Plan and let the user choose |
+| Work no longer fits a coherent local/single-session resolution or needs load-bearing decisions/slicing | Recommend Plan and let the user choose |
 | Baseline or target path is red | Report the inherited failure and stop before applying |
 | Base/targets change after preview | Recompute and renew confirmation |
 | Risk trigger appears | Include full Verify in the apply action and run it after gates |

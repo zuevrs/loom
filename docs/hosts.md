@@ -98,12 +98,12 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
-| **Plan** | `/loom` → Plan work (or precision `/loom-plan`) | — | Dispatcher selects the canonical Plan ritual; native `/plan` stays stock OMP |
+| **Plan** | `/loom` → Plan work (or precision `/loom-plan`) | — | Confirm a PRD, optionally slice issues, then stop or hand off; native `/plan` stays stock OMP |
 | **Resolve locally** | `/loom` → Resolve locally (or precision `/loom-grill`) | — | Project-nonmutating investigation with bounded apply; scope growth recommends Plan |
 | **Implement** | `loom-implement` one issue | Native session | Loom scopes the slice; no Advisor setup is required |
 | **Verify** | `loom-verify` | one native `task` batch with bundled reviewers | Loom defines policy/digest; shared context plus per-item Spec/Standards roles preserve independent axes |
 | **Done gate** | write `## Verify` → `Status: done` | goal pre-commit gate + **session_stop** + TTSR | Prevent invalid native goal completion; correct general turn stops; remind on premature done write |
-| **Multi-issue** | pick next `ready-for-agent` issue | OMP native goal/lifecycle | Loom tracks state on disk; OMP owns orchestration and budgets; Loom blocks invalid `goal complete` before persistence and uses `session_stop` for general turn-stop correction |
+| **Whole-pack** | host-native handoff via [`docs/unattended.md`](unattended.md) | OMP native goal/lifecycle | Host owns orchestration and budgets; Loom preserves per-issue context, Verify, state, and human gate |
 | **Maintenance** | `loom-tend` | — | Warp audit, stale issues, `loom:` debt |
 
 ### OMP features that amplify Loom
@@ -121,7 +121,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 ### Planning on OMP
 
-The preferred OMP entry is **`/loom`** with outcome **Plan work**; **`/loom-plan`** remains the precision shortcut — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
+The preferred OMP entry is **`/loom`** with outcome **Plan work**; **`/loom-plan`** remains the precision shortcut. Plan interviews, applies the gated PRD phase, and enters gated issue slicing only when requested; a confirmed PRD without issues is valid completion. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
 
 **Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
@@ -135,13 +135,7 @@ The preferred OMP entry is **`/loom`** with outcome **Plan work**; **`/loom-plan
 > Implement issue 002-token-refresh        # → next ready-for-agent issue
 ```
 
-Release 1 can prepare (but does not launch or harden) this exact user handoff. It does not guarantee a non-default branch, checkpoint commits, per-issue HEAD fixed points, or stop-all semantics (each issue gets a clean sub-agent with PRD + that one issue, so context never accumulates across issues):
-
-```
-omp goal "Work through .loom/jwt-auth/issues/ in order. For each issue spawn a
-fresh sub-agent with the PRD and that single issue only — never chain issues in
-one context. Each sub-agent runs loom-implement then loom-verify before done."
-```
+When issue slicing is requested and confirmed, Plan may prepare a capability-neutral host-native whole-pack handoff through [`docs/unattended.md`](unattended.md). The host owns execution and lifecycle; Loom preserves dependency order, one issue at a time, fresh maker context per issue, Verify before `done`, and the human merge/publish gate. Plan does not encode an OMP-specific command.
 
 ## Templates
 
