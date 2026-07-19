@@ -2,7 +2,7 @@
 
 This release keeps only the daytime branch/verify/report contract. Generic runner reports and overnight autonomous improvement are deferred to a later package.
 
-Loom ships no runner (see ADR history: host-native execution won). Every host already knows how to run an agent unattended — background agents, cloud agents, cron + headless CLI, autonomous frameworks. What they need from Loom is a **contract** so an unwatched run stays safe, and **recipes** for the recurring maintenance work worth automating.
+Loom ships no runner. The host owns unattended execution through its background, cloud, goal, loop, cron, CI, or headless facilities. Loom supplies the **contract** that keeps the run safe and the **recipes** for recurring maintenance.
 
 ## The contract
 

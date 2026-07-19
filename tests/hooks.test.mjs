@@ -649,31 +649,26 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(unattended.includes("Verification is automatable"), "loop test demands an objective red-capable gate");
   }
 
-  // v0.23.3 pocock/osmani sweep, round 2 — four prose contracts, no new surfaces
-  // (handoff and triage deliberately skipped: no inbound stream, plan stays the
-  // single entry point).
+  // Maker and unattended semantic contracts.
   {
-    // 1. test ratchet (Osmani long-running-agents failure mode): the maker-side
-    // counterpart of verify's falsifiability rule
+    // Maker-side test ratchet complements Verify's falsifiability rule.
     const tdd = read("skills/loom-implement/TDD.md");
     ok(tdd.includes("Ratchet violation"), "TDD names the ratchet anti-pattern");
     ok(tdd.includes("A failing test is a signal, never an obstacle"), "TDD forbids deleting/weakening tests for green");
 
     const impl = read("skills/loom-implement/SKILL.md");
-    // 2. surfaced assumptions: the gap between "PRD answered" and "my reading is
-    // the only reading" — silent invention caught one lap before the checkers
-    ok(impl.includes("Surface the assumptions you do make"), "implement surfaces assumptions before non-trivial code");
+    // Assumptions are explicit before non-trivial implementation.
+    ok(/Surface assumptions[\s\S]*Before writing non-trivial code/.test(impl), "implement surfaces assumptions before non-trivial code");
     ok(impl.includes("correct me now or I proceed"), "assumption block carries the correct-me-now contract");
-    // 3. PR body contract: the unattended human gate gets a fixed shape
+    // Unattended human handoff has a stable PR body shape.
     const unattended = read("docs/unattended.md");
     ok(unattended.includes("### PR body contract"), "unattended doc fixes the PR description shape");
     ok(unattended.includes("drop a section entirely when it's empty"), "PR contract drops empty sections, not ceremony");
     ok(unattended.includes("lead with the blocker"), "draft PRs lead with the blocker");
     ok(impl.includes("docs/unattended.md"), "implement points at the canonical unattended contract");
-    // 4. simplify-while-green: maker-initiated subtraction pass between the
-    // discipline ladder (prevent) and the standards checker (judge)
+    // Maker performs a bounded subtraction pass while checks are green.
     ok(impl.includes("Simplify while green"), "self-review carries the simplification pass");
-    ok(impl.includes("Chesterton's fence"), "simplification pass respects Chesterton's fence");
+    ok(impl.includes("Preserve guards you cannot prove redundant"), "simplification pass preserves unproven guards");
     ok(impl.includes("I'll call this simplification"), "anti-rationalization splits simplification from refactor");
     ok(impl.includes("The suite only ratchets tighter"), "anti-rationalization blocks test deletion for green");
   }
@@ -713,12 +708,11 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes("assumptions the user treats as obvious"), "tacit-knowledge probe names the hidden-assumption signal");
   }
 
-  // field run 8 doc pins: matrix statuses stay honest, headless stdin note exists,
-  // stop-gate prose carries the exit-2 / one-forced-lap contract.
+  // Cross-host documentation canaries.
   {
     const readme = read("README.md");
     ok(readme.includes("opencode plugin -g github:zuevrs/loom"), "README OpenCode install carries -g (bare command lands in the project's .opencode/)");
-    ok(readme.includes("/loom:loom-init"), "README names the plugin-namespaced ritual invocation for Claude Code");
+    ok(readme.includes("/loom:loom"), "README names the recommended namespaced dispatcher for Claude Code");
     ok(readme.includes("Responses API"), "README names the Codex model-leg upstream block (Responses-only host, z.ai serves none)");
     ok(/Codex.*install \+ integration verified.*runtime blocked/s.test(readme), "README Codex row separates install/integration from blocked runtime");
     ok(readme.includes("exit 2") && readme.includes("one forced lap"), "README stop-gate section documents the exit-2 block and one-forced-lap rule");
@@ -786,7 +780,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(tdd.includes("Refactoring is not part of the loop"), "TDD.md pushes refactoring out of the loop");
 }
 
-// Implement ownership + native Verify contract
+// Daily entry, ritual ownership, and native Verify contract
 {
   const { readFileSync: rf } = await import("node:fs");
   const impl = rf(resolve(__dirname, "..", "skills", "loom-implement", "SKILL.md"), "utf8");
@@ -794,7 +788,12 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const agents = rf(resolve(__dirname, "..", "AGENTS.md"), "utf8");
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
+  const readme = rf(resolve(__dirname, "..", "README.md"), "utf8");
+  const hosts = rf(resolve(__dirname, "..", "docs", "hosts.md"), "utf8");
   ok(impl.includes("Implement owns one named issue only"), "implement owns exactly one issue");
+  ok(readme.includes("## Precision entrypoints") && readme.includes("advanced shortcuts"), "README documents precision entrypoints once as advanced API");
+  ok(hosts.includes("/loom Implement <issue>") && hosts.includes("/loom Review ready work"), "OMP daily workflow uses the dispatcher entry");
+  ok(!initSkill.includes('"workspace_id"') && initSkill.includes("scripts/setup-workspace") && initSkill.includes("docs/workspaces.md"), "Init delegates workspace schema and edge cases to canonical owners");
   ok(!impl.includes("## Batch mode") && !impl.includes("orchestrating session"), "implement excludes inline batch orchestration");
   ok(impl.includes("docs/unattended.md") && impl.includes("host owns whole-pack/background"), "implement delegates whole-pack and unattended mechanics");
   for (const doc of [agents, initSkill]) ok(doc.includes("Fresh maker context per issue"), "managed block keeps fresh-context lane invariant");
@@ -2317,7 +2316,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const loomInit = read("skills/loom-init/SKILL.md");
   ok(loomEntry.includes("load `loom-init`") && loomEntry.includes("Init solely owns deterministic inventory and profile proposal/apply"), "dispatcher routes workspace setup once to Init");
   ok(!loomEntry.includes("scripts/setup-workspace <workspace-root>") && !loomEntry.includes("scripts/inspect-workspace <root>"), "dispatcher carries no executable setup orchestration");
-  ok(loomInit.includes("same installed Loom tree as this currently loaded Init skill") && loomInit.includes("node <absolute-setup-utility>"), "Init resolves and invokes the installed setup utility absolutely");
+  ok(loomInit.includes("same installed Loom tree as this skill") && loomInit.includes("node <absolute-setup-utility>"), "Init resolves and invokes the installed setup utility absolutely");
   ok(!loomInit.includes("node scripts/setup-workspace"), "Init never invokes setup relative to the user workspace");
   const tendPolicy = section(read("skills/loom-tend/SKILL.md"), "## Process", "## Hard stops");
   ok(tendPolicy.includes("current relevant diff/fixed point") && tendPolicy.includes("no relevant change after"), "Tend requires APPROVE coverage of current work");

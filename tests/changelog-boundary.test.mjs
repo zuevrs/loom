@@ -18,16 +18,16 @@ function run(unreleased, newest, older) {
 
 ${unreleased}
 
-## [1.0.0]
+## [1.1.0]
 
 ${newest}
 
-## [0.9.0]
+## [1.0.0]
 
 ${older}
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/zuevrs/loom/compare/v0.9.0...v1.0.0
+[Unreleased]: https://github.com/zuevrs/loom/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/zuevrs/loom/compare/v1.0.0...v1.1.0
 `);
   return spawnSync("bash", [checker, root], {
     encoding: "utf8",

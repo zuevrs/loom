@@ -2,7 +2,7 @@
 
 > Advanced opt-in. Basic Loom + OMP is complete without Advisor; enable this only when a second-model shadow is worth the added cost and noise.
 
-Loom's enforcement fires **before** the turn (managed block, pre-LLM invariants) and **after** it (stop gate, checkers, witness). OMP's advisor fills the missing middle: a second model that shadows the main agent, sees every turn incrementally (thoughts included), and injects notes **while the turn is happening**. A collapsed grill gets called out on the turn it collapses — not in next-day dump archaeology.
+Loom's managed block and pre-LLM invariants act before a turn, while gates, checkers, and witness act at completion boundaries. OMP's optional Advisor adds a second model that reviews each turn incrementally and injects notes during the session.
 
 The profile is one YAML file: [`templates/WATCHDOG.yml`](../templates/WATCHDOG.yml). It teaches the advisor Loom's ritual contracts as narrow fire-only-on signatures. No skills, hooks, or managed block are touched — this is optional, additive, and OMP-only (the advisor is a host feature, and Loom's boundary rule is to recommend host-native capabilities, not absorb them into core).
 
@@ -49,4 +49,4 @@ Outside Loom rituals the profile stays silent by contract. Note that enabling th
 
 One extra model call per main-agent turn — fast-tier if you pinned one (see Model above; the unpinned default resolves a strong slow-chain model, which costs accordingly).
 
-Two structural limits, observed in the field: the advisor reviews at **turn boundaries**, so drift inside a single long turn is called out only as the next turn starts — and a headless `omp -p` run can exit before the shadow speaks at all (its last-turn review dies with the process). And the advisor is **user-aligned by design**: when the user explicitly asks for the anti-pattern ("just batch all your questions"), it stays silent on purpose — the profile guards against agent drift, not user choices. Both are host mechanics, not profile knobs; interactive TUI sessions are where the profile earns its keep. The profile's instructions end every signature list with "silence otherwise", and OMP's baseline already enforces at-most-one-note-per-update, no repeats, and prefer-silence. If the shadow still nags: soften a signature's severity in `WATCHDOG.yml`, or `/advisor off` and report the false positive — a noisy watchdog is a bug, not a feature.
+The advisor reviews at **turn boundaries**, so drift inside one long turn appears only when the next turn starts; a headless `omp -p` run can exit before the final review. It is also user-aligned: explicit user choices are outside the profile's drift guard. These are host mechanics, not profile settings, so prefer Advisor for interactive TUI sessions. The profile says "silence otherwise", and OMP limits notes; if it is still noisy, lower the signature severity in `WATCHDOG.yml` or use `/advisor off`.

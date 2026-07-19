@@ -20,20 +20,7 @@ A **workspace setup** is an explicit opt-in branch for a workspace folder contai
 
 ### Workspace profile
 
-Use `.loom/workspace.json` only after explicit workspace setup. It is generated and validated by Loom; it is not required in a canonical repo-only project:
-
-```json
-{
-  "workspace_id": "payments-platform",
-  "repositories": [
-    { "path": "services/api", "remote": "git.example.com/team/api" },
-    { "path": "services/auth", "remote": "git.example.com/team/auth" }
-  ],
-  "context_paths": ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"]
-}
-```
-
-Relative repository paths must remain inside the workspace and must identify independent Git roots. Registered service repos are context/execution targets, not additional Loom roots.
+Use `.loom/workspace.json` only after explicit workspace setup. The canonical schema, ownership, activation, and edge-case contract lives in [`docs/workspaces.md`](../../docs/workspaces.md); `scripts/setup-workspace` owns generation and validation. Canonical repository-only projects need no profile.
 
 ## Outputs
 
@@ -59,7 +46,7 @@ Relative repository paths must remain inside the workspace and must identify ind
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v1.0.0 -->
+<!-- loom:begin version=v1.1.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -101,7 +88,7 @@ Inside the lane:
 
 ## Workspace profile setup
 
-When explicitly routed `/loom setup workspace`, Init deterministically inventories and proposes/applies the profile: resolve `scripts/setup-workspace` from the same installed Loom tree as this currently loaded Init skill, invoke `node <absolute-setup-utility> <root> [--depth <positive-integer>]` in proposal mode (forwarding the same depth on apply), preview the bounded apply, then use its validated `--profile <confirmed-profile.json> --confirm` path. Repeated setup preserves a valid curated ID, repository allowlist, and context paths while reporting inventory drift. If the existing profile is malformed or stale (missing/moved repository or remote mismatch), proposal mode reports `existing_profile_error` and offers an inventory-based replacement; only a valid explicit `--profile` plus `--confirm` may replace it. Configured repository identity must match exactly.
+When explicitly routed `/loom setup workspace`, Init resolves `scripts/setup-workspace` from the same installed Loom tree as this skill and invokes `node <absolute-setup-utility> <root> [--depth <positive-integer>]` in proposal mode. Preview the exact profile write and ask for confirmation, then apply through the utility's validated `--profile <confirmed-profile.json> --confirm` path, forwarding the same depth. Report `existing_profile_error` and the proposed recovery when the profile is malformed or stale; only an explicitly confirmed valid profile may replace it. The utility owns inventory, profile validation, identity matching, curated-profile preservation, and drift reporting; [`docs/workspaces.md`](../../docs/workspaces.md) owns the workspace contract.
 
 After profile setup, Init may offer exactly one optional handoff to ordinary Plan, Grill, or Tend based on the user's desired outcome, then stops. Init does not own onboarding or migration. The workspace root owns Loom documents and state; service product docs remain in their repositories. Any later normalization uses the selected ritual's ordinary bounded gates, validates destinations, and requires separate consent before deleting sources.
 

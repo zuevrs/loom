@@ -6,6 +6,38 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [1.1.0] - 2026-07-19
+
+### Highlights
+
+- **One daily entry.** `/loom` is now the recommended interactive path across supported command-style hosts, including planning, selected-issue implementation, native review, maintenance, and just-in-time setup. All precision `loom-*` commands remain installed as an advanced, backward-compatible API.
+- **Native OMP Verify.** OMP v17.0.4+ runs standard Verify as one native task batch with a shared evidence packet and independent Spec and Standards roles. Custom checker manifests remain optional compatibility entrypoints rather than prerequisites.
+- **Clear ritual ownership.** Plan optionally slices work, Implement owns one issue, Verify judges without fixing, Tend owns one maintenance outcome, Init owns setup, and the host owns whole-pack or unattended execution.
+
+### Migration steps
+
+- Update or reinstall the host adapter, restart the host, then enter `/loom`. Existing automation may continue using precision `loom-*` entrypoints.
+- Enter `/loom` in existing projects and accept the just-in-time Init refresh when the managed block is behind v1.1.0.
+- OMP users need v17.0.4 or newer for the documented native Verify batch path. Advisor and custom checker setup are optional.
+
+### Adapter impacts
+
+- OMP adds an early native goal-completion guard while retaining `session_stop` for general turn-stop correction and session-start recovery. OMP remains responsible for task execution, model routing, lifecycle, waiting, and recovery.
+- Workspace mode remains an opt-in root/context adapter: Loom artifacts live at the workspace root, while service code and product documentation remain in registered repositories. Canonical one-Git-repository/one-Loom behavior is unchanged.
+- Cross-host enforcement and runtime claims remain limited to directly verified capabilities; no host is upgraded from implemented or blocked status by this release.
+
+### Safety changes
+
+- Verify keeps objective gates, independent checker contexts, deterministic digest write-back, and no-APPROVE-no-done enforcement. Red gates short-circuit review, and missing independent review fails closed.
+- Dispatcher routing remains project-nonmutating, asks one question on ambiguity, resumes deterministically, and fails closed for explicit Loom work when workspace ownership cannot be validated.
+- Init retains an inline self-contained managed block, absolute installed-tree setup utility resolution, explicit proposal/apply confirmation, validated recovery, and at most one post-setup ritual handoff.
+- Product-facing changelog, commit, PR, and source-comment prose describes product purpose rather than Loom-internal bookkeeping.
+
+### Evidence
+
+- Dependency-free hook, adapter, workspace, installer, template, drift, documentation, and structural smoke checks cover the release contracts.
+- Candidate and final linked installed-plugin OMP evidence are recorded in [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md). On OMP v17.0.4, the linked local `loom@1.1.0` tree passed the model-backed native Verify batch gate with independent Spec and Standards APPROVE verdicts; this is not git/tarball-installed release evidence.
+
 ## [1.0.0] - 2026-07-19
 
 ### Highlights
@@ -1132,7 +1164,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/zuevrs/loom/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/zuevrs/loom/compare/v0.27.0...v1.0.0
 [0.27.0]: https://github.com/zuevrs/loom/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/zuevrs/loom/compare/v0.25.1...v0.26.0

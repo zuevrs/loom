@@ -22,7 +22,7 @@ $ agent tries to stop
    back to ready-for-agent / needs-triage / wontfix. Do not fabricate an APPROVE.
 ```
 
-So the agent runs `loom-verify`: independent Spec and Standards checkers read one shared evidence packet and write their aggregate verdict into the issue file:
+So the agent enters `/loom` and asks to review ready work: independent Spec and Standards checkers read one shared evidence packet and write their aggregate verdict into the issue file:
 
 ```
 APPROVE — 2026-07-05 — spec pass, standards pass
@@ -52,7 +52,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 
 | Host | Install | Uninstall | Status |
 |------|---------|-----------|--------|
-| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | install verified; runtime blocked by Claude billing in current smoke |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — enter with `/loom:loom` | `/remove-plugin loom` | install verified; runtime blocked by Claude billing in current smoke |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | install + integration verified; runtime blocked upstream (Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
 | OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | installed-plugin v1.0.0 discovery/health and workspace setup/profile runtime verified; native Verify batch smoke passed on OMP v17.0.4 (tested minimum); optional handoff, other workspace flows, and other hosts remain unverified |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | install + integration verified; fixture runtime smoke passed |
@@ -85,11 +85,11 @@ The dispatcher loads exactly one existing ritual and disappears. Interviews begi
 
 ## Upgrade
 
-1. **Global install** — plugin-native hosts: re-run the install command (**OMP:** `omp plugin install git:github.com/zuevrs/loom --force` — without `--force` the cached tarball is reused), then **restart the host process** (a plugin hot-swapped under a running host keeps serving stale code — observed live on OMP; `omp plugin doctor loom` confirms health). Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer — it repairs its own stale entries and never touches foreign config. If your clone is pinned to a tag (detached HEAD), use `git -C ~/.loom fetch --tags && git -C ~/.loom checkout <new-tag>` instead of pull.
-2. **Per project** — run `loom-init` in active repos to refresh the managed block when prompted.
+1. **Global install** — plugin-native hosts: re-run the install command (**OMP:** `omp plugin install git:github.com/zuevrs/loom --force` — without `--force` the cached tarball is reused), then **restart the host process** so it loads the updated plugin; `omp plugin doctor loom` confirms health. Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer — it repairs its own stale entries and never touches foreign config. If your clone is pinned to a tag (detached HEAD), use `git -C ~/.loom fetch --tags && git -C ~/.loom checkout <new-tag>` instead of pull.
+2. **Per project** — enter `/loom` in active repos and accept the Init refresh when prompted.
 3. **Verify** — `node ~/.loom/scripts/install.mjs --doctor`: checks hook entries point at existing files, skill links aren't broken, **all surfaces resolve into one Loom tree of one version** (hooks from one clone + skills from another upgrade apart silently), and the current project's managed block matches the installed version. Prints the exact fix for anything wrong, changes nothing. Exit 0 = healthy.
 
-A dead hook is silent — the session just runs without enforcement. Run `--doctor` after every upgrade; it exists because a renamed hook file once left the Stop gate dead for two releases before anyone noticed.
+A dead hook is silent, so run `--doctor` after every upgrade to confirm enforcement paths resolve.
 
 ## Prerequisites & Troubleshooting
 
@@ -97,7 +97,7 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 - **Windows:** plugin hosts work out of the box (hooks are plain Node, CI-verified on `windows-latest`); script hosts run `node ~/.loom/scripts/install.mjs --cursor` (or `--windsurf` / `--kiro` / `--agents`) from any shell — skills link as directory junctions, no admin rights needed; where linking is unavailable the installer copies and tells you to re-run after updates.
 - **`path exists (skipping)` during install:** a foreign path squats on a loom skill name — move it, re-run.
 - **Hooks not taking effect:** confirm entries in host config, restart the host session, then `--doctor`.
-- **Managed block version mismatch:** re-run `loom-init` in the affected project.
+- **Managed block version mismatch:** enter `/loom` in the affected project and accept the Init refresh.
 
 ## Precision entrypoints
 
@@ -132,16 +132,16 @@ OMP is the maximum-synergy host: Loom owns **what** to build (PRD, issues, verif
 
 ```bash
 omp plugin install git:github.com/zuevrs/loom
-cd your-project && omp        # in session: run loom-init
+cd your-project && omp        # in session: use /loom; Init is offered JIT when needed
 
 # Update to latest:
 omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ```
-> /loom Plan work: JWT authentication       # dispatcher → loom-plan
-> /loom-implement .loom/jwt/issues/001-auth-endpoint.md  # precision selected-issue entry
-> Verify                                   # → one native task batch, Spec + Standards roles
+> /loom Plan work: JWT authentication
+> /loom Implement .loom/jwt/issues/001-auth-endpoint.md
+> /loom Review ready work                  # one native task batch, Spec + Standards roles
 > (goal completion is pre-commit guarded; session_stop checks general turn stops)
 ```
 
@@ -152,7 +152,7 @@ The standard path uses OMP v17.0.4+ native task batching for Verify, plus comple
 - Hooks are non-mutating — they never edit files. Blocking occurs only at host-supported enforcement seams, including OMP's early goal-complete gate and the general Stop/`session_stop` gate.
 - Work needing human judgement (auth, payments, secrets) is routed `ready-for-human` at planning time.
 - No auto-merge, no auto-publish, no silent self-rewrite.
-- `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
+- Follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 
 ## Contributing
 
