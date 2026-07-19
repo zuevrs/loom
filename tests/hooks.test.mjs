@@ -481,7 +481,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   deepStrictEqual(previewOwners.map(([name]) => name), ["Init", "Grill", "Gate 1", "Gate 2", "Tend", "Named-issue Implement"], "semantic layer enumerates every durable-write preview owner");
 }
 
-// Hermes remains guidance-only and scans only a locally provable root until Issue 03.
+// Hermes forwards canonical Node ownership while ordinary delivery stays topology-quiet.
 {
   const root = mkdtempSync(join(tmpdir(), "loom-hermes-local-delivery-"));
   const service = join(root, "service");
@@ -511,7 +511,7 @@ os.chdir(sys.argv[2]); c=C(); mod.register(c); print(c.hooks["on_session_start"]
     const siblingDelivery = split(runHermes(sibling));
     ok(siblingDelivery.pre.includes("local-done.md") && !siblingDelivery.pre.includes("owner-done.md"), "Hermes valid-profile sibling scans local owner only");
     const serviceDelivery = split(runHermes(service));
-    ok(!serviceDelivery.pre.includes("owner-done.md"), "Hermes registered service does not claim workspace-owner alert before Issue 03");
+    ok(serviceDelivery.pre.includes("owner-done.md"), "Hermes registered service scans the canonical workspace artifact owner");
     for (const value of [root, service, sibling, "AGENTS.md:", "CONTEXT.md:", ".loom/:", "## .loom state"]) ok(!serviceDelivery.session.includes(value), `Hermes ordinary delivery hides topology: ${value}`);
 
     writeFileSync(profilePath, "{");

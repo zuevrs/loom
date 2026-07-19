@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Dependency-free local benchmark for the Hermes canonical project-context bridge."""
+import importlib.util, json, os, platform, statistics, subprocess, tempfile, time
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+QUERY = ROOT / "hooks" / "workspace.cjs"
+SPEC = importlib.util.spec_from_file_location("loom_hermes_bench", ROOT / "hermes-plugin" / "__init__.py")
+H = importlib.util.module_from_spec(SPEC); SPEC.loader.exec_module(H)
+def git(root, *args): subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True)
+def repo(path):
+    path.mkdir(parents=True); git(path, "init", "-q"); (path / "README.md").write_text("fixture\n"); git(path, "add", "."); git(path, "-c", "user.email=bench@example.test", "-c", "user.name=Bench", "commit", "-qm", "baseline")
+def timed(fn, count):
+    values=[]
+    for _ in range(count):
+        start=time.perf_counter(); fn(); values.append((time.perf_counter()-start)*1000)
+    ordered=sorted(values)
+    return {"count":count,"median_ms":round(statistics.median(values),3),"p95_ms":round(ordered[max(0, int(count*.95)-1)],3)}
+def query(cwd): subprocess.run(["node", str(QUERY), "--project-context", str(cwd)], check=True, capture_output=True)
+with tempfile.TemporaryDirectory(prefix="loom-hermes-benchmark-") as temp:
+    base=Path(temp); ws=base/"workspace"; api=ws/"api"; sibling=ws/"sibling"; canonical=base/"canonical"
+    for path in (api,sibling,canonical): repo(path)
+    (ws/".loom").mkdir(); profile=ws/".loom/workspace.json"; profile.write_text(json.dumps({"workspace_id":"benchmark","repositories":[{"path":"api"}]}))
+    deep=api
+    for i in range(24): deep=deep/f"level-{i}"
+    deep.mkdir(parents=True)
+    per_turn={name:timed(lambda cwd=cwd: query(cwd),10) for name,cwd in {"canonical":canonical,"registered":api,"unregistered":sibling,"deep":deep}.items()}
+    initial=timed(lambda: query(api),10)
+    H._PROJECT_CONTEXT_CACHE=None; H._query_project_context(api)
+    cache_hit=timed(lambda:H._query_project_context(api),100)
+    profile.write_text("{"); H._PROJECT_CONTEXT_CACHE=None
+    invalid=timed(lambda:H._query_project_context(api),10)
+    H._PROJECT_CONTEXT_CACHE=None
+    old=os.environ.get("LOOM_NODE"); os.environ["LOOM_NODE"]=str(base/"missing-node")
+    unavailable=timed(lambda:H._query_project_context(api),10)
+    if old is None: os.environ.pop("LOOM_NODE",None)
+    else: os.environ["LOOM_NODE"]=old
+    print(json.dumps({"environment":{"platform":platform.platform(),"python":platform.python_version(),"node":subprocess.run(["node","--version"],capture_output=True,text=True).stdout.strip()},"separate_process_per_turn":per_turn,"initial_registered_query":initial,"hermes_cache_hit":cache_hit,"invalid_query":invalid,"node_unavailable":unavailable},sort_keys=True))

@@ -3,9 +3,18 @@
 
 const { existsSync, readFileSync, realpathSync, statSync, mkdirSync, writeFileSync, renameSync, copyFileSync } = require("node:fs");
 const { execFileSync } = require("node:child_process");
+const { createHash } = require("node:crypto");
 const { resolve, dirname, relative, isAbsolute, sep } = require("node:path");
 
 const PROFILE = [".loom", "workspace.json"];
+const GIT_TIMEOUT_MS = 5000;
+
+function sanitizeError(error, limit = 300) {
+  const text = String(error?.message || error || "unknown error").replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim();
+  return text.length > limit ? `${text.slice(0, limit - 1)}…` : text;
+}
+
+function identityHash(value) { return createHash("sha256").update(value).digest("hex"); }
 
 function profilePath(root) { return resolve(root, ...PROFILE); }
 
@@ -17,7 +26,7 @@ function readWorkspaceProfile(root) {
     const normalized = validateWorkspaceProfile(value, root);
     return { ...normalized, root: resolve(root), profilePath: file };
   } catch (error) {
-    return { invalid: true, root: resolve(root), profilePath: file, error: error.message };
+    return { invalid: true, root: resolve(root), profilePath: file, error: sanitizeError(error) };
   }
 }
 
@@ -135,7 +144,7 @@ function validateWorkspaceRepositories(profile) {
     if (!existsSync(resolve(path, ".git"))) throw new Error(`repository is not a Git root: ${repo.path}`);
     if (repo.remote !== undefined) {
       let actual;
-      try { actual = execFileSync("git", ["-C", path, "config", "--get", "remote.origin.url"], { encoding: "utf8" }).trim(); }
+      try { actual = execFileSync("git", ["-C", path, "config", "--get", "remote.origin.url"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "pipe", "ignore"] }).trim(); }
       catch { throw new Error(`cannot read Git remote: ${repo.path}`); }
       if (actual !== repo.remote) throw new Error(`Git remote mismatch for ${repo.path}`);
     }
@@ -149,7 +158,7 @@ function dirtyRepositories(profile) {
   for (const repo of profile.repositories) {
     const path = resolve(profile.root, repo.path);
     try {
-      const status = execFileSync("git", ["-C", path, "status", "--porcelain"], { encoding: "utf8" });
+      const status = execFileSync("git", ["-C", path, "status", "--porcelain"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS });
       if (status.trim()) changed.push(repo.path);
     } catch (error) {
       changed.errors.push({ path: repo.path, error: String(error.stderr || error.message).trim() });
@@ -170,7 +179,7 @@ function workspaceRoot(start) {
 
 function findGitRoot(start) {
   try {
-    return resolve(execFileSync("git", ["-C", resolve(start), "rev-parse", "--show-toplevel"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim());
+    return resolve(execFileSync("git", ["-C", resolve(start), "rev-parse", "--show-toplevel"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "pipe", "ignore"] }).trim());
   } catch {
     return null;
   }
@@ -186,6 +195,42 @@ function findProjectRoot(start) {
     if (parent === dir) return agentsRoot || resolve(start || process.cwd());
     dir = parent;
   }
+}
+
+function projectContextCacheEvidence(start, context) {
+  const evidence = [];
+  let dir = resolve(start || process.cwd());
+  while (true) {
+    evidence.push({ type: "file", path: profilePath(dir) });
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  if (context?.mode === "workspace") {
+    for (const repo of context.profile.repositories) {
+      if (repo.remote !== undefined) evidence.push({
+        type: "git-remote",
+        repo: resolve(context.ownerRoot, repo.path),
+        expectedHash: identityHash(repo.remote),
+      });
+    }
+  }
+  return evidence;
+}
+
+function projectContextQuery(start) {
+  const context = projectContext(start);
+  return {
+    mode: context.mode,
+    ...(context.invalid ? { invalid: true } : {}),
+    ownerRoot: context.ownerRoot,
+    artifactRoot: context.artifactRoot,
+    executionRoots: context.executionRoots,
+    profilePath: context.profilePath || null,
+    error: context.error ? sanitizeError(context.error) : null,
+    nonGitOwner: context.nonGitOwner,
+    cacheEvidence: projectContextCacheEvidence(start, context),
+  };
 }
 
 function projectContext(start) {
@@ -235,4 +280,18 @@ function workspacePointers(profile) {
   return pointers;
 }
 
-module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextPointers, nonGitOwnerWarning };
+module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextQuery, projectContextPointers, nonGitOwnerWarning };
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  if (args[0] !== "--project-context" || args.length > 2) {
+    process.stderr.write("usage: node hooks/workspace.cjs --project-context [cwd]\n");
+    process.exit(2);
+  }
+  try {
+    process.stdout.write(`${JSON.stringify(projectContextQuery(args[1] || process.cwd()))}\n`);
+  } catch (error) {
+    process.stderr.write(`${sanitizeError(error)}\n`);
+    process.exit(1);
+  }
+}

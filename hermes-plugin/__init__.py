@@ -8,7 +8,10 @@ Registers skills, slash commands, and lifecycle hooks:
 Install: symlink or copy this directory to ~/.hermes/plugins/loom/
 """
 
+import hashlib
+import json
 import os
+import subprocess
 from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
@@ -17,7 +20,7 @@ MANAGED_BLOCK_VERSION = "v1.1.0"
 
 WORKSPACE_DISCIPLINE = """
 
-Workspace profiles are opt-in. If `.loom/workspace.json` is present, the meta-repo owns workspace context and invalid profiles must be repaired before state work; registered service repositories remain separate roots.
+Workspace profiles are opt-in. Canonical Node project context owns workspace validation and membership; Hermes only forwards its verdict.
 """
 
 DISCIPLINE = """# Loom universal invariants (pre-turn guard)
@@ -44,27 +47,72 @@ SKILL_NAMES = [
 COMMAND_NAMES = SKILL_NAMES
 
 
-def _workspace_profile():
-    """Best-effort workspace context discovery; scope enforcement is not Hermes-owned."""
-    for parent in [Path.cwd(), *Path.cwd().parents][:20]:
-        profile = parent / ".loom" / "workspace.json"
-        if not profile.exists():
-            continue
+def _safe_error(error, limit=300):
+    text = " ".join(str(error or "unknown error").split())
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def _evidence_value(item):
+    if item.get("type") == "file":
         try:
-            import json
-            value = json.loads(profile.read_text())
-            if not isinstance(value, dict) or not value.get("workspace_id"):
-                return {"invalid": True, "path": profile}
-            repos = value.get("repositories")
-            return {"root": parent, "path": profile, "id": value["workspace_id"], "repos": len(repos) if isinstance(repos, list) else 0, "guidance_only": True}
-        except Exception:
-            return {"invalid": True, "path": profile}
-    return None
+            stat = Path(item["path"]).stat()
+            return (stat.st_mtime_ns, stat.st_size)
+        except OSError:
+            return None
+    if item.get("type") == "git-remote":
+        try:
+            result = subprocess.run(
+                ["git", "-C", item["repo"], "config", "--get", "remote.origin.url"],
+                capture_output=True, text=True, timeout=5, check=False,
+            )
+            if result.returncode:
+                return ("error", result.returncode)
+            return hashlib.sha256(result.stdout.strip().encode()).hexdigest()
+        except (OSError, subprocess.SubprocessError):
+            return ("error", None)
+    return ("unsupported", item.get("type"))
 
 
-def _find_project_root():
-    """Safest local-only delivery root until Issue 03 supplies the canonical bridge."""
-    cwd = Path.cwd()
+_PROJECT_CONTEXT_CACHE = None
+
+
+def _query_project_context(cwd=None):
+    """Query canonical Node once, reusing valid context while typed evidence matches."""
+    global _PROJECT_CONTEXT_CACHE
+    cwd = Path(cwd or Path.cwd()).resolve()
+    if _PROJECT_CONTEXT_CACHE and _PROJECT_CONTEXT_CACHE["cwd"] == cwd:
+        if all(_evidence_value(item) == value for item, value in _PROJECT_CONTEXT_CACHE["evidence"]):
+            return _PROJECT_CONTEXT_CACHE["context"]
+
+    node = os.environ.get("LOOM_NODE", "node")
+    query = PLUGIN_DIR.parent / "hooks" / "workspace.cjs"
+    try:
+        result = subprocess.run(
+            [node, str(query), "--project-context", str(cwd)],
+            capture_output=True, text=True, timeout=5, check=False,
+        )
+        if result.returncode:
+            raise RuntimeError(f"Node query exited {result.returncode}")
+        context = json.loads(result.stdout)
+        required = {"mode", "ownerRoot", "artifactRoot", "executionRoots", "cacheEvidence"}
+        if not required.issubset(context) or not isinstance(context["cacheEvidence"], list):
+            raise RuntimeError("Node query returned an incomplete project context")
+    except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as error:
+        # loom: no persistent child process; measured startup is paid once per cwd/session.
+        # Upgrade only if evidence shows session startup latency matters.
+        return {"mode": "unavailable", "error": _safe_error(error), "localRoot": str(_find_project_root(cwd))}
+
+    evidence = tuple((item, _evidence_value(item)) for item in context.pop("cacheEvidence"))
+    if context.get("invalid"):
+        _PROJECT_CONTEXT_CACHE = None
+    else:
+        _PROJECT_CONTEXT_CACHE = {"cwd": cwd, "evidence": evidence, "context": context}
+    return context
+
+
+def _find_project_root(start=None):
+    """Safest local-only root when the canonical query is unavailable."""
+    cwd = Path(start or Path.cwd()).resolve()
     for parent in [cwd, *cwd.parents]:
         if any((parent / marker).exists() for marker in ("AGENTS.md", ".loom", ".git")):
             return parent
@@ -383,13 +431,19 @@ def _anomaly_alert(root: Path, urgent_only: bool = False) -> str:
     return "\n\n# Loom alert\n" + "\n".join(f"- {a}" for a in alerts)
 
 
-def _build_session_guidance(root: Path, workspace=None) -> str:
-    """Topology-quiet ordinary delivery; profile semantics remain guidance-only."""
-    if workspace and workspace.get("invalid"):
+def _build_session_guidance(root: Path, context=None) -> str:
+    """Topology-quiet ordinary delivery from canonical Node context."""
+    if context and context.get("invalid"):
         return (
             "# Loom session context\n\n"
-            f"Invalid workspace profile: {workspace['path']}\n"
-            "Workspace behavior is disabled until repaired. Ordinary project work remains available; explicit Loom work must stop."
+            f"Invalid workspace profile: {context.get('profilePath')} ({context.get('error')})\n"
+            "Repair the profile and retry. State scanning is skipped; ordinary project work remains available, but explicit Loom work must stop."
+        )
+    if context and context.get("mode") == "unavailable":
+        return (
+            "# Loom session context\n\n"
+            f"Loom project-context query unavailable: {context.get('error')}. Ordinary work remains available. "
+            "Loom state delivery is limited to the local project and explicit Loom work must stop until Node/query access is restored."
         )
     lines = ["# Loom session context"]
     agents = root / "AGENTS.md"
@@ -416,8 +470,9 @@ def register(ctx):
     # --- Hook: session start (one-shot generic safety/version guidance) ---
     def on_session_start(**kwargs):
         try:
-            workspace = _workspace_profile()
-            return _build_session_guidance(_find_project_root(), workspace)
+            context = _query_project_context()
+            root = Path(context.get("artifactRoot") or context.get("localRoot") or _find_project_root())
+            return _build_session_guidance(root, context)
         except Exception:
             return None
 
@@ -426,15 +481,18 @@ def register(ctx):
     # --- Hook: pre_llm_call (per-turn invariants + role context + anomaly alert) ---
     def pre_llm_hook(messages=None, **kwargs):
         role = os.environ.get("LOOM_ROLE", "").lower()
-        workspace = _workspace_profile()
+        context = _query_project_context()
         ctx_text = DISCIPLINE + WORKSPACE_DISCIPLINE
-        if workspace and workspace.get("invalid"):
-            ctx_text += f"\n\n# Loom workspace error\nInvalid profile: {workspace['path']}\nRepair it before reading or writing state."
+        if context.get("invalid"):
+            ctx_text += f"\n\n# Loom workspace error\nInvalid profile: {context.get('profilePath')} ({context.get('error')})\nRepair it before reading or writing state; explicit Loom work must stop."
+        elif context.get("mode") == "unavailable":
+            ctx_text += f"\n\n# Loom bridge limitation\nProject-context query unavailable: {context.get('error')}. Ordinary work remains available; explicit Loom must stop. Urgent alerts are local-only."
         if role in ROLES:
             ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
         try:
-            if not (workspace and workspace.get("invalid")):
-                ctx_text += _anomaly_alert(_find_project_root(), urgent_only=True)
+            if not context.get("invalid"):
+                alert_root = Path(context.get("artifactRoot") or context.get("localRoot"))
+                ctx_text += _anomaly_alert(alert_root, urgent_only=True)
         except Exception:
             pass  # alert is best-effort — never break a turn over it
         return {"context": ctx_text}
@@ -454,6 +512,11 @@ def register(ctx):
 
         def make_handler(p):
             def handler(args, **kwargs):
+                context = _query_project_context()
+                if context.get("invalid"):
+                    return f"BLOCKED: invalid workspace profile {context.get('profilePath')}: {context.get('error')}. Repair it before explicit Loom work."
+                if context.get("mode") == "unavailable":
+                    return f"BLOCKED: canonical Loom project context is unavailable: {context.get('error')}"
                 return p.read_text() if p.exists() else f"Skill {p.stem} not found"
             return handler
 

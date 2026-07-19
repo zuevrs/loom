@@ -25,6 +25,6 @@
     "discipline"
   ],
   "scripts": {
-    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs"
+    "test": "python3 -m unittest discover -s tests -p '*hermes*bridge*.py' && node --test tests/*hermes*bridge*.test.mjs && node tests/hooks.test.mjs && node tests/workspace.test.mjs"
   }
 }
