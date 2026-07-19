@@ -1,7 +1,7 @@
 // loom: explicit multi-repo workspace profile support. Repo-only mode remains the default.
 "use strict";
 
-const { existsSync, readFileSync, realpathSync, statSync, readdirSync } = require("node:fs");
+const { existsSync, readFileSync, realpathSync, statSync, readdirSync, mkdirSync, writeFileSync, renameSync, copyFileSync } = require("node:fs");
 const { execFileSync } = require("node:child_process");
 const { createHash } = require("node:crypto");
 const { resolve, dirname, relative, join } = require("node:path");
@@ -69,6 +69,27 @@ function validateWorkspaceProfile(value, root) {
   });
   if (new Set(context_paths.map((path) => path.toLowerCase())).size !== context_paths.length) throw new Error("context_paths must not contain duplicates");
   return { workspace_id: value.workspace_id, repositories, ...(value.context_paths !== undefined ? { context_paths } : {}) };
+}
+
+function writeWorkspaceProfile(value, root) {
+  const workspaceRoot = resolve(root);
+  const normalized = validateWorkspaceProfile(value, workspaceRoot);
+  const directory = resolve(workspaceRoot, ".loom");
+  mkdirSync(directory, { recursive: true });
+  const file = profilePath(workspaceRoot);
+  const content = `${JSON.stringify({ workspace_id: normalized.workspace_id, repositories: normalized.repositories, ...(normalized.context_paths ? { context_paths: normalized.context_paths } : {}) }, null, 2)}\n`;
+  if (existsSync(file) && readFileSync(file, "utf8") === content) return { changed: false, profilePath: file, backupPath: null, profile: { ...normalized, root: workspaceRoot, profilePath: file } };
+  const backupPath = existsSync(file) ? `${file}.bak` : null;
+  if (backupPath) copyFileSync(file, backupPath);
+  const temporary = `${file}.${process.pid}.tmp`;
+  try {
+    writeFileSync(temporary, content, { encoding: "utf8", mode: 0o600 });
+    renameSync(temporary, file);
+  } catch (error) {
+    try { if (existsSync(temporary)) require("node:fs").rmSync(temporary, { force: true }); } catch {}
+    throw error;
+  }
+  return { changed: true, profilePath: file, backupPath, profile: { ...normalized, root: workspaceRoot, profilePath: file } };
 }
 
 function findWorkspace(start) {
@@ -249,4 +270,4 @@ function workspacePointers(profile) {
   ];
 }
 
-module.exports = { profilePath, readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, validateTaskManifest, freezeTaskManifest, canonicalProfile, profileFingerprint, canonicalManifest, repositoryState, unexpectedGitRoots, changedRepositories, allowedRepositoryPaths, findWorkspace, workspaceState, workspaceRoot, workspacePointers };
+module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, validateTaskManifest, freezeTaskManifest, canonicalProfile, profileFingerprint, canonicalManifest, repositoryState, unexpectedGitRoots, changedRepositories, allowedRepositoryPaths, findWorkspace, workspaceState, workspaceRoot, workspacePointers };

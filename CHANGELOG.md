@@ -6,11 +6,30 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [0.27.0] - 2026-07-19
+
+### Highlights
+
+- **Agent-driven workspace setup.** `/loom setup workspace` now inventories a multi-repo folder, presents a compact proposal, asks once for confirmation, and writes the validated workspace profile without requiring users to run setup scripts manually.
+
+### Safety changes
+
+- Workspace inventory is read-only and depth-bounded; it reports branch, clean/dirty state, remotes, nested or symlinked Git roots, and errors without reading service source.
+- Applying setup requires a materialized confirmed profile. Direct confirmation without that profile is rejected, and profile replacement is atomic with one previous-version backup on updates.
+
+### Migration steps
+
+- Existing workspace profiles remain valid. New workspaces can start from the workspace root with `/loom setup workspace`.
+
+### Adapter impacts
+
+- OMP live evidence covers both proposal and confirmed apply paths. Other hosts consume the same unified skill and deterministic setup utilities.
+
 ## [0.26.0] - 2026-07-18
 
 ### Highlights
 
-- **Opt-in multi-repo workspace foundation.** A validated `.loom/workspace.json` profile keeps shared Loom context and task records in a meta-repo while preserving canonical one-Git-repository/one-Loom mode by default.
+- **Opt-in multi-repo workspace foundation.** A validated `.loom/workspace.json` profile can keep shared Loom context and task records in a meta-repo while preserving the canonical one-Git-repository/one-Loom mode by default.
 - **Daytime workspace scope contract.** Confirmed `targets` and read-only `context` boundaries support cross-service work with per-repository verification and runner-neutral handoff.
 
 ### Safety changes
@@ -1083,7 +1102,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/zuevrs/loom/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/zuevrs/loom/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/zuevrs/loom/compare/v0.25.0...v0.25.1
 [0.25.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v0.25.0

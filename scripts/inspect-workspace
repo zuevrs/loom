@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+// loom: read-only bounded workspace inventory; emits stable JSON.
+import { existsSync, lstatSync, readdirSync, realpathSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { resolve, relative, sep } from "node:path";
+
+const [rootArg, flag] = process.argv.slice(2);
+if (!rootArg || (flag && flag !== "--json")) {
+  console.error("usage: inspect-workspace <root> [--json]");
+  process.exit(2);
+}
+const root = resolve(rootArg);
+if (!existsSync(root) || !lstatSync(root).isDirectory()) {
+  console.error(`workspace root is not a directory: ${rootArg}`);
+  process.exit(1);
+}
+
+const skip = new Set([".git", ".loom", ".agents", ".cursor", ".omp", "node_modules", "build", "dist", "vendor"]);
+const roots = [];
+const symlinked = [];
+const errors = [];
+const visited = new Set();
+
+function rel(path) { return relative(root, path).split(sep).join("/") || "."; }
+function git(path, args) {
+  try { return execFileSync("git", ["-C", path, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim(); }
+  catch { return null; }
+}
+function record(path, isSymlink = false) {
+  const pathName = rel(path);
+  const branch = git(path, ["branch", "--show-current"]);
+  const status = git(path, ["status", "--porcelain"]);
+  const remote = git(path, ["config", "--get", "remote.origin.url"]);
+  const state = { path: pathName, branch, clean: status === null ? null : !status, remote };
+  if (isSymlink) symlinked.push({ ...state, resolved_path: rel(realpathSync(path)) });
+  else roots.push(state);
+}
+function walk(dir, depth, ancestorGit = false) {
+  const real = realpathSync(dir);
+  if (visited.has(real)) return;
+  visited.add(real);
+  let entries;
+  try { entries = readdirSync(dir, { withFileTypes: true }); }
+  catch (error) { errors.push({ path: rel(dir), error: error.message }); return; }
+  for (const entry of entries) {
+    if (entry.name === ".git") continue;
+    const candidate = resolve(dir, entry.name);
+    if (entry.isSymbolicLink()) {
+      let resolved;
+      try { resolved = realpathSync(candidate); } catch (error) { errors.push({ path: rel(candidate), error: error.message }); continue; }
+      if (existsSync(resolve(resolved, ".git"))) symlinked.push({ path: rel(candidate), resolved_path: rel(resolved), branch: git(resolved, ["branch", "--show-current"]), clean: null, remote: git(resolved, ["config", "--get", "remote.origin.url"]) });
+      continue;
+    }
+    if (!entry.isDirectory()) continue;
+    let stat;
+    try { stat = lstatSync(candidate); } catch (error) { errors.push({ path: rel(candidate), error: error.message }); continue; }
+    if (depth >= 2) continue;
+    const hasGit = existsSync(resolve(candidate, ".git"));
+    if (hasGit) {
+      record(candidate);
+      if (ancestorGit) continue;
+      walk(candidate, depth + 1, true);
+      continue;
+    }
+    if (skip.has(entry.name) || entry.name.startsWith(".")) continue;
+    walk(candidate, depth + 1, ancestorGit);
+  }
+}
+
+if (existsSync(resolve(root, ".git"))) record(root);
+walk(root, 0, existsSync(resolve(root, ".git")));
+const allNested = [];
+for (const candidate of roots) {
+  const base = candidate.path === "." ? "" : `${candidate.path}/`;
+  for (const possible of roots) if (possible.path.startsWith(base) && possible.path !== candidate.path) allNested.push(possible.path);
+}
+const nestedSet = new Set(allNested);
+const gitRoots = roots.filter((item) => item.path !== "." && !nestedSet.has(item.path)).sort((a, b) => a.path.localeCompare(b.path));
+const unregistered = [...nestedSet].sort();
+const rootIsGit = existsSync(resolve(root, ".git"));
+const rootState = rootIsGit ? {
+  path: ".",
+  branch: git(root, ["branch", "--show-current"]),
+  clean: (() => { const status = git(root, ["status", "--porcelain"]); return status === null ? null : !status; })(),
+  remote: git(root, ["config", "--get", "remote.origin.url"]),
+} : null;
+const inventory = {
+  schema_version: 1,
+  root: ".",
+  root_is_git: rootIsGit,
+  root_git_state: rootState,
+  git_roots: gitRoots,
+  unregistered_git_roots: unregistered,
+  symlinked_git_roots: symlinked.sort((a, b) => a.path.localeCompare(b.path)),
+  warnings: [...(unregistered.length ? ["unregistered or nested Git roots require explicit profile confirmation"] : []), ...(symlinked.length ? ["symlinked Git roots are not proposed automatically"] : [])],
+  errors: errors.sort((a, b) => a.path.localeCompare(b.path)),
+};
+process.stdout.write(`${JSON.stringify(inventory, null, 2)}\n`);

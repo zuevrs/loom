@@ -26,7 +26,7 @@ const {
 } = require("./hooks/stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.26.0";
+const MANAGED_BLOCK_VERSION = "v0.27.0";
 
 const INVARIANTS = PRE_LLM;
 

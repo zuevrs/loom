@@ -69,7 +69,7 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 
 ## Multi-repo workspaces
 
-Loom remains `1 Git repository = 1 Loom` by default. For a parent directory containing independent service repositories, explicitly set up a workspace meta-repo and use `.loom/workspace.json`; see [`docs/workspaces.md`](docs/workspaces.md). This is opt-in and does not add Loom files to registered service repositories.
+Loom remains `1 Git repository = 1 Loom` by default. In a directory containing independent service repositories, run **`/loom setup workspace`**: the agent inventories the repositories, shows the proposed allowlist and warnings, asks once for confirmation, then safely creates `.loom/workspace.json`. This is opt-in and adds no Loom files to registered service repositories. See [`docs/workspaces.md`](docs/workspaces.md).
 
 ## Quick Start
 

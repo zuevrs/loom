@@ -10,13 +10,13 @@ disable-model-invocation: true
 
 One safe, idempotent project setup for persistent `.loom` pack/enforcement capability; internal invocation returns to its originating ritual.
 
-A **workspace setup** is an explicit opt-in branch for a parent meta-repo containing independent Git repositories. It never changes the canonical one-Git-repo/one-Loom default and never writes Loom artifacts into registered service repositories.
+A **workspace setup** is an explicit opt-in branch for a workspace folder containing independent Git repositories. It never changes the canonical one-Git-repo/one-Loom default and never writes Loom artifacts into registered service repositories.
 
 ## Inputs
 
 - Global Loom install on host (skills already available via plugin or host-native install)
 - Current repo state (`AGENTS.md`, `.loom/`)
-- For workspace setup: the user's explicit request, parent directory, and a read-only scan of bounded nested Git roots, remotes, and local docs/config
+- For workspace setup: the user's explicit request, workspace root, and JSON from `scripts/inspect-workspace <root> --json`
 
 ### Workspace profile
 
@@ -49,7 +49,7 @@ Relative repository paths must remain inside the workspace and must identify ind
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, these durable documents belong in the meta-repo; do not create them in a registered service repo.
+5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, these durable documents belong in the workspace root; do not create them in a registered service repo.
 6. Print summary: changed / checked-not-changed / warnings. Internal invocation returns to the originating route; direct Init may recommend Plan. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for recurring audits.
 7. If nothing needed: `No changes needed` + what was checked.
 
@@ -58,7 +58,7 @@ Relative repository paths must remain inside the workspace and must identify ind
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.26.0 -->
+<!-- loom:begin version=v0.27.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -101,12 +101,13 @@ Inside the lane:
 
 When the user explicitly asks to set up a multi-repo workspace:
 
-1. Read the bounded directory structure and identify nested Git roots, remotes, existing Loom artifacts, and obvious local documentation/config. Do not run service tests during setup.
-2. Show the exact meta-repo path, profile content, ignored service paths, and migration candidates.
-3. Ask for one bounded confirmation before `git init`, `.gitignore`, `.loom/workspace.json`, or migration writes. Do not create a remote, push, or commit.
-4. A valid workspace profile owns the workspace Loom context. If a registered service repo contains `.loom`, `CONTEXT.md`, `docs/adr/`, or a Loom-managed `AGENTS.md` block, report it and offer a separate migration plan; never delete or silently merge it.
-5. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init. A user may explicitly detach a service before using canonical repo-only Init.
-6. Workspace task artifacts and Verify records live in the meta-repo task pack or an approved external sidecar. Product service repos receive only product-facing changes.
+1. Treat the current workspace root as the scan root. If launched from a service Git-root, identify the intended parent only from explicit user context; do not silently create a local profile.
+2. Run the shared read-only inventory: `node scripts/inspect-workspace <root> --json`. It scans to bounded depth 2 and reports Git roots, clean/dirty counts, remotes, nested/unregistered roots, symlink roots, and errors.
+3. Show a compact summary and proposed current-schema profile (`workspace_id`, `repositories`, optional existing `context_paths`). Do not read service source or run service tests during setup.
+4. Ask for one bounded confirmation before writing. The unified setup branch delegates to `scripts/setup-workspace --confirm` and writes only `<workspace>/.loom/workspace.json` through the validated atomic writer; it does not initialize Git, create docs, commit, push, or migrate service artifacts.
+5. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, warn that artifacts are unversioned. If a registered service repo contains `.loom`, `CONTEXT.md`, `docs/adr/`, or a Loom-managed `AGENTS.md` block, report it and offer a separate migration plan; never delete or silently merge it.
+6. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init. A user may explicitly detach a service before using canonical repo-only Init.
+7. Workspace task artifacts and Verify records live in the workspace-root task pack or an approved external sidecar. Product service repos receive only product-facing changes.
 
 ## Hard stops
 

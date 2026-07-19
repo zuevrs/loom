@@ -69,7 +69,7 @@ After Verify APPROVE → write `## Verify` section, then set `Status: done`. Wor
 
 ### Workspace terms
 
-**Workspace mode**: An explicit opt-in profile for a parent meta-repo containing independent Git repositories. It does not change the canonical repository mode.
+**Workspace mode**: An explicit opt-in profile for a workspace directory containing independent Git repositories. It does not change the canonical repository mode.
 
 **Workspace profile**: `.loom/workspace.json`, the validated map of workspace identity, registered repository paths, expected remotes, and allowlisted context paths. It contains stable structure, not per-task write permissions.
 

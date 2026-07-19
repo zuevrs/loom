@@ -21,7 +21,7 @@ No workspace profile is needed. The repository remains one Git root and one Loom
 Use this when a parent directory contains independent service repositories and shared architecture work:
 
 ```text
-workspace-meta/              # optional separate meta-repo
+workspace/                    # ordinary folder or optional Git meta/root
 ├── .loom/workspace.json
 ├── .loom/<task>/            # workspace task artifacts
 ├── CONTEXT.md               # workspace-wide language
@@ -54,7 +54,7 @@ Task-specific write scope is not permanent profile configuration. Loom derives `
 
 ## Execution boundaries
 
-- The meta-repo owns workspace context, task artifacts, ADRs, and workspace Verify records.
+- The workspace root owns workspace context, task artifacts, ADRs, and workspace Verify records. It may be a Git repository, but Git is not required for setup.
 - Registered service repositories remain free of `.loom/`, Loom-managed `AGENTS.md` blocks, and workspace documentation.
 - A task may read several services and target one or more services. Expanding targets requires evidence and renewed confirmation.
 - Each target repository has its own branch, baseline, checks, and product commits. A workspace task links those records; it does not invent one cross-repo Git branch.
@@ -62,13 +62,13 @@ Task-specific write scope is not permanent profile configuration. Loom derives `
 
 ## Entry points
 
-- Start from the meta-repo/folder workspace when the affected service is not yet known. Loom reads the workspace map first and progressively expands context.
+- Start from the workspace root when the affected service is not yet known. Loom reads the workspace map first and progressively expands context.
 - Start from a service worktree as a shortcut when the task is known to be local. If a valid parent workspace profile is found, Loom can hand off to that workspace context without writing local Loom files.
 - If no profile is found, the service follows canonical repository mode.
 
 ## Data boundary
 
-Workspace profiles and reports must not contain secrets, credentials, raw sensitive payloads, or a full source snapshot. Evidence is redacted and minimal; sidecar ledgers retain metadata and paths rather than copied code.
+Workspace profiles and reports must not contain secrets, credentials, raw sensitive payloads, or a full source snapshot. If the workspace root is not Git, Loom warns that these artifacts are not versioned. Evidence is redacted and minimal; sidecar ledgers retain metadata and paths rather than copied code.
 
 
 ## Task manifest
@@ -92,3 +92,10 @@ Workspace records may store per-target base/head commits and Verify evidence wit
 ## Future unattended work
 
 Autonomous overnight improvement is a separate follow-up package. This release documents only the daytime workspace scope and runner boundary.
+## Setup flow
+
+Use the explicit unified entry `/loom setup workspace` from the workspace root. Loom runs the shared read-only inventory (`node scripts/inspect-workspace <root> --json`) to bounded depth 2, then shows a compact summary of paths, branches, clean/dirty state, remotes, nested/unregistered roots, symlinks, and errors.
+
+The proposed profile uses the existing schema: `workspace_id`, `repositories`, and only already-existing workspace `context_paths`. After the summary, the user may adjust the workspace ID or repository allowlist; the confirmed profile is passed to the writer before one confirmation. Nothing is written before confirmation. After confirmation, Loom atomically writes `.loom/workspace.json`, keeps one `.loom/workspace.json.bak` only when an existing profile changes, and stops. It does not initialize Git, create docs, migrate service artifacts, or begin a task.
+
+A bare `/loom` never auto-enables workspace mode. A service-root invocation may hand off to an existing parent profile, but setup remains an explicit action.

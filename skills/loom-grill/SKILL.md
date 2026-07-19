@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Workspace scope
 
-When an explicit `.loom/workspace.json` profile is present, treat the parent meta-repo as the Loom context owner. A service-root invocation hands off to that workspace context; it does not silently initialize or write service-local Loom state. Before any write, derive a task manifest with `targets` (repositories allowed to change) and `context` (read-only repositories), show it, and obtain bounded confirmation. Expand `targets` only after evidence and renewed confirmation; never write Loom artifacts into registered service repositories. Run the workspace preflight before apply and postflight after apply; postflight must reject changes in `context` or unlisted repositories. Without the profile, preserve canonical one-Git-repository/one-Loom behavior.
+When an explicit `.loom/workspace.json` profile is present, treat the workspace root as the Loom context owner. A service-root invocation hands off to that workspace context; it does not silently initialize or write service-local Loom state. Before any write, derive a task manifest with `targets` (repositories allowed to change) and `context` (read-only repositories), show it, and obtain bounded confirmation. Expand `targets` only after evidence and renewed confirmation; never write Loom artifacts into registered service repositories. Run the workspace preflight before apply and postflight after apply; postflight must reject changes in `context` or unlisted repositories. Without the profile, preserve canonical one-Git-repository/one-Loom behavior.
 
 ## Goal
 

@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+// loom: explicit workspace setup proposal/apply flow; confirmation is the --confirm boundary.
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve, basename } from "node:path";
+import { createRequire } from "node:module";
+const { writeWorkspaceProfile } = createRequire(import.meta.url)("../hooks/workspace.cjs");
+const [rootArg, ...flags] = process.argv.slice(2);
+const confirm = flags.includes("--confirm");
+const profileFlag = flags.findIndex((flag) => flag === "--profile");
+const profileFile = profileFlag >= 0 ? flags[profileFlag + 1] : null;
+const allowedFlags = new Set(["--confirm", "--profile"]);
+if (!rootArg || (profileFlag >= 0 && (!profileFile || profileFile.startsWith("--"))) || (confirm && !profileFile) || flags.some((flag, index) => !allowedFlags.has(flag) && !(profileFlag >= 0 && index === profileFlag + 1))) {
+  console.error("usage: setup-workspace <workspace-root> [--profile <profile.json>] [--confirm]");
+  process.exit(2);
+}
+const root = resolve(rootArg);
+try {
+  const inventory = JSON.parse(execFileSync(resolve(import.meta.dirname, "inspect-workspace"), [root, "--json"], { encoding: "utf8" }));
+  const existingContext = ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"].filter((file) => existsSync(join(root, file)));
+  const proposed = {
+    workspace_id: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "workspace",
+    repositories: inventory.git_roots.filter((repo) => repo.path !== ".").map((repo) => ({ path: repo.path, ...(repo.remote ? { remote: repo.remote } : {}) })),
+    ...(existingContext.length ? { context_paths: existingContext } : {}),
+  };
+  const profile = profileFile ? JSON.parse(readFileSync(resolve(profileFile), "utf8")) : proposed;
+  const proposal = { workspace_root: ".", profile, warnings: inventory.warnings, unregistered_git_roots: inventory.unregistered_git_roots, symlinked_git_roots: inventory.symlinked_git_roots, errors: inventory.errors };
+  if (!confirm) {
+    process.stdout.write(`${JSON.stringify({ mode: "proposal", ...proposal }, null, 2)}\n`);
+    process.exit(0);
+  }
+  const result = writeWorkspaceProfile(profile, root);
+  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath }, null, 2)}\n`);
+} catch (error) {
+  console.error(`workspace setup failed: ${error.message}`);
+  process.exit(1);
+}
