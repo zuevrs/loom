@@ -56,7 +56,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v0.24.10 -->
+<!-- loom:begin version=v2.0.0 -->
 ## Loom Base Rule
 
 Always keep Loom discipline and router active in context.

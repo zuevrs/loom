@@ -6,6 +6,24 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [2.0.0] - 2026-07-21
+
+Base reset to v0.24.0 skill contracts with selective improvements from later work.
+
+### Highlights
+
+- **Full ritual contracts restored.** Implement, Verify, Plan, and Grill keep v0.24 executable depth instead of v1.2 compressed stubs.
+- **Unified `/loom` entry.** Dispatcher routes to one ritual with one-hop handoffs and explicit workspace setup.
+- **Workspace support.** Opt-in `.loom/workspace.json`, inspect/setup scripts, and topology-aware session recovery without per-prompt tax on valid profiles.
+- **Host enforcement.** OMP goal-complete gate, Hermes explicit project-context bridge, and stop-gate ESCALATE handling.
+- **Grill quality.** v0.24.1–v0.24.10 patches plus tiered small-fix verify and research contract.
+
+### Migration steps
+
+- Reinstall or force-upgrade the Loom plugin, then restart the host process.
+- Run `node ~/.loom/scripts/install.mjs --doctor` after upgrade.
+- If you used v0.25–v1.1 tags, treat this as a clean major reset — reinstall from `main` at `v2.0.0`.
+
 ## [0.24.10] - 2026-07-15
 
 Correctness fixes for verification state and host project discovery.
@@ -1018,7 +1036,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.10...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v2.0.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
 [0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9
 [0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8
