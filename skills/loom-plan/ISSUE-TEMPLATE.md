@@ -4,7 +4,7 @@
 
 ## What to build
 
-{Vertical slice — end-to-end, independently shippable. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision. If a prototype branch informed this slice, add its pointer in `## Log` (branch + commit), never as merge target.}
+{One end-to-end, independently shippable vertical slice. A stable prototype-evidence pointer may be cited when the PRD provides one.}
 
 ## Acceptance criteria
 
@@ -13,7 +13,7 @@
 ## Verification command
 
 ```bash
-# Command that proves it works
+{Exactly one command. A non-zero exit or a missing expected result disproves completion.}
 ```
 
 ## Blocked by
@@ -24,7 +24,7 @@
 
 - ...
 
-<!-- Implement appends a Log section here AS WORK HAPPENS (a bullet per key decision, deviation, open question — crash-surviving trace, not an end-of-run summary). Verify appends its verdict section (every attempt — APPROVE and REJECT both). -->
+<!-- Implement appends concise decision/deviation/open-question Log bullets as work happens. Verify owns verdict write-back. -->
 
 ## Status
 
