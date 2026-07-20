@@ -63,7 +63,9 @@ This exchange begins after the canonical interview has resolved the shared decis
 ## Verification
 
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
-- Full `loom-verify` (spec + standards checkers) → use it only when the scope signal fires and the user chooses to continue in Grill. For typical Grill-sized changes, objective gates are sufficient.
+- After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical checker tiers in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md): mechanical typo/format → objective checks; semantic docs/config/code → fresh Standards checker; behavioral/risk or explicit contract → Spec + Standards; ambiguity escalates.
+- Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior requires a risk note and full Spec + Standards Verify even for a small fix.
+- Full `loom-verify` (spec + standards checkers) → use when the scope signal fires and the user chooses to continue in Grill, or when a risk trigger appears.
 
 ## Hard stops
 
