@@ -1,30 +1,36 @@
 """Loom plugin for Hermes Agent.
 
 Registers skills, slash commands, and lifecycle hooks:
-- on_session_start: context pointers + managed-block version check
+- on_session_start: generic safety guidance + managed-block version check
 - pre_llm_call: per-turn invariant injection (can return context)
 - subagent_start: loomRole detection for delegate_task children
 
 Install: symlink or copy this directory to ~/.hermes/plugins/loom/
 """
 
+import json
 import os
+import re
+import subprocess
 from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.24.10"
+MANAGED_BLOCK_VERSION = "v1.1.0"
 
-DISCIPLINE = """# Loom invariants (pre-turn guard)
+WORKSPACE_DISCIPLINE = """
 
-- Router is active: map intent → ritual skill before acting.
+Workspace profiles are opt-in. Hermes resolves canonical project context only at explicit Loom command boundaries.
+"""
+
+DISCIPLINE = """# Loom universal invariants (pre-turn guard)
+
+- Ordinary prompts remain normal agent mode.
+- Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
+- Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
 - Human gate: never auto-merge, never auto-publish.
-- One issue at a time; fresh session per issue for Implement.
-- Maker/checker separation: Implement never self-approves.
-- No verify digest → no done.
-- Work needing human judgement → ready-for-human at slicing time.
-- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
+- Existing .loom issues marked done require an APPROVE Verify signal.
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path)."""
 
 ROLES = {
     "maker": "Ship one vertical slice. Do not self-approve. Leave runnable check.",
@@ -34,17 +40,103 @@ ROLES = {
 }
 
 SKILL_NAMES = [
-    "loom-init", "loom-plan", "loom-grill",
+    "loom", "loom-init", "loom-plan", "loom-grill",
     "loom-implement", "loom-verify", "loom-tend",
 ]
 
-RITUAL_NAMES = [n for n in SKILL_NAMES if n.startswith("loom-")]
+COMMAND_NAMES = SKILL_NAMES
 
 
-def _find_project_root():
-    cwd = Path.cwd()
+def _blocked_project_context(context, limit=500):
+    """One-line explicit-command block message, capped at 500 characters."""
+    def clean(value, field_limit, keep_suffix=False):
+        text = re.sub(r"[\x00-\x1f\x7f]+", " ", str(value or "unknown"))
+        text = " ".join(text.split())
+        if len(text) <= field_limit:
+            return text
+        return ("…" + text[-(field_limit - 1):]) if keep_suffix else (text[: field_limit - 1] + "…")
+
+    error = clean(context.get("error"), 220)
+    if context.get("mode") == "invalid":
+        path = clean(context.get("profilePath"), 180, keep_suffix=True)
+        message = f"BLOCKED: invalid workspace profile {path}: {error}. Repair it before explicit Loom work."
+    else:
+        message = f"BLOCKED: canonical Loom project context is unavailable: {error}. Restore Node/query access and retry."
+    return clean(message, limit)
+
+
+def _validate_project_context(context):
+    """Allowlist and validate the canonical resolver's neutral wire shape."""
+    if not isinstance(context, dict):
+        raise RuntimeError("Node query returned a non-object project context")
+    mode = context.get("mode")
+    if type(mode) is not str or mode not in {"canonical", "workspace", "invalid"}:
+        raise RuntimeError("Node query returned an unsupported project-context mode")
+
+    base_keys = {"mode", "ownerRoot", "artifactRoot", "executionRoots", "profilePath", "error", "nonGitOwner"}
+    allowed_keys = base_keys | ({"invalid"} if mode == "invalid" else set())
+    if set(context) != allowed_keys:
+        raise RuntimeError("Node query returned unexpected project-context fields")
+
+    owner = context["ownerRoot"]
+    artifact = context["artifactRoot"]
+    roots = context["executionRoots"]
+    profile_path = context["profilePath"]
+    error = context["error"]
+    non_git_owner = context["nonGitOwner"]
+    if type(owner) is not str or not owner or type(artifact) is not str or not artifact:
+        raise RuntimeError("Node query returned invalid project roots")
+    if type(roots) is not list or any(type(root) is not str or not root for root in roots):
+        raise RuntimeError("Node query returned invalid execution roots")
+    if profile_path is not None and type(profile_path) is not str:
+        raise RuntimeError("Node query returned an invalid profile path")
+    if error is not None and type(error) is not str:
+        raise RuntimeError("Node query returned an invalid context error")
+    if type(non_git_owner) is not bool:
+        raise RuntimeError("Node query returned an invalid non-Git owner flag")
+
+    neutral = {
+        "mode": mode,
+        "ownerRoot": owner,
+        "artifactRoot": artifact,
+        "executionRoots": list(roots),
+        "profilePath": profile_path,
+        "error": error,
+        "nonGitOwner": non_git_owner,
+    }
+    if mode == "invalid":
+        if context["invalid"] is not True or roots:
+            raise RuntimeError("Node query returned an inconsistent invalid context")
+        if not profile_path or not error:
+            raise RuntimeError("Node query returned an incomplete invalid context")
+        neutral["invalid"] = True
+    elif profile_path is not None or error is not None:
+        raise RuntimeError("Node query returned inconsistent valid context details")
+    return neutral
+
+
+def _query_explicit_project_context(cwd=None):
+    """Run the canonical Node resolver once for an explicit Loom command."""
+    cwd = Path(cwd or Path.cwd()).resolve()
+    node = os.environ.get("LOOM_NODE", "node")
+    query = PLUGIN_DIR.parent / "hooks" / "workspace.cjs"
+    try:
+        result = subprocess.run(
+            [node, str(query), "--project-context", str(cwd)],
+            capture_output=True, text=True, timeout=5, check=False,
+        )
+        if result.returncode:
+            raise RuntimeError(result.stderr or f"Node query exited {result.returncode}")
+        return _validate_project_context(json.loads(result.stdout))
+    except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as error:
+        return {"mode": "unavailable", "error": str(error)}
+
+
+def _find_project_root(start=None):
+    """Safest local-only root when the canonical query is unavailable."""
+    cwd = Path(start or Path.cwd()).resolve()
     for parent in [cwd, *cwd.parents]:
-        if (parent / "AGENTS.md").exists():
+        if any((parent / marker).exists() for marker in ("AGENTS.md", ".loom", ".git")):
             return parent
     return cwd
 
@@ -323,7 +415,7 @@ ALERT_SCAN_CEILING = 200
 
 
 # loom: Python mirror of anomalyAlert in omp-extension.mjs / loom-pre-llm.cjs — keep in sync.
-def _anomaly_alert(root: Path) -> str:
+def _anomaly_alert(root: Path, urgent_only: bool = False) -> str:
     import re
 
     loom_dir = root / ".loom"
@@ -341,7 +433,7 @@ def _anomaly_alert(root: Path) -> str:
     for f in issue_files:
         text = re.sub(r"<!--[\s\S]*?-->", "", f.read_text())
         m = re.search(r"^Status:\s*(\S+)", text, re.M)
-        if m and m.group(1) == "needs-info":
+        if not urgent_only and m and m.group(1) == "needs-info":
             needs_info.append(f.name)
         if re.search(r"^Status:\s*done\b", text, re.M) and _latest_verify_verdict(text) != "APPROVE":
             unverified.append(f.name)
@@ -351,47 +443,31 @@ def _anomaly_alert(root: Path) -> str:
         alerts.append(f"done without APPROVE (stop gate will block): {', '.join(unverified)}")
     if needs_info:
         alerts.append(f"needs-info awaiting answers: {', '.join(needs_info)}")
-    lint = _lint_warnings(root)
-    if lint:
-        alerts.append(f"{len(lint)} .loom lint warning(s) — run `node stop-gate-logic.cjs --lint` (first: {lint[0]})")
+    if not urgent_only:
+        lint = _lint_warnings(root)
+        if lint:
+            alerts.append(f"{len(lint)} .loom lint warning(s) — run `node stop-gate-logic.cjs --lint` (first: {lint[0]})")
 
     if not alerts:
         return ""
     return "\n\n# Loom alert\n" + "\n".join(f"- {a}" for a in alerts)
 
 
-def _build_context_pointers(root: Path) -> str:
-    lines = ["# Loom session context", ""]
+def _build_session_guidance(root: Path) -> str:
+    """Topology-quiet ordinary delivery using only a locally provable root."""
+    lines = ["# Loom session context"]
     agents = root / "AGENTS.md"
     if agents.exists():
         import re
         content = agents.read_text()
-        m = re.search(r"<!-- loom:begin version=(\S+)", content)
-        drift = m and _version_drift_warning(
-            m.group(1),
-            MANAGED_BLOCK_VERSION,
+        match = re.search(r"<!-- loom:begin version=(\S+)", content)
+        drift = match and _version_drift_warning(
+            match.group(1), MANAGED_BLOCK_VERSION,
             "pull the ~/.loom clone (the hermes plugin is a symlink into it)",
         )
         if drift:
-            lines.append(drift)
-        lines.append(f"AGENTS.md: {agents}")
-
-    context = root / "CONTEXT.md"
-    if context.exists():
-        lines.append(f"CONTEXT.md: {context}")
-
-    loom_dir = root / ".loom"
-    if loom_dir.is_dir():
-        lines.append(f".loom/: {loom_dir}/")
-
-    if len(lines) == 2:
-        lines.append("No Loom project detected. Run loom-init to set up this project.")
-
-    snapshot = _state_snapshot(root)
-    if snapshot:
-        lines.extend(["", snapshot, "", "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."])
-    else:
-        lines.extend(["", "Keep discipline + router active. Reconstruct state from .loom/ before acting."])
+            lines.extend(["", drift])
+    lines.extend(["", "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent."])
     return "\n".join(lines)
 
 
@@ -401,11 +477,10 @@ def register(ctx):
         if skill_path.exists():
             ctx.register_skill(name, str(skill_path))
 
-    # --- Hook: session start (one-shot context pointers) ---
+    # --- Hook: session start (one-shot generic safety/version guidance) ---
     def on_session_start(**kwargs):
         try:
-            root = _find_project_root()
-            return _build_context_pointers(root)
+            return _build_session_guidance(_find_project_root())
         except Exception:
             return None
 
@@ -414,11 +489,13 @@ def register(ctx):
     # --- Hook: pre_llm_call (per-turn invariants + role context + anomaly alert) ---
     def pre_llm_hook(messages=None, **kwargs):
         role = os.environ.get("LOOM_ROLE", "").lower()
-        ctx_text = DISCIPLINE
+        ctx_text = DISCIPLINE + WORKSPACE_DISCIPLINE
         if role in ROLES:
             ctx_text += f"\n\n# Loom role: {role}\nConstraint: {ROLES[role]}"
         try:
-            ctx_text += _anomaly_alert(_find_project_root())
+            # ponytail: ordinary Hermes alerts are local-only. A registered service may
+            # miss workspace-owner alerts; explicit Loom commands resolve ownership.
+            ctx_text += _anomaly_alert(_find_project_root(), urgent_only=True)
         except Exception:
             pass  # alert is best-effort — never break a turn over it
         return {"context": ctx_text}
@@ -433,11 +510,14 @@ def register(ctx):
     ctx.register_hook("subagent_start", on_subagent_start)
 
     # --- Slash commands ---
-    for name in RITUAL_NAMES:
+    for name in COMMAND_NAMES:
         skill_path = SKILLS_DIR / name / "SKILL.md"
 
         def make_handler(p):
             def handler(args, **kwargs):
+                context = _query_explicit_project_context()
+                if context.get("mode") in {"invalid", "unavailable"}:
+                    return _blocked_project_context(context)
                 return p.read_text() if p.exists() else f"Skill {p.stem} not found"
             return handler
 

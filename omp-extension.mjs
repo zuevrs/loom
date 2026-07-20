@@ -1,9 +1,10 @@
 // loom — OMP/Pi extension.
 // Loaded via `omp` manifest in package.json.
 // session_start: context pointers. before_agent_start: invariants + role.
-// tool_call/tool_result: goal-completion gate. session_stop: verify gate.
+// tool_call: goal pre-commit gate. tool_execution_start: checker witness.
+// session_stop: general turn-stop verify gate.
 // Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
-// Loom planning in OMP is the /loom-plan command only.
+// Preferred entry is /loom; /loom-plan remains the precision planning route.
 //
 // Ref: can1357/oh-my-pi extensibility/extensions/types.ts
 
@@ -24,12 +25,11 @@ const {
   unwitnessedApproved,
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
+const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v0.24.10";
+const MANAGED_BLOCK_VERSION = "v1.1.0";
 
-const INVARIANTS = `${PRE_LLM}
-
-- Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum.`;
+const INVARIANTS = PRE_LLM;
 
 const ROLES = {
   maker: "Ship one vertical slice. Do not self-approve. Leave runnable check.",
@@ -40,7 +40,10 @@ const ROLES = {
 };
 
 function findProjectRoot() {
-  return witnessRoot(process.env.PI_PROJECT_DIR || process.cwd());
+  const start = process.env.PI_PROJECT_DIR || process.cwd();
+  const workspace = workspaceState(start);
+  if (workspace?.invalid) return workspace.root;
+  return workspaceRoot(start) || witnessRoot(start);
 }
 
 // Per-turn anomaly alert — prints ONLY when something is wrong, so discipline
@@ -73,6 +76,8 @@ function anomalyAlert(root) {
 
 function buildContextPointers(root) {
   const pointers = [];
+  const activeWorkspace = findWorkspace(root);
+  pointers.push(...workspacePointers(activeWorkspace));
 
   const agentsPath = resolve(root, "AGENTS.md");
   if (existsSync(agentsPath)) {
@@ -89,8 +94,10 @@ function buildContextPointers(root) {
     pointers.push(`AGENTS.md: ${agentsPath}`);
   }
 
-  const contextPath = resolve(root, "CONTEXT.md");
-  if (existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+  if (!activeWorkspace) {
+    const contextPath = resolve(root, "CONTEXT.md");
+    if (existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+  }
 
   const loomDir = resolve(root, ".loom");
   if (existsSync(loomDir)) {
@@ -115,8 +122,8 @@ export default function loomExtension(pi) {
         ...(snapshot ? ["", snapshot] : []),
         "",
         snapshot
-          ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
-          : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
+          ? "Keep the universal discipline active. The snapshot is advisory — read the issue files before acting; enter Loom routing only on explicit Loom/precision/selected-issue intent and read issue files before acting."
+          : "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
       ];
       process.stdout.write(lines.join("\n") + "\n");
     } catch {
@@ -128,7 +135,10 @@ export default function loomExtension(pi) {
   pi.on("before_agent_start", (event) => {
     try {
       const role = (process.env.LOOM_ROLE || "").toLowerCase();
-      let injection = INVARIANTS;
+      const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
+      let injection = workspace?.invalid
+        ? `# Loom workspace error\nWorkspace profile is invalid: ${workspace.profilePath} (${workspace.error})\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`
+        : INVARIANTS;
       if (role && ROLES[role]) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
         if (/-checker$/.test(role)) {
@@ -170,14 +180,8 @@ export default function loomExtension(pi) {
     return undefined;
   });
 
-  // Goal gate — maker/checker on the stop condition. In goal mode the agent
-  // declares its own success (`goal` tool, op "complete") after a self-audit;
-  // nothing else reviews that call, and session_stop fires too late to shape
-  // the completion report. Two hands, sized to certainty:
-  //  - block completion on done-without-APPROVE (never legitimate — the same
-  //    invariant session_stop enforces, applied to the stop-condition judge);
-  //  - leftover ready-for-agent issues get a note appended to the completion
-  //    result instead (a narrow goal legitimately leaves pack work behind).
+  // Goal completion persists native state before session_stop can correct the turn.
+  // Block that commit point while any issue is done without an APPROVE digest.
   pi.on("tool_call", (event) => {
     try {
       if (event.toolName !== "goal" || (event.input || {}).op !== "complete") return undefined;
@@ -193,31 +197,10 @@ export default function loomExtension(pi) {
     }
   });
 
-  pi.on("tool_result", (event) => {
-    try {
-      if (event.toolName !== "goal" || (event.input || {}).op !== "complete" || event.isError) {
-        return undefined;
-      }
-      const ready = findIssuesByStatus(findProjectRoot(), "ready-for-agent");
-      if (!ready.length) return undefined;
-      const names = ready.map((p) => p.split(/[\\/]/).pop()).join(", ");
-      return {
-        content: [
-          ...(event.content || []),
-          {
-            type: "text",
-            text: `Loom note: ready-for-agent issues remain (${names}). If they were in this goal's scope, resume instead of completing; either way name them in your final report.`,
-          },
-        ],
-      };
-    } catch {
-      return undefined;
-    }
-  });
-
   // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)
   pi.on("session_stop", () => {
     try {
+      const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
       const root = findProjectRoot();
       const blocked = findUnverifiedDoneIssues(root).sort();
       if (blocked.length > 0) {

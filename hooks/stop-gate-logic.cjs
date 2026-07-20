@@ -12,6 +12,7 @@ const {
 } = require("node:fs");
 const { join, basename, resolve, dirname } = require("node:path");
 const { tmpdir } = require("node:os");
+const { dirtyRepositories, workspaceRoot, workspaceState } = require("./workspace.cjs");
 const { createHash } = require("node:crypto");
 
 /** @returns {Record<string, string[]>} pack name → issue paths */
@@ -38,18 +39,25 @@ function collectIssuePaths(loomDir) {
   return Object.values(collectIssuesByPack(loomDir)).flat();
 }
 
-function latestVerifyVerdict(content) {
-  // HTML comments don't count — templates carry slot comments that mention the markers.
+function latestVerifySection(content) {
   const text = content.replace(/<!--[\s\S]*?-->/g, "");
-  const verdicts = text
+  return text
     .split(/^(?=## )/m)
     .filter((section) => /^## Verify\b/.test(section))
-    .flatMap((section) => [...section.matchAll(/^(APPROVE|REJECT)\b/gm)]);
-  return verdicts.length ? verdicts[verdicts.length - 1][1] : null;
+    .at(-1) || null;
+}
+
+function latestVerifyVerdict(content) {
+  const latest = latestVerifySection(content);
+  if (!latest) return null;
+  const verdicts = [...latest.matchAll(/^(APPROVE|REJECT|ESCALATE|ESCALATE_HUMAN)\b/gm)];
+  return verdicts.length ? verdicts.at(-1)[1] : null;
 }
 
 function isDoneWithoutVerify(content) {
   const text = content.replace(/<!--[\s\S]*?-->/g, "");
+  // Compatibility: legacy line-start APPROVE remains valid. The recommended
+  // dated digest is producer guidance, not a migration gate.
   return /^Status:\s*done\b/m.test(text) && latestVerifyVerdict(text) !== "APPROVE";
 }
 
@@ -223,19 +231,21 @@ function versionDriftWarning(block, installed, updateHint) {
 }
 
 // ---------------------------------------------------------------------------
-// Verify witness — anti-fake-APPROVE. Subagent hooks record checker spawns;
-// the gate warns when a fresh done+APPROVE has no witnessed checker run.
-// Warn-first: LOOM_WITNESS=strict blocks, CI/LOOM_WITNESS=off skips.
+// Verify witness — best-effort diagnostic telemetry. Subagent hooks record
+// checker spawns and may warn when a fresh done+APPROVE has no record.
+// Warn-first: LOOM_WITNESS=strict requests one bounded corrective lap.
 // ---------------------------------------------------------------------------
 
 const WITNESS_TTL_MS = 24 * 60 * 60 * 1000;
 
 /** Nearest ancestor with .loom/; nearest AGENTS.md only if no .loom exists. */
 function witnessRoot(start) {
-  const initial = resolve(start || process.cwd());
+  const state = workspaceState(start || process.cwd(), { validateRepositories: false });
+  const configured = workspaceRoot(start || process.cwd());
+  const initial = state?.invalid ? state.root : (configured || resolve(start || process.cwd()));
   let dir = initial;
   let agentsRoot = null;
-  for (let i = 0; i < 20; i++) {
+  while (true) {
     if (existsSync(join(dir, ".loom"))) return dir;
     if (!agentsRoot && existsSync(join(dir, "AGENTS.md"))) agentsRoot = dir;
     const parent = dirname(dir);
@@ -436,6 +446,12 @@ function stateSnapshot(root) {
       `working tree: ${dirty} uncommitted change(s) — possibly interrupted work; check git status/diff before picking an issue`
     );
   }
+  const workspace = workspaceState(root);
+  if (workspace?.valid) {
+    const services = dirtyRepositories(workspace.profile);
+    if (services.length) lines.push(`registered service working trees dirty: ${services.join(", ")} — possibly interrupted work; check each git status/diff`);
+    if (services.errors.length) lines.push(`registered service status unavailable: ${services.errors.map(({ path }) => path).join(", ")} — run git status in each service and repair Git state`);
+  }
 
   if (!lines.length) return null;
   return ["## .loom state", ...lines].join("\n");
@@ -473,10 +489,17 @@ function findUnverifiedDoneIssues(root) {
  * Exit 0 = allow, 1 = block. Invoked directly: `node stop-gate-logic.cjs [root]`.
  * Lint warnings go to stderr but never change the exit code. Witness check is
  * hook-only (opts.witness): warn by default, block under LOOM_WITNESS=strict,
- * skip under LOOM_WITNESS=off. CI invocations don't pass opts.witness — a fresh
+ * skip under LOOM_WITNESS=off. CI invocations do not pass opts.witness — a fresh
  * runner has no witness file and must not warn about it.
  */
 function check(root, opts = {}) {
+  const requestedRoot = root;
+  const workspace = workspaceState(requestedRoot);
+  if (workspace?.invalid) {
+    process.stderr.write(`BLOCKED: invalid workspace profile ${workspace.profilePath}: ${workspace.error}\n`);
+    return 1;
+  }
+  root = workspace?.valid ? workspace.root : requestedRoot;
   for (const w of lintWarnings(root)) {
     process.stderr.write(`LINT: ${w}\n`);
   }
@@ -499,7 +522,7 @@ function check(root, opts = {}) {
       process.stderr.write(
         `${strict ? "BLOCKED" : "WITNESS"}: ${listNames(unwitnessed)} approved recently ` +
           `but no checker sub-agent spawn was witnessed on this machine. ` +
-          `If loom-verify really ran, its checkers should have been spawned as sub-agents.\n`
+          `A witnessed spawn does not prove completion, quality, or independence.\n`
       );
       if (strict) code = 1;
     }
@@ -544,14 +567,22 @@ if (require.main === module) {
   // Claude Code / Codex Stop-hook contract: exit 2 = block (stderr fed back to
   // the model), exit 1 = non-blocking "hook error" toast. CI keeps exit 1.
   const finish = (payload) => {
-    const code = check(root, { witness: !args.includes("--ci") });
+    let gateError = false;
+    let code;
+    try {
+      code = check(root, { witness: !args.includes("--ci") });
+    } catch (error) {
+      process.stderr.write(`BLOCKED: stop gate could not complete safely: ${String(error?.message || error)}\n`);
+      gateError = true;
+      code = 1;
+    }
     if (!args.includes("--hook")) process.exit(code);
     // stop_hook_active = the model already continued once because this gate
     // blocked. Blocking again loops a headless run forever (observed: -p probe
     // burned laps until killed). One forced lap is the contract: block once
     // with a reason that names the fix, then let the stop through — the
     // warning is already in the transcript for the human gate.
-    if (code && payload && payload.stop_hook_active) process.exit(0);
+    if (code && !gateError && payload && payload.stop_hook_active) process.exit(0);
     process.exit(code ? 2 : 0);
   };
   if (process.stdin.isTTY) {
