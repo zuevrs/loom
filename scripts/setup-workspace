@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+// loom: explicit workspace setup proposal/apply flow; confirmation is the --confirm boundary.
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, rmSync, copyFileSync, readdirSync } from "node:fs";
+import { join, resolve, basename } from "node:path";
+import { createRequire } from "node:module";
+const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories } = createRequire(import.meta.url)("../hooks/workspace.cjs");
+const MANAGED_BLOCK = `<!-- loom:begin version=v1.2.0 -->
+## Loom Base Rule
+
+Ordinary work stays ordinary; explicit Loom intent uses the \`loom\` router.
+
+- Minimal discipline: understand the flow, then prefer YAGNI → reuse → platform/stdlib → installed dependency → minimum checked change; protect trust boundaries, security, data loss, accessibility, and explicit requirements.
+- Human gate: never auto-merge or auto-publish.
+- Durable writes require a bounded preview of exact targets/actions and base; changed repository, scope, target, action, or base requires renewed consent. Workspace owners keep Loom artifacts at the workspace root.
+- One selected issue per fresh maker context; respect blockers. Implement never self-approves; maker/checker roles stay separate.
+- \`Status: done\` requires a \`## Verify\` line starting with \`APPROVE\`; no APPROVE means no done.
+- Named-issue consent covers only issue-scoped changes, Log, Verify write-back, and approved status transition; no external action.
+- Project content follows repository language, then user language; ritual names and \`loom:\` markers stay English.
+
+Statuses: \`needs-triage\`, \`needs-info\`, \`ready-for-agent\`, \`ready-for-human\`, \`done\`, \`wontfix\`.
+<!-- loom:end -->`;
+
+function managedAgents(root) {
+  const path = join(root, "AGENTS.md");
+  if (!existsSync(path)) return { path, content: `${MANAGED_BLOCK}\n`, status: "will-create", changed: true };
+  const source = readFileSync(path, "utf8");
+  const begins = [...source.matchAll(/<!-- loom:begin(?: version=[^>]*)? -->/g)];
+  const ends = [...source.matchAll(/<!-- loom:end -->/g)];
+  if (begins.length !== ends.length || begins.length > 1 || (source.includes("<!-- loom:") && begins.length !== 1)) throw new Error("AGENTS.md has malformed or unpaired Loom managed delimiters; repair it before setup");
+  if (!begins.length) return { path, content: `${source.replace(/\n?$/, "\n")}\n${MANAGED_BLOCK}\n`, status: "will-create", changed: true };
+  const start = begins[0].index;
+  const end = ends[0].index + ends[0][0].length;
+  const content = source.slice(0, start) + MANAGED_BLOCK + source.slice(end);
+  return { path, content, status: content === source ? "already-correct" : "will-refresh", changed: content !== source };
+}
+
+function rootAssets(root, agents) {
+  const loom = join(root, ".loom");
+  return { agents: { path: "AGENTS.md", status: agents.status }, loom_packs: existsSync(loom) ? readdirSync(loom).filter((name) => name !== "workspace.json").sort() : [], context: existsSync(join(root, "CONTEXT.md")), adrs: existsSync(join(root, "docs", "adr")) };
+}
+
+function applyTransaction(root, agents, profile, preserveProfile = false) {
+  const agentsPath = join(root, "AGENTS.md");
+  const profilePath = join(root, ".loom", "workspace.json");
+  const oldAgents = existsSync(agentsPath) ? readFileSync(agentsPath, "utf8") : null;
+  const oldProfile = existsSync(profilePath) ? readFileSync(profilePath, "utf8") : null;
+  const backupPath = `${profilePath}.bak`;
+  const oldBackup = existsSync(backupPath) ? readFileSync(backupPath, "utf8") : null;
+  const profileContent = `${JSON.stringify({ workspace_id: profile.workspace_id, repositories: profile.repositories, ...(profile.context_paths ? { context_paths: profile.context_paths } : {}) }, null, 2)}\n`;
+  const agentsChanged = oldAgents !== agents.content;
+  const profileChanged = !preserveProfile && oldProfile !== profileContent;
+  if (!agentsChanged && !profileChanged) return { changed: false, profilePath, backupPath: null, agentsPath };
+  const temporary = [];
+  let createdDirectory = false;
+  try {
+    if (!existsSync(join(root, ".loom"))) { mkdirSync(join(root, ".loom"), { recursive: true }); createdDirectory = true; }
+    const stage = (path, content) => { const temp = `${path}.${process.pid}.tmp`; writeFileSync(temp, content, { encoding: "utf8", mode: 0o600 }); temporary.push(temp); return temp; };
+    const agentsTemp = agentsChanged ? stage(agentsPath, agents.content) : null;
+    const profileTemp = profileChanged ? stage(profilePath, profileContent) : null;
+    const resultBackupPath = oldProfile !== null && profileChanged ? backupPath : null;
+    if (resultBackupPath) copyFileSync(profilePath, resultBackupPath);
+    if (agentsTemp) renameSync(agentsTemp, agentsPath);
+    if (profileTemp) renameSync(profileTemp, profilePath);
+    return { changed: true, profilePath, backupPath: resultBackupPath, agentsPath, agents_changed: agentsChanged, profile_changed: profileChanged };
+  } catch (error) {
+    for (const temp of temporary) try { rmSync(temp, { force: true }); } catch {}
+    if (oldAgents === null) { if (agentsChanged) try { rmSync(agentsPath, { force: true }); } catch {} } else if (agentsChanged) try { writeFileSync(agentsPath, oldAgents); } catch {}
+    if (oldProfile === null) { if (profileChanged) try { rmSync(profilePath, { force: true }); } catch {} } else if (profileChanged) try { writeFileSync(profilePath, oldProfile); } catch {}
+    if (profileChanged) { try { if (oldBackup === null) rmSync(backupPath, { force: true }); else writeFileSync(backupPath, oldBackup); } catch {} }
+    if (createdDirectory) try { rmSync(join(root, ".loom"), { recursive: true, force: true }); } catch {}
+    throw error;
+  }
+}
+
+const args = process.argv.slice(2);
+const rootArg = args.shift();
+let confirm = false;
+let profileFile = null;
+let depth = null;
+let usageError = !rootArg;
+for (let index = 0; index < args.length && !usageError; index++) {
+  const flag = args[index];
+  if (flag === "--confirm" && !confirm) confirm = true;
+  else if ((flag === "--profile" || flag === "--depth") && args[index + 1] && !args[index + 1].startsWith("--")) {
+    if (flag === "--profile" && profileFile === null) profileFile = args[++index];
+    else if (flag === "--depth" && depth === null) depth = args[++index];
+    else usageError = true;
+  } else usageError = true;
+}
+if (usageError || (confirm && !profileFile) || (depth !== null && (!/^\d+$/.test(depth) || Number(depth) < 1))) {
+  console.error("usage: setup-workspace <workspace-root> [--depth <positive-integer>] [--profile <profile.json>] [--confirm]");
+  process.exit(2);
+}
+
+const root = resolve(rootArg);
+const agents = managedAgents(root);
+const canonical = (path) => path.replaceAll("\\", "/").toLowerCase();
+try {
+  const inspectArgs = [root, "--json", ...(depth === null ? [] : ["--depth", depth])];
+  const inventory = JSON.parse(execFileSync(resolve(import.meta.dirname, "inspect-workspace"), inspectArgs, { encoding: "utf8" }));
+  const existingContext = ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"].filter((file) => existsSync(join(root, file)));
+  const inventoryProfile = {
+    workspace_id: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "workspace",
+    repositories: inventory.git_roots.map((repo) => ({ path: repo.path.replaceAll("\\", "/"), ...(repo.remote ? { remote: repo.remote } : {}) })),
+    ...(existingContext.length ? { context_paths: existingContext } : {}),
+  };
+  const loadedProfile = readWorkspaceProfile(root);
+  let existingProfile = null;
+  let existingProfileError = null;
+  if (loadedProfile?.invalid) existingProfileError = loadedProfile.error;
+  else if (loadedProfile) {
+    existingProfile = {
+      workspace_id: loadedProfile.workspace_id,
+      repositories: loadedProfile.repositories,
+      ...(loadedProfile.context_paths !== undefined ? { context_paths: loadedProfile.context_paths } : {}),
+    };
+    try { validateWorkspaceRepositories(loadedProfile); }
+    catch (error) { existingProfileError = error.message; }
+  }
+  const proposed = existingProfileError ? inventoryProfile : existingProfile || inventoryProfile;
+  const profile = profileFile ? validateWorkspaceProfile(JSON.parse(readFileSync(resolve(profileFile), "utf8")), root) : proposed;
+  if (profile.repositories.length === 0) throw new Error(`no repositories found at depth ${depth ?? "2"}; retry /loom setup workspace with greater depth (or pass --depth <positive-integer> to this utility)`);
+  const proposedPaths = new Set((existingProfile || proposed).repositories.map((repo) => canonical(repo.path)));
+  const inventoryPaths = new Set(inventory.git_roots.map((repo) => canonical(repo.path)));
+  const inventoryDrift = existingProfile ? {
+    discovered_unregistered: inventory.git_roots.filter((repo) => !proposedPaths.has(canonical(repo.path))),
+    registered_missing_from_inventory: existingProfile.repositories.filter((repo) => !inventoryPaths.has(canonical(repo.path))).map((repo) => repo.path),
+  } : null;
+  const proposal = {
+    workspace_root: ".",
+    profile,
+    ...(existingProfileError ? { existing_profile_error: existingProfileError } : {}),
+    inventory: { root_is_git: inventory.root_is_git, root_git_state: inventory.root_git_state, repositories: inventory.git_roots, root_assets: rootAssets(root, agents) },
+    inventory_drift: inventoryDrift,
+    warnings: [...inventory.warnings, ...(!inventory.root_is_git ? [`Loom artifact owner is not a Git root: ${root}. Durable Loom writes have no owner-level Git safety net.`] : [])],
+    unregistered_git_roots: inventory.unregistered_git_roots,
+    symlinked_git_roots: inventory.symlinked_git_roots,
+    errors: inventory.errors,
+    root_write: { agents: agents.status, profile: existingProfile && JSON.stringify(profile) === JSON.stringify(existingProfile) ? "preserve-valid" : existingProfile ? "will-refresh" : "will-create" },
+  };
+  if (!confirm) {
+    process.stdout.write(`${JSON.stringify({ mode: "proposal", ...proposal }, null, 2)}\n`);
+    process.exit(0);
+  }
+  const validatedProfile = validateWorkspaceProfile(profile, root);
+  validateWorkspaceRepositories({ ...validatedProfile, root });
+  const result = applyTransaction(root, agents, validatedProfile, Boolean(existingProfile && !existingProfileError && JSON.stringify(validatedProfile) === JSON.stringify(existingProfile)));
+  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, profile: validatedProfile, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath, agents_path: result.agentsPath, agents_changed: result.agents_changed ?? false, profile_changed: result.profile_changed ?? false }, null, 2)}\n`);
+} catch (error) {
+  console.error(`workspace setup failed: ${error.message}`);
+  process.exit(1);
+}

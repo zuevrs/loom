@@ -15,5 +15,8 @@
     "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
     "extensions": ["./omp-extension.mjs"]
   },
-  "keywords": ["agent", "harness", "skills", "enforcement", "discipline"]
+  "keywords": ["agent", "harness", "skills", "enforcement", "discipline"],
+  "scripts": {
+    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs && node tests/hermes-project-context-bridge.test.mjs && node tests/changelog-boundary.test.mjs"
+  }
 }
