@@ -9,7 +9,7 @@ const PRE_LLM = `# Loom invariants (pre-turn guard)
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
 - Work needing human judgement → ready-for-human at slicing time.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).`;
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).`;
 
 /** Load-bearing phrases every discipline injection must include. */
 const REQUIRED_PHRASES = [

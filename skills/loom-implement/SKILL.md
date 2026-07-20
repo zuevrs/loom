@@ -49,11 +49,11 @@ The router sends small single-session fixes here without a PRD or issue file. Th
    **Surface the assumptions you do make.** The gap this guards: the PRD answered, but your reading of it isn't the only possible one. Before writing non-trivial code, print the numbered list — `Assumptions: 1. … — correct me now or I proceed with these` — to the chat (attended) or into `## Log` (unattended). An assumption surfaced costs one line; the same assumption discovered by a checker costs a REJECT lap. Trivial issues skip the block — an empty ritual is noise.
 4. Climb the **discipline ladder** — first rung that holds (below).
 5. Prefer deletion over addition.
-6. Mark intentional shortcuts with `loom:` comments (ceiling + upgrade path).
+6. Mark `loom:` comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 7. Make the smallest change satisfying acceptance criteria.
 8. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
    **Bug or perf regression instead of a feature?** Read [`DIAGNOSE.md`](DIAGNOSE.md) and follow it — feedback loop first, no hypothesis without a red-capable command.
-9. **Prototype spike:** timebox exploratory code; throw away or fold into scope before done.
+9. **Prototype spike:** timebox exploratory code; absorb validated decisions into the scoped slice. If the prototype answered a load-bearing question, keep it as primary-source evidence on a throwaway branch (`prototype/<slug>`) and record its pointer (branch + commit) in `## Log`. Never merge prototype branches.
 10. Leave **one runnable check** (proportional).
 11. Run issue verification commands; capture evidence in the issue comment **silent pass, loud fail** — a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim; pasting green walls buries the one line that matters. Climb the **verification ladder** as far as the repo allows: static (lint/typecheck) → tests → a smoke run of the touched behavior. Depth is proportional to the change — but skipping a rung the repo already has is a gap the checker will name.
 12. **Log as you go, not at the end.** Append a `## Log` bullet (before `## Status`) at the moment a key decision, deviation from the issue as written, or open question happens — 3–5 bullets per issue, not a diary. A session that dies mid-implement changes no status and writes no report; bullets written in the moment are the only trace the next session inherits. At this step: re-read and trim the Log, don't write it from memory. This is the maker's claim; the checker compares it against the actual diff. The shape:

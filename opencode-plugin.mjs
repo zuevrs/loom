@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 0.24.0
+// loom — OpenCode plugin adapter. Version: 0.24.10
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -30,7 +30,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 - Prefer minimal working change over broad rewrites.
 - No unrelated refactors while implementing an issue.
 - One issue at a time; respect blocker order.
-- Mark intentional shortcuts with loom: comments (ceiling + upgrade path).
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before done.
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.

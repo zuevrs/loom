@@ -38,15 +38,19 @@ function collectIssuePaths(loomDir) {
   return Object.values(collectIssuesByPack(loomDir)).flat();
 }
 
-function isDoneWithoutVerify(content) {
+function latestVerifyVerdict(content) {
   // HTML comments don't count — templates carry slot comments that mention the markers.
   const text = content.replace(/<!--[\s\S]*?-->/g, "");
-  if (!/^Status:\s*done\b/m.test(text)) return false;
-  // Verified = a real "## Verify" section whose digest line starts with APPROVE.
-  for (const section of text.split(/^(?=## )/m)) {
-    if (/^## Verify\b/.test(section) && /^APPROVE\b/m.test(section)) return false;
-  }
-  return true;
+  const verdicts = text
+    .split(/^(?=## )/m)
+    .filter((section) => /^## Verify\b/.test(section))
+    .flatMap((section) => [...section.matchAll(/^(APPROVE|REJECT)\b/gm)]);
+  return verdicts.length ? verdicts[verdicts.length - 1][1] : null;
+}
+
+function isDoneWithoutVerify(content) {
+  const text = content.replace(/<!--[\s\S]*?-->/g, "");
+  return /^Status:\s*done\b/m.test(text) && latestVerifyVerdict(text) !== "APPROVE";
 }
 
 function issueStatus(content) {
@@ -226,17 +230,19 @@ function versionDriftWarning(block, installed, updateHint) {
 
 const WITNESS_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** Nearest ancestor with .loom/ (else AGENTS.md, else start) — shared key for hooks + gate. */
+/** Nearest ancestor with .loom/; nearest AGENTS.md only if no .loom exists. */
 function witnessRoot(start) {
-  let dir = resolve(start || process.cwd());
+  const initial = resolve(start || process.cwd());
+  let dir = initial;
+  let agentsRoot = null;
   for (let i = 0; i < 20; i++) {
     if (existsSync(join(dir, ".loom"))) return dir;
-    if (existsSync(join(dir, "AGENTS.md"))) return dir;
+    if (!agentsRoot && existsSync(join(dir, "AGENTS.md"))) agentsRoot = dir;
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  return resolve(start || process.cwd());
+  return agentsRoot || initial;
 }
 
 function witnessPath(root) {
@@ -312,14 +318,9 @@ const listNames = (paths) =>
     .map((p) => basename(p))
     .join(", ") + (paths.length > 5 ? `, +${paths.length - 5} more` : "");
 
-/** Rework pending = the LAST ## Verify section's digest line is REJECT. */
+/** Rework pending = the latest effective Verify verdict is REJECT. */
 function lastVerdictIsReject(text) {
-  const verdicts = text
-    .split(/^(?=## )/m)
-    .filter((s) => /^## Verify\b/.test(s));
-  if (!verdicts.length) return false;
-  const last = verdicts[verdicts.length - 1];
-  return /^REJECT\b/m.test(last) && !/^APPROVE\b/m.test(last);
+  return latestVerifyVerdict(text) === "REJECT";
 }
 
 /** Uncommitted-change count, or 0 when not a repo / no git / too slow. */
@@ -511,6 +512,7 @@ module.exports = {
   findUnverifiedDoneIssues,
   findIssuesByStatus,
   isDoneWithoutVerify,
+  latestVerifyVerdict,
   stateSnapshot,
   lintWarnings,
   lastVerdictIsReject,
@@ -528,7 +530,8 @@ module.exports = {
 if (require.main === module) {
   const args = process.argv.slice(2);
   const lintOnly = args.includes("--lint");
-  const root = args.find((a) => !a.startsWith("--")) || process.cwd();
+  const explicitRoot = args.find((a) => !a.startsWith("--"));
+  const root = explicitRoot || witnessRoot(process.cwd());
   if (lintOnly) {
     const warnings = lintWarnings(root);
     for (const w of warnings) process.stdout.write(`LINT: ${w}\n`);

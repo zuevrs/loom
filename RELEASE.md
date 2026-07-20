@@ -74,9 +74,22 @@ git tag vX.Y.Z
 git push origin main --tags
 ```
 
-## 7) Verify
+## 7) Create GitHub Release
+
+```bash
+gh release create vX.Y.Z --title "vX.Y.Z — <short title>" --notes "<changelog body>" --latest
+```
+
+Include an upgrade section at the bottom of notes:
+```
+### Upgrade
+omp plugin install git:github.com/zuevrs/loom --force
+```
+
+## 8) Verify
 
 1. `git rev-parse --short HEAD`
 2. `git rev-parse --short vX.Y.Z`
 3. Confirm both hashes match.
-4. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md) checklist (maintainer ledger).
+4. `gh release view vX.Y.Z` — confirm Latest.
+5. Complete [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md) checklist (maintainer ledger).

@@ -1,6 +1,6 @@
 ---
 name: loom-plan
-description: Convert an idea into an executable PRD and issue pack. Use when scope is non-trivial, multi-session, or inbound/underspecified. Not for freeform brainstorming with no docs wanted (loom-grill) or a small ready-to-build fix (loom-implement).
+description: Convert an idea into an executable PRD and issue pack. Use when scope is non-trivial, multi-session, or inbound/underspecified. Not for investigate/explore/debug sessions with undefined scope (loom-grill) or a small ready-to-build fix (loom-implement).
 disable-model-invocation: true
 ---
 

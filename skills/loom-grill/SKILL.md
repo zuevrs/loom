@@ -1,6 +1,6 @@
 ---
 name: loom-grill
-description: Investigate, decide, act — disciplined exploration that enacts its findings. Not for planning buildable work with defined scope (that is loom-plan).
+description: Investigate, decide, act — disciplined exploration that materializes its findings. Not for planning buildable work with defined scope (that is loom-plan).
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Goal
 
-Investigate a question, resolve it through disciplined interview, then enact findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues). Covers both "think this through" and "debug/fix this" when the user has no pre-defined scope.
+Investigate a question, resolve it through disciplined interview, then materialize findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues). Covers both "think this through" and "debug/fix this" when the user has no pre-defined scope.
 
 ## Inputs
 
@@ -24,28 +24,17 @@ Investigate a question, resolve it through disciplined interview, then enact fin
 
 ## Process
 
-1. **Confirm the topic** in one sentence; if the topic touches the repo, explore code/docs first — *facts* are looked up, *decisions* are put to the user. Topic hinges on external facts (a library, an API, a spec)? Research **primary sources** with the host's tools — delegate to a background/sub-agent when the host has one (pass `loomRole: "researcher"` in spawn data).
-2. **Interview relentlessly** — same discipline as Plan grill:
-   - **One question at a time.** Never batch; each answer branches the next.
-   - **Resolve decision dependencies in order.** When one open question depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the grill will re-litigate.
-   - **Recommend an answer** — which option you'd pick and why, listed first.
-   - **Never invent a load-bearing decision silently.** If you would otherwise assume something — ask, or surface it as an explicit assumption for the user to confirm.
-   - **Start broad, then narrow**: problem, context, constraints — then push edges and trade-offs one-by-one.
-   - **Probe for unstated constraints** — the "well obviously…" answer is the one never said. Offer a concrete option the user would reject; the rejection teaches more than an open question.
-   - **Challenge fuzzy language** — propose precise terms. Update `CONTEXT.md` inline the moment a term resolves (before the next question — never batch writes).
-   - **Facts vs decisions**: a fact exploration can find — look it up. A decision (intent, preference, scope, trade-off) — put to the user, wait for the answer. Exploration never stands in for the user's side of a decision.
-   - **Cross-reference code.** If the user states how something works, check the code agrees; surface any contradiction.
-   - **The interview runs in the user's language**; technical terms stay as-is.
-   - **Project language from the first write.** `CONTEXT.md` and ADRs are project content — write them in the project's language immediately.
-   - **Interruptions never shrink the grill** — restate the last unanswered question and resume.
-3. **Action gate** — when investigation crystallises into something actionable (code change or ADR-worthy decision):
-   - State the decision and proposed action (in the user's language): *"Decision: X. Enact: [concrete steps]?"*
-   - Wait for explicit user confirmation before any code write or ADR.
-   - User says no → continue grilling; the decision is just a leaning until confirmed.
-   - Note: `CONTEXT.md` glossary writes do NOT require this gate — they happen inline during step 2.
-4. **Enact** — after confirmation:
-   - **Code changes**: minimal diff, then run objective gates (lint/typecheck/test — whatever the repo has). Silent pass, loud fail.
-   - **ADR** (only when triple-gate holds: hard to reverse + surprising + trade-off): lightweight format —
+1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a PRD and issue pack.
+2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, inline `CONTEXT.md`, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and PRD/issue exit gate in Plan; return here when the interview crystallises into an action or the user stops.
+3. **Resolve the thread** — follow the canon until the load-bearing branches are explicit. End naturally when investigation finds nothing actionable. When something becomes actionable, continue through Grill's gate below.
+4. **Action gate** — state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
+   - **Pre-materialize edge-case checkpoint (code changes only).** Before the first code materialization in this thread, ask one adversarial edge-case question with a recommendation. Resolve it through the shared canon before proposing materialization.
+   - Wait for explicit user confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", and "love it" resolve a branch, not an action gate.
+   - Treat a refusal as a leaning and resume the canonical interview.
+   - Continue writing resolved glossary terms to `CONTEXT.md` inline; those glossary writes are part of the canonical interview cadence and require no separate action confirmation.
+5. **Materialize** — after confirmation:
+   - **Code changes**: before the first code change in the session, run the repo's objective gates to establish a baseline. Make the minimal diff, then run the gates again. Report failures and keep passing checks quiet.
+   - **ADR** (only when the canon's triple-gate holds: hard to reverse + surprising + trade-off): use the lightweight format —
      ```
      # Question
      <what we were deciding>
@@ -54,62 +43,62 @@ Investigate a question, resolve it through disciplined interview, then enact fin
      # Why
      <1-2 sentences>
      ```
-   - Return to grilling if questions remain.
-5. **Scope signal** — if enacted changes touch >3 files or require >1 commit: *"Scope is growing. Recommend Plan for the rest — continue here?"* (in the user's language). User decides.
+   - Return to the canonical interview while questions remain.
+6. **Scope signal** — when materialized changes touch >3 files or require >1 commit, say *"Scope is growing. Recommend Plan for the rest — continue here?"* in the user's language. Let the user choose the route.
 
-## The cadence, worked
+## The distinct cadence, worked
 
-One exchange showing the moves — question with recommendation, inline CONTEXT write, action gate only for the code change:
+This exchange begins after the canonical interview has resolved the shared decision branches and shows Grill's added edge checkpoint and action gate:
 
-> **Agent:** The retry logic lives in `src/client.ts` — should it back off exponentially or use a fixed delay? I'd recommend exponential: it's kinder to the server under load, and the stdlib `setTimeout` multiplication is one line. *(waits)*
+> **Agent:** One edge case before materialization: if the API returns `429` twice and then times out, should attempt 3 still happen, or stop on timeout? I'd recommend stop on timeout to avoid compounding load and user wait. *(waits)*
 >
-> **User:** Exponential. And 3 retries max, not 5.
+> **User:** Stop on timeout.
 >
-> **Agent:** *(updates `CONTEXT.md`: "Retry policy — exponential backoff, 3 attempts max" — before asking anything else)* That caps the worst-case wait at ~7s. The current code uses a fixed 1s × 5. Decision: rewrite the retry loop to exponential with max 3. Enact? *(waits for explicit go)*
-
-A flat sequence of questions with no doc writes and no action proposals is the anti-pattern this file exists to prevent.
+> **Agent:** Decision: rewrite the retry loop to exponential backoff, maximum 3 attempts, and stop on timeout. Materialize by updating `src/client.ts` and running the repo gates? *(waits for explicit go)*
+>
+> **User:** Yes, do that.
+>
+> **Agent:** *(runs the baseline gates, makes the change, runs the objective gates again, and reports the verified result)*
 
 ## Verification
 
-- Code changes → **always** run the repo's objective gates (discover from package scripts / Makefile / CI config).
-- Full `loom-verify` (spec + standards checkers) → only if the scope signal fires AND the user chooses to continue in grill despite it. For typical grill-sized changes, gates are sufficient.
+- Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
+- Full `loom-verify` (spec + standards checkers) → use it only when the scope signal fires and the user chooses to continue in Grill. For typical Grill-sized changes, objective gates are sufficient.
 
 ## Hard stops
 
-- **Never enact without explicit user confirmation** — proposing ≠ doing. (Exception: `CONTEXT.md` glossary writes are inline and automatic.)
+- **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing. Enthusiasm resolves a branch, not an action gate. (`CONTEXT.md` glossary writes remain the inline canonical exception.)
 - Never write PRD or issue cards — that is Plan territory.
-- Never batch questions. One question = one answer = one branch.
-- Never auto-upgrade to Plan — signal and let the user decide.
-- Never skip gates after code changes — a change without a gate run is unverified.
-- Never invent a load-bearing decision silently — ask or surface as assumption.
+- Never publish, deploy, or perform another irreversible action without explicit confirmation that names the action.
+- Never expand scope or auto-upgrade to Plan — signal the threshold and let the user choose.
+- Complete the pre-materialize edge-case checkpoint before the first code write.
+- Run objective gates after every code change; materialization is verified only when they pass.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
-| User wants full feature scope mid-grill | Signal: "this is Plan-sized — wrap up findings here, continue as Plan?" |
-| Investigation finds nothing actionable | End naturally — no forced output; the conversation IS the value |
-| Gates fail after enactment | Fix inline (same session), re-run gates, continue |
-| User drops / says "continue" | Restate the last unanswered question; resume — do not rush |
-| Scope signal fires | State it; user decides to continue or upgrade |
+| User wants full feature scope mid-Grill | Give the scope signal and let the user choose Grill or Plan |
+| Investigation finds nothing actionable | End naturally; the conversation is the outcome |
+| Pre-materialize edge case is unresolved | Resume the canonical interview until the edge decision is explicit |
+| Confirmation is absent or ambiguous | Restate the concrete action and wait for explicit confirmation |
+| Gates fail after materialization | Fix inline, re-run the gates, and report the result |
+| Scope signal fires | State the threshold and let the user choose the route |
 
 ## Anti-rationalization
 
+Shared interview excuses and responses live only in Plan's canonical [`GRILL.md`](../loom-plan/GRILL.md). Grill adds only action-specific guards:
+
 | Excuse | Reality |
 |---|---|
-| "This feels like Plan, I'll write a PRD" | Wrong ritual. Grill explores and enacts inline; Plan scopes buildable work. |
-| "User seemed to agree, I'll just do it" | Agreement is not confirmation. State the action, wait for explicit go. |
-| "I'll skip gates, it's a tiny change" | Gates exist to catch what tiny changes break. Run them. |
-| "Ask 5 questions at once, faster" | One question = one answer. Each answer branches the next. |
-| "No ADR needed, it's obvious" | Apply the triple-gate: hard to reverse + surprising + trade-off. All three → ADR. Missing one → skip. |
-| "I'll batch the CONTEXT writes at the end" | Term resolved → written before the next question. Batching is the deviation. |
-| "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it or surface it as assumption. |
-| "I already know what they want" | You know what YOU would build — ask what THEY need. |
-| "User seems impatient, wrap up" | Resume the grill where it stopped. One more question now saves a bad change later. |
+| "This feels like Plan, I'll write a PRD" | Keep this ritual inline. Signal Plan and let the user choose the route. |
+| "User seemed to agree, I'll just do it" | Agreement is a decision signal, not action confirmation. State the concrete action and wait for explicit go. |
+| "I'll skip gates, it's a tiny change" | Run the objective gates; they define whether the materialized change is verified. |
+| "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |
 
 ## Done when
 
-- User signalled stop — you never self-declare the grill finished
-- Every enacted change verified by gates
-- Decisions captured in lightweight ADRs (when triple-gate holds); domain updates in CONTEXT.md
-- No unconfirmed proposals left hanging
+- The user signals stop; Grill stays active while they continue the thread
+- Every materialized change passes the objective gates
+- Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are in `CONTEXT.md`
+- Every proposed action is either explicitly confirmed and materialized or explicitly declined

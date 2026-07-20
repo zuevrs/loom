@@ -62,10 +62,18 @@ fi
 if ! grep -Fq 'docs/glossary.md' "$README"; then
   errors+=("README is missing glossary link")
 fi
+if grep -Fq 'one digest file' "$README"; then
+  errors+=("README still describes loom-grill as digest-file output (stale since v0.24.0)")
+fi
+if ! grep -Fq 'omp plugin install git:github.com/zuevrs/loom --force' "$README"; then
+  errors+=("README Upgrade section must document OMP --force for updates")
+fi
 GLOSSARY_DOC="$ROOT/docs/glossary.md"
 AUTHORING_DOC="$ROOT/docs/authoring.md"
 if [ ! -f "$GLOSSARY_DOC" ]; then
   errors+=("docs/glossary.md is missing")
+elif grep -Fwq 'enactment' "$GLOSSARY_DOC"; then
+  errors+=("docs/glossary.md uses 'enactment' — normalized to 'materialization' since v0.24.6")
 fi
 if [ ! -f "$AUTHORING_DOC" ]; then
   errors+=("docs/authoring.md is missing")
@@ -81,6 +89,12 @@ HOSTS_DOC="$ROOT/docs/hosts.md"
 if [ ! -f "$HOSTS_DOC" ]; then
   errors+=("docs/hosts.md is missing")
 else
+  if grep -Fq 'one digest file' "$HOSTS_DOC"; then
+    errors+=("docs/hosts.md still describes loom-grill as digest-file output (stale since v0.24.0)")
+  fi
+  if grep -Fwq 'enact' "$HOSTS_DOC"; then
+    errors+=("docs/hosts.md uses 'enact' — normalized to 'materialize' since v0.24.6")
+  fi
   # README is the lead (quick path), hosts.md is the depth — they must reference each other.
   if ! grep -Fq 'docs/hosts.md' "$README"; then
     errors+=("README must route to docs/hosts.md for per-host depth")

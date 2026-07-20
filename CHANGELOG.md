@@ -4,6 +4,130 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+- _No unreleased changes yet._
+
+## [0.24.10] - 2026-07-15
+
+Correctness fixes for verification state and host project discovery.
+
+### Fixed
+
+- **Effective verify verdicts.** JavaScript gates and Hermes now use the latest effective `APPROVE` or `REJECT` verdict to decide whether work is done or needs rework.
+- **Consistent project-root discovery.** Host integrations, including OMP, prefer an ancestor `.loom` project over an intermediate `AGENTS.md`.
+- **Bounded OMP witness handling.** OMP witness warnings remain non-blocking by default, while strict mode requests at most one corrective lap for an unchanged issue set.
+- **Focused regressions.** Added coverage for verdict ordering, nested-root discovery, and OMP witness stop behavior.
+
+## [0.24.9] - 2026-07-15
+
+Terminology and drift-warning cleanup.
+
+### Fixed
+
+- **Glossary and hosts.md terminology.** Normalized remaining "enact/enactment" to "materialize/materialization" (missed in v0.24.6).
+- **OMP drift warning.** The version-drift message now shows the working `omp plugin install … --force` command instead of the broken `omp plugin update` path.
+- **Canary for future drift.** `check-doc-consistency` now rejects "enact" in glossary and hosts docs.
+
+## [0.24.8] - 2026-07-14
+
+### Highlights
+
+- **Truthful host enforcement.** Cursor now invokes the shared stop gate in blocking mode; OMP permits one corrective lap and then exits a repeated unresolved state with a warning; host capability claims distinguish observable enforcement from installation wiring.
+- **Auditable TDD discipline.** Standards verification now treats unexplained behavioral-test deletion, green-manufacturing skips, weakened assertions, and avoidably private seams as blocker-grade findings while preserving explicit higher-seam and spec-backed exceptions.
+- **One interview canon.** Plan owns shared interview discipline; Grill loads that canon and retains its distinct action and consent flow.
+
+### Migration steps
+
+- Reinstall or force-upgrade the Loom plugin, then restart the host process so its hooks and managed instructions reload.
+- Run the host doctor or installer check after upgrade; follow the host-specific command in the README.
+
+### Adapter impacts
+
+- **Cursor:** an unverified `done` now blocks through Cursor's exit-2 hook contract.
+- **OMP:** the first unresolved stop requests correction; an immediate repeat of the same state exits with a visible warning instead of looping indefinitely.
+- **Codex and Droid:** hard enforcement remains labelled Unverified pending live host evidence.
+
+### Safety changes
+
+- Standards checkers reject coverage-reducing shortcuts and test seams below the PRD-confirmed public boundary.
+- Write, publication, irreversible-action, scope, and human-consent gates remain explicit while normal interview instructions use positive target behavior.
+
+## [0.24.7] - 2026-07-12
+
+Reference distill: cleaner debt signal and stronger prototype evidence trace.
+
+### Changed
+
+- **`loom:` marker narrowing.** The marker is now explicitly limited to deliberate simplifications that cut a real corner, with a named ceiling and upgrade path — reducing debt-noise from trivial comments.
+- **Prototype-as-evidence contract.** Plan/Implement now treat decision-shaping prototypes as primary-source evidence on throwaway `prototype/<slug>` branches (pointer recorded as branch + commit), never merge targets.
+- **Template and test alignment.** PRD/issue/phase guidance and test pins now enforce prototype pointer capture and marker semantics.
+
+## [0.24.6] - 2026-07-10
+
+Light Plan/Grill terminology parity on gate wording.
+
+### Changed
+
+- **Shared gate term.** `loom-grill` now uses `materialize` instead of `enact` in action-gate wording, depth checkpoint, and worked cadence.
+- **Plan/Grill enthusiasm rule aligned.** `skills/loom-plan/GRILL.md` now uses the same “does not authorize materialization” wording.
+- **Test alignment.** `tests/hooks.test.mjs` assertions updated for the new terminology.
+
+## [0.24.5] - 2026-07-10
+
+Grill depth hardening with a lightweight pre-enact checkpoint.
+
+### Changed
+
+- **Pre-enact edge-case checkpoint.** `loom-grill` now requires one adversarial edge-case question (with recommendation) before the first code enact in a thread.
+- **Runtime guardrails for shallow enact.** Added hard stop, failure mode, and anti-rationalization lines that block "code now, edge-cases later" behavior.
+- **Cadence example updated.** The worked sequence now shows edge-case closure before action gate confirmation.
+
+## [0.24.4] - 2026-07-10
+
+Drift cleanup for `loom-grill` wording across remaining surfaces.
+
+### Changed
+
+- **Glossary alignment.** `docs/glossary.md` now describes Grill as investigate/explore/debug/decide with confirmation-gated enactment (no digest file).
+- **Kiro router alignment.** `kiro-agent.json` router prompt now matches the current `loom-grill` contract instead of the old brainstorm/digest wording.
+- **Plan description alignment.** `skills/loom-plan/SKILL.md` negative-example wording now points to undefined-scope investigate/explore/debug sessions for `loom-grill`.
+
+## [0.24.3] - 2026-07-09
+
+Grill plan-parity: surgical gap closure in `loom-grill`.
+
+### Changed
+
+- **Ask-tool discipline** — `One ask call = exactly ONE question` plus anti-rationalization for question arrays (OMP live bug class).
+- **Research persistence** — `.loom/research/YYYY-MM-DD-<slug>.md` path for external findings with citations.
+- **ADR offer in interview** — offer before write (never silent); worked example shows ADR offer before code enact.
+- **Format links** — `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` referenced from grill interview rules.
+- **Interruption resume** — re-read this file on continue/drop.
+- **Failure modes** — conflicting ADRs, "just do it" pushback.
+- **Hard stops** — unresolved ADR conflict, fuzzy topic.
+- **Anti-rationalization** — ask-tool array, skip CONTEXT/ADR, brownfield CONTEXT batching.
+
+## [0.24.2] - 2026-07-09
+
+README and hosts docs: OMP update path and current grill description.
+
+### Changed
+
+- **OMP upgrade in README.** Install table points to Upgrade; Upgrade section documents `omp plugin install … --force` (without it OMP reuses the cached tarball).
+- **`loom-grill` description updated** in README Skills table and `docs/hosts.md` — reflects think+act unified mode (no digest file).
+- **Doc consistency canaries** — `check-doc-consistency` rejects stale digest-file wording and missing OMP `--force` in README.
+
+## [0.24.1] - 2026-07-09
+
+Grill quality: four Plan-parity gaps closed.
+
+### Changed
+
+- **Glossary challenge.** The grill now explicitly checks new terms against existing `CONTEXT.md` language and surfaces conflicts on the spot.
+- **Edge-case scenarios.** Interview rules include inventing concrete scenarios that force the user to be precise about boundaries.
+- **Research provenance.** Findings that shaped a decision must be persisted with citations — "some blog said so" is not provenance a future session can check.
+- **Enthusiasm is not a go.** Action gate and hard stops clarify that "interesting" or "sounds right" resolves a branch but does not authorize enactment.
+- **Anti-anchoring.** New anti-rationalization row in both grills: an accepted recommendation is not a stated preference — own the proposal's origin.
+
 ## [0.24.0] - 2026-07-08
 
 Grill redesign: unified think+act mode. Investigation, decision-making, and enactment in one session — with confirmation gates, objective verification, and persistent trace via lightweight ADRs.
@@ -894,7 +1018,17 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v0.24.10...HEAD
+[0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
+[0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9
+[0.24.8]: https://github.com/zuevrs/loom/compare/v0.24.7...v0.24.8
+[0.24.7]: https://github.com/zuevrs/loom/compare/v0.24.6...v0.24.7
+[0.24.6]: https://github.com/zuevrs/loom/compare/v0.24.5...v0.24.6
+[0.24.5]: https://github.com/zuevrs/loom/compare/v0.24.4...v0.24.5
+[0.24.4]: https://github.com/zuevrs/loom/compare/v0.24.3...v0.24.4
+[0.24.3]: https://github.com/zuevrs/loom/compare/v0.24.2...v0.24.3
+[0.24.2]: https://github.com/zuevrs/loom/compare/v0.24.1...v0.24.2
+[0.24.1]: https://github.com/zuevrs/loom/compare/v0.24.0...v0.24.1
 [0.24.0]: https://github.com/zuevrs/loom/compare/v0.23.5...v0.24.0
 [0.23.5]: https://github.com/zuevrs/loom/compare/v0.23.4...v0.23.5
 [0.23.4]: https://github.com/zuevrs/loom/compare/v0.23.3...v0.23.4

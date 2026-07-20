@@ -4,7 +4,7 @@
 
 ## What to build
 
-{Vertical slice — end-to-end, independently shippable. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision.}
+{Vertical slice — end-to-end, independently shippable. No file paths or code snippets — they go stale. Exception: a decision-rich snippet from a prototype (state machine, schema, type shape) — inline it; it IS the decision. If a prototype branch informed this slice, add its pointer in `## Log` (branch + commit), never as merge target.}
 
 ## Acceptance criteria
 

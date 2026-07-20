@@ -141,7 +141,7 @@ function installCursorHooks() {
     sessionStart: { entry: { command: cmd("loom-session-start.cjs"), timeout: 5 } },
     beforeSubmitPrompt: { entry: { command: cmd("loom-pre-llm.cjs"), timeout: 3 } },
     subagentStart: { entry: { command: cmd("loom-subagent-cursor.cjs"), timeout: 3 } },
-    stop: { entry: { command: cmd("stop-gate-logic.cjs"), timeout: 5 } },
+    stop: { entry: { command: `${cmd("stop-gate-logic.cjs")} --hook`, timeout: 5 } },
   };
 
   console.log("Hooks:");
@@ -237,7 +237,7 @@ function doctor() {
       } else {
         let bad = 0;
         for (const [event, h] of loomEntries) {
-          const file = h.command.replace(/^node\s+/, "").replace(/^"|"$/g, "");
+          const file = h.command.replaceAll('"', "").split(/\s+/).find((token) => LOOM_HOOK_FILES.has(basename(token)));
           if (!/^node\s/.test(h.command) || !existsSync(file)) {
             failLine(`cursor hooks: ${event} → ${h.command} (file missing or not node)`, fixCmd);
             bad += 1;

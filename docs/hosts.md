@@ -8,37 +8,42 @@ The [README](../README.md) carries the quick path: install, upgrade, uninstall, 
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
 | Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
-| Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 3 | — | yes | ext |
-| Enforcement | Stop | Stop | — | Stop+TTSR+agents | — | Stop+rule | — | — | — | — | Stop | — |
-| Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | ext |
+| Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 2 | — | yes | — |
+| Enforcement | Hard | Hard (Unverified) | Convention-only | Hard | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
+| Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | AGENTS.md |
 
-Legend: `Hooks` → `3` = session-start + pre-LLM + sub-agent-spawn (or OMP: session_start + before_agent_start + session_stop), `config` = host config-driven hook, `ext` = extension callback, `—` = no hook primitive.
+`Hooks` counts callbacks that perform observable work, not registered names. OMP's three are `session_start`, `before_agent_start`, and `session_stop`. Hermes has two working callbacks (`on_session_start` and `pre_llm_call`); its registered no-op `subagent_start` callback is not counted. OpenClaw has no shipped extension.
 
-Legend: `Enforcement` → `Stop` = Stop hook / session_stop gate, `Stop+TTSR+agents` = session_stop + TTSR reminder + custom verify agents, `Stop+rule` = Stop hook + managed rule file.
+`Enforcement` is independent of integration and distribution tier:
 
-Legend: `Discipline` → `hook` = lifecycle hook injection, `hook+rule` = hook plus managed rule, `AGENTS.md` = managed block only, `body`/`prompt` = agent prompt text, `transform`/`ext` = host transform/extension injection.
+- **Hard** — a runtime mechanism can prevent the action, and that blocking contract has direct evidence.
+- **Soft** — runtime context or warnings shape behavior but cannot prevent the action.
+- **Convention-only** — skills and managed instructions carry the discipline with no lifecycle enforcement.
+- **Unverified** — a qualifier on an implemented tier whose live host contract has not been evidenced; it is not a fourth tier.
 
-**Tier honesty:** Plugin-tier means full Loom *behavioral surface* for that host's primitives — not identical hook counts. OMP ships session_start + before_agent_start + session_stop via extension; Hermes ships session-start + per-turn + subagent; script-tier hosts rely on the AGENTS.md managed block.
+Plugin presence, integration tier, and hook count describe delivery and wiring. None of them proves Hard enforcement.
 
-### Discipline-only tier
+### Convention-only hosts
 
-Hosts without a hard verify gate get **skills + managed block**; discipline is prompt-based — same rituals, honor-system enforcement. That covers Pi, OpenCode, Windsurf, Kiro, Hermes (hooks but no stop gate), Cline, and OpenClaw. For hard gates, work on a Stop-hook host (Claude Code, Codex, Cursor, Droid) or OMP — or add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) so done-without-APPROVE blocks at PR level regardless of host.
+Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through skills and managed instructions without a runtime gate. OpenClaw remains Convention-only until Loom ships and verifies an extension. Add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) when done-without-APPROVE must block at PR level regardless of host.
 
 ## Host-native enforcement
 
-| Host | Mechanism | What it enforces |
-|------|-----------|-----------------|
-| **OMP** | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | Hard gate at turn end + stream reminder + verify agents via `task` tool + witnessed checker spawns |
-| **Claude Code / Codex** | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Blocks agent stop if issues marked done without verify digest — one forced lap, then lets go with the warning on record |
-| **Cursor** | `Stop` hook (`node hooks/stop-gate-logic.cjs`) + managed rules | Same verify gate via hook + rule-file injection |
-| **Droid (Factory)** | `Stop` hook via `.claude-plugin` format | Same verify gate |
-| **Windsurf / Kiro / Hermes / Cline / OpenClaw** | No runtime stop-gate | Discipline via managed block + skills; add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) (`node hooks/stop-gate-logic.cjs`) to block done-without-APPROVE at PR level |
+| Host | Tier | Mechanism | Evidence-backed claim |
+|------|------|-----------|----------------------|
+| **OMP** | Hard | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | `session_stop` prevents the first unresolved stop; TTSR and agents are additional reminder/review layers |
+| **Claude Code** | Hard | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Live stop contract prevents done-without-APPROVE once, then permits the repeated state |
+| **Codex** | Hard (Unverified) | Same shipped `Stop` hook | Plugin-root expansion and stop blocking still need live-host evidence |
+| **Cursor** | Hard | Generated `Stop` hook invokes `node hooks/stop-gate-logic.cjs --hook` | Installed-command regression exercises exit 2 for unresolved state and exit 0 for verified state |
+| **Droid (Factory)** | Hard (Unverified) | Shipped `Stop` hook via `.claude-plugin` format | Plugin-root expansion and stop blocking still need live-host evidence |
+| **OpenCode / Hermes** | Soft | System transform / two working lifecycle callbacks | Runtime context is injected, but no stop primitive prevents completion |
+| **Pi / Windsurf / Kiro / Cline / OpenClaw** | Convention-only | Skills and managed instructions | No shipped lifecycle stop gate; OpenClaw has no extension |
 
-**OMP:** three enforcement layers — (1) TTSR reminder when writing `Status: done`, (2) `session_stop` hard gate at turn end if the issue's `## Verify` section has no APPROVE line, (3) custom agents for structured verify. See [Loom + OMP](#loom--omp-maximum-synergy) below.
+**OMP:** the first stop for a done-without-APPROVE state returns control to the agent. A repeated stop with the same unresolved issue set is permitted with an explicit warning; resolution or any change to that set resets the forced lap. TTSR remains the stream reminder, and custom agents provide structured verify.
 
 **Known OMP limitation:** some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work.
 
-**Claude Code / Codex / Cursor:** the `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook blocks the stop (exit 2) and the block reason — run `loom-verify`, or correct a wrong `done` status — is fed back to the model. The block is **one forced lap**: if the agent stops again without resolving (`stop_hook_active` set), the gate lets the stop through with the warning already in the transcript — otherwise a headless run loops forever. The same hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
+**Claude Code / Cursor:** the `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook blocks the first stop (exit 2) and feeds the correction reason back to the model. A repeated stop is allowed so a headless run cannot loop forever. Codex and Droid ship the same intended hard path, but remain Unverified until their plugin-root and stop contracts pass a live check. The shared hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
 
 ### The `.loom` linter
 
@@ -54,7 +59,7 @@ A session killed mid-implement changes no status and files no report — the onl
 
 ### The verify witness
 
-An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. On OMP the extension witnesses checker spawns made through the `task` tool (named `loom-verify-*` agents or generic spawns carrying the checker role) and the `session_stop` gate carries the same warning — warn-only there, since `session_stop` has no blocking primitive. `LOOM_WITNESS=strict` upgrades the warning to a block on Stop-hook hosts; `LOOM_WITNESS=off` disables. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
+An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. On OMP the extension witnesses checker spawns made through the `task` tool (named `loom-verify-*` agents or generic spawns carrying the checker role). Its default witness mode writes a visible warning and permits the stop; `LOOM_WITNESS=strict` requests one corrective lap for an unchanged unwitnessed issue set, then permits a repeated stop with a warning. Stop-hook hosts likewise make `strict` blocking, while `LOOM_WITNESS=off` disables witness output. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
 
 **Known limitation (Codex):** the witness recorder rides the `SubagentStart` hook; on Codex versions that don't fire it, checker spawns go unwitnessed and the warning appears even though verify genuinely ran. It is warn-only — read it as "confirm checkers ran", or set `LOOM_WITNESS=off` for that host. Keep `strict` to hosts whose spawn hooks are confirmed firing (Claude Code, Cursor).
 
@@ -82,6 +87,9 @@ Loom owns **what** to build (PRD, issues, verify contract). OMP owns **how** the
 omp plugin install git:github.com/zuevrs/loom
 cd your-project && omp
 # In session: run loom-init — creates .loom/, AGENTS.md managed block
+
+# Update to latest (required — without --force OMP reuses the cached tarball):
+omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ### Daily workflow
@@ -89,7 +97,7 @@ cd your-project && omp
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
 | **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
-| **Brainstorm** | `/loom-grill` any topic → one digest file | — | Relentless interview without the PRD machinery; hand the digest to `/loom-plan` if it becomes scope |
+| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; materialize inline with gates; upgrade to `/loom-plan` if scope grows |
 | **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |

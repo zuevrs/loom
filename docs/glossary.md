@@ -6,7 +6,15 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Harness** — The operating setup for one agent session: rules, skills, warp, and dispatch.
 
-**Enforcement hook** — Host-native mechanism that blocks or redirects agent behavior at runtime. Examples: Stop hook (Claude Code/Codex/Cursor/Droid), `session_stop` (OMP), TTSR reminder (OMP).
+**Enforcement tier** — Evidence-based capability, independent of install or integration tier. Plugin presence and hook count do not establish enforcement.
+
+**Hard** — A runtime mechanism can prevent the action, and its blocking contract has direct evidence.
+
+**Soft** — Runtime context or warnings shape behavior without preventing the action.
+
+**Convention-only** — Skills and managed instructions carry the discipline without lifecycle enforcement.
+
+**Unverified** — Qualifier for an implemented capability whose live host contract has not been evidenced; not a fourth enforcement tier.
 
 **TTSR rule** — Time-Traveling Stream Rule (OMP-specific). Regex condition on the agent's output stream that injects corrective guidance at zero upfront token cost. Loom uses TTSR as a reminder layer; the hard gate is `session_stop`.
 
@@ -18,7 +26,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **The Discipline** — YAGNI → reuse → stdlib → platform → installed dep → one line → minimum code, with carve-outs for security, validation, and accessibility.
 
-**`loom:`** — Marker for an intentional shortcut naming the ceiling and upgrade path.
+**`loom:`** — Marker used only for deliberate simplifications that cut a real corner; must name the ceiling and upgrade path.
 
 ## Rituals
 
@@ -26,7 +34,7 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
 
-**Grill** — Freeform brainstorm interview on any topic (even non-project); output is one digest file, never PRD/issues/docs.
+**Grill** — Investigate/explore/debug/decide flow for undefined scope: disciplined interview with confirmation-gated materialization. No PRD/issues and no digest file.
 
 **Implement** — Ship one issue with minimal diff; leave one runnable check.
 

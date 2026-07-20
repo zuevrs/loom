@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v0.24.0"
+MANAGED_BLOCK_VERSION = "v0.24.10"
 
 DISCIPLINE = """# Loom invariants (pre-turn guard)
 
@@ -23,7 +23,7 @@ DISCIPLINE = """# Loom invariants (pre-turn guard)
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
 - Work needing human judgement → ready-for-human at slicing time.
-- Mark shortcuts with loom: comments (ceiling + upgrade path).
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 - Before writing code: YAGNI → reuse → stdlib → platform → dep → one line → minimum."""
 
 ROLES = {
@@ -186,6 +186,20 @@ def _lint_warnings(root: Path) -> "list[str]":
     return warnings
 
 
+def _latest_verify_verdict(content: str):
+    """Latest line-start APPROVE/REJECT across real Verify history, after comment stripping."""
+    import re
+
+    text = re.sub(r"<!--[\s\S]*?-->", "", content)
+    verdicts = [
+        verdict
+        for section in re.split(r"^(?=## )", text, flags=re.M)
+        if re.match(r"## Verify\b", section)
+        for verdict in re.findall(r"^(APPROVE|REJECT)\b", section, re.M)
+    ]
+    return verdicts[-1] if verdicts else None
+
+
 # loom: Python mirror of stateSnapshot in hooks/stop-gate-logic.cjs — keep the two in sync.
 def _state_snapshot(root: Path) -> "str | None":
     import re
@@ -201,12 +215,6 @@ def _state_snapshot(root: Path) -> "str | None":
         files = sorted(issues_dir.glob("*.md")) if issues_dir.is_dir() else []
         if files:
             packs[pack] = files
-
-    def _last_verdict_is_reject(text):
-        verdicts = [s for s in re.split(r"^(?=## )", text, flags=re.M) if re.match(r"## Verify\b", s)]
-        if not verdicts:
-            return False
-        return bool(re.search(r"^REJECT\b", verdicts[-1], re.M)) and not re.search(r"^APPROVE\b", verdicts[-1], re.M)
 
     # Same extraction as blocked_refs in _lint_warnings (nested there) — keep in sync.
     def _blocked_refs(text):
@@ -245,13 +253,10 @@ def _state_snapshot(root: Path) -> "str | None":
             by_file[f] = (status, text)
             if status == "needs-info":
                 needs_info.append(f.name)
-            if status not in ("done", "wontfix") and _last_verdict_is_reject(text):
+            if status not in ("done", "wontfix") and _latest_verify_verdict(text) == "REJECT":
                 rework.append(f.name)
             # Same rule as the real gate (isDoneWithoutVerify): done anywhere, not just first Status line.
-            if re.search(r"^Status:\s*done\b", text, re.M) and not any(
-                re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
-                for s in re.split(r"^(?=## )", text, flags=re.M)
-            ):
+            if re.search(r"^Status:\s*done\b", text, re.M) and _latest_verify_verdict(text) != "APPROVE":
                 unverified.append(f.name)
 
         # Next up = lowest ready-for-agent with ALL blockers done (wontfix does not unblock).
@@ -338,10 +343,7 @@ def _anomaly_alert(root: Path) -> str:
         m = re.search(r"^Status:\s*(\S+)", text, re.M)
         if m and m.group(1) == "needs-info":
             needs_info.append(f.name)
-        if re.search(r"^Status:\s*done\b", text, re.M) and not any(
-            re.match(r"## Verify\b", s) and re.search(r"^APPROVE\b", s, re.M)
-            for s in re.split(r"^(?=## )", text, flags=re.M)
-        ):
+        if re.search(r"^Status:\s*done\b", text, re.M) and _latest_verify_verdict(text) != "APPROVE":
             unverified.append(f.name)
 
     alerts = []
