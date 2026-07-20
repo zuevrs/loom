@@ -41,7 +41,7 @@ Keep the warp current and debts from rotting — without inventing feature scope
    node ~/.loom/hooks/stop-gate-logic.cjs --lint .
    rg -l "Status: ready-for-agent" .loom/
    ```
-   Cross-reference with git log — if the acceptance criteria commit exists and the `## Verify` section carries an APPROVE line, mark `done`. Without one, run `loom-verify` first (enforcement gate requires it).
+   Cross-reference with git log — if the acceptance criteria commit exists and the `## Verify` section carries an APPROVE line, mark `done` only when implementation evidence exists **and** that APPROVE is proven to cover the current relevant diff/fixed point, with no relevant change after that verdict. Existing APPROVE alone is insufficient. If identity/coverage cannot be proven, or behavior changed after APPROVE, surface the gap and route to a fresh `loom-verify`; do not change it to `done`. **Tend never creates, fabricates, substitutes, or extends a verdict.**
 
    Same sweep for triage stubs: `needs-triage` (scope creep captured by Implement) → route to `loom-plan` or `wontfix` with the user; `needs-info` → surface the written question to the user, flip back to `ready-for-agent` once answered.
 
@@ -65,7 +65,8 @@ When capture-learning approves a project skill: create `skills/<name>/SKILL.md` 
 
 - No autonomous long-term knowledge writes without user confirmation.
 - No feature expansion during maintenance — cut new issue instead.
-- No status changes to issues outside the Tend scope (e.g. marking issues `done`).
+- No status changes to issues outside the Tend scope (e.g. marking issues `done` without proven APPROVE coverage).
+- Never create or extend APPROVE, infer verdict coverage, or self-verify.
 - Do not delete or rewrite existing `loom:` debt markers — only pay them down with real code.
 
 ## Failure modes
