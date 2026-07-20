@@ -197,6 +197,28 @@ export default function loomExtension(pi) {
     }
   });
 
+  pi.on("tool_result", (event) => {
+    try {
+      if (event.toolName !== "goal" || (event.input || {}).op !== "complete" || event.isError) {
+        return undefined;
+      }
+      const ready = findIssuesByStatus(findProjectRoot(), "ready-for-agent");
+      if (!ready.length) return undefined;
+      const names = ready.map((p) => p.split(/[\\/]/).pop()).join(", ");
+      return {
+        content: [
+          ...(event.content || []),
+          {
+            type: "text",
+            text: `Loom note: ready-for-agent issues remain (${names}). If they were in this goal's scope, resume instead of completing; either way name them in your final report.`,
+          },
+        ],
+      };
+    } catch {
+      return undefined;
+    }
+  });
+
   // Hard gate: parity with Claude/Codex/Cursor Stop hook (OMP session_stop, v16.0.5+)
   pi.on("session_stop", () => {
     try {

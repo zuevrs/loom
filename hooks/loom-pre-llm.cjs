@@ -13,17 +13,14 @@ try {
 
   const {
     findUnverifiedDoneIssues,
+    findIssuesByStatus,
+    lintWarnings,
     alertScanAllowed,
+    witnessRoot,
   } = require("./stop-gate-logic.cjs");
   const { basename } = require("node:path");
-  const { workspaceState, workspacePointers, findWorkspace, projectContext } = require("./workspace.cjs");
-  const workspace = workspaceState(process.cwd());
-  if (workspace?.invalid) {
-    process.stdout.write(`\n# Loom workspace error\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\nWorkspace behavior is disabled until repaired. Continue ordinary project work canonically; explicit Loom work must stop.\n`);
-    return;
-  }
 
-  const root = projectContext(process.cwd()).artifactRoot;
+  const root = witnessRoot(process.cwd());
   if (!alertScanAllowed(root)) return; // ceiling: see stop-gate-logic.cjs
   const alerts = [];
 
@@ -33,6 +30,20 @@ try {
       `done without APPROVE (stop gate will block): ${unverified
         .map((p) => basename(p))
         .join(", ")}`
+    );
+  }
+
+  const needsInfo = findIssuesByStatus(root, "needs-info");
+  if (needsInfo.length) {
+    alerts.push(
+      `needs-info awaiting answers: ${needsInfo.map((p) => basename(p)).join(", ")}`
+    );
+  }
+
+  const lint = lintWarnings(root);
+  if (lint.length) {
+    alerts.push(
+      `${lint.length} .loom lint warning(s) — run \`node stop-gate-logic.cjs --lint\` (first: ${lint[0]})`
     );
   }
 

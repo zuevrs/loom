@@ -26,7 +26,7 @@ Produce a verifiable PRD + issue pack under `.loom/<feature-slug>/` without star
 - **User explicitly invoked `loom-plan`** → run the three-phase ritual below. **Never auto-handoff to `loom-implement`** — the user chose Plan; offer the PRD pack or ask them to confirm a deliberate skip.
 - **Small / single-session** (router only, user did NOT invoke Plan) → skip PRD pack; hand off to `loom-implement` (YAGNI).
 - **Multi-session / large / inbound underspecified** → full ritual below.
-- **Amendment** (an existing pack's PRD is wrong or outgrown) → read [`AMEND.md`](AMEND.md) and follow it; do not re-run the full ritual.
+- **Amendment** (an existing pack's PRD is wrong or outgrown — usually a `needs-info` issue naming a contradiction, or the verify two-strikes fork) → read [`AMEND.md`](AMEND.md) and follow it: **do not re-run the full ritual.** Grill ONLY the delta: the contradiction, its blast radius, nothing else. Then amend the PRD in place — change the affected lines and append one dated line to an `## Amendments` section (create it once) saying what changed and why. Re-quiz ONLY the slices the change touches (statuses, acceptance criteria, blockers); untouched issues stay untouched. Exit gate: user confirms the amendment, affected `needs-info` issues flip back to `ready-for-agent`. Both user gates still exist — they just cover the delta, not the world.
 - Write PRD/issues in the project's language; ritual names and `loom:` markers stay English.
 
 ## Process — three phases, three files

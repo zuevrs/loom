@@ -145,8 +145,6 @@ function validateWorkspaceRepositories(profile) {
   for (const repo of profile.repositories) {
     const path = resolve(profile.root, repo.path);
     if (!existsSync(resolve(path, ".git"))) throw new Error(`repository is not a Git root: ${repo.path}`);
-    try { repositoryIdentity(path); }
-    catch { throw new Error(`repository is not a Git root: ${repo.path}`); }
     if (repo.remote !== undefined) {
       let actual;
       try { actual = execFileSync("git", ["-C", path, "config", "--get", "remote.origin.url"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "pipe", "ignore"] }).trim(); }

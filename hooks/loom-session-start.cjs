@@ -1,24 +1,35 @@
 #!/usr/bin/env node
 // loom: session-start hook
-// Non-mutating. Delivers generic safety guidance and checks managed-block version.
+// Non-mutating. Syncs context pointers and checks managed-block version.
 
 "use strict";
 
 const fs = require("fs");
 const path = require("path");
-const { versionDriftWarning } = require("./stop-gate-logic.cjs");
-const { projectContext, projectContextPointers } = require("./workspace.cjs");
+const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
+const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v1.2.0";
+const MANAGED_BLOCK_VERSION = "v0.24.10";
+
+function findProjectRoot() {
+  let dir = process.cwd();
+  while (dir !== path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, "AGENTS.md"))) return dir;
+    dir = path.dirname(dir);
+  }
+  return process.cwd();
+}
 
 function run() {
-  const context = projectContext(process.cwd());
-  if (context.invalid) {
-    process.stdout.write(`# Loom session context\n\n${projectContextPointers(context).join("\n")}\n\nWorkspace behavior is disabled until the profile is repaired. Ordinary project work remains available; explicit Loom work fails closed.\n`);
+  const workspace = workspaceState(process.cwd());
+  if (workspace?.invalid) {
+    process.stdout.write(`# Loom session context\n\n${workspacePointers(findWorkspace(process.cwd())).join("\n")}\n\nWorkspace behavior is disabled until the profile is repaired. Ordinary project work remains available; explicit Loom work fails closed.\n`);
     return;
   }
-  const root = context.artifactRoot;
+  const activeWorkspace = findWorkspace(process.cwd());
+  const root = workspaceRoot(process.cwd()) || findProjectRoot();
   const pointers = [];
+  pointers.push(...workspacePointers(activeWorkspace));
 
   const agentsPath = path.join(root, "AGENTS.md");
   if (fs.existsSync(agentsPath)) {
@@ -33,21 +44,44 @@ function run() {
       );
       if (drift) pointers.push(drift);
     }
+    pointers.push(`AGENTS.md: ${agentsPath}`);
   }
 
+  if (!activeWorkspace) {
+    const contextPath = path.join(root, "CONTEXT.md");
+    if (fs.existsSync(contextPath)) pointers.push(`CONTEXT.md: ${contextPath}`);
+
+    const adrDir = path.join(root, "docs", "adr");
+    if (fs.existsSync(adrDir)) pointers.push(`ADRs: ${adrDir}/`);
+  }
+
+  const loomDir = path.join(root, ".loom");
+  if (fs.existsSync(loomDir)) {
+    pointers.push(`.loom/: ${loomDir}/`);
+  }
+
+  if (pointers.length === 0) {
+    pointers.push(
+      "No Loom project detected. Run loom-init to set up this project."
+    );
+  }
+
+  const snapshot = stateSnapshot(root);
 
   const output = [
     "# Loom session context",
-    ...(pointers.length ? ["", ...pointers] : []),
     "",
-    "Keep the universal discipline active. Ordinary prompts remain normal agent mode; reconstruct .loom state only after explicit Loom/precision/selected-issue intent.",
+    ...pointers,
+    ...(snapshot ? ["", snapshot] : []),
+    "",
+    snapshot
+      ? "Keep discipline + router active. State above is a snapshot — read the issue files before acting on them."
+      : "Keep discipline + router active. Reconstruct state from .loom/ before acting.",
   ].join("\n");
 
-  // loom: output format varies by host — Claude reads plain stdout
   process.stdout.write(output + "\n");
 }
 
-// Non-blocking hook: never fail the session over a context-pointer error.
 try {
   run();
 } catch {

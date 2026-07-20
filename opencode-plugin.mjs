@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 1.1.0
+// loom — OpenCode plugin adapter. Version: 2.0.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -20,16 +20,38 @@ const skillsDir = path.resolve(__dirname, "skills");
 
 function workspaceInjection() {
   const profile = findWorkspace(process.cwd());
-  if (!profile) return "";
-  if (profile.invalid) return `\n\n# Loom workspace error\n${workspacePointers(profile).join("\n")}\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`;
-  return `\n\n# Loom workspace\n${workspacePointers(profile).join("\n")}\nThe workspace root owns Loom state; registered service repositories remain ordinary execution targets.`;
+  if (!profile?.invalid) return "";
+  return `\n\n# Loom workspace error\n${workspacePointers(profile).join("\n")}\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`;
 }
 
-const SYSTEM_INJECTION = `${PRE_LLM}
+const SYSTEM_INJECTION = `# Loom — lazy senior dev harness
 
-# Loom entry
+Always keep Loom discipline and router active in context.
 
-Loom is opt-in. On explicit /loom, load the installed loom dispatcher skill; precision loom-* entries load their named skill. The dispatcher is the canonical owner of outcome and resume routing.`
+## Discipline
+
+Lazy senior dev mode: the best code is the code you never wrote. Lazy means efficient, not careless.
+
+Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
+
+- Prefer minimal working change over broad rewrites.
+- No unrelated refactors while implementing an issue.
+- One issue at a time; respect blocker order.
+- Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
+- Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
+- Non-trivial logic leaves one runnable check before done.
+- Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
+- No verify digest → no done.
+- Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
+- Confirm before project writes in setup/apply flows.
+
+${PRE_LLM}
+
+## Router
+
+Map intent to ritual skills: loom-init (setup) | loom-plan (plan/scope) | loom-grill (investigate/explore/decide/act) | loom-implement (build from issue) | loom-verify (check) | loom-tend (maintain). Recurring audits → recipes/ (docs/unattended.md).
+
+On explicit /loom, load the installed loom dispatcher skill. Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
 
 export default async ({ client } = {}) => {
   return {
