@@ -6,6 +6,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [2.0.1] - 2026-07-21
+
+### Highlights
+
+- **OMP command surface unified** — `/loom` dispatcher + `/loom-implement` shortcut; other rituals load through the dispatcher or skill reads (no six duplicate OMP commands).
+- **Grill research cadence** — unsettled-prerequisite rule: running exploration blocks only dependent questions; independent questions continue (partial port from upstream batch-grill-me).
+- **Orca integration guide** — [`docs/orca.md`](docs/orca.md): Loom × Orca roles, worktree gap, orchestration mapping, pilot checklist.
+
+### Migration steps
+
+- Reinstall or force-upgrade the Loom OMP plugin; restart OMP.
+- Invoke `/loom` instead of removed per-ritual OMP commands (`/loom-plan`, `/loom-init`, etc.).
+
 ## [2.0.0] - 2026-07-21
 
 Base reset to v0.24.0 skill contracts with selective improvements ported from v0.25–v1.1.
@@ -1056,7 +1069,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/zuevrs/loom/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v2.0.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10
 [0.24.9]: https://github.com/zuevrs/loom/compare/v0.24.8...v0.24.9

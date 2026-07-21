@@ -1,6 +1,6 @@
 # Loom workspaces
 
-Workspace mode is an opt-in root/context adapter for ordinary Loom. It is not a multi-repository orchestrator, runner, coordinator, or special lifecycle.
+Workspace mode is an opt-in root/context adapter for ordinary Loom. It is not a multi-repository orchestrator, runner, coordinator, or special lifecycle. For **Orca** worktrees and orchestration alongside workspace mode, see [`orca.md`](orca.md).
 
 ## Modes
 

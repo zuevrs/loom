@@ -70,9 +70,9 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 ## Quickstart
 
 1. **Install** Loom for your host (above).
-2. In your project, invoke **`loom-init`** — confirm the write plan.
-3. **`loom-plan`** for multi-session work, or **`/loom`** for a small fix (routes to Grill).
-4. **`loom-implement`** one issue at a time; ensure a **`loom-verify`** digest exists before marking done (auto-invoked on some hosts, manual on others).
+2. In your project, invoke **`/loom setup workspace`** or **`loom-init`** — confirm the write plan.
+3. **`/loom <intent>`** — routes to the right ritual (plan, grill, implement, verify, tend). Shortcut: **`/loom-implement`** when you already know the issue.
+4. Ensure a **`loom-verify`** digest exists before marking done (auto-invoked after implement on most paths).
 
 ## Upgrade
 
@@ -94,6 +94,7 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 
 | Skill | Purpose |
 |---|---|
+| `loom` | Dispatcher — routes `/loom` to the right ritual by intent |
 | `loom-init` | Project setup: managed block, `.loom/` |
 | `loom-plan` | Scope interview → PRD + issue pack |
 | `loom-grill` | Investigate, decide, act — disciplined exploration with confirmation gates; ADR + CONTEXT.md + verified code changes, no PRD/issues |
@@ -128,8 +129,8 @@ omp plugin install git:github.com/zuevrs/loom --force
 ```
 
 ```
-> Plan JWT auth feature                    # → /loom-plan (grill → PRD → issues)
-> Implement issue 001-auth-endpoint        # → loom-implement
+> /loom plan JWT auth feature              # → loom-plan (grill → PRD → issues)
+> /loom-implement                          # → issue from snapshot / named target
 > Verify                                   # → task: loom-verify-spec + loom-verify-standards
 > (agent writes ## Verify, sets Status: done — session_stop gate checks it)
 ```

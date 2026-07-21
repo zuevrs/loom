@@ -1,5 +1,5 @@
 name: loom
-version: 2.0.0
+version: 2.0.1
 description: Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.
 author: zuevrs
 provides_hooks:

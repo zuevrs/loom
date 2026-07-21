@@ -7,7 +7,7 @@ The [README](../README.md) carries the quick path: install, upgrade, uninstall, 
 | Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor | Windsurf | Kiro | Hermes | Cline | Droid | OpenClaw |
 |---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
+| Commands | yes | yes | — | `/loom` | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
 | Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 2 | — | yes | — |
 | Enforcement | Hard | Hard (Unverified) | Convention-only | Hard (Unverified) | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | AGENTS.md |
@@ -96,9 +96,10 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 | Phase | Loom | OMP feature | Why together |
 |-------|------|-------------|--------------|
-| **Plan** | `/loom-plan` → grill → PRD → issues | — | Loom planning is the `/loom-plan` command (three-phase ritual); native `/plan` is left stock OMP |
-| **Explore / debug** | `/loom-grill` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; materialize inline with gates; upgrade to `/loom-plan` if scope grows |
-| **Implement** | `loom-implement` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
+| **Entry** | `/loom` — routes by intent (plan, grill, implement, verify, tend) | `commands/` + `skills/` | One entry point; rituals stay skills, not six duplicate commands |
+| **Plan** | `/loom plan …` or skill `loom-plan` → grill → PRD → issues | — | Loom planning is the three-phase ritual; native `/plan` is left stock OMP |
+| **Explore / debug** | `/loom` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; upgrade to Plan if scope grows |
+| **Implement** | `/loom-implement` or `/loom implement …` one issue | **Advisor** (optional) | Loom scopes the slice; OMP advisor injects inline concerns each turn — teach it Loom's contracts with the [discipline profile](omp-advisor.md) |
 | **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
 | **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
 | **Multi-issue** | pick next `ready-for-agent` issue | **`omp goal`** + **goal gate** (tool_call/tool_result) | Loom tracks state on disk; OMP runs unattended with token budget. Goal mode's exit is self-judged (`goal complete` after a self-audit) — the extension blocks completion while any issue is done-without-APPROVE and appends leftover `ready-for-agent` issues to the completion result |
@@ -119,7 +120,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 ### Planning on OMP
 
-Loom planning on OMP is the **`/loom-plan`** command — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
+Loom planning on OMP starts with **`/loom`** (routes to `loom-plan`) or the precision skill **`loom-plan`** — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. OMP **`commands/`** exposes `/loom` (dispatcher) and `/loom-implement` (shortcut); other rituals load through the dispatcher or `skill://` reads. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
 
 **Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
 

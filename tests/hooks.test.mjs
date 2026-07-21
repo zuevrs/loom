@@ -985,7 +985,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const doc of [agents, initSkill]) {
     ok(doc.includes("loom-grill"), "managed block routes loom-grill");
   }
-  ok(existsSync(resolve(__dirname, "..", "commands", "loom-grill.md")), "loom-grill command exists");
+  ok(existsSync(resolve(__dirname, "..", "commands", "loom.md")), "loom dispatcher command exists");
 }
 
 // issue 03 — Plan owns the shared interview canon; Grill keeps only its ritual delta
@@ -1000,6 +1000,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   for (const phrase of [
     "One `ask` call = exactly ONE question.",
     "Resolve decision dependencies in order.",
+    "unsettled prerequisite",
     "Probe for unstated constraints.",
     "Invent edge-case scenarios",
     '"The ask tool accepts an array — one call, many questions"',
@@ -1236,10 +1237,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const toIssues = rf(resolve(__dirname, "..", "skills", "loom-plan", "TO-ISSUES.md"), "utf8");
   ok(toIssues.includes("ready-for-human"), "slicing still routes human-judgement work to ready-for-human");
 
-  // ponytail parity — all six ritual commands ship
+  // OMP command surface — dispatcher entry + implement shortcut only
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
-  const expected = ["loom-grill.md", "loom-implement.md", "loom-init.md", "loom-plan.md", "loom-tend.md", "loom-verify.md"];
-  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships exactly the six rituals (got: ${cmds.join(", ")})`);
+  const expected = ["loom-implement.md", "loom.md"];
+  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships dispatcher + implement shortcut (got: ${cmds.join(", ")})`);
 }
 
 // v0.10.0 — unattended lane + recipes + ritual upgrades (a–g)
@@ -1952,7 +1953,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   ok(read("skills/loom-plan/GRILL.md").includes("Enthusiasm is not a go"), "plan grill: enthusiasm does not authorize materialization");
   ok(read("skills/loom-grill/SKILL.md").includes("Never materialize a code write or ADR without explicit user confirmation"), "loom-grill: materialization requires explicit confirm");
   ok(/^description: Investigate/m.test(read("skills/loom-grill/SKILL.md")), "loom-grill description leads with investigate");
-  ok(/^description: Grill /m.test(read("commands/loom-grill.md")), "loom-grill command description leads with grill verb");
+  ok(/^description: Enter Loom/m.test(read("commands/loom.md")), "loom command description names the dispatcher entry");
 }
 
 // v0.16.0 — worked examples in load-bearing skills + no-op sweep
