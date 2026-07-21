@@ -16,7 +16,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v2.0.1"
+MANAGED_BLOCK_VERSION = "v2.0.2"
 
 WORKSPACE_DISCIPLINE = """
 

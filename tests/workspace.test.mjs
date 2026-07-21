@@ -211,12 +211,32 @@ try {
   ok(!existsSync(join(confirmApi, ".loom")), "confirm never writes into registered service repo");
   deepStrictEqual(new Set(listFiles(confirmApi)), beforeApi, "confirm leaves service repo files unchanged");
   ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("Custom intro"), "confirm preserves user AGENTS.md content outside managed block");
-  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v2.0.1 -->"), "confirm managed block matches loom-init template version");
+  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v2.0.2 -->"), "confirm managed block matches loom-init template version");
 
   const serviceCtx = workspace.projectContext(confirmApi);
   strictEqual(serviceCtx.mode, "workspace");
   strictEqual(serviceCtx.artifactRoot, resolve(confirmRoot));
   ok(serviceCtx.executionRoots.some((root) => resolve(root) === resolve(confirmApi)), "service-root project context keeps service as execution root");
+
+  const isoRoot = join(tmp, "isolation");
+  const isoApi = join(isoRoot, "api");
+  repo(isoApi);
+  const branchProfile = workspace.validateWorkspaceProfile({ workspace_id: "branchy", repositories: [{ path: "api" }], isolation: "branch" }, isoRoot);
+  strictEqual(branchProfile.isolation, "branch");
+  ok(!workspace.serializeWorkspaceProfile(branchProfile).isolation, "branch isolation omits default from serialized profile");
+  const orcaProfile = workspace.validateWorkspaceProfile({
+    workspace_id: "orcaw",
+    repositories: [{ path: "api" }],
+    isolation: "orca-worktree",
+    orca: { repos: { api: "repo-uuid-1" } },
+  }, isoRoot);
+  strictEqual(orcaProfile.orca.repos.api, "repo-uuid-1");
+  try {
+    workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "api" }], isolation: "orca-worktree" }, isoRoot);
+    ok(false, "orca-worktree without orca.repos should fail");
+  } catch (error) {
+    ok(error.message.includes("orca.repos"));
+  }
 
   console.log("workspace tests passed");
 } finally {

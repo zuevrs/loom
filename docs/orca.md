@@ -96,19 +96,22 @@ See Orca skills: `orca-cli` (worktrees/terminals), `orchestration` (tasks/DAG).
 For a multi-repo workspace like `Projects/test`:
 
 ```
-Projects/test/                    ← Loom workspace owner (.loom/, workspace.json)
+Projects/test/                    ← always OMP + Loom (cwd)
+  .loom/pilot/checkouts.json      ← frozen git targets for this pack
   .loom/pilot/issues/01-*.md
-  services/api/                   ← git repo; execution target
+  services/api/
   services/auth/
 ```
 
-1. Run **Plan/Implement entry** from `Projects/test` (or OMP with cwd there) so hooks resolve `mode: workspace`.
-2. Use Orca orchestration for **parallelism and deps**, not for Loom artifact ownership.
-3. Prefer **pattern A** until service-level worktrees can resolve workspace context (pattern D).
+1. Run **Plan/Implement** from `Projects/test` → `mode: workspace`.
+2. After PRD: Plan writes **checkouts.json** (Gate 1.5). Story B gets its own pack + checkouts; story A stays frozen.
+3. **`isolation: orca-worktree`** in `workspace.json` → EXECUTION phase creates Orca worktrees and records paths in checkouts.json.
+4. Pack done → [`LAND.md`](../skills/loom-tend/LAND.md): PRs prepared, **one confirm** to merge + cleanup.
 
 ## Pilot checklist
 
 - [ ] `node hooks/workspace.cjs --project-context <workspace>` → `mode: workspace`
+- [ ] `.loom/<pack>/checkouts.json` exists after Plan (workspace mode)
 - [ ] `.loom/<pack>/issues/` lint clean (`node hooks/stop-gate-logic.cjs --lint .`)
 - [ ] Orca tasks created with deps matching `Blocked by:`
 - [ ] Dispatch spec includes workspace owner path + issue file

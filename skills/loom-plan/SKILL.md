@@ -38,6 +38,7 @@ With a valid active workspace profile, write PRD/issues, CONTEXT, ADRs, and othe
 No project-file or external-state write before the current gate previews **exact target paths and actions** and receives bounded confirmation. Changed target, action, scope, or base requires a recomputed preview and renewed confirmation.
 
 - **Gate 1 (PRD/domain):** preview every file to write (PRD, CONTEXT delta, ADRs, PRODUCT/DESIGN when applicable) with the action for each; user confirms, then write.
+- **Gate 1.5 (checkouts, workspace mode only):** after PRD confirm, preview `.loom/<feature-slug>/checkouts.json` and git/Orca actions; user confirms, then write checkouts. Skip when not in workspace mode.
 - **Gate 2 (issues):** preview the complete issue breakdown and every issue file path; user confirms, then write all issue files.
 - **JIT Init:** if `.loom` persistence or enforcement is first needed and absent, offer bounded `loom-init` with an exact setup preview immediately before Gate 1 write, then return here.
 
@@ -47,7 +48,8 @@ Run the phases strictly in order. Read ONLY the current phase file — do NOT op
 
 1. **Grill** — first, brownfield check: mature repo with no `CONTEXT.md`/`PRODUCT.md` and no prior `.loom` pack? Read [`BROWNFIELD.md`](BROWNFIELD.md) and mine the repo into a draft `CONTEXT.md` before any interview. Then read [`GRILL.md`](GRILL.md) NOW and follow it. Relentless scope interview, one question per `ask` call, domain modeled inline (`CONTEXT.md` via [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), ADRs via [`ADR-FORMAT.md`](ADR-FORMAT.md)). Exit gate: user confirms shared understanding AND gives an explicit go.
 2. **PRD** — only after that go: read [`TO-PRD.md`](TO-PRD.md). Pure synthesis via [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md) (+ [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) / [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) when applicable), no re-interview. **Gate 1:** preview exact targets/actions (see Write gates); on confirmation, write. Exit gate: user confirms the PRD.
-3. **Issues** — only after PRD confirmation: read [`TO-ISSUES.md`](TO-ISSUES.md). Vertical slices, granularity quiz. **Gate 2:** preview the complete issue pack (see Write gates); on confirmation, write issue files via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md).
+3. **Checkouts** — workspace mode only, after PRD confirmation: read [`EXECUTION.md`](EXECUTION.md). **Gate 1.5:** preview `checkouts.json` and git/Orca actions; on confirmation, execute and write. Canonical single-repo mode skips this phase.
+4. **Issues** — only after PRD confirmation (and checkouts when workspace mode): read [`TO-ISSUES.md`](TO-ISSUES.md). Vertical slices, granularity quiz. **Gate 2:** preview the complete issue pack (see Write gates); on confirmation, write issue files via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md).
 
 If a phase is interrupted (dropped connection, error, user says "continue"), re-read the CURRENT phase file and resume exactly where you stopped — an interruption never advances a phase or shrinks it.
 
@@ -61,7 +63,7 @@ Fresh session per issue is recommended — pass PRD + one issue only to each Imp
 ## Hard stops
 
 - NEVER write PRD/issues without explicit user go-ahead.
-- NEVER open a later phase file before its gate (grill → go → PRD → confirm → issues).
+- NEVER open a later phase file before its gate (grill → go → PRD → confirm → [checkouts if workspace] → issues).
 - No project-file write before the gate that names exact targets and actions.
 - Phase-specific hard stops live in the phase files — they bind while that phase runs.
 
@@ -76,7 +78,7 @@ Fresh session per issue is recommended — pass PRD + one issue only to each Imp
 
 ## Done when
 
-- All three phases completed in order, both user gates passed (PRD confirmed; slices approved)
+- All phases completed in order, user gates passed (PRD confirmed; checkouts when workspace mode; slices approved)
 - Full checklist in [`TO-ISSUES.md`](TO-ISSUES.md) § "Done when" satisfied
 - Amendment route instead: delta grilled, PRD amended with a dated `## Amendments` entry, affected slices re-quizzed, user confirmed, affected `needs-info` issues flipped back to `ready-for-agent`
 - **Handoff:** after completing the pack, name the first `ready-for-agent` issue and offer to spawn implement sub-agents (`/loom-implement` or batch via `task` tool). Do not auto-start — wait for explicit user go-ahead.

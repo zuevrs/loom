@@ -19,7 +19,7 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 
 ## Workspace ownership
 
-With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run Git diffs, tests, and lint in the relevant registered service repository. Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
+With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Read `.loom/<feature>/checkouts.json` when present — edit and run tests at each repo's recorded `path` on the recorded `branch`; do not switch branches implicitly. Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
 
 ## Whole-pack and unattended intent
 

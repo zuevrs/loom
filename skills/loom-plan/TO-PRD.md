@@ -16,7 +16,7 @@ Do NOT re-interview the user — the grill already surfaced every decision. Synt
 
 **STOP: present the PRD and get explicit user confirmation.** Do not slice, do not write issues, do not open `TO-ISSUES.md` until the user confirms the PRD.
 
-After confirmation: read [`TO-ISSUES.md`](TO-ISSUES.md) and move to Phase 3.
+After confirmation: if `node hooks/workspace.cjs --project-context` → `mode: workspace`, read [`EXECUTION.md`](EXECUTION.md). Otherwise read [`TO-ISSUES.md`](TO-ISSUES.md) and move to Phase 3.
 
 ## Anti-rationalization
 

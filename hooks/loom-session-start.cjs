@@ -9,7 +9,7 @@ const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
 
-const MANAGED_BLOCK_VERSION = "v2.0.1";
+const MANAGED_BLOCK_VERSION = "v2.0.2";
 
 function findProjectRoot() {
   let dir = process.cwd();

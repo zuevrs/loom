@@ -6,6 +6,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [2.0.2] - 2026-07-21
+
+### Highlights
+
+- **Workspace checkouts** — optional `isolation` in `workspace.json` (`branch` default, `orca-worktree` + `orca.repos`); Plan Gate 1.5 writes `.loom/<pack>/checkouts.json` in workspace mode after PRD confirm.
+- **Implement reads checkouts** — edits and tests use recorded branch/path per repo; no implicit branch switching.
+- **Land pack** — `loom-tend/LAND.md`: prepare PRs, one confirm gate for merge + worktree cleanup.
+
+### Migration steps
+
+- Workspace users: re-run Plan checkouts gate for active packs, or hand-write `checkouts.json` from [`CHECKOUTS-TEMPLATE.md`](skills/loom-plan/CHECKOUTS-TEMPLATE.md).
+- Orca users: set `isolation: orca-worktree` and `orca.repos` in `workspace.json` before Plan creates worktrees.
+
 ## [2.0.1] - 2026-07-21
 
 ### Highlights
@@ -1069,7 +1082,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/zuevrs/loom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/zuevrs/loom/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v2.0.0
 [0.24.10]: https://github.com/zuevrs/loom/compare/v0.24.9...v0.24.10

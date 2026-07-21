@@ -21,6 +21,21 @@ Workspace mode uses `<workspace>/.loom/workspace.json`:
 
 Paths are relative, validated, and contained by the workspace. The profile is opt-in; no profile means canonical behavior.
 
+### Git isolation (optional)
+
+```json
+{
+  "workspace_id": "payments-platform",
+  "repositories": [ ... ],
+  "isolation": "branch"
+}
+```
+
+- **`branch`** (default) — one git branch per pack (`feat/<pack-slug>`) in registered repo paths.
+- **`orca-worktree`** — separate Orca worktree per pack per repo; requires `orca.repos` mapping repository paths to Orca repo IDs. See [`orca.md`](orca.md).
+
+After PRD confirmation, Plan writes `.loom/<pack>/checkouts.json` (workspace mode only) — branch names and absolute checkout paths for Implement. Canonical single-repo projects skip this file.
+
 ## Ownership
 
 The workspace root alone owns Loom `CONTEXT.md`, ADRs, `.loom` packs/logs/Verify records, archives, and managed blocks. Registered service repositories remain ordinary product repositories: README, API docs, runbooks, source, tests, and other product documentation stay there. Loom does not create service-local Loom artifacts.

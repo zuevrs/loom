@@ -817,7 +817,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const toPrd = rf(resolve(skillDir, "TO-PRD.md"), "utf8");
   const toIssues = rf(resolve(skillDir, "TO-ISSUES.md"), "utf8");
 
-  ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("TO-ISSUES.md"), "router points at all three phases");
+  ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("EXECUTION.md") && skill.includes("TO-ISSUES.md"), "router points at all four phases");
+  ok(skill.includes("Gate 1.5"), "plan router names checkouts gate");
   ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
   ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
   ok(grill.includes("Resume after interruptions"), "grill has interruption-resume rule");
@@ -826,6 +827,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(grill.includes("Project language from the first write"), "grill writes CONTEXT/ADR in project language immediately");
   ok(grill.includes("The interview runs in the user's language"), "grill interview itself runs in the user's language");
   ok(grill.includes("Offer an ADR"), "grill offers ADRs, never silent");
+  ok(toPrd.includes("EXECUTION.md"), "to-prd routes workspace mode to checkouts phase");
   ok(toPrd.includes("Do NOT re-interview"), "to-prd is pure synthesis");
   ok(toPrd.includes("explicit user confirmation"), "to-prd has PRD confirmation gate");
   ok(toIssues.includes("Quiz the user"), "to-issues quizzes granularity");

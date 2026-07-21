@@ -45,7 +45,7 @@ function normalizeRelativePath(path, label = "path") {
 
 function validateWorkspaceProfile(value, root) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("profile must be an object");
-  const allowedKeys = new Set(["workspace_id", "repositories", "context_paths"]);
+  const allowedKeys = new Set(["workspace_id", "repositories", "context_paths", "isolation", "orca"]);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) throw new Error(`unknown profile field: ${key}`);
   if (typeof value.workspace_id !== "string") throw new Error("workspace_id must be a string");
   const workspace_id = value.workspace_id.trim();
@@ -81,7 +81,42 @@ function validateWorkspaceProfile(value, root) {
     return portableContextPath;
   });
   if (new Set(context_paths.map((path) => path.toLowerCase())).size !== context_paths.length) throw new Error("context_paths must not contain duplicates");
-  return { workspace_id, repositories, ...(value.context_paths !== undefined ? { context_paths } : {}) };
+  const isolation = value.isolation === undefined ? "branch" : value.isolation;
+  if (isolation !== "branch" && isolation !== "orca-worktree") throw new Error('isolation must be "branch" or "orca-worktree"');
+  let orca;
+  if (value.orca !== undefined) {
+    if (!value.orca || typeof value.orca !== "object" || Array.isArray(value.orca)) throw new Error("orca must be an object");
+    for (const key of Object.keys(value.orca)) if (key !== "repos") throw new Error(`unknown orca field: ${key}`);
+    if (!value.orca.repos || typeof value.orca.repos !== "object" || Array.isArray(value.orca.repos)) throw new Error("orca.repos must be an object");
+    orca = { repos: {} };
+    for (const [repoPath, repoId] of Object.entries(value.orca.repos)) {
+      const portablePath = normalizeRelativePath(repoPath, "orca repository path");
+      if (!repositories.some((repo) => repo.path === portablePath)) throw new Error(`orca.repos references unregistered repository: ${repoPath}`);
+      if (typeof repoId !== "string" || !repoId.trim()) throw new Error(`orca.repos value must be a non-empty string: ${repoPath}`);
+      orca.repos[portablePath] = repoId.trim();
+    }
+    if (isolation !== "orca-worktree") throw new Error("orca.repos requires isolation orca-worktree");
+    if (Object.keys(orca.repos).length === 0) throw new Error("orca.repos must map at least one registered repository");
+  } else if (isolation === "orca-worktree") {
+    throw new Error("isolation orca-worktree requires orca.repos");
+  }
+  return {
+    workspace_id,
+    repositories,
+    ...(value.context_paths !== undefined ? { context_paths } : {}),
+    ...(value.isolation !== undefined ? { isolation } : {}),
+    ...(orca ? { orca } : {}),
+  };
+}
+
+function serializeWorkspaceProfile(profile) {
+  return {
+    workspace_id: profile.workspace_id,
+    repositories: profile.repositories,
+    ...(profile.context_paths ? { context_paths: profile.context_paths } : {}),
+    ...(profile.isolation && profile.isolation !== "branch" ? { isolation: profile.isolation } : {}),
+    ...(profile.orca ? { orca: profile.orca } : {}),
+  };
 }
 
 function writeWorkspaceProfile(value, root) {
@@ -90,7 +125,7 @@ function writeWorkspaceProfile(value, root) {
   const directory = resolve(workspaceRoot, ".loom");
   mkdirSync(directory, { recursive: true });
   const file = profilePath(workspaceRoot);
-  const content = `${JSON.stringify({ workspace_id: normalized.workspace_id, repositories: normalized.repositories, ...(normalized.context_paths ? { context_paths: normalized.context_paths } : {}) }, null, 2)}\n`;
+  const content = `${JSON.stringify(serializeWorkspaceProfile(normalized), null, 2)}\n`;
   if (existsSync(file) && readFileSync(file, "utf8") === content) return { changed: false, profilePath: file, backupPath: null, profile: { ...normalized, root: workspaceRoot, profilePath: file } };
   const backupPath = existsSync(file) ? `${file}.bak` : null;
   if (backupPath) copyFileSync(file, backupPath);
@@ -260,7 +295,7 @@ function workspacePointers(profile) {
   return pointers;
 }
 
-module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextPointers, nonGitOwnerWarning };
+module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, serializeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextPointers, nonGitOwnerWarning };
 
 if (require.main === module) {
   const args = process.argv.slice(2);

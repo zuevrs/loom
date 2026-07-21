@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, rmSync, copyFileSync, readdirSync } from "node:fs";
 import { join, resolve, basename } from "node:path";
 import { createRequire } from "node:module";
-const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories } = createRequire(import.meta.url)("../hooks/workspace.cjs");
+const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, serializeWorkspaceProfile } = createRequire(import.meta.url)("../hooks/workspace.cjs");
 
 function loadManagedBlock() {
   const initSkill = readFileSync(resolve(import.meta.dirname, "../skills/loom-init/SKILL.md"), "utf8");
@@ -40,7 +40,7 @@ function applyTransaction(root, agents, profile, preserveProfile = false) {
   const oldProfile = existsSync(profilePath) ? readFileSync(profilePath, "utf8") : null;
   const backupPath = `${profilePath}.bak`;
   const oldBackup = existsSync(backupPath) ? readFileSync(backupPath, "utf8") : null;
-  const profileContent = `${JSON.stringify({ workspace_id: profile.workspace_id, repositories: profile.repositories, ...(profile.context_paths ? { context_paths: profile.context_paths } : {}) }, null, 2)}\n`;
+  const profileContent = `${JSON.stringify(serializeWorkspaceProfile(profile), null, 2)}\n`;
   const agentsChanged = oldAgents !== agents.content;
   const profileChanged = !preserveProfile && oldProfile !== profileContent;
   if (!agentsChanged && !profileChanged) return { changed: false, profilePath, backupPath: null, agentsPath };

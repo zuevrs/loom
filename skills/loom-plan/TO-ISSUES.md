@@ -1,6 +1,6 @@
 # Phase 3 — Issues (vertical slices)
 
-Entry condition: the user confirmed the PRD. If not, STOP — return to `TO-PRD.md`.
+Entry condition: the user confirmed the PRD, and (in workspace mode) `checkouts.json` exists or was explicitly skipped with consent. If not, STOP — return to `TO-PRD.md` or [`EXECUTION.md`](EXECUTION.md).
 
 ## Draft slices
 
