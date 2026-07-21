@@ -79,3 +79,4 @@ Fresh session per issue is recommended — pass PRD + one issue only to each Imp
 - All three phases completed in order, both user gates passed (PRD confirmed; slices approved)
 - Full checklist in [`TO-ISSUES.md`](TO-ISSUES.md) § "Done when" satisfied
 - Amendment route instead: delta grilled, PRD amended with a dated `## Amendments` entry, affected slices re-quizzed, user confirmed, affected `needs-info` issues flipped back to `ready-for-agent`
+- **Handoff:** after completing the pack, name the first `ready-for-agent` issue and offer to spawn implement sub-agents (`/loom-implement` or batch via `task` tool). Do not auto-start — wait for explicit user go-ahead.

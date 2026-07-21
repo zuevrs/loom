@@ -30,6 +30,7 @@ Route an explicit Loom entry to exactly one existing ritual without duplicating 
 3. Classify exactly one outcome:
    - **Resolve locally** — investigate, question, or small local fix → load `loom-grill`.
    - **Plan work** — define scope, PRD, or issue pack → load `loom-plan`.
+   - **Build selected issue** — explicit issue target or resumed next-up → load `loom-implement`.
    - **Review ready work** — judge a diff/branch/ready issue → load `loom-verify`.
    - **Maintain project** — audit status, warp, debt, or stale packs → load `loom-tend`.
 4. Resolve workspace ownership per `docs/workspaces.md`: activate only at the workspace root or inside a registered repository; invalid workspace state warns and disables workspace behavior outside explicit Loom work.
