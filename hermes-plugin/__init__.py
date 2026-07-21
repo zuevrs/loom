@@ -25,10 +25,13 @@ Workspace profiles are opt-in. Hermes resolves canonical project context only at
 
 DISCIPLINE = """# Loom universal invariants (pre-turn guard)
 
+- Router is active: map intent → ritual skill before acting.
 - Ordinary prompts remain normal agent mode.
 - Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
 - Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
 - Human gate: never auto-merge, never auto-publish.
+- Maker/checker separation: Implement never self-approves.
+- No verify digest → no done.
 - Existing .loom issues marked done require an APPROVE Verify signal.
 - Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path)."""
 

@@ -47,7 +47,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 1. Treat the current workspace root as the scan root. If launched from a service Git-root, identify the intended parent only from explicit user context; do not silently create a local profile.
 2. Run the shared read-only inventory: `node scripts/inspect-workspace <root> --json`.
 3. Show a compact summary and proposed profile (`workspace_id`, `repositories`, optional `context_paths`). Do not read service source or run service tests during setup.
-4. Ask for one bounded confirmation before writing. Delegate to `scripts/setup-workspace --confirm`; writes only `<workspace>/.loom/workspace.json` through the validated atomic writer.
+4. Ask for one bounded confirmation before writing. Delegate to `node scripts/setup-workspace <root> --confirm --profile <profile.json>`; the script writes the workspace-root managed `AGENTS.md` block (when needed) and `.loom/workspace.json` in one confirmed apply (each file is replaced atomically; a crash between files may leave mixed revisions — re-run setup to reconcile). It never writes into registered service repositories.
 5. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, warn that artifacts are unversioned. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
 6. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init.
 
@@ -59,7 +59,7 @@ Merge into user's `AGENTS.md` between delimiters. Preserve all user content outs
 <!-- loom:begin version=v2.0.0 -->
 ## Loom Base Rule
 
-Always keep Loom discipline and router active in context.
+Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
 
 ### Discipline
 
@@ -68,17 +68,23 @@ Lazy senior dev mode: **the best code is the code you never wrote.** Lazy means 
 Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
 
 - Prefer minimal working change over broad rewrites.
-- No unrelated refactors while implementing an issue.
-- One issue at a time; respect blocker order.
 - Mark `loom:` comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before `done`.
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
-- No verify digest → no done.
-- Run verification commands before marking `done`.
 - Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
 - Confirm before project writes in setup/apply flows.
-- Match the user's language for project content; ritual names and `loom:` markers stay English.
+- **External prose:** product purpose in commits/PRs/comments, not mechanics. **Language:** repo convention → project → user; ritual names/`loom:` stay English. **Traceability:** issue/PRD/ADR refs in trailers/PR References, not subjects.
+
+### Loom lane
+
+Begins only after explicit `/loom`, a `loom-*` shortcut, or work on a selected Loom issue.
+
+- Use the `loom` dispatcher; reconstruct `.loom/` before selecting persisted work; explicit target wins.
+- Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
+- Workspace mode: root owns Loom artifacts; service repos are evidence/execution targets only.
+- Issue consent covers issue-scoped changes, `## Log`, Verify write-back, `Status: done` after APPROVE — not scope expansion or external actions.
+- One issue at a time; fresh maker context per issue. No verify digest → no done.
 
 ### Invariants
 
@@ -100,14 +106,9 @@ Map intent to ritual skills:
 
 **Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:**
+**Scope routing:** small fix → `loom-grill`; multi-session/underspecified → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
-- Small single-session fix → `loom-implement` directly.
-- Multi-session or inbound underspecified work → `loom-plan` first.
-- **Fresh session per issue** for Implement — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue.
-- Domain breadth (security/perf/CI) → recommend host-native skills; do not fold into Loom core.
-
-**Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
+**Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 
 ### Session state
 

@@ -17,6 +17,14 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 - Project conventions (git style, test/lint commands)
 - **Fresh session:** PRD + this issue only
 
+## Workspace ownership
+
+With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run Git diffs, tests, and lint in the relevant registered service repository. Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
+
+## Whole-pack and unattended intent
+
+Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, read and follow the canonical branch/report/never-merge contract in [`docs/unattended.md`](../../docs/unattended.md); do not recreate its runner mechanics here.
+
 ## Batch mode ("do all the issues", host goal/loop features)
 
 Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only the chain order and verify verdicts. Chaining issues inside one context is the fallback **only when the host cannot spawn sub-agents** — note the limitation in the issue comment. Either way: dependency order, one issue at a time, `loom-verify` after each — run by the **orchestrator** between sub-agents (sub-agents usually cannot spawn checker sub-sub-agents; the implement sub-agent then yields without a digest and notes that in `## Log`).
@@ -30,9 +38,13 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 - `loom-verify` stays mandatory before the PR. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
 - Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — write the status and the question into the issue file, then open a **draft PR** with whatever exists and the blocker named in the description. Silent death is the only forbidden exit.
 
-## Direct small-fix (no issue file)
+## No-issue compatibility route
 
-The router sends small single-session fixes here without a PRD or issue file. The whole process applies **except the file writes have nowhere to go**: `## Log` (step 12) and the verify verdict live in the **chat** (attended) or the **PR description** (unattended) instead of an issue file. Steps that read the issue file read the **user's fix request** instead — it is the spec source for step 1 (nothing to unblock), step 3 (ask the user directly; there is no PRD to consult), and step 11's verification evidence. Step 14's handoff has no pack to point at — skip it. The stop gate has nothing to check — there is no `Status: done` to guard — but the discipline is unchanged: no verify digest → don't declare the fix complete. If the "small fix" grows past one session or sprouts questions only Plan can answer, stop and route to `loom-plan` — that's no longer a small fix.
+A direct `loom-implement` invocation without a named issue delegates exactly one hop to [`loom-grill`](../loom-grill/SKILL.md), with **full `loom-verify` mandatory** for any applied change. Grill is the sole local-question/small-fix process. Do not re-enter Implement or the dispatcher from that handoff.
+
+## Execution consent
+
+Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions.
 
 ## Outputs
 
@@ -43,7 +55,7 @@ The router sends small single-session fixes here without a PRD or issue file. Th
 
 ## Process
 
-1. Read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. Not told which issue? The session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full — the fresh-context contract is PRD + this issue, and a field run that ignored it spent 8 turns reading five cards to pick one. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
+1. Require exactly one named issue. If none was named, use the one-hop Grill compatibility route above and stop this ritual. Read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. Not told which issue? The session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full — the fresh-context contract is PRD + this issue, and a field run that ignored it spent 8 turns reading five cards to pick one. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
 2. **Pre-flight baseline:** run the project's existing checks (test/lint commands from conventions) BEFORE touching code. A red baseline makes "tests pass" unattributable — note pre-existing failures in `## Log`; if the issue's own verification path is already red, stop and report instead of building on it.
 3. **Never invent a load-bearing decision silently.** Issue silent on output format, interface names, error contracts, edge behavior? The PRD's Implementation Decisions and Assumptions answer first; if the PRD is silent too, ask the user (attended) or flip to `needs-info` (unattended). An issue deliberately carries no file paths — interpreting it against the PRD is your job; inventing what the PRD never decided is not.
    **Surface the assumptions you do make.** The gap this guards: the PRD answered, but your reading of it isn't the only possible one. Before writing non-trivial code, print the numbered list — `Assumptions: 1. … — correct me now or I proceed with these` — to the chat (attended) or into `## Log` (unattended). An assumption surfaced costs one line; the same assumption discovered by a checker costs a REJECT lap. Trivial issues skip the block — an empty ritual is noise.
@@ -53,7 +65,7 @@ The router sends small single-session fixes here without a PRD or issue file. Th
 7. Make the smallest change satisfying acceptance criteria.
 8. **TDD for non-trivial logic:** read [`TDD.md`](TDD.md) and follow it — behavioral tests at the PRD's pre-agreed seams, red before green, vertical slices. Skip for trivial/doc edits.
    **Bug or perf regression instead of a feature?** Read [`DIAGNOSE.md`](DIAGNOSE.md) and follow it — feedback loop first, no hypothesis without a red-capable command.
-9. **Prototype spike:** timebox exploratory code; absorb validated decisions into the scoped slice. If the prototype answered a load-bearing question, keep it as primary-source evidence on a throwaway branch (`prototype/<slug>`) and record its pointer (branch + commit) in `## Log`. Never merge prototype branches.
+9. **Prototype spike:** timebox exploratory code; absorb validated decisions into the scoped slice. Prototype evidence must be durable, independently inspectable, and accessible to later maker/checker contexts through a stable pointer (a throwaway branch `prototype/<slug>` + commit, a durable host artifact, or an external primary source). Ephemeral scratch is insufficient unless persisted durably. A user-confirmed inline result is a user-owned assumption/decision, not prototype evidence — it cannot silently become production code. Record the pointer in `## Log`. Never merge prototype branches.
 10. Leave **one runnable check** (proportional).
 11. Run issue verification commands; capture evidence in the issue comment **silent pass, loud fail** — a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim; pasting green walls buries the one line that matters. Climb the **verification ladder** as far as the repo allows: static (lint/typecheck) → tests → a smoke run of the touched behavior. Depth is proportional to the change — but skipping a rung the repo already has is a gap the checker will name.
 12. **Log as you go, not at the end.** Append a `## Log` bullet (before `## Status`) at the moment a key decision, deviation from the issue as written, or open question happens — 3–5 bullets per issue, not a diary. A session that dies mid-implement changes no status and writes no report; bullets written in the moment are the only trace the next session inherits. At this step: re-read and trim the Log, don't write it from memory. This is the maker's claim; the checker compares it against the actual diff. The shape:
@@ -136,7 +148,7 @@ Done has two layers: the issue's **acceptance criteria** say what *this slice* m
 
 - Issue verification commands pass
 - Runnable check exists and passes
-- `## Log` written into the issue file (decisions, deviations, open questions) — chat/PR for a direct small-fix
+- `## Log` written into the issue file (decisions, deviations, open questions)
 - **`loom-verify` digest produced** with Verdict + Sub-agent evidence (or documented host limitation)
-- Issue not marked `Status: done` until verify APPROVE — for a direct small-fix, completion = the digest in chat/PR (no status to set)
+- Issue not marked `Status: done` until verify APPROVE
 - Handoff line delivered: next unblocked issue named, fresh session recommended (issue-pack work only)

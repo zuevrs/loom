@@ -54,7 +54,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 |------|---------|-----------|--------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | **verified** (live full cycle: init → implement → checkers → stop gate) |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live sessions) |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | implemented (extension + stop-gate logic unit-tested; live stop/verify batch not in CI) |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (live smoke: managed block + 6 skills in context) |
@@ -71,7 +71,7 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 
 1. **Install** Loom for your host (above).
 2. In your project, invoke **`loom-init`** — confirm the write plan.
-3. **`loom-plan`** for multi-session work (or **`loom-implement`** directly for a small fix).
+3. **`loom-plan`** for multi-session work, or **`/loom`** for a small fix (routes to Grill).
 4. **`loom-implement`** one issue at a time; ensure a **`loom-verify`** digest exists before marking done (auto-invoked on some hosts, manual on others).
 
 ## Upgrade
@@ -105,7 +105,7 @@ A dead hook is silent — the session just runs without enforcement. Run `--doct
 
 Where the host supports them, Loom uses up to three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
 
-Hard enforcement is directly evidenced on Claude Code, Cursor, and OMP: done-without-APPROVE blocks the first stop (exit 2 on Stop-hook hosts), forcing one forced lap, then a repeated unresolved stop is allowed with a warning so headless runs cannot loop forever. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. OpenCode and Hermes are **Soft** runtime guidance; Pi, Windsurf, Kiro, Cline, and OpenClaw are **Convention-only**. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
+Hard enforcement is directly evidenced on Claude Code and Cursor: done-without-APPROVE blocks the first stop (exit 2 on Stop-hook hosts), forcing one forced lap, then a repeated unresolved stop is allowed with a warning so headless runs cannot loop forever. OMP ships the same intended hard path via `session_stop`, but remains **Hard (Unverified)** pending live-host evidence in CI. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. OpenCode and Hermes are **Soft** runtime guidance; Pi, Windsurf, Kiro, Cline, and OpenClaw are **Convention-only**. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
 
 Checkers default to the host's **fast/cheap tier** — judging is cheaper than making — and your host config always wins.
 
@@ -141,7 +141,7 @@ Three enforcement layers (TTSR reminder, `session_stop` hard gate, custom verify
 - Hooks are non-mutating — they never edit files; enforcement blocks only at the Stop gate.
 - Work needing human judgement (auth, payments, secrets) is routed `ready-for-human` at planning time.
 - No auto-merge, no auto-publish, no silent self-rewrite.
-- `v0.x` contracts may evolve; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
+- Contracts evolve with SemVer; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
 
 ## Contributing
 

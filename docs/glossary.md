@@ -28,6 +28,14 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 **`loom:`** — Marker used only for deliberate simplifications that cut a real corner; must name the ceiling and upgrade path.
 
+**Loom lane** — Opt-in ritual discipline activated by explicit `/loom`, a `loom-*` shortcut, or selected Loom issue work. Ordinary prompts stay normal agent mode.
+
+**Dispatcher** — The non-ritual `loom` skill. Reconstructs state, selects one public outcome, loads exactly one ritual, and disappears.
+
+**Project-nonmutating** — Reads and commands reasonably expected not to modify tracked/generated project content or external state.
+
+**Apply gate** — Explicit consent bound to exact targets/actions and current base; changed scope or base renews the gate.
+
 ## Rituals
 
 **Ritual** — Named flow: Init, Plan, Grill, Implement, Verify, Tend.
@@ -51,6 +59,10 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 **Issue** — One grabbable slice under `.loom/<feature>/issues/`.
 
 **Managed block** — Delimited section (`<!-- loom:begin -->…<!-- loom:end -->`) injected into `AGENTS.md` for host-agnostic discipline delivery.
+
+## Workspace
+
+**Workspace mode** — Explicit opt-in profile (`.loom/workspace.json`) for a directory containing independent Git repositories. The workspace root owns Loom artifacts; registered repositories are execution targets. Does not change canonical single-repository mode.
 
 ## Status vocabulary
 

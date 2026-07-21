@@ -5,7 +5,7 @@ This file demonstrates the managed block that `loom-init` writes into your proje
 <!-- loom:begin version=v2.0.0 -->
 ## Loom Base Rule
 
-Always keep Loom discipline and router active in context.
+Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
 
 ### Discipline
 
@@ -14,17 +14,23 @@ Lazy senior dev mode: **the best code is the code you never wrote.** Lazy means 
 Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
 
 - Prefer minimal working change over broad rewrites.
-- No unrelated refactors while implementing an issue.
-- One issue at a time; respect blocker order.
 - Mark `loom:` comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before `done`.
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
-- No verify digest → no done.
-- Run verification commands before marking `done`.
 - Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
 - Confirm before project writes in setup/apply flows.
-- Match the user's language for project content; ritual names and `loom:` markers stay English.
+- **External prose:** product purpose in commits/PRs/comments, not mechanics. **Language:** repo convention → project → user; ritual names/`loom:` stay English. **Traceability:** issue/PRD/ADR refs in trailers/PR References, not subjects.
+
+### Loom lane
+
+Begins only after explicit `/loom`, a `loom-*` shortcut, or work on a selected Loom issue.
+
+- Use the `loom` dispatcher; reconstruct `.loom/` before selecting persisted work; explicit target wins.
+- Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
+- Workspace mode: root owns Loom artifacts; service repos are evidence/execution targets only.
+- Issue consent covers issue-scoped changes, `## Log`, Verify write-back, `Status: done` after APPROVE — not scope expansion or external actions.
+- One issue at a time; fresh maker context per issue. No verify digest → no done.
 
 ### Invariants
 
@@ -46,14 +52,9 @@ Map intent to ritual skills:
 
 **Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:**
+**Scope routing:** small fix → `loom-grill`; multi-session/underspecified → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
-- Small single-session fix → `loom-implement` directly.
-- Multi-session or inbound underspecified work → `loom-plan` first.
-- **Fresh session per issue** for Implement — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue.
-- Domain breadth (security/perf/CI) → recommend host-native skills; do not fold into Loom core.
-
-**Ambiguous active build:** list issues with `Status: ready-for-agent` under `.loom/*/issues/` and ask **one** clarifying question.
+**Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 
 ### Session state
 

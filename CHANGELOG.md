@@ -8,20 +8,40 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [2.0.0] - 2026-07-21
 
-Base reset to v0.24.0 skill contracts with selective improvements from later work.
+Base reset to v0.24.0 skill contracts with selective improvements ported from v0.25–v1.1.
 
 ### Highlights
 
-- **Full ritual contracts restored.** Implement, Verify, Plan, and Grill keep v0.24 executable depth instead of v1.2 compressed stubs.
-- **Unified `/loom` entry.** Dispatcher routes to one ritual with one-hop handoffs and explicit workspace setup.
-- **Workspace support.** Opt-in `.loom/workspace.json`, inspect/setup scripts, and topology-aware session recovery without per-prompt tax on valid profiles.
-- **Host enforcement.** OMP goal-complete gate, Hermes explicit project-context bridge, and stop-gate ESCALATE handling.
-- **Grill quality.** v0.24.1–v0.24.10 patches plus tiered small-fix verify and research contract.
+- **Full ritual contracts restored.** Implement, Verify, Plan, and Grill keep v0.24 executable depth instead of later compressed stubs.
+- **Unified `/loom` dispatcher.** Outcome-first entry routes to one ritual with one-hop handoffs and explicit workspace setup.
+- **Loom lane guard.** Ordinary prompts remain normal agent mode; ritual discipline activates only on explicit Loom intent.
+- **Workspace support.** Opt-in `.loom/workspace.json` as root/context adapter — no coordinator, no fingerprints, no task manifests.
+- **Bounded write consent.** Plan and Grill preview exact targets/actions before writes; changed scope renews confirmation.
+- **Pending domain delta.** Interview resolves terms inline; `CONTEXT.md` flushes at Gate 1, not immediately.
+- **Standards-only Verify branch.** No issue/PRD → Standards review only; verdict cannot complete a Loom issue.
+- **Two-strikes rule.** Second overlapping REJECT is a stop signal, not a third lap.
+- **Purpose-led external prose.** Commits, PRs, and reports describe product purpose; traceability via References sections.
+- **Proportional research.** Local-first, primary sources, conditional consent only for external tools with cost/egress.
+- **One outcome per Tend invocation.** Strongest evidence-backed finding; no mandatory sweep.
+- **Execution consent (Implement).** Named issue authorizes issue-scoped changes; no scope expansion.
+- **No-issue compatibility route.** `loom-implement` without issue delegates to Grill with mandatory Verify.
+- **Prototype evidence safety.** Must be durable and inspectable; cannot silently become production code.
+- **Host enforcement.** OMP dual gate (goal-complete + session_stop), Hermes project-context bridge, stop-gate ESCALATE handling.
+- **Grill quality.** v0.24.1–v0.24.10 patches: edge-case checkpoint, marker narrowing, research provenance, verdict ordering.
+
+### Not ported (by design)
+
+- Hash-bound consent (file-preview without content hashes is sufficient)
+- Frozen task manifests and fingerprints (deferred per-task targets/context to v2.1)
+- Per-turn context injection from compressed skill bodies
+- Phrase-matching canaries inside skill files
+- Pending-delta as a separate file (inline delta is better)
 
 ### Migration steps
 
 - Reinstall or force-upgrade the Loom plugin, then restart the host process.
 - Run `node ~/.loom/scripts/install.mjs --doctor` after upgrade.
+- Refresh the managed block: enter `/loom` and accept the JIT Init prompt.
 - If you used v0.25–v1.1 tags, treat this as a clean major reset — reinstall from `main` at `v2.0.0`.
 
 ## [0.24.10] - 2026-07-15

@@ -5,23 +5,16 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, rmSync,
 import { join, resolve, basename } from "node:path";
 import { createRequire } from "node:module";
 const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories } = createRequire(import.meta.url)("../hooks/workspace.cjs");
-const MANAGED_BLOCK = `<!-- loom:begin version=v1.2.0 -->
-## Loom Base Rule
 
-Ordinary work stays ordinary; explicit Loom intent uses the \`loom\` router.
-
-- Minimal discipline: understand the flow, then prefer YAGNI → reuse → platform/stdlib → installed dependency → minimum checked change; protect trust boundaries, security, data loss, accessibility, and explicit requirements.
-- Human gate: never auto-merge or auto-publish.
-- Durable writes require a bounded preview of exact targets/actions and base; changed repository, scope, target, action, or base requires renewed consent. Workspace owners keep Loom artifacts at the workspace root.
-- One selected issue per fresh maker context; respect blockers. Implement never self-approves; maker/checker roles stay separate.
-- \`Status: done\` requires a \`## Verify\` line starting with \`APPROVE\`; no APPROVE means no done.
-- Named-issue consent covers only issue-scoped changes, Log, Verify write-back, and approved status transition; no external action.
-- Project content follows repository language, then user language; ritual names and \`loom:\` markers stay English.
-
-Statuses: \`needs-triage\`, \`needs-info\`, \`ready-for-agent\`, \`ready-for-human\`, \`done\`, \`wontfix\`.
-<!-- loom:end -->`;
+function loadManagedBlock() {
+  const initSkill = readFileSync(resolve(import.meta.dirname, "../skills/loom-init/SKILL.md"), "utf8");
+  const match = initSkill.match(/```markdown\n(<!-- loom:begin[\s\S]*?<!-- loom:end -->)\n```/);
+  if (!match) throw new Error("managed block template missing from skills/loom-init/SKILL.md");
+  return match[1];
+}
 
 function managedAgents(root) {
+  const MANAGED_BLOCK = loadManagedBlock();
   const path = join(root, "AGENTS.md");
   if (!existsSync(path)) return { path, content: `${MANAGED_BLOCK}\n`, status: "will-create", changed: true };
   const source = readFileSync(path, "utf8");

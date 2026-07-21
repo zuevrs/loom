@@ -15,25 +15,30 @@ Investigate a question, resolve it through disciplined interview, then materiali
 - The question or topic (explicit or inferred from the user's trigger)
 - Repo context if the topic touches it (explore before asking)
 
+## Workspace ownership
+
+With a valid active workspace profile, write `CONTEXT.md`, ADRs, and `.loom/research/` notes only under the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run reads, diffs, and gates in the relevant registered service repository. Loom artifacts belong at the workspace owner, not inside registered service repositories.
+
 ## Outputs
 
 - Decisions → lightweight ADR (`docs/adr/NNNN-<slug>.md`: Question / Decision / Why) — only when all three hold: hard to reverse + surprising without context + result of a real trade-off
-- Domain knowledge → `CONTEXT.md` updates (written inline as terms resolve — no separate confirmation)
+- Domain knowledge → pending `CONTEXT.md` delta (maintained inline as terms resolve; flushed at action gate)
 - Code changes → verified by objective gates (confirmation required)
 - No PRD, no issues, no digest file
 
 ## Process
 
 1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a PRD and issue pack.
-2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, inline `CONTEXT.md`, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and PRD/issue exit gate in Plan; return here when the interview crystallises into an action or the user stops.
+2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, pending domain delta, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and PRD/issue exit gate in Plan; return here when the interview crystallises into an action or the user stops.
 3. **Resolve the thread** — follow the canon until the load-bearing branches are explicit. End naturally when investigation finds nothing actionable. When something becomes actionable, continue through Grill's gate below.
 4. **Action gate** — state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
    - **Pre-materialize edge-case checkpoint (code changes only).** Before the first code materialization in this thread, ask one adversarial edge-case question with a recommendation. Resolve it through the shared canon before proposing materialization.
    - Wait for explicit user confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", and "love it" resolve a branch, not an action gate.
    - Treat a refusal as a leaning and resume the canonical interview.
-   - Continue writing resolved glossary terms to `CONTEXT.md` inline; those glossary writes are part of the canonical interview cadence and require no separate action confirmation.
+   - Continue maintaining resolved glossary terms in the pending domain delta inline; the delta flushes to `CONTEXT.md` as part of the action gate's bounded apply.
+   - Preview exact files and actions in the bounded apply proposal; changed target, action, scope, or base requires renewed confirmation.
 5. **Materialize** — after confirmation:
-   - **Code changes**: before the first code change in the session, run the repo's objective gates to establish a baseline. Make the minimal diff, then run the gates again. Report failures and keep passing checks quiet.
+   - **Code changes**: before the first code change in the session, run the repo's objective gates to establish a baseline. If the target behavior's verification path is already red, report the inherited failure and stop before applying. Make the minimal diff, then run the gates again. Report failures and keep passing checks quiet.
    - **ADR** (only when the canon's triple-gate holds: hard to reverse + surprising + trade-off): use the lightweight format —
      ```
      # Question
@@ -44,7 +49,7 @@ Investigate a question, resolve it through disciplined interview, then materiali
      <1-2 sentences>
      ```
    - Return to the canonical interview while questions remain.
-6. **Scope signal** — when materialized changes touch >3 files or require >1 commit, say *"Scope is growing. Recommend Plan for the rest — continue here?"* in the user's language. Let the user choose the route.
+6. **Semantic boundary** — recommend Plan when the work no longer fits a coherent local, single-session resolution or needs load-bearing decisions or issue slicing. File and commit counts are not scope proxies. Before compaction/interruption, offer a checkpoint; keep pending changes in conversation until the checkpoint confirms.
 
 ## The distinct cadence, worked
 
@@ -65,27 +70,30 @@ This exchange begins after the canonical interview has resolved the shared decis
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
 - After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical checker tiers in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md): mechanical typo/format → objective checks; semantic docs/config/code → fresh Standards checker; behavioral/risk or explicit contract → Spec + Standards; ambiguity escalates.
 - Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior requires a risk note and full Spec + Standards Verify even for a small fix.
-- Full `loom-verify` (spec + standards checkers) → use when the scope signal fires and the user chooses to continue in Grill, or when a risk trigger appears.
+- Full `loom-verify` (spec + standards checkers) → use when the semantic boundary fires and the user chooses to continue in Grill, or when a risk trigger appears.
+- Small fixes without an issue file: the verify digest lives in **chat** (attended) or the **PR description** (unattended); no issue write-back or status change.
 
 ## Hard stops
 
-- **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing. Enthusiasm resolves a branch, not an action gate. (`CONTEXT.md` glossary writes remain the inline canonical exception.)
+- **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing. Enthusiasm resolves a branch, not an action gate.
 - Never write PRD or issue cards — that is Plan territory.
 - Never publish, deploy, or perform another irreversible action without explicit confirmation that names the action.
-- Never expand scope or auto-upgrade to Plan — signal the threshold and let the user choose.
+- Never expand scope or auto-upgrade to Plan — signal the semantic boundary and let the user choose.
 - Complete the pre-materialize edge-case checkpoint before the first code write.
+- If baseline gates for the target path are red, stop and report inherited failure before applying.
 - Run objective gates after every code change; materialization is verified only when they pass.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
-| User wants full feature scope mid-Grill | Give the scope signal and let the user choose Grill or Plan |
+| User wants full feature scope mid-Grill | Give the semantic boundary signal and let the user choose Grill or Plan |
 | Investigation finds nothing actionable | End naturally; the conversation is the outcome |
 | Pre-materialize edge case is unresolved | Resume the canonical interview until the edge decision is explicit |
 | Confirmation is absent or ambiguous | Restate the concrete action and wait for explicit confirmation |
+| Baseline or target path is red | Report the inherited failure and stop before applying |
 | Gates fail after materialization | Fix inline, re-run the gates, and report the result |
-| Scope signal fires | State the threshold and let the user choose the route |
+| Work no longer fits a coherent local/single-session resolution | Recommend Plan and let the user choose |
 
 ## Anti-rationalization
 
@@ -102,5 +110,5 @@ Shared interview excuses and responses live only in Plan's canonical [`GRILL.md`
 
 - The user signals stop; Grill stays active while they continue the thread
 - Every materialized change passes the objective gates
-- Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are in `CONTEXT.md`
+- Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are flushed to `CONTEXT.md` at the action gate
 - Every proposed action is either explicitly confirmed and materialized or explicitly declined

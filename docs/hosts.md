@@ -9,7 +9,7 @@ The [README](../README.md) carries the quick path: install, upgrade, uninstall, 
 | Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
 | Commands | yes | yes | — | — | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
 | Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 2 | — | yes | — |
-| Enforcement | Hard | Hard (Unverified) | Convention-only | Hard | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
+| Enforcement | Hard | Hard (Unverified) | Convention-only | Hard (Unverified) | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
 | Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | AGENTS.md |
 
 `Hooks` counts callbacks that perform observable work, not registered names. OMP's three are `session_start`, `before_agent_start`, and `session_stop`. Hermes has two working callbacks (`on_session_start` and `pre_llm_call`); its registered no-op `subagent_start` callback is not counted. OpenClaw has no shipped extension.
@@ -31,7 +31,7 @@ Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through skills and managed in
 
 | Host | Tier | Mechanism | Evidence-backed claim |
 |------|------|-----------|----------------------|
-| **OMP** | Hard | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | `session_stop` prevents the first unresolved stop; TTSR and agents are additional reminder/review layers |
+| **OMP** | Hard (Unverified) | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | Bridge and stop-gate logic are unit-tested; live OMP stop blocking and native verify batch are not yet evidenced in CI |
 | **Claude Code** | Hard | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Live stop contract prevents done-without-APPROVE once, then permits the repeated state |
 | **Codex** | Hard (Unverified) | Same shipped `Stop` hook | Plugin-root expansion and stop blocking still need live-host evidence |
 | **Cursor** | Hard | Generated `Stop` hook invokes `node hooks/stop-gate-logic.cjs --hook` | Installed-command regression exercises exit 2 for unresolved state and exit 0 for verified state |
@@ -39,7 +39,7 @@ Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through skills and managed in
 | **OpenCode / Hermes** | Soft | System transform / two working lifecycle callbacks | Runtime context is injected, but no stop primitive prevents completion |
 | **Pi / Windsurf / Kiro / Cline / OpenClaw** | Convention-only | Skills and managed instructions | No shipped lifecycle stop gate; OpenClaw has no extension |
 
-**OMP:** the first stop for a done-without-APPROVE state returns control to the agent. A repeated stop with the same unresolved issue set is permitted with an explicit warning; resolution or any change to that set resets the forced lap. TTSR remains the stream reminder, and custom agents provide structured verify.
+**OMP:** the extension implements the intended first-stop contract for done-without-APPROVE (unit-tested bridge logic; live OMP blocking not yet evidenced in CI). A repeated stop with the same unresolved issue set is permitted with an explicit warning; resolution or any change to that set resets the forced lap. TTSR remains the stream reminder, and custom agents provide structured verify when OMP discovers them.
 
 **Known OMP limitation:** some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work.
 

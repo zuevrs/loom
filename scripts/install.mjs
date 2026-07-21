@@ -77,14 +77,36 @@ function fail(msg) {
   process.exit(2);
 }
 
+function isLoomSkillTree(targetPath) {
+  const resolved = resolve(targetPath);
+  if (basename(dirname(resolved)) !== "skills") return false;
+  const loomRoot = dirname(dirname(resolved));
+  const pkgPath = join(loomRoot, "package.json");
+  if (existsSync(pkgPath)) {
+    try {
+      if (JSON.parse(readFileSync(pkgPath, "utf8")).name === "loom") return true;
+    } catch {}
+  }
+  return existsSync(join(loomRoot, "hooks", "stop-gate-logic.cjs"));
+}
+
 // Link src → dest. Symlink preferred; copy fallback for hosts without symlink rights.
 function linkOrCopy(src, dest, { isDir }) {
   if (existsSync(dest) || isSymlink(dest)) {
-    if (isSymlink(dest) && resolve(readlinkSync(dest)) === resolve(src)) {
-      return "already-linked";
+    if (isSymlink(dest)) {
+      const target = resolve(readlinkSync(dest));
+      if (target === resolve(src)) return "already-linked";
+      // Replace stale links only when the target lives in a verified Loom tree.
+      if (isLoomSkillTree(target)) {
+        rmSync(dest, { recursive: true, force: true });
+      } else {
+        skipped += 1;
+        return "skipped-exists";
+      }
+    } else {
+      skipped += 1;
+      return "skipped-exists";
     }
-    skipped += 1;
-    return "skipped-exists";
   }
   try {
     symlinkSync(src, dest, isDir && IS_WIN ? "junction" : undefined);

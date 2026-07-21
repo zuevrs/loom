@@ -26,7 +26,7 @@ function workspaceInjection() {
 
 const SYSTEM_INJECTION = `# Loom — lazy senior dev harness
 
-Always keep Loom discipline and router active in context.
+Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
 
 ## Discipline
 
@@ -35,23 +35,25 @@ Lazy senior dev mode: the best code is the code you never wrote. Lazy means effi
 Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
 
 - Prefer minimal working change over broad rewrites.
-- No unrelated refactors while implementing an issue.
-- One issue at a time; respect blocker order.
 - Mark loom: comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
 - Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
 - Non-trivial logic leaves one runnable check before done.
 - Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
-- No verify digest → no done.
 - Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
 - Confirm before project writes in setup/apply flows.
+- External prose: product purpose in commits/PRs/comments. Language: repo convention → project → user; ritual names/loom: stay English. Traceability: issue/PRD/ADR refs in trailers/PR References.
 
 ${PRE_LLM}
+
+## Loom lane
+
+Begins only after explicit /loom, a loom-* shortcut, or work on a selected Loom issue. Ordinary prompts remain normal agent mode.
 
 ## Router
 
 Map intent to ritual skills: loom-init (setup) | loom-plan (plan/scope) | loom-grill (investigate/explore/decide/act) | loom-implement (build from issue) | loom-verify (check) | loom-tend (maintain). Recurring audits → recipes/ (docs/unattended.md).
 
-On explicit /loom, load the installed loom dispatcher skill. Small fix → loom-implement directly. Multi-session → loom-plan first. Fresh session per issue.`;
+On explicit /loom, load the installed loom dispatcher skill. Small fix → loom-grill. Multi-session → loom-plan first. Fresh session per issue.`;
 
 export default async ({ client } = {}) => {
   return {

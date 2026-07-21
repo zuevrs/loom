@@ -126,7 +126,7 @@ function run(script, env = {}) {
 
 // --- Stop gate tests ---
 
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, symlinkSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, symlinkSync, readlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -330,7 +330,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
   const verify = read("skills/loom-verify/SKILL.md");
-  ok(verify.includes("Every verdict is persisted"), "verify persists REJECT too");
+  ok(verify.includes("Every Spec-backed verdict is persisted"), "verify persists REJECT too");
   ok(/REJECT — \{date\}/.test(verify), "verify documents REJECT write-back format");
   ok(verify.includes("line starting with `APPROVE`"), "verify documents APPROVE-line gate contract");
 
@@ -784,7 +784,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes("lightweight ADR"), "grill writes lightweight ADRs as trace");
     ok(grill.includes("Question / Decision / Why"), "grill ADR format is three-section lightweight");
     ok(grill.includes("run the repo's objective gates"), "grill runs gates after code changes");
-    ok(grill.includes(">3 files"), "grill has scope threshold signal");
+    ok(grill.includes("Semantic boundary") || grill.includes("coherent local, single-session resolution"), "grill has semantic scope boundary signal");
     ok(grill.includes("No PRD, no issues, no digest file"), "grill explicitly excludes digest from outputs");
     ok(!grill.includes("NEVER enact what was discussed"), "grill no longer forbids old enact hard stop");
     ok(grill.includes("Never materialize a code write or ADR without explicit user confirmation"), "grill guards materialization with confirm");
@@ -821,8 +821,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
   ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
   ok(grill.includes("Resume after interruptions"), "grill has interruption-resume rule");
-  ok(grill.includes("Write `CONTEXT.md` inline"), "grill writes CONTEXT inline");
-  ok(grill.includes("before asking the next question"), "grill writes each term before the next question, not batched");
+  ok(grill.includes("pending domain delta inline"), "grill maintains pending CONTEXT delta inline");
+  ok(grill.includes("before asking the next question"), "grill updates delta before the next question, not batched");
   ok(grill.includes("Project language from the first write"), "grill writes CONTEXT/ADR in project language immediately");
   ok(grill.includes("The interview runs in the user's language"), "grill interview itself runs in the user's language");
   ok(grill.includes("Offer an ADR"), "grill offers ADRs, never silent");
@@ -1156,6 +1156,41 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     strictEqual(runInstaller(["--doctor"]).code, 0, "doctor is clean again after relinking from one tree");
   }
 
+  // foreign fork with skills/<name> layout but not a Loom tree: install must not delete it
+  {
+    const foreignTree = join(tmpHome, "foreign-fork");
+    mkdirSync(join(foreignTree, "skills", "loom-plan"), { recursive: true });
+    writeFileSync(join(foreignTree, "skills", "loom-plan", "SKILL.md"), "foreign\n");
+    writeFileSync(join(foreignTree, "package.json"), JSON.stringify({ name: "not-loom", version: "9.9.9" }));
+    const foreignLink = join(tmpHome, ".agents", "skills", "loom-plan");
+    rmSync(foreignLink, { recursive: true, force: true });
+    symlinkSync(join(foreignTree, "skills", "loom-plan"), foreignLink);
+    const foreignInstall = runInstaller(["--cursor"]);
+    ok(foreignInstall.code === 0 || foreignInstall.code === 1, "install completes when a foreign skill link squats the name");
+    strictEqual(resolve(readlinkSync(foreignLink)), resolve(join(foreignTree, "skills", "loom-plan")), "foreign skill symlink survives install");
+    ok(foreignInstall.out.includes("skipped"), "installer reports skipped foreign path");
+  }
+
+  // stale link to an older Loom clone: install replaces it
+  {
+    const oldLoom = join(tmpHome, "old-loom");
+    mkdirSync(join(oldLoom, "hooks"), { recursive: true });
+    mkdirSync(join(oldLoom, "skills", "loom-plan"), { recursive: true });
+    writeFileSync(join(oldLoom, "package.json"), JSON.stringify({ name: "loom", version: "0.1.0" }));
+    writeFileSync(join(oldLoom, "hooks", "stop-gate-logic.cjs"), "// stub\n");
+    writeFileSync(join(oldLoom, "skills", "loom-plan", "SKILL.md"), "old\n");
+    const staleLink = join(tmpHome, ".agents", "skills", "loom-plan");
+    rmSync(staleLink, { recursive: true, force: true });
+    symlinkSync(join(oldLoom, "skills", "loom-plan"), staleLink);
+    const loomRoot = resolve(__dirname, "..");
+    runInstaller(["--cursor"]);
+    strictEqual(
+      resolve(readlinkSync(staleLink)),
+      resolve(join(loomRoot, "skills", "loom-plan")),
+      "stale Loom clone skill link is replaced by the current install tree"
+    );
+  }
+
   // a foreign dir squatting on a loom skill name: install skips it, uninstall must not delete it
   const squatter = join(tmpHome, ".agents", "skills", "loom-tend");
   rmSync(squatter, { recursive: true, force: true });
@@ -1221,7 +1256,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
 
   const doc = read("docs/unattended.md");
-  for (const phrase of ["Branch, not trunk", "PR is the exit", "Verify still runs", "draft PR"]) {
+  for (const phrase of ["Branch, not trunk", "Report is the exit", "Verify still runs", "draft PR"]) {
     ok(doc.includes(phrase), `unattended doc states: ${phrase}`);
   }
   ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
@@ -1402,7 +1437,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(read("docs/unattended.md").includes("also run **attended**"), "unattended doc explains chat invocation");
 
   const tend = read("skills/loom-tend/SKILL.md");
-  ok(tend.includes("Recipe check"), "tend offers graduating recurring audits to recipes");
+  ok(tend.includes("Recurring audits"), "tend offers graduating recurring audits to recipes");
   ok(tend.includes(".loom/maintenance/issues/"), "tend knows the recipe stub inbox");
 
   const routerLine = "recurring audit on a schedule";
@@ -1675,8 +1710,8 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("## Direct small-fix (no issue file)"), "implement defines the no-issue lane");
-  ok(impl.includes("chat** (attended) or the **PR description"), "small-fix Log/verdict live in chat or PR");
+  ok(impl.includes("## No-issue compatibility route"), "implement delegates no-issue invocations to grill");
+  ok(read("skills/loom-grill/SKILL.md").includes("chat** (attended) or the **PR description"), "grill small-fix verify digest lives in chat or PR");
   ok(impl.includes("Close the session"), "implement ends with the handoff step");
   ok(impl.includes("Do not start the next issue in this session"), "handoff forbids same-session continuation");
   ok(impl.includes("Second REJECT from verify with overlapping blockers"), "implement knows the two-strikes stop");
@@ -1941,7 +1976,7 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
 
   const grill = read("skills/loom-plan/GRILL.md");
   ok(grill.includes("## The cadence, worked"), "GRILL.md carries a worked exchange");
-  ok(grill.includes("updates `CONTEXT.md`"), "worked exchange shows the inline CONTEXT write");
+  ok(grill.includes("updates the pending domain delta"), "worked exchange shows the pending domain delta update");
   ok(grill.includes("want an ADR for it?"), "worked exchange offers (not writes) the ADR");
 
   // No-op sweep: restatements removed, semantics still carried by their owners.

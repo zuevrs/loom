@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -186,6 +186,37 @@ try {
   const pointerSession = execFileSync(process.execPath, [sessionStart], { cwd: pointerRepo, encoding: "utf8" });
   ok(pointerSession.includes(join(pointerRoot, "LISTED.md")), "session emits listed workspace context");
   ok(!pointerSession.includes(join(pointerRoot, "CONTEXT.md")), "session omits unlisted root CONTEXT in workspace mode");
+
+  function listFiles(dir) {
+    const out = [];
+    for (const name of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, name.name);
+      if (name.isDirectory()) out.push(...listFiles(path));
+      else out.push(path.replaceAll("\\", "/"));
+    }
+    return out.sort();
+  }
+
+  const confirmRoot = join(tmp, "confirm-root");
+  const confirmApi = join(confirmRoot, "api");
+  repo(confirmApi);
+  writeFileSync(join(confirmRoot, "AGENTS.md"), "# User\n\nCustom intro\n\n");
+  const beforeApi = new Set(listFiles(confirmApi));
+  const confirmProfilePath = join(tmp, "confirm-profile.json");
+  writeFileSync(confirmProfilePath, JSON.stringify({ workspace_id: "confirm", repositories: [{ path: "api" }] }));
+  const appliedConfirm = JSON.parse(execFileSync(process.execPath, [setup, confirmRoot, "--profile", confirmProfilePath, "--confirm"], { encoding: "utf8" }));
+  strictEqual(appliedConfirm.mode, "applied");
+  ok(existsSync(join(confirmRoot, ".loom", "workspace.json")), "confirm writes workspace profile at owner root");
+  ok(existsSync(join(confirmRoot, "AGENTS.md")), "confirm writes managed block at owner root");
+  ok(!existsSync(join(confirmApi, ".loom")), "confirm never writes into registered service repo");
+  deepStrictEqual(new Set(listFiles(confirmApi)), beforeApi, "confirm leaves service repo files unchanged");
+  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("Custom intro"), "confirm preserves user AGENTS.md content outside managed block");
+  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v2.0.0 -->"), "confirm managed block matches loom-init template version");
+
+  const serviceCtx = workspace.projectContext(confirmApi);
+  strictEqual(serviceCtx.mode, "workspace");
+  strictEqual(serviceCtx.artifactRoot, resolve(confirmRoot));
+  ok(serviceCtx.executionRoots.some((root) => resolve(root) === resolve(confirmApi)), "service-root project context keeps service as execution root");
 
   console.log("workspace tests passed");
 } finally {
