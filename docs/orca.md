@@ -75,8 +75,10 @@ orca orchestration task-create \
   --json
 
 orca orchestration task-list --ready --json
-orca orchestration dispatch --task <task_id> --to <terminal-handle> --inject --json
+orca orchestration dispatch --task <task_id> --from <coordinator-handle> --to <worker-handle> --inject --json
 ```
+
+Dispatch from a plain shell requires `--from` (or `ORCA_TERMINAL_HANDLE` in a live Orca terminal); without it: `no_active_sender_terminal`.
 
 Orca statuses (`pending` → `ready` → `dispatched` → `completed`) mirror Loom's blocker graph at runtime. **Loom remains source of truth** for `Status:` and `## Verify` — update issue files when work finishes; Orca task completion does not replace verify digest or stop gate.
 
