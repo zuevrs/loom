@@ -7,10 +7,10 @@
 # not in the stop gate, not in next-day dump archaeology.
 #
 # Install and controls: docs/omp-advisor.md in the Loom repo.
-# Enable per project: `.omp/config.yml` → `advisor:` → `enabled: true`.
-# Model: defaults to your `advisor` model role (unset, OMP falls back to the
-# slow-role chain). Judging is cheaper than making — uncomment `model:` to pin
-# your fast/cheap tier.
+# Init keeps project `advisor.enabled: false`; use manual `/advisor on` only in
+# the attended coordinator sessions documented in docs/omp-advisor.md.
+# Model: Init can copy the exact current `modelRoles.smol` ID to the project
+# advisor role. Keep the entry unpinned so that role remains the source of truth.
 
 advisors:
   - name: loom-discipline

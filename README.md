@@ -135,7 +135,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 > (agent writes ## Verify, sets Status: done — session_stop gate checks it)
 ```
 
-Three enforcement layers (TTSR reminder, `session_stop` hard gate, custom verify agents), goal-mode exit guarding for batch runs, and an advisor discipline profile — the full daily workflow and feature table: [`docs/hosts.md`](docs/hosts.md#loom--omp-maximum-synergy).
+OMP-native integration adds an optional project context/worker preset, fresh prewalk workers, disabled-by-default cheap Advisor setup, and exclusive runner routing: Orca when configured, otherwise confirmed TUI `/goal set` + a finite total `/goal budget` above already-consumed root-session tokens. After a Goal ends, drop it as appropriate and verify status with `/goal show`. The full contract is in [`docs/hosts.md`](docs/hosts.md#loom--omp-maximum-synergy).
 
 ## Safety
 

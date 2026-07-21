@@ -116,13 +116,7 @@ For a **local** recurring cadence there is also the `/loop` skill (Cursor 3.5+):
 
 ### OMP
 
-```bash
-omp goal "Run the recipe in recipes/dep-audit.md. Follow loom-implement § Unattended mode: branch, verify, PR."
-```
-
-Goal mode's exit is self-judged — the agent calls `goal complete` after its own audit, and no second pair of eyes reviews that call. The Loom extension closes the gap (maker/checker on the stop condition): completion is **blocked** while any `.loom` issue sits `done` without an APPROVE verify digest, and leftover `ready-for-agent` issues are appended to the completion result so the final report has to name them.
-
-Headless checker roles work here too: `LOOM_ROLE=spec-checker omp -p "…"`.
+OMP `/loop` and scheduled automations are explicitly deferred from Loom 3.1.0. For an attended multi-issue pack without Orca, `/loom` may preview `/goal set <objective>` plus a finite total `/goal budget` above current root-session usage. After the Goal ends, drop it as appropriate and trust `/goal show` status. This is not recurring recipe wiring. Headless checker roles remain available: `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`.
 
 ### Autonomous frameworks (OpenClaw, Hermes, and friends)
 

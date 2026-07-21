@@ -24,11 +24,11 @@ Invalid `.loom/config.json` stops before config-dependent or Git actions with re
 
 ## Whole-pack and unattended intent
 
-Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, read and follow the canonical branch/report/never-merge contract in [`docs/unattended.md`](../../docs/unattended.md); do not recreate its runner mechanics here.
+On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) for context, prewalk, Advisor, and runner routing. Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, read and follow the canonical branch/report/never-merge contract in [`docs/unattended.md`](../../docs/unattended.md); do not recreate its runner mechanics here.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
-Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only the chain order and verify verdicts. Chaining issues inside one context is the fallback **only when the host cannot spawn sub-agents** — note the limitation in the issue comment. Either way: dependency order, one issue at a time, `loom-verify` after each — run by the **orchestrator** between sub-agents (sub-agents usually cannot spawn checker sub-sub-agents; the implement sub-agent then yields without a digest and notes that in `## Log`).
+Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only blocker order and verify verdicts. `loom-verify` after each worker yields is run by the **orchestrator**. On OMP, follow the adapter's exclusive Orca-or-Goal routing; Goal must stop if fresh workers are unavailable rather than chaining issues. On other hosts, chaining is a documented fallback **only when the host cannot spawn sub-agents**; prefer attended sequential sessions and record the limitation. This fallback never applies inside OMP Goal.
 
 ## Unattended mode (background agents, CI, scheduled runs)
 

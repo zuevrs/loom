@@ -6,6 +6,19 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [3.1.0] - 2026-07-21
+
+### Highlights
+
+- **OMP-native adapter** — Loom now points OMP projects to native auto-shake, fresh prewalk workers, phase-boundary handoff rescue, disabled-by-default cheap Advisor, and tested TTSR capture without reimplementing host mechanics.
+- **Exclusive native runners** — configured Orca delegates DAG/dispatch/wait/retry mechanics to its installed orchestration skill; otherwise an explicitly requested pack may use confirmed TUI `/goal set` plus a finite `/goal budget`, with a fresh worker and coordinator Verify per issue.
+- **Safe project setup** — Init independently offers the recommended `.omp/config.yml` context/worker preset and an exact-smol Advisor role while preserving existing YAML and leaving Advisor and memory disabled. Live OMP 17.0.6 accepted the project preset (shake, 80k idle threshold, task prewalk, cheap disabled Advisor); a visible Orca worker accepted `--prewalk --config` and showed Prewalk-ready TUI state, without evidence of an actual model switch. Native `/goal set`/`budget`/`show`/`drop` lifecycle was exercised, establishing that total budgets must account for current root-session usage; this was not a full multi-issue Goal run.
+
+### Migration steps
+
+- Re-run `/loom` Init on OMP projects to preview either optional project-local preset. Existing `.omp/config.yml` files are never blindly rewritten; merge the displayed missing snippet only after its separate confirmation.
+- Replace old `omp goal ...` examples with attended TUI `/goal set <objective>` and `/goal budget <tokens>`. Do not combine Goal with configured Orca.
+
 ## [3.0.0] - 2026-07-21
 
 ### Highlights
@@ -1097,7 +1110,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/zuevrs/loom/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/zuevrs/loom/compare/v2.0.2...v3.0.0
 [2.0.2]: https://github.com/zuevrs/loom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/zuevrs/loom/compare/v2.0.0...v2.0.1

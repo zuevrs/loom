@@ -4,27 +4,17 @@ Loom's enforcement fires **before** the turn (managed block, pre-LLM invariants)
 
 The profile is one YAML file: [`templates/WATCHDOG.yml`](../templates/WATCHDOG.yml). It teaches the advisor Loom's ritual contracts as narrow fire-only-on signatures. No skills, hooks, or managed block are touched — this is optional, additive, and OMP-only (the advisor is a host feature, and Loom's boundary rule is to recommend host-native capabilities, not absorb them into core).
 
-## Install (per project, once)
+## Configure the cheap role (per project, once)
 
-```bash
-# 1. The profile — advisor discovery reads WATCHDOG.yml from the project root
-#    (a project .omp/ dir or the user agent dir ~/.omp/agent/ also work)
-cp ~/.loom/templates/WATCHDOG.yml <project>/WATCHDOG.yml
+Run `/loom` and ask for setup. Init reads `omp config get modelRoles --json`, copies the exact current `modelRoles.smol` model ID into project-local `modelRoles.advisor`, and keeps `advisor.enabled: false`. It previews the complete `<artifactRoot>/.omp/config.yml` when absent. For an existing YAML file it shows only the exact missing snippet and asks separately for a careful preserving merge; it never appends blindly or enables Advisor.
 
-# 2. Keep it on for every session in this project
-mkdir -p <project>/.omp
-printf 'advisor:\n  enabled: true\n' >> <project>/.omp/config.yml
-```
+The profile remains [`templates/WATCHDOG.yml`](../templates/WATCHDOG.yml). Use manual `/advisor on` only for long attended coordinator/Grill/Plan sessions or a complex attended coordinator Implement session. Do not use Advisor in Orca/task workers or Verify.
 
-Plugin-install users without a `~/.loom` clone: take the template from [the repo](https://github.com/zuevrs/loom/blob/main/templates/WATCHDOG.yml).
-
-**Model:** with no `model:` in the entry, OMP resolves your `advisor` model role (unset, it falls back to the slow-role chain — a strong model). Judging is cheaper than making: pin your fast/cheap tier by uncommenting `model:` in the template or setting `modelRoles: advisor:` in `~/.omp/agent/config.yml`.
-
-Step 2 appends — if `.omp/config.yml` already exists, merge the `advisor.enabled: true` key by hand instead. Prefer toggling per session? Skip step 2 and use `/advisor on` (or launch with `--advisor`).
+Fast Advisor is a behavior linter: confirmation, one-question cadence, pre-flight baseline, issue scope, and Verify discipline. It is not architecture, specification, security, or code review and never replaces independent checkers.
 
 ## What changes day to day
 
-Nothing in your commands — `/loom-plan`, `loom-implement`, verify all run as before. The advisor is passive until a signature fires:
+The sole public command remains `/loom`; it routes to Plan, Implement, or Verify as before. The advisor is passive until a signature fires:
 
 | Severity | Delivery | Loom signatures |
 |---|---|---|
@@ -45,6 +35,6 @@ Outside Loom rituals the profile stays silent by contract. Note that enabling th
 
 ## Cost and noise
 
-One extra model call per main-agent turn — fast-tier if you pinned one (see Model above; the unpinned default resolves a strong slow-chain model, which costs accordingly).
+One extra model call per main-agent turn while manually enabled. Init pins the exact current smol role ID so the behavior lint stays on the project's cheap tier.
 
 Two structural limits, observed in the field: the advisor reviews at **turn boundaries**, so drift inside a single long turn is called out only as the next turn starts — and a headless `omp -p` run can exit before the shadow speaks at all (its last-turn review dies with the process). And the advisor is **user-aligned by design**: when the user explicitly asks for the anti-pattern ("just batch all your questions"), it stays silent on purpose — the profile guards against agent drift, not user choices. Both are host mechanics, not profile knobs; interactive TUI sessions are where the profile earns its keep. The profile's instructions end every signature list with "silence otherwise", and OMP's baseline already enforces at-most-one-note-per-update, no repeats, and prefer-silence. If the shadow still nags: soften a signature's severity in `WATCHDOG.yml`, or `/advisor off` and report the false positive — a noisy watchdog is a bug, not a feature.

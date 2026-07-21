@@ -36,11 +36,12 @@ Use `.loom/workspace.json` only after explicit workspace setup. It is generated 
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-5. Detect Orca project registration project-nonmutatingly. When the CLI and registration are available, offer exactly once: `Use Orca worktrees for parallel stories?` Preview the exact write `{ "worktrees": "orca" }` to `<artifactRoot>/.loom/config.json`; write only after confirmation. Never enable automatically.
-6. When `.loom` and/or `AGENTS.md` are untracked in a Git root, offer an initial root control-plane commit with the exact paths; never commit automatically.
-7. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
-8. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
-9. If nothing needed: `No changes needed` + what was checked.
+5. On an OMP host/project only, lazy-load [`../loom/OMP.md`](../loom/OMP.md) and make its two independent optional offers: (1) the recommended context+worker preset and (2) the exact current smol model copied to the disabled Advisor role. Each has its own exact preview and bounded confirmation; target `<artifactRoot>/.omp/config.yml`, never blindly rewrite existing YAML, never enable Advisor, and leave memory off.
+6. Detect Orca project registration project-nonmutatingly. When the CLI and registration are available, offer exactly once: `Use Orca worktrees for parallel stories?` Preview the exact write `{ "worktrees": "orca" }` to `<artifactRoot>/.loom/config.json`; write only after confirmation. Never enable automatically.
+7. When `.loom` and/or `AGENTS.md` are untracked in a Git root, offer an initial root control-plane commit with the exact paths; never commit automatically.
+8. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
+9. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
+10. If nothing needed: `No changes needed` + what was checked.
 
 ## Workspace setup branch
 
@@ -58,7 +59,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v3.0.0 -->
+<!-- loom:begin version=v3.1.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.

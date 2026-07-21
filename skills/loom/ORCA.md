@@ -1,29 +1,31 @@
 # Orca worktree adapter
 
-Load this adapter only when the resolved artifact root has a valid `.loom/config.json` with `{"worktrees":"orca"}`. OMP + Orca visible-TUI worker flow was verified live on 2026-07-21 through service commit `e81ef4db0d10bc574b46af59193200a59d770850` (tree `9662a2e8272ac822d52e32b5b79fd1ec931a1575`); other agent hosts remain unverified. The user always starts one ordinary main OMP session at the project/workspace root. Keep coordinator/worker architecture out of the UI unless troubleshooting requires it.
+Load this adapter only when the resolved artifact root has valid `.loom/config.json` with `{"worktrees":"orca"}`. OMP + Orca visible-TUI worker flow was verified live on 2026-07-21 through service commit `e81ef4db0d10bc574b46af59193200a59d770850` (tree `9662a2e8272ac822d52e32b5b79fd1ec931a1575`); other hosts remain unverified. The user starts one ordinary main OMP session at the project/workspace root.
+
+## Native orchestration boundary
+
+Load and follow the installed native Orca `orchestration` skill for task/DAG creation, dispatch/inject, blocking ask/reply, waits, retries, circuit breaker, heartbeat, liveness, and completion mechanics. This adapter adds only Loom payload, ordering, Verify, and commit-tree boundaries; do not duplicate or compete with native lifecycle logic.
+
+Orca is the runner whenever this adapter is active. Never run OMP Goal simultaneously. An explicit “implement pack/issue” request plus one bounded preview of issues, dependencies, worktrees, workers, and bases authorizes supervised orchestration for that story. A new issue, repository, or base renews confirmation. Plan's existing confirmation may create story worktrees after PRD confirmation, but runtime tasks are created only after an explicit implement-pack request; never create dead tasks during Plan.
 
 ## Plan handoff
 
-After PRD confirmation and before issue slicing, identify the registered repositories the PRD touches, then present one bounded preview of every Orca action and wait for confirmation. Orca is the source of truth for worktree paths, branches, repository IDs, terminal IDs, and the repository default ref: never copy those values into Loom files. Discover repositories from Orca repository state/path, never from stored repo IDs.
+After PRD confirmation, identify touched registered repositories and preview every worktree action. Orca remains source of truth for paths, branches, repository/terminal IDs, and default refs; never persist those in Loom files. Rediscover a story worktree by repository path plus an Orca comment containing pack slug and absolute PRD path. Zero matches means preview remediation/creation; multiple matches means stop and ask.
 
-Rediscover story worktrees deterministically by repository path plus an Orca comment containing the pack slug and absolute PRD path. Zero matches means preview remediation/creation and proceed only through confirmation; multiple matches means stop and ask. Never silently duplicate.
+Create one story worktree per touched repository from Orca's default ref, except an explicit dependency on another unmerged story. If no default exists, resolve remote symbolic HEAD or ask; never guess `main`. Dirty prior-story work may be offered a safe branch+commit freeze, but never moved magically. If Orca, registration, or config is unavailable, stop before Git changes: `Register this repository in Orca, ensure the Orca CLI is available, or remove/fix .loom/config.json; then retry Plan.`
 
-Create one story worktree per touched repository from its Orca/default repository ref, except when the story explicitly depends on another unmerged story. If no default is available, resolve the remote symbolic HEAD or ask; never guess `main`. Use a display name containing the pack slug and repository short name, and add the rediscovery comment.
+## Loom task contract
 
-If the main checkout is dirty with prior-story work, offer to safely freeze it on its own branch and commit first; never move changes magically. The new story still starts clean from the default branch. If Orca, the config, or repository registration is unavailable, stop before git changes and say exactly: `Register this repository in Orca, ensure the Orca CLI is available, or remove/fix .loom/config.json; then retry Plan.` Never silently fall back to a branch.
+Task dependencies mirror each issue's `Blocked by`. A ready wave may run in parallel only for independent issues in different service worktrees with no shared branch/files. The root coordinator serializes all `.loom` Log, Verify, and status writes.
 
-## Work and completion
+Use a fresh visible OMP worker per issue, never reuse one. Lazy-load [`OMP.md`](OMP.md): launch every visible worker with `--prewalk --config <artifactRoot>/.omp/config.yml`; OMP 17.0.6 startup was live-verified to accept the flag/config and reach a ready visible TUI showing Prewalk, but no actual prewalk model switch was observed. Never enable Advisor in workers. The worker is maker only and must not invoke Verify/checkers or write root Loom artifacts. Its completion payload must name changed files/repositories, base SHA plus diff/tree identity, checks run, and concise decision/blocker log bullets.
 
-Implement runs as a visible ordinary OMP TUI in the worktree, launched by Orca. The root coordinator dispatches the issue with `orca orchestration dispatch --inject`. The worker remains observable and accepts local clarification. A scope change creates a decision gate back to the coordinator.
+A worker question uses native Orca ask/decision-gate mechanics. The coordinator bridges it to exactly one OMP AskUser question with a recommendation, then replies; only dependent tasks wait. If a load-bearing decision is unresolved, mark/route `needs-info`; never guess. Orca owns retries and liveness. Loom records only final failure/escalation in the issue Log/status and adds no stagnation retry loop.
 
-Native `worker_done` is the only completion signal. Terminal exit, sentinels, and TUI idle are not completion signals. Accept lifecycle completion only when its payload `taskId` and `dispatchId` both match the active dispatch; ignore stale or unrelated inbox messages.
-
-The worker is maker only: it must not invoke Verify or checker agents, and its `worker_done` claims/checks are maker evidence, never approval. Its payload must include changed files/repositories, base SHA plus diff/tree identity, checks run, and concise log bullets covering decisions and blockers. The root coordinator owns issue, PRD, and all `.loom` writes; it writes that evidence to the issue `## Log` before running independent Loom Spec + Standards Verify.
-
-Issue order is sequential by default. Parallelize only independent issues in different service worktrees with no shared branch or files.
+The coordinator accepts only the native completion corresponding to the active task/dispatch, records maker evidence in `## Log`, and runs independent Loom Spec + Standards Verify. Maker checks are evidence, never approval.
 
 ## Verified commit boundary
 
-Before Verify, stage exactly the intended files (or otherwise include intended untracked contents) without auto-staging unrelated files, then capture `git write-tree` plus the base SHA as the judged identity. Verify judges that exact tree. After APPROVE only, the user may opt in to an Orca worker auto-commit on its isolated story branch. This narrow exception never permits push, publish, merge, or amend. After commit, compare `git rev-parse HEAD^{tree}` with the captured tree; any mismatch requires re-Verify. If a commit preceded reliable tree capture, as in the pilot procedural mistake, run fresh Verify against that exact commit SHA and tree; do not amend. The Verify digest records the repository and service commit SHA. The coordinator may then offer a separate root control-plane metadata commit.
+Before Verify, stage exactly intended files (including intended untracked content) without auto-staging unrelated files, then capture `git write-tree` and base SHA as the judged identity. After APPROVE only, the user may opt in to an Orca worker auto-commit on its isolated story branch. Never push, publish, merge, or amend. Compare `git rev-parse HEAD^{tree}` with the captured tree; mismatch requires re-Verify. If commit preceded reliable capture, Verify that exact commit SHA/tree. The digest records repository and service commit SHA.
 
 The stable lifecycle ends at a verified commit. Offer an ordinary PR separately; never auto-merge or auto-clean worktrees.

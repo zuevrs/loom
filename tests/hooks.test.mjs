@@ -2310,7 +2310,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   ok(/# model:/.test(tpl), "model line ships commented — advisor role by default, no hardcoded model");
   const doc = read("docs/omp-advisor.md");
   ok(doc.includes("templates/WATCHDOG.yml"), "advisor doc points at the template");
-  ok(/advisor:\\n {2}enabled: true/.test(doc) && doc.includes(".omp/config.yml"), "advisor doc shows the per-project enable key");
+  ok(doc.includes("advisor.enabled: false") && doc.includes(".omp/config.yml"), "advisor doc keeps the project role disabled by default");
   ok(doc.includes("/advisor on") && doc.includes("/advisor dump"), "advisor doc lists the host controls");
   ok(/OMP-only/.test(doc), "advisor doc is honest about the host boundary");
   ok(/baseline.*advisor behavior/s.test(doc), "advisor doc warns the baseline advisor comes with the toggle");
@@ -2383,27 +2383,26 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   const adapter = read("skills/loom/ORCA.md");
   for (const phrase of [
     "verified live on 2026-07-21",
-    "user always starts one ordinary main OMP session",
-    "After PRD confirmation and before issue slicing",
-    "repository path plus an Orca comment containing the pack slug and absolute PRD path",
+    "user starts one ordinary main OMP session",
+    "After PRD confirmation",
+    "repository path plus an Orca comment containing pack slug and absolute PRD path",
     "Zero matches means preview remediation/creation",
     "multiple matches means stop and ask",
     "never guess `main`",
-    "orca orchestration dispatch --inject",
-    "payload `taskId` and `dispatchId` both match the active dispatch",
-    "ignore stale or unrelated inbox messages",
-    "must not invoke Verify or checker agents",
-    "maker evidence, never approval",
+    "installed native Orca `orchestration` skill",
+    "active task/dispatch",
+    "must not invoke Verify/checkers",
+    "Maker checks are evidence, never approval",
     "changed files/repositories",
     "base SHA plus diff/tree identity",
-    "writes that evidence to the issue `## Log` before running independent",
-    "stage exactly the intended files",
+    "records maker evidence in `## Log`",
+    "stage exactly intended files",
     "without auto-staging unrelated files",
-    "`git write-tree` plus the base SHA",
+    "`git write-tree` and base SHA",
     "`git rev-parse HEAD^{tree}`",
     "mismatch requires re-Verify",
     "stable lifecycle ends at a verified commit",
-    "other agent hosts remain unverified",
+    "other hosts remain unverified",
   ]) ok(adapter.includes(phrase), `Orca adapter carries: ${phrase}`);
   for (const [path, phrase] of [
     ["docs/orca.md", "Both checks then APPROVED service commit"],
