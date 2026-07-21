@@ -1,12 +1,10 @@
 # Loom workspaces
 
-Workspace mode is an opt-in root/context adapter for ordinary Loom. It is not a multi-repository orchestrator, runner, coordinator, or special lifecycle. For **Orca** worktrees and orchestration alongside workspace mode, see [`orca.md`](orca.md).
+Workspace mode is an opt-in topology and ownership adapter for a folder containing independent Git repositories. It is not a runner or coordinator. Canonical mode remains one Git repository owning its `.loom/`, `CONTEXT.md`, ADRs, and managed block.
 
-## Modes
+## Topology
 
-Canonical repository mode remains the default: one Git repository owns its `.loom/`, `CONTEXT.md`, ADRs, and managed block. A workspace profile activates only at the workspace root or from inside one of its registered repositories. An unregistered sibling remains canonical; Loom may mention the nearby workspace as optional guidance.
-
-Workspace mode uses `<workspace>/.loom/workspace.json`:
+A workspace profile lives at `<workspace>/.loom/workspace.json`:
 
 ```json
 {
@@ -19,41 +17,14 @@ Workspace mode uses `<workspace>/.loom/workspace.json`:
 }
 ```
 
-Paths are relative, validated, and contained by the workspace. The profile is opt-in; no profile means canonical behavior.
-
-### Git isolation (optional)
-
-```json
-{
-  "workspace_id": "payments-platform",
-  "repositories": [ ... ],
-  "isolation": "branch"
-}
-```
-
-- **`branch`** (default) — one git branch per pack (`feat/<pack-slug>`) in registered repo paths.
-- **`orca-worktree`** — separate Orca worktree per pack per repo; requires `orca.repos` mapping repository paths to Orca repo IDs. See [`orca.md`](orca.md).
-
-After PRD confirmation, Plan writes `.loom/<pack>/checkouts.json` (workspace mode only) — branch names and absolute checkout paths for Implement. Canonical single-repo projects skip this file.
+Paths are relative, validated, and contained by the workspace. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical.
 
 ## Ownership
 
-The workspace root alone owns Loom `CONTEXT.md`, ADRs, `.loom` packs/logs/Verify records, archives, and managed blocks. Registered service repositories remain ordinary product repositories: README, API docs, runbooks, source, tests, and other product documentation stay there. Loom does not create service-local Loom artifacts.
+The workspace root alone owns Loom context, ADRs, `.loom` packs/logs/Verify records, archives, and managed blocks. Registered service repositories remain product repositories and execution/evidence targets. Loom never creates service-local Loom artifacts.
 
-After setup, normal Grill, Plan, Implement, Verify, and Tend operate against the workspace owner. There is no workspace task manifest, fingerprint, baseline coordinator, aggregate Verify, cross-repository branch, or runner.
+Run `/loom setup workspace` from the intended root. Setup inventories repositories project-nonmutatingly, previews the profile, and writes only after bounded confirmation. A non-Git workspace root is allowed but means Loom artifacts are unversioned.
 
-## Setup and ownership
+General project capabilities live separately in [`.loom/config.json`](orca.md), resolved from the same workspace `artifactRoot`. Enabling `{ "worktrees": "orca" }` opts into the short [Orca user flow](orca.md); host commands and lifecycle stay in the lazy adapter, not the workspace profile.
 
-Run `/loom setup workspace` from the intended root. The dispatcher routes once to `loom-init`, which solely owns deterministic inventory and profile proposal/apply. Inventory scans to depth 2 by default; retry with a greater `--depth` when no repositories are found. Repeated setup preserves a valid curated profile and reports inventory drift.
-
-After profile setup, Init may offer exactly one handoff to ordinary Plan, Grill, or Tend based on the user's outcome. The workspace root owns Loom documents and state; service product documentation remains in service repositories. Any later normalization uses the selected ritual's ordinary bounded gates, validates destinations before writing, and requires separate consent before deleting any source.
-
-## Apply and recovery boundaries
-
-Registered repositories are readable evidence in explicit Loom work. Service changes use the ritual's existing bounded apply gate: one preview names repositories, exact targets/actions, and base evidence. A new repository, target, action, scope, or changed base renews consent. Git/external actions keep their own gates.
-
-Session pointers expose only validated `context_paths`, progressively, rather than injecting their contents. Only profile-listed paths are exposed.
-
-The workspace root need not be Git. Session recovery still reports dirty registered services, and invoking the public Stop-gate CLI with a registered service path inspects workspace-root `.loom` state. Invalid profiles fail closed for explicit Loom work, while ordinary hooks warn and disable workspace behavior without blocking project work. Malformed JSON is exceptional: repository membership cannot be proven, so descendants—including otherwise unregistered siblings—may see the recovery warning. With a valid profile, unregistered siblings remain canonical.
-
-Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots. A non-Git workspace root means Loom artifacts are unversioned, and setup must say so.
+Invalid profiles fail closed for explicit Loom work. Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots.

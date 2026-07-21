@@ -45,7 +45,7 @@ function normalizeRelativePath(path, label = "path") {
 
 function validateWorkspaceProfile(value, root) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("profile must be an object");
-  const allowedKeys = new Set(["workspace_id", "repositories", "context_paths", "isolation", "orca"]);
+  const allowedKeys = new Set(["workspace_id", "repositories", "context_paths"]);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) throw new Error(`unknown profile field: ${key}`);
   if (typeof value.workspace_id !== "string") throw new Error("workspace_id must be a string");
   const workspace_id = value.workspace_id.trim();
@@ -81,31 +81,10 @@ function validateWorkspaceProfile(value, root) {
     return portableContextPath;
   });
   if (new Set(context_paths.map((path) => path.toLowerCase())).size !== context_paths.length) throw new Error("context_paths must not contain duplicates");
-  const isolation = value.isolation === undefined ? "branch" : value.isolation;
-  if (isolation !== "branch" && isolation !== "orca-worktree") throw new Error('isolation must be "branch" or "orca-worktree"');
-  let orca;
-  if (value.orca !== undefined) {
-    if (!value.orca || typeof value.orca !== "object" || Array.isArray(value.orca)) throw new Error("orca must be an object");
-    for (const key of Object.keys(value.orca)) if (key !== "repos") throw new Error(`unknown orca field: ${key}`);
-    if (!value.orca.repos || typeof value.orca.repos !== "object" || Array.isArray(value.orca.repos)) throw new Error("orca.repos must be an object");
-    orca = { repos: {} };
-    for (const [repoPath, repoId] of Object.entries(value.orca.repos)) {
-      const portablePath = normalizeRelativePath(repoPath, "orca repository path");
-      if (!repositories.some((repo) => repo.path === portablePath)) throw new Error(`orca.repos references unregistered repository: ${repoPath}`);
-      if (typeof repoId !== "string" || !repoId.trim()) throw new Error(`orca.repos value must be a non-empty string: ${repoPath}`);
-      orca.repos[portablePath] = repoId.trim();
-    }
-    if (isolation !== "orca-worktree") throw new Error("orca.repos requires isolation orca-worktree");
-    if (Object.keys(orca.repos).length === 0) throw new Error("orca.repos must map at least one registered repository");
-  } else if (isolation === "orca-worktree") {
-    throw new Error("isolation orca-worktree requires orca.repos");
-  }
   return {
     workspace_id,
     repositories,
     ...(value.context_paths !== undefined ? { context_paths } : {}),
-    ...(value.isolation !== undefined ? { isolation } : {}),
-    ...(orca ? { orca } : {}),
   };
 }
 
@@ -114,8 +93,6 @@ function serializeWorkspaceProfile(profile) {
     workspace_id: profile.workspace_id,
     repositories: profile.repositories,
     ...(profile.context_paths ? { context_paths: profile.context_paths } : {}),
-    ...(profile.isolation && profile.isolation !== "branch" ? { isolation: profile.isolation } : {}),
-    ...(profile.orca ? { orca: profile.orca } : {}),
   };
 }
 

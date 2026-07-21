@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: node tests/hooks.test.mjs
+      - run: npm test
       - run: scripts/check-drift
       - run: scripts/check-doc-consistency
       - run: scripts/check-installers
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: node tests/hooks.test.mjs
+      - run: npm test
       # Installer smoke on a real Windows FS: junction links, hooks.json, doctor, uninstall.
       # Evidence run for the README host-status ledger (docs/evidence/HOST-INSTALL.md).
       - name: installer smoke (temp USERPROFILE)

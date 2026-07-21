@@ -41,7 +41,7 @@ tests/           ← hook tests and canaries
    ```
    Or individually:
    ```bash
-   node tests/hooks.test.mjs
+   npm test
    bash scripts/check-drift
    bash scripts/check-doc-consistency
    bash scripts/check-installers

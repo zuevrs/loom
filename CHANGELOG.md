@@ -6,6 +6,21 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [3.0.0] - 2026-07-21
+
+### Highlights
+
+- **General capability config** — strict `.loom/config.json` supports one opt-in capability: `{ "worktrees": "orca" }`, in canonical and workspace projects.
+- **Orca story worktrees** — Plan lazy-loads a host-neutral adapter after PRD confirmation; OMP + Orca visible-TUI flow was verified live on 2026-07-21 through service commit `e81ef4db0d10bc574b46af59193200a59d770850` (tree `9662a2e8272ac822d52e32b5b79fd1ec931a1575`): clean-base isolation from dirty main, injected implement/rework tasks, task-and-dispatch-scoped completion, and independent Spec/Standards REJECT → APPROVE.
+- **Breaking command removal** — `/loom-implement` was removed from the public OMP command surface. Use `/loom implement ...` through the single `/loom` dispatcher; internal ritual skills remain available.
+- **Verified-commit boundary** — stage only intended files before Verify/tree capture, and only when the user opted in, auto-commit after APPROVE and compare the commit tree. If capture happened too late, fresh-Verify the exact commit SHA/tree; never amend.
+
+### Migration steps
+
+- **Breaking config replacement:** v2.0.2's short-lived workspace checkout config was replaced by `.loom/config.json`; remove any experimental `checkouts.json`, `isolation`, or `orca.repos` data rather than migrating it.
+- Replace the removed `/loom-implement` command with `/loom implement ...`; `/loom` is now the only public OMP command.
+- Re-run Init and explicitly confirm the Orca offer to create `.loom/config.json`; worktrees are never enabled automatically.
+
 ## [2.0.2] - 2026-07-21
 
 ### Highlights
@@ -1082,7 +1097,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v2.0.2...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/zuevrs/loom/compare/v2.0.2...v3.0.0
 [2.0.2]: https://github.com/zuevrs/loom/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/zuevrs/loom/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/zuevrs/loom/compare/v0.24.10...v2.0.0

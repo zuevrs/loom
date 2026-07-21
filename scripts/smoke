@@ -11,7 +11,7 @@ run() {
   "$@"
 }
 
-run node tests/hooks.test.mjs
+run npm test
 run bash scripts/check-drift
 run bash scripts/check-doc-consistency
 run bash scripts/check-installers

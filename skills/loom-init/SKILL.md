@@ -36,9 +36,11 @@ Use `.loom/workspace.json` only after explicit workspace setup. It is generated 
 4. Apply idempotently:
    - Write/refresh managed block only inside delimiters (content below)
    - Create `.loom/` if missing (no PRD/issues yet)
-5. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
-6. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
-7. If nothing needed: `No changes needed` + what was checked.
+5. Detect Orca project registration project-nonmutatingly. When the CLI and registration are available, offer exactly once: `Use Orca worktrees for parallel stories?` Preview the exact write `{ "worktrees": "orca" }` to `<artifactRoot>/.loom/config.json`; write only after confirmation. Never enable automatically.
+6. When `.loom` and/or `AGENTS.md` are untracked in a Git root, offer an initial root control-plane commit with the exact paths; never commit automatically.
+7. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
+8. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
+9. If nothing needed: `No changes needed` + what was checked.
 
 ## Workspace setup branch
 
@@ -56,7 +58,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v2.0.2 -->
+<!-- loom:begin version=v3.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -78,7 +80,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 
 ### Loom lane
 
-Begins only after explicit `/loom`, a `loom-*` shortcut, or work on a selected Loom issue.
+Begins only after explicit `/loom` or work on a selected Loom issue.
 
 - Use the `loom` dispatcher; reconstruct `.loom/` before selecting persisted work; explicit target wins.
 - Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
@@ -99,14 +101,14 @@ Map intent to ritual skills:
 - setup/install/project wiring → `loom-init`
 - planning/scope/prd/issues/slicing → `loom-plan`
 - investigate/explore/ask/"why/how"/debug/decide → `loom-grill`
-- implementation/build/fix for a selected issue → `loom-implement`
+- concrete implementation/build/fix/add, with or without an issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
 - recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
 
-**Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
+**Confusable pairs:** concrete "build/fix/add X" → Implement, investigate/why/how/decide/unclear → Grill, work needing PRD/issues or multiple sessions → Plan; explicit natural-language target wins; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:** small fix → `loom-grill`; multi-session/underspecified → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
+**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
 **Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 

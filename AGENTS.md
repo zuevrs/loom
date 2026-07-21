@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v2.0.2 -->
+<!-- loom:begin version=v3.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -24,7 +24,7 @@ Before writing code, stop at the first rung that holds: YAGNI → reuse in repo 
 
 ### Loom lane
 
-Begins only after explicit `/loom`, a `loom-*` shortcut, or work on a selected Loom issue.
+Begins only after explicit `/loom` or work on a selected Loom issue.
 
 - Use the `loom` dispatcher; reconstruct `.loom/` before selecting persisted work; explicit target wins.
 - Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
@@ -45,14 +45,14 @@ Map intent to ritual skills:
 - setup/install/project wiring → `loom-init`
 - planning/scope/prd/issues/slicing → `loom-plan`
 - investigate/explore/ask/"why/how"/debug/decide → `loom-grill`
-- implementation/build/fix for a selected issue → `loom-implement`
+- concrete implementation/build/fix/add, with or without an issue → `loom-implement`
 - review/check/gates/acceptance → `loom-verify`
 - maintenance/status cleanup/knowledge capture → `loom-tend`
 - recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
 
-**Confusable pairs:** has a defined scope ("build X") → Plan, exploring/asking/debugging → Grill; judging a change → Verify, fixing its findings → Implement.
+**Confusable pairs:** concrete "build/fix/add X" → Implement, investigate/why/how/decide/unclear → Grill, work needing PRD/issues or multiple sessions → Plan; explicit natural-language target wins; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:** small fix → `loom-grill`; multi-session/underspecified → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
+**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
 **Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 

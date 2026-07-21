@@ -1,4 +1,4 @@
-// loom — OpenCode plugin adapter. Version: 2.0.2
+// loom — OpenCode plugin adapter. Version: 3.0.0
 //
 // Registers loom skills directory and injects discipline + router into
 // every system prompt. Add to opencode.json:
@@ -14,14 +14,18 @@ import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const { PRE_LLM } = require("./hooks/invariants.cjs");
 const { findWorkspace, workspacePointers } = require("./hooks/workspace.cjs");
+const { readProjectConfig, invalidProjectConfigAlert } = require("./hooks/config.cjs");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillsDir = path.resolve(__dirname, "skills");
 
-function workspaceInjection() {
+function runtimeInjection() {
   const profile = findWorkspace(process.cwd());
-  if (!profile?.invalid) return "";
-  return `\n\n# Loom workspace error\n${workspacePointers(profile).join("\n")}\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`;
+  const workspaceAlert = profile?.invalid
+    ? `# Loom workspace error\n${workspacePointers(profile).join("\n")}\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`
+    : "";
+  const configAlert = invalidProjectConfigAlert(readProjectConfig(process.cwd()));
+  return [workspaceAlert, configAlert].filter(Boolean).map((alert) => `\n\n${alert}`).join("");
 }
 
 const SYSTEM_INJECTION = `# Loom — lazy senior dev harness
@@ -47,13 +51,13 @@ ${PRE_LLM}
 
 ## Loom lane
 
-Begins only after explicit /loom, a loom-* shortcut, or work on a selected Loom issue. Ordinary prompts remain normal agent mode.
+Begins only after explicit /loom or work on a selected Loom issue. Ordinary prompts remain normal agent mode.
 
 ## Router
 
-Map intent to ritual skills: loom-init (setup) | loom-plan (plan/scope) | loom-grill (investigate/explore/decide/act) | loom-implement (build from issue) | loom-verify (check) | loom-tend (maintain). Recurring audits → recipes/ (docs/unattended.md).
+Map intent to ritual skills: loom-init (setup) | loom-plan (plan/scope) | loom-grill (investigate/why/how/decide/unclear) | loom-implement (concrete build/fix/add) | loom-verify (check) | loom-tend (maintain). Recurring audits → recipes/ (docs/unattended.md).
 
-On explicit /loom, load the installed loom dispatcher skill. Small fix → loom-grill. Multi-session → loom-plan first. Fresh session per issue.`;
+On explicit /loom, load the installed loom dispatcher skill. Small concrete fix → loom-implement, then verify. Work needing PRD/issues or multiple sessions → loom-plan first. Fresh session per issue.`;
 
 export default async ({ client } = {}) => {
   return {
@@ -66,7 +70,7 @@ export default async ({ client } = {}) => {
     },
 
     "experimental.chat.system.transform": async (_input, output) => {
-      output.system.push(SYSTEM_INJECTION + workspaceInjection());
+      output.system.push(SYSTEM_INJECTION + runtimeInjection());
     },
   };
 };

@@ -19,7 +19,8 @@ Ship one vertical slice that satisfies issue acceptance with minimal diff.
 
 ## Workspace ownership
 
-With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Read `.loom/<feature>/checkouts.json` when present — edit and run tests at each repo's recorded `path` on the recorded `branch`; do not switch branches implicitly. Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
+With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
+Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md): run only in the Orca-reported worktree and leave issue/PRD/`.loom` writes and final Verify to the root coordinator.
 
 ## Whole-pack and unattended intent
 
@@ -38,9 +39,9 @@ No human is watching, so the human gate moves to the PR. See [`docs/unattended.m
 - `loom-verify` stays mandatory before the PR. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
 - Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — write the status and the question into the issue file, then open a **draft PR** with whatever exists and the blocker named in the description. Silent death is the only forbidden exit.
 
-## No-issue compatibility route
+## Direct small-fix route
 
-A direct `loom-implement` invocation without a named issue delegates exactly one hop to [`loom-grill`](../loom-grill/SKILL.md), with **full `loom-verify` mandatory** for any applied change. Grill is the sole local-question/small-fix process. Do not re-enter Implement or the dispatcher from that handoff.
+Without a named issue, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or issue. Full `loom-verify` remains mandatory.
 
 ## Execution consent
 
@@ -55,7 +56,7 @@ Selecting a named issue explicitly authorizes issue-scoped project changes, `## 
 
 ## Process
 
-1. Require exactly one named issue. If none was named, use the one-hop Grill compatibility route above and stop this ritual. Read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. Not told which issue? The session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full — the fresh-context contract is PRD + this issue, and a field run that ignored it spent 8 turns reading five cards to pick one. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
+1. For issue work, require exactly one named issue and read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. Not told which issue? The session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full — the fresh-context contract is PRD + this issue, and a field run that ignored it spent 8 turns reading five cards to pick one. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
 2. **Pre-flight baseline:** run the project's existing checks (test/lint commands from conventions) BEFORE touching code. A red baseline makes "tests pass" unattributable — note pre-existing failures in `## Log`; if the issue's own verification path is already red, stop and report instead of building on it.
 3. **Never invent a load-bearing decision silently.** Issue silent on output format, interface names, error contracts, edge behavior? The PRD's Implementation Decisions and Assumptions answer first; if the PRD is silent too, ask the user (attended) or flip to `needs-info` (unattended). An issue deliberately carries no file paths — interpreting it against the PRD is your job; inventing what the PRD never decided is not.
    **Surface the assumptions you do make.** The gap this guards: the PRD answered, but your reading of it isn't the only possible one. Before writing non-trivial code, print the numbered list — `Assumptions: 1. … — correct me now or I proceed with these` — to the chat (attended) or into `## Log` (unattended). An assumption surfaced costs one line; the same assumption discovered by a checker costs a REJECT lap. Trivial issues skip the block — an empty ritual is noise.

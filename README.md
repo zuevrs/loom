@@ -54,7 +54,7 @@ Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom
 |------|---------|-----------|--------|
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | **verified** (live full cycle: init → implement → checkers → stop gate) |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | implemented (extension + stop-gate logic unit-tested; live stop/verify batch not in CI) |
+| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live OMP + Orca visible-TUI implement/rework/verify cycle; stop-gate logic unit-tested) |
 | Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
 | Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (live smoke: managed block + 6 skills in context) |
@@ -71,7 +71,7 @@ Uninstall removes what Loom owns and leaves foreign files untouched. Project fil
 
 1. **Install** Loom for your host (above).
 2. In your project, invoke **`/loom setup workspace`** or **`loom-init`** — confirm the write plan.
-3. **`/loom <intent>`** — routes to the right ritual (plan, grill, implement, verify, tend). Shortcut: **`/loom-implement`** when you already know the issue.
+3. **`/loom <intent>`** — the only OMP command; routes to the right ritual (plan, grill, implement, verify, tend), including direct small fixes.
 4. Ensure a **`loom-verify`** digest exists before marking done (auto-invoked after implement on most paths).
 
 ## Upgrade
@@ -118,7 +118,7 @@ Loom ships no runner — your host already has one (background agents, cron + he
 
 ## Loom + OMP
 
-OMP is the maximum-synergy host: Loom owns **what** to build (PRD, issues, verify contract), OMP owns **how** the agent runs (enforcement, orchestration, review).
+OMP is the maximum-synergy host. Optional OMP + Orca worktrees were verified through a committed tree in a live visible-TUI E2E on 2026-07-21: a clean-base story worktree while main retained paused work, visible OMP TUI, `dispatch --inject`, task-and-dispatch-scoped `worker_done`, and independent coordinator Spec/Standards Verify with one REJECT/rework lap through APPROVE. Loom owns **what** to build (PRD, issues, verify contract), OMP owns **how** the agent runs (enforcement, orchestration, review).
 
 ```bash
 omp plugin install git:github.com/zuevrs/loom
@@ -130,7 +130,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 
 ```
 > /loom plan JWT auth feature              # → loom-plan (grill → PRD → issues)
-> /loom-implement                          # → issue from snapshot / named target
+> /loom implement issue 01                # → issue from snapshot / named target
 > Verify                                   # → task: loom-verify-spec + loom-verify-standards
 > (agent writes ## Verify, sets Status: done — session_stop gate checks it)
 ```

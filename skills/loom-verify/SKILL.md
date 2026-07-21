@@ -30,6 +30,7 @@ Structured digest (below). **Spec-backed Loom issue:** persisted into the issue'
 ## Workspace ownership
 
 With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run each ordinary existing Git diff/check command in the relevant registered service repository; this is not aggregate Verify and adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
+Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md); the root coordinator pins the judged tree/diff, owns Verify write-back, and records repo + service commit SHA after an approved matching commit.
 
 ## Process
 

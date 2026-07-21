@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import { deepStrictEqual, ok, strictEqual, throws } from "node:assert";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -119,7 +119,7 @@ try {
   const escaped = join(tmp, "escaped");
   repo(escaped);
   symlinkSync(escaped, join(writerRoot, "linked"), "dir");
-  try { workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "linked" }] }, writerRoot); ok(false); } catch (error) { ok(error.message.includes("symlink escapes")); }
+  throws(() => workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "linked" }] }, writerRoot), /symlink escapes/);
 
   const dottedRepo = join(writerRoot, "..cache", "repo");
   repo(dottedRepo);
@@ -127,14 +127,13 @@ try {
   const dotted = workspace.validateWorkspaceProfile({ workspace_id: "dotted", repositories: [{ path: "..cache/repo" }], context_paths: ["..cache/context.md"] }, writerRoot);
   deepStrictEqual(dotted.repositories.map((item) => item.path), ["..cache/repo"], "leading dots are not parent traversal");
   deepStrictEqual(dotted.context_paths, ["..cache/context.md"]);
-  try { workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "../escaped" }] }, writerRoot); ok(false); } catch (error) { ok(error.message.includes("traversal"), "explicit parent traversal stays rejected"); }
+  throws(() => workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "../escaped" }] }, writerRoot), /traversal/, "explicit parent traversal stays rejected");
 
   const idRoot = join(tmp, "id-validation");
   repo(join(idRoot, "api"));
   strictEqual(workspace.validateWorkspaceProfile({ workspace_id: "  valid-id  ", repositories: [{ path: "api" }] }, idRoot).workspace_id, "valid-id", "workspace ID is trimmed");
   for (const invalidId of ["   ", "bad\ncontrol", "Upper", "unsafe_id", `a${"b".repeat(64)}`]) {
-    try { workspace.validateWorkspaceProfile({ workspace_id: invalidId, repositories: [{ path: "api" }] }, idRoot); ok(false, `accepted invalid workspace ID: ${JSON.stringify(invalidId)}`); }
-    catch (error) { ok(error.message.includes("workspace_id")); }
+    throws(() => workspace.validateWorkspaceProfile({ workspace_id: invalidId, repositories: [{ path: "api" }] }, idRoot), /workspace_id/, `accepted invalid workspace ID: ${JSON.stringify(invalidId)}`);
   }
 
   const longRoot = join(tmp, `${"a".repeat(63)}-${"b".repeat(20)}`);
@@ -211,31 +210,25 @@ try {
   ok(!existsSync(join(confirmApi, ".loom")), "confirm never writes into registered service repo");
   deepStrictEqual(new Set(listFiles(confirmApi)), beforeApi, "confirm leaves service repo files unchanged");
   ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("Custom intro"), "confirm preserves user AGENTS.md content outside managed block");
-  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v2.0.2 -->"), "confirm managed block matches loom-init template version");
+  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v3.0.0 -->"), "confirm managed block matches loom-init template version");
 
   const serviceCtx = workspace.projectContext(confirmApi);
   strictEqual(serviceCtx.mode, "workspace");
   strictEqual(serviceCtx.artifactRoot, resolve(confirmRoot));
   ok(serviceCtx.executionRoots.some((root) => resolve(root) === resolve(confirmApi)), "service-root project context keeps service as execution root");
 
-  const isoRoot = join(tmp, "isolation");
-  const isoApi = join(isoRoot, "api");
-  repo(isoApi);
-  const branchProfile = workspace.validateWorkspaceProfile({ workspace_id: "branchy", repositories: [{ path: "api" }], isolation: "branch" }, isoRoot);
-  strictEqual(branchProfile.isolation, "branch");
-  ok(!workspace.serializeWorkspaceProfile(branchProfile).isolation, "branch isolation omits default from serialized profile");
-  const orcaProfile = workspace.validateWorkspaceProfile({
-    workspace_id: "orcaw",
-    repositories: [{ path: "api" }],
-    isolation: "orca-worktree",
-    orca: { repos: { api: "repo-uuid-1" } },
-  }, isoRoot);
-  strictEqual(orcaProfile.orca.repos.api, "repo-uuid-1");
-  try {
-    workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "api" }], isolation: "orca-worktree" }, isoRoot);
-    ok(false, "orca-worktree without orca.repos should fail");
-  } catch (error) {
-    ok(error.message.includes("orca.repos"));
+  const profileSchemaRoot = join(tmp, "profile-schema");
+  repo(join(profileSchemaRoot, "api"));
+  for (const field of [
+    { isolation: "branch" },
+    { isolation: "orca-worktree", orca: { repos: { api: "repo-id" } } },
+    { orca: { repos: { api: "repo-id" } } },
+  ]) {
+    throws(
+      () => workspace.validateWorkspaceProfile({ workspace_id: "removed", repositories: [{ path: "api" }], ...field }, profileSchemaRoot),
+      /unknown profile field/,
+      `accepted removed workspace fields: ${JSON.stringify(field)}`
+    );
   }
 
   console.log("workspace tests passed");

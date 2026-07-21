@@ -7,6 +7,14 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const hooksDir = resolve(__dirname, "..", "hooks");
 
+function captureStderr(fn) {
+  let stderr = "";
+  const write = process.stderr.write;
+  process.stderr.write = (chunk) => { stderr += String(chunk); return true; };
+  try { return { value: fn(), stderr }; }
+  finally { process.stderr.write = write; }
+}
+
 function run(script, env = {}) {
   return execFileSync("node", [resolve(hooksDir, script)], {
     encoding: "utf8",
@@ -140,7 +148,7 @@ import { join } from "node:path";
   // Case 1: done without ## Verify → should block (exit 1)
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
   try {
-    execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000 });
+    execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000, stdio: ["ignore", "pipe", "pipe"] });
     ok(false, "stop-gate should have exited non-zero for done without verify");
   } catch (e) {
     strictEqual(e.status, 1, "stop-gate blocks done without ## Verify");
@@ -151,7 +159,7 @@ import { join } from "node:path";
   mkdirSync(nested, { recursive: true });
   writeFileSync(join(tmp, "work", "AGENTS.md"), "# Nested instructions\n");
   try {
-    execFileSync(process.execPath, [stopGate], { cwd: nested, timeout: 5000 });
+    execFileSync(process.execPath, [stopGate], { cwd: nested, timeout: 5000, stdio: ["ignore", "pipe", "pipe"] });
     ok(false, "stop-gate should discover the parent .loom from a nested cwd");
   } catch (e) {
     strictEqual(e.status, 1, "stop-gate prefers parent .loom over intermediate AGENTS.md");
@@ -164,12 +172,12 @@ import { join } from "node:path";
 
   // Case 2: done with ## Verify → should pass (exit 0)
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Verify\n\nAPPROVE — 2026-06-30\n\n## Status\n\nStatus: done\n");
-  const out2 = execFileSync(process.execPath, [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000 });
+  const out2 = execFileSync(process.execPath, [stopGate], { cwd: tmp, encoding: "utf8", timeout: 5000, stdio: ["ignore", "pipe", "pipe"] });
   ok(out2 === "" || !out2.includes("BLOCKED"), "stop-gate allows done with ## Verify");
 
   // Case 3: not done → should pass regardless
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: ready-for-agent\n");
-  execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000 });
+  execFileSync(process.execPath, [stopGate], { cwd: tmp, timeout: 5000, stdio: ["ignore", "pipe", "pipe"] });
 
   // --- field run 8: the Claude/Codex Stop-hook contract ---
   // Exit 1 is a non-blocking "hook error" toast on those hosts; only exit 2
@@ -181,6 +189,7 @@ import { join } from "node:path";
       execFileSync(process.execPath, [stopGate, "--hook"], {
         cwd: tmp, timeout: 5000,
         input: typeof payload === "string" ? payload : JSON.stringify(payload),
+        stdio: ["pipe", "pipe", "pipe"],
       });
       return 0;
     } catch (e) {
@@ -193,7 +202,7 @@ import { join } from "node:path";
   strictEqual(hookRun("\uFEFF" + JSON.stringify({ stop_hook_active: true })), 0, "--hook tolerates a BOM-prefixed payload (PowerShell pipes)");
   strictEqual(hookRun("not json at all"), 2, "--hook with unparseable stdin still gates on filesystem state (first lap blocks)");
   try {
-    execFileSync(process.execPath, [stopGate, "--ci"], { cwd: tmp, timeout: 5000, input: "" });
+    execFileSync(process.execPath, [stopGate, "--ci"], { cwd: tmp, timeout: 5000, input: "", stdio: ["pipe", "pipe", "pipe"] });
     ok(false, "--ci should still exit 1");
   } catch (e) {
     strictEqual(e.status, 1, "--ci keeps the plain CI exit code 1");
@@ -246,7 +255,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   writeFileSync(join(issueDir, "001.md"), "# Test\n\n## Status\n\nStatus: done\n");
   strictEqual(findUnverifiedDoneIssues(tmp).length, 1, "finds done without verify");
-  strictEqual(check(tmp), 1, "check exits block");
+  strictEqual(captureStderr(() => check(tmp)).value, 1, "check exits block");
 
   writeFileSync(
     join(issueDir, "001.md"),
@@ -423,7 +432,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     strictEqual(handlers.session_stop(), undefined, "OMP clean stop passes");
 
     writeFileSync(firstIssue, "# One\n\n## Status\n\nStatus: done\n");
-    const firstStop = handlers.session_stop();
+    const firstStop = captureStderr(() => handlers.session_stop()).value;
     ok(firstStop?.continue && firstStop.additionalContext.startsWith("BLOCKED:"), "OMP first unresolved stop blocks");
     const repeated = repeatedStop();
     strictEqual(repeated.result, undefined, "OMP repeated same-state stop passes");
@@ -432,10 +441,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     writeFileSync(firstIssue, "# One\n\n## Status\n\nStatus: ready-for-agent\n");
     strictEqual(handlers.session_stop(), undefined, "OMP resolution clears the forced lap");
     writeFileSync(firstIssue, "# One\n\n## Status\n\nStatus: done\n");
-    ok(handlers.session_stop()?.continue, "OMP unresolved state blocks again after resolution");
+    ok(captureStderr(() => handlers.session_stop()).value?.continue, "OMP unresolved state blocks again after resolution");
 
     writeFileSync(secondIssue, "# Two\n\n## Status\n\nStatus: done\n");
-    ok(handlers.session_stop()?.continue, "OMP changed unresolved state starts a fresh forced lap");
+    ok(captureStderr(() => handlers.session_stop()).value?.continue, "OMP changed unresolved state starts a fresh forced lap");
     strictEqual(repeatedStop().result, undefined, "OMP repeated changed state is bounded to one lap");
   } finally {
     for (const [key, value] of Object.entries(previous)) {
@@ -465,7 +474,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   process.env.PI_PROJECT_DIR = nested;
   process.env.LOOM_WITNESS = "off";
   try {
-    const stop = handlers.session_stop();
+    const stop = captureStderr(() => handlers.session_stop()).value;
     ok(stop?.continue && stop.additionalContext.includes("01-parent.md"), "OMP stop finds parent .loom past intermediate AGENTS.md");
 
     let sessionOut = "";
@@ -799,12 +808,12 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ]) {
       const content = read(p);
       ok(content.includes("investigate/explore/ask"), `${label} router routes investigate/explore to grill`);
-      ok(content.includes("exploring/asking/debugging → Grill"), `${label} confusable-pairs updated`);
+      ok(content.includes("investigate/why/how/decide/unclear → Grill"), `${label} confusable-pairs updated`);
       ok(!content.includes("no docs wanted"), `${label} drops old 'no docs wanted' grill description`);
     }
 
     const ocp = read("opencode-plugin.mjs");
-    ok(ocp.includes("investigate/explore/decide/act"), "opencode injection describes grill as investigate/explore/decide/act");
+    ok(ocp.includes("investigate/why/how/decide/unclear"), "opencode injection describes Grill intent");
   }
 }
 
@@ -817,8 +826,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const toPrd = rf(resolve(skillDir, "TO-PRD.md"), "utf8");
   const toIssues = rf(resolve(skillDir, "TO-ISSUES.md"), "utf8");
 
-  ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("EXECUTION.md") && skill.includes("TO-ISSUES.md"), "router points at all four phases");
-  ok(skill.includes("Gate 1.5"), "plan router names checkouts gate");
+  ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("TO-ISSUES.md"), "router points at all three phases");
+  ok(skill.includes("../loom/ORCA.md") && skill.includes("worktrees: \"orca\""), "plan lazy-loads Orca adapter only from config");
+  ok(!skill.includes("Gate 1.5") && !skill.includes("EXECUTION.md"), "plan removes checkout phase and named gate");
   ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
   ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
   ok(grill.includes("Resume after interruptions"), "grill has interruption-resume rule");
@@ -827,7 +837,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(grill.includes("Project language from the first write"), "grill writes CONTEXT/ADR in project language immediately");
   ok(grill.includes("The interview runs in the user's language"), "grill interview itself runs in the user's language");
   ok(grill.includes("Offer an ADR"), "grill offers ADRs, never silent");
-  ok(toPrd.includes("EXECUTION.md"), "to-prd routes workspace mode to checkouts phase");
+  ok(toPrd.includes("shared Orca adapter") && toPrd.includes("TO-ISSUES.md"), "to-prd returns through conditional adapter handoff");
   ok(toPrd.includes("Do NOT re-interview"), "to-prd is pure synthesis");
   ok(toPrd.includes("explicit user confirmation"), "to-prd has PRD confirmation gate");
   ok(toIssues.includes("Quiz the user"), "to-issues quizzes granularity");
@@ -1117,13 +1127,13 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const cursorIssue = join(cursorIssues, "01.md");
   writeFileSync(cursorIssue, "# Cursor gate\n\n## Status\n\nStatus: done\n");
   strictEqual(
-    spawnSync(cursorStop, { cwd: cursorProject, input: "{}", shell: true }).status,
+    spawnSync(cursorStop, { cwd: cursorProject, input: "{}", shell: true, encoding: "utf8" }).status,
     2,
     "generated Cursor stop command blocks an unresolved done issue"
   );
   writeFileSync(cursorIssue, "# Cursor gate\n\n## Verify\n\nAPPROVE — checks pass\n\n## Status\n\nStatus: done\n");
   strictEqual(
-    spawnSync(cursorStop, { cwd: cursorProject, input: "{}", shell: true }).status,
+    spawnSync(cursorStop, { cwd: cursorProject, input: "{}", shell: true, encoding: "utf8" }).status,
     0,
     "generated Cursor stop command allows a verified done issue"
   );
@@ -1239,10 +1249,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const toIssues = rf(resolve(__dirname, "..", "skills", "loom-plan", "TO-ISSUES.md"), "utf8");
   ok(toIssues.includes("ready-for-human"), "slicing still routes human-judgement work to ready-for-human");
 
-  // OMP command surface — dispatcher entry + implement shortcut only
+  // OMP command surface — one dispatcher command only
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();
-  const expected = ["loom-implement.md", "loom.md"];
-  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships dispatcher + implement shortcut (got: ${cmds.join(", ")})`);
+  const expected = ["loom.md"];
+  ok(JSON.stringify(cmds) === JSON.stringify(expected), `commands/ ships only /loom (got: ${cmds.join(", ")})`);
 }
 
 // v0.10.0 — unattended lane + recipes + ritual upgrades (a–g)
@@ -1713,7 +1723,8 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("## No-issue compatibility route"), "implement delegates no-issue invocations to grill");
+  ok(impl.includes("## Direct small-fix route"), "implement directly handles concrete no-issue fixes");
+  ok(!impl.includes("delegates exactly one hop") && impl.includes("Full `loom-verify` remains mandatory"), "small-fix route stays in Implement then Verify");
   ok(read("skills/loom-grill/SKILL.md").includes("chat** (attended) or the **PR description"), "grill small-fix verify digest lives in chat or PR");
   ok(impl.includes("Close the session"), "implement ends with the handoff step");
   ok(impl.includes("Do not start the next issue in this session"), "handoff forbids same-session continuation");
@@ -2082,7 +2093,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
     ok(warning.startsWith("WITNESS:") && warning.includes("001.md"), "warn mode writes a visible issue-specific warning");
 
     process.env.LOOM_WITNESS = "strict";
-    const strictFirst = handlers.session_stop();
+    const strictFirst = captureStderr(() => handlers.session_stop()).value;
     ok(strictFirst?.continue && strictFirst.additionalContext.startsWith("BLOCKED:"), "strict witness first stop requests one corrective lap");
     warning = "";
     process.stderr.write = (chunk) => { warning += String(chunk); return true; };
@@ -2106,7 +2117,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
 
     strictEqual(handlers.session_stop(), undefined, "witnessed APPROVE passes session_stop and clears strict state");
     rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
-    ok(handlers.session_stop()?.continue, "strict witness blocks again after witness state clears");
+    ok(captureStderr(() => handlers.session_stop()).value?.continue, "strict witness blocks again after witness state clears");
 
     // Named plugin agents match too (the field run's first spawn attempt).
     rmSync(gate.witnessPath(gate.witnessRoot(tmp)), { force: true });
@@ -2363,6 +2374,50 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     "docs/glossary.md",
   ]) {
     ok(read(p).includes(phrase), `${p} narrows loom marker to real corner-cuts`);
+  }
+}
+
+// v3.0.0 — capability config, lazy Orca adapter, one-command surface
+{
+  const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
+  const adapter = read("skills/loom/ORCA.md");
+  for (const phrase of [
+    "verified live on 2026-07-21",
+    "user always starts one ordinary main OMP session",
+    "After PRD confirmation and before issue slicing",
+    "repository path plus an Orca comment containing the pack slug and absolute PRD path",
+    "Zero matches means preview remediation/creation",
+    "multiple matches means stop and ask",
+    "never guess `main`",
+    "orca orchestration dispatch --inject",
+    "payload `taskId` and `dispatchId` both match the active dispatch",
+    "ignore stale or unrelated inbox messages",
+    "must not invoke Verify or checker agents",
+    "maker evidence, never approval",
+    "changed files/repositories",
+    "base SHA plus diff/tree identity",
+    "writes that evidence to the issue `## Log` before running independent",
+    "stage exactly the intended files",
+    "without auto-staging unrelated files",
+    "`git write-tree` plus the base SHA",
+    "`git rev-parse HEAD^{tree}`",
+    "mismatch requires re-Verify",
+    "stable lifecycle ends at a verified commit",
+    "other agent hosts remain unverified",
+  ]) ok(adapter.includes(phrase), `Orca adapter carries: ${phrase}`);
+  for (const [path, phrase] of [
+    ["docs/orca.md", "Both checks then APPROVED service commit"],
+    ["README.md", "live visible-TUI E2E on 2026-07-21"],
+    ["CHANGELOG.md", "OMP + Orca visible-TUI flow was verified live"],
+  ]) ok(read(path).includes(phrase), `${path} records live visible-TUI E2E evidence`);
+  const dispatcher = read("skills/loom/SKILL.md");
+  ok(dispatcher.includes("concrete build/fix/add request") && dispatcher.includes("run `loom-verify`"), "dispatcher routes concrete small fixes through Implement then Verify");
+  ok(dispatcher.includes("investigate, why/how, decide") && dispatcher.includes("PRD/issues or multiple sessions"), "dispatcher separates Grill and Plan intent");
+  ok(dispatcher.includes("explicit natural-language target wins"), "explicit target wins routing");
+  for (const removed of ["skills/loom-plan/CHECKOUTS-TEMPLATE.md", "skills/loom-plan/EXECUTION.md", "skills/loom-tend/LAND.md", "commands/loom-implement.md"]) ok(!existsSync(resolve(__dirname, "..", removed)), `${removed} removed`);
+  for (const active of ["skills/loom-plan/SKILL.md", "skills/loom-plan/TO-PRD.md", "skills/loom-plan/TO-ISSUES.md", "skills/loom-implement/SKILL.md", "skills/loom-tend/SKILL.md", "docs/orca.md", "docs/workspaces.md", "README.md", "docs/hosts.md"]) {
+    const body = read(active);
+    ok(!/checkouts\.json|Gate 1\.5|orca\.repos|orca-worktree|LAND\.md/.test(body), `${active} has no v2.0.2 checkout surface`);
   }
 }
 

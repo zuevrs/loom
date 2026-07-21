@@ -54,7 +54,7 @@ Update these files to `X.Y.Z`:
 ## 4) Run checks
 
 ```bash
-node tests/hooks.test.mjs
+npm test
 bash scripts/check-drift
 bash scripts/check-doc-consistency
 bash scripts/check-installers

@@ -143,7 +143,7 @@ fi
 
 # Contributing/CI parity for mandatory checks.
 for cmd in \
-  'node tests/hooks.test.mjs' \
+  'npm test' \
   'bash scripts/check-drift' \
   'bash scripts/check-doc-consistency' \
   'bash scripts/check-installers' \
@@ -158,7 +158,7 @@ do
 done
 
 for ci_cmd in \
-  'node tests/hooks.test.mjs' \
+  'npm test' \
   'scripts/check-drift' \
   'scripts/check-doc-consistency' \
   'scripts/check-installers' \

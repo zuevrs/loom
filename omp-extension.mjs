@@ -4,7 +4,7 @@
 // tool_call: goal pre-commit gate. tool_execution_start: checker witness.
 // session_stop: general turn-stop verify gate.
 // Native OMP /plan is deliberately left untouched (plan-mode patching withdrawn);
-// Preferred entry is /loom; /loom-plan remains the precision planning route.
+// The single public command is /loom; internal ritual skills remain available.
 //
 // Ref: can1357/oh-my-pi extensibility/extensions/types.ts
 
@@ -26,8 +26,9 @@ const {
   witnessRoot,
 } = require("./hooks/stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
+const { readProjectConfig, invalidProjectConfigAlert } = require("./hooks/config.cjs");
 
-const MANAGED_BLOCK_VERSION = "v2.0.2";
+const MANAGED_BLOCK_VERSION = "v3.0.0";
 
 const INVARIANTS = PRE_LLM;
 
@@ -136,9 +137,11 @@ export default function loomExtension(pi) {
     try {
       const role = (process.env.LOOM_ROLE || "").toLowerCase();
       const workspace = workspaceState(process.env.PI_PROJECT_DIR || process.cwd());
+      const configAlert = invalidProjectConfigAlert(readProjectConfig(process.env.PI_PROJECT_DIR || process.cwd()));
       let injection = workspace?.invalid
         ? `# Loom workspace error\nWorkspace profile is invalid: ${workspace.profilePath} (${workspace.error})\nWorkspace behavior is disabled until repaired. Ordinary work remains canonical; explicit Loom work must stop.`
         : INVARIANTS;
+      if (configAlert) injection += `\n\n${configAlert}`;
       if (role && ROLES[role]) {
         injection += `\n\n# Loom role: ${role}\nConstraint: ${ROLES[role]}`;
         if (/-checker$/.test(role)) {

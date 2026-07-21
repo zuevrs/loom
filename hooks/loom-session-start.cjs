@@ -8,8 +8,9 @@ const fs = require("fs");
 const path = require("path");
 const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
+const { readProjectConfig, invalidProjectConfigAlert } = require("./config.cjs");
 
-const MANAGED_BLOCK_VERSION = "v2.0.2";
+const MANAGED_BLOCK_VERSION = "v3.0.0";
 
 function findProjectRoot() {
   let dir = process.cwd();
@@ -29,6 +30,7 @@ function run() {
   const activeWorkspace = findWorkspace(process.cwd());
   const root = workspaceRoot(process.cwd()) || findProjectRoot();
   const pointers = [];
+  const configAlert = invalidProjectConfigAlert(readProjectConfig(process.cwd()));
   pointers.push(...workspacePointers(activeWorkspace));
 
   const agentsPath = path.join(root, "AGENTS.md");
@@ -72,6 +74,7 @@ function run() {
     "# Loom session context",
     "",
     ...pointers,
+    ...(configAlert ? ["", configAlert] : []),
     ...(snapshot ? ["", snapshot] : []),
     "",
     snapshot
