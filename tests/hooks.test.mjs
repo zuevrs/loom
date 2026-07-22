@@ -355,7 +355,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(implement.includes("`wontfix` blocker does NOT unblock"), "wontfix blocker stops implement");
   ok(implement.includes("Status: needs-triage"), "scope creep writes needs-triage stub");
   ok(implement.includes("Status: needs-info"), "unanswerable question flips to needs-info");
-  ok(implement.includes("run by the **orchestrator**"), "batch mode: orchestrator owns verify");
+  ok(implement.includes("run by the **coordinator**"), "batch mode: coordinator owns verify");
 
   ok(read("skills/loom-plan/GRILL.md").includes("needs-triage"), "plan grill consumes triage stubs");
   ok(read("skills/loom-tend/SKILL.md").includes("needs-info"), "tend sweeps triage statuses");
@@ -827,7 +827,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const toIssues = rf(resolve(skillDir, "TO-ISSUES.md"), "utf8");
 
   ok(skill.includes("GRILL.md") && skill.includes("TO-PRD.md") && skill.includes("TO-ISSUES.md"), "router points at all three phases");
-  ok(skill.includes("../loom/ORCA.md") && skill.includes("worktrees: \"orca\""), "plan lazy-loads Orca adapter only from config");
+  ok(skill.includes("Plan creates no branches, worktrees, or runtime tasks"), "plan leaves Orca isolation to Implement");
   ok(!skill.includes("Gate 1.5") && !skill.includes("EXECUTION.md"), "plan removes checkout phase and named gate");
   ok(!/OMP\s*`?\/plan`?/i.test(skill + grill + toPrd + toIssues), "no OMP /plan references in phase files");
   ok(grill.includes("One `ask` call = exactly ONE question"), "grill forbids ask-array batching");
@@ -870,7 +870,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
   ok(impl.includes("## Batch mode"), "implement documents batch mode");
-  ok(impl.includes("one fresh implement sub-agent per issue"), "batch mode spawns fresh sub-agent per issue");
+  ok(impl.includes("one fresh implement worker per issue attempt"), "batch mode creates fresh maker per attempt");
   ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
   for (const doc of [agents, initSkill]) {
     ok(doc.includes("in batch/goal runs spawn a fresh sub-agent per issue"), "managed block extends fresh-session rule to batch runs");
@@ -1735,8 +1735,8 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   ok(impl.includes("## Direct small-fix route"), "implement directly handles concrete no-issue fixes");
   ok(!impl.includes("delegates exactly one hop") && impl.includes("Full `loom-verify` remains mandatory"), "small-fix route stays in Implement then Verify");
   ok(read("skills/loom-grill/SKILL.md").includes("chat** (attended) or the **PR description"), "grill small-fix verify digest lives in chat or PR");
-  ok(impl.includes("Close the session"), "implement ends with the handoff step");
-  ok(impl.includes("Do not start the next issue in this session"), "handoff forbids same-session continuation");
+  ok(impl.includes("Close the maker session"), "implement ends each maker attempt with handoff");
+  ok(impl.includes("maker stops but the root coordinator may dispatch"), "handoff separates maker stop from coordinator continuation");
   ok(impl.includes("Second REJECT from verify with overlapping blockers"), "implement knows the two-strikes stop");
   ok(impl.includes("amendment route"), "wrong-PRD failure mode points at the amendment route");
 
@@ -2393,10 +2393,10 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   for (const phrase of [
     "verified live on 2026-07-21",
     "user starts one ordinary main OMP session",
-    "After PRD confirmation",
-    "repository path plus an Orca comment containing pack slug and absolute PRD path",
-    "Zero matches means preview remediation/creation",
-    "multiple matches means stop and ask",
+    "During Implement preview",
+    "product-facing story, service, and status language without Loom branding",
+    "Zero matches permits the confirmed JIT create",
+    "multiple or inconsistent matches stop for human resolution",
     "never guess `main`",
     "installed native Orca `orchestration` skill",
     "active task/dispatch",
