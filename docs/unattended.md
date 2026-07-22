@@ -4,7 +4,7 @@ Loom ships no runner (see ADR history: host-native execution won). Every host al
 
 ## Runtime contract boundary
 
-The canonical executable contract is [`skills/loom/UNATTENDED.md`](../skills/loom/UNATTENDED.md). Runners must compose or load that fragment directly; this document is wiring and explanation for humans, never mandatory runtime input. The fragment owns isolation, report exits, Verify, blockers, budget/stagnation, the PR body contract, zero-findings behavior, and the no-merge/publish gate.
+The canonical executable contract is [`skills/loom/UNATTENDED.md`](../skills/loom/UNATTENDED.md). Runners must compose or load that fragment directly; this document is wiring and explanation for humans, never mandatory runtime input. The fragment owns isolation, report exits, Verify, blockers, budget/stagnation, the PR body contract, zero-findings behavior, and the consent boundary: the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive.
 
 Project `CONTEXT.md`, `PRODUCT.md`, `DESIGN.md`, and project `docs/adr/` remain project truth. Loom's distribution `docs/` directory is human reference only.
 

@@ -49,6 +49,20 @@ The confirmed preview is the single opt-in for autonomous whole-pack execution a
 
 After confirmation, activate exactly the previewed runner. With Orca, follow [`../loom/ORCA.md`](../loom/ORCA.md) and the installed native `orchestration` skill through complete, blocker, or the existing two-strikes stop. Without Orca, follow OMP's canonical-repository Goal fallback. Goal is never a workspace or Orca runner.
 
+### Prepare review
+
+This section governs attended Prepare review only. Its separate exact confirmation is mandatory before any push or hosted review. It does not govern or revoke a configured unattended runner's already-authorized dedicated-branch and hosted-review exit under [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md); those are distinct invocation modes, never simultaneous consent rules for one invocation.
+
+Offer Prepare review only after a whole-pack readiness inventory proves every included issue has an APPROVE line, its committed SHA/tree still matches the identity Verify judged, every lane is clean, and current repository checks pass. This is evidence assembly, not another pack-level LLM Verify. An incomplete pack stops; it may offer a partial **draft** bundle only behind its own exact, separate confirmation.
+
+Show one confirmation inventory listing each affected service, branch and base, verified commit/tree, check result, intended push, hosted review target and draft/ordinary state, plus exactly the completed maker/checker terminals to close. Confirmation authorizes only those pushes and at most one hosted review/PR per listed service. It never authorizes merge, rebase, amend, squash, force, branch/worktree cleanup, remote deletion, or an unlisted terminal close. A changed inventory renews confirmation; prior pack/commit consent is never publication consent.
+
+Generate a lane-specific product-facing title and body from that lane's diff, acceptance criteria, and current checks. Synthesize a sanitized public projection: never copy private `## Log`, Verify prose/digest, or private control-plane text verbatim; exclude Loom names, pack/private paths, issue IDs, model names, orchestration/terminal/worktree mechanics, and other private markers. Include only explicit public ticket or ADR URLs already present in source material, and place them only in a public References section; private `.loom` paths, pack/issue IDs, and PRD/issue references are forbidden. Explicit repository/project language instructions win; otherwise use the current user's language. Git history supplies style and conventions only, never language.
+
+Fetch each base and assess drift without rewriting history. Safe drift permits an ordinary hosted review. A conflict or red current base is a blocker and may produce only a draft that says what blocks review. Use host-neutral “hosted review” wording; when `gh` is available for a GitHub remote, its normal push/PR path may publish the confirmed lane. For unsupported or absent hosted remotes, report the honest manual outcome and do not claim an external review exists. Do not create a Loom publication manifest.
+
+Publication is per lane and non-transactional: record each successful push/review immediately, stop or continue only within the confirmed inventory after a failure, and never roll back a successful hosted review. The final summary distinguishes published, failed, draft, and manual lanes. After publication, keep every included approved Loom issue `Status: done`; `in-review` is not a Loom issue status. Set only the exact listed Orca worktree cards to native `workspace-status: in-review`, close exactly the confirmed completed maker/checker terminals, keep the root coordinator alive through that summary, and retain every worktree for Tend after merge.
+
 ### Coordinator and maker boundaries
 
 The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from issue cards, PRD, Git, and Orca rather than retained chat memory. It exclusively writes `.loom`, dispatches each attempt to a fresh one-issue maker, and runs independent Verify after `worker_done`.
@@ -61,7 +75,7 @@ Fresh-context-per-issue survives batching: the coordinator creates **one fresh i
 
 ## Unattended mode (background agents, CI, scheduled runs)
 
-Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely. It owns isolation, report exits, Verify, blockers, budget/stagnation, PR body contract, zero-findings behavior, and the never-merge/publish gate. Host wiring may be consulted by humans, but execution must not require distribution `docs/`.
+Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely. It owns isolation, report exits, Verify, blockers, budget/stagnation, public hosted-review body contract, zero-findings behavior, and the consent boundary: the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive. Host wiring may be consulted by humans, but execution must not require distribution `docs/`.
 
 ## Direct small-fix route
 
