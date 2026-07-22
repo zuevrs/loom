@@ -357,7 +357,7 @@ for (const required of [
   "first line names the blocker", "draft-PR exit is mandatory", "do not replace it with a local-only report or commit",
 ]) ok(unattended.includes(required), `Mandatory blocker-to-draft-PR contract missing: ${required}`);
 const githubWiring = unattendedDocs.slice(unattendedDocs.indexOf("### GitHub Actions"), unattendedDocs.indexOf("### The verify gate"));
-const loomCheckout = "repository: zuevrs/loom\n          ref: v3.2.0\n          path: loom-runtime";
+const loomCheckout = "repository: zuevrs/loom\n          ref: v3.3.0\n          path: loom-runtime";
 const composedPrompt = String.raw`prompt="$(cat ../loom-runtime/skills/loom/UNATTENDED.md; printf '\n\n--- COMPLETE RECIPE ---\n\n'; cat ../loom-runtime/recipes/docs-drift.md)"`;
 ok(githubWiring.includes("with: { path: target }") && githubWiring.includes(loomCheckout), "hosted example does not keep target and pinned Loom checkouts distinct");
 ok(githubWiring.indexOf(loomCheckout) < githubWiring.indexOf(composedPrompt), "hosted example composes before checking out pinned Loom");

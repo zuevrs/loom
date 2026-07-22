@@ -4,16 +4,31 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-### Added
+- _No unreleased changes yet._
 
-- Documented the repository-aware daily pack workflow: compact Implement preview, sequential same-service and parallel independent-service lanes, fresh-worker Verify rework, verified product commits, disk/Git/Orca resume, separately confirmed private-safe review preparation, and exact Tend cleanup.
-- Added sanitized recorded pilot events, prose, and command outputs for the live disposable two-repository pilot, covering scheduling, REJECT/rework, exact verified commit/tree boundaries, marker-free branch/commit/review prose, coherent `CONTINUE`, ambiguity `TIMEOUT`, manual-only review preparation, selective cleanup, and selected-versus-observed policy.
-- Simplified resume after the pilot's ambiguity helper timed out at 180 seconds without a verdict: the fail-closed contract now sequences existing workspace, issue, exact Git, and native Orca source owners before dispatch. The root coordinator performs the decision directly with no helper, subagent, or worker path, and no custom executable reference validator or runtime manifest is shipped. Live ambiguity `STOP` was not observed.
+## [3.3.0] - 2026-07-22
+
+### Highlights
+
+- **Repository-aware daily packs** — one compact Implement preview can run same-service issues sequentially and independent services in parallel, with a fresh maker and independent Verify for every issue.
+- **Resumable Orca lifecycle** — disposable coordinators reconstruct a unique runnable lane from validated workspace, issue, Git, and native Orca state, then fail closed on missing, contradictory, dirty, timed-out, or ambiguous evidence.
+- **Review and cleanup handoffs** — approved work ends at exact verified commits; attended review preparation is separately confirmed and privacy-safe, while Tend removes only uniquely matched, durably merged, clean, inactive Orca lanes after exact confirmation.
+
+### Adapter impacts
+
+- **OMP + Orca:** configured Orca packs use story-by-service lanes, fresh visible workers, coordinator-owned Verify/rework, exact commit-tree checks, native resume inventory, and native worktree cleanup. Goal remains mutually exclusive with Orca.
+- **Other hosts:** the generic single-issue rituals are unchanged; the new multi-repository lifecycle remains specific to validated workspace projects with the Orca adapter enabled.
+
+### Safety changes
+
+- Resume validates logical repository names through the workspace registry before any Git command, uses canonical roots and exact argument-array commands, and permits dispatch only after one explicit coordinator-owned `CONTINUE`.
+- Publication consent now separates attended exact confirmation from configured unattended setup/launch authorization. Neither mode permits auto-merge, and public review prose is synthesized without private Loom, model, orchestration, terminal, or worktree markers.
+- Cleanup requires durable hosted-merge evidence plus coherent disk, Git, Orca, and host identity; failures retain the lane and never fall back to raw Git or filesystem worktree removal.
 
 ### Known limitations
 
-- The original pilot observed coherent `CONTINUE`, but did not observe ambiguity `STOP`; its first probe was canceled and its second timed out. A future live pilot should evidence the corrected coordinator-owned stop path.
-- Prewalk was selected without a visible switch capture; Goal-off and Advisor-disabled were selected/configured without live state queries. OMP custom-agent discovery, live OMP stop blocking, and native Verify batching retain their documented limitations; unsupported hosts remain unverified.
+- The live pilot observed coherent `CONTINUE`, but not ambiguity `STOP`; the first ambiguity probe was canceled and the second timed out. A future pilot should exercise the corrected coordinator-owned stop path.
+- Prewalk selection lacks a visible model-switch capture. Goal-off and Advisor-disabled state, OMP custom-agent discovery, live OMP stop blocking, and native Verify batching retain their documented evidence limitations; unsupported hosts remain unverified.
 
 ## [3.2.0] - 2026-07-22
 
@@ -1131,7 +1146,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/zuevrs/loom/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/zuevrs/loom/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/zuevrs/loom/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/zuevrs/loom/compare/v2.0.2...v3.0.0

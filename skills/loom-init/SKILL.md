@@ -59,7 +59,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v3.2.0 -->
+<!-- loom:begin version=v3.3.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
