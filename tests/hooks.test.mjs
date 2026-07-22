@@ -1248,6 +1248,13 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(!existsSync(resolve(__dirname, "..", "skills", "loom-init", "SAFETY-TEMPLATE.md")), "SAFETY template removed");
   const toIssues = rf(resolve(__dirname, "..", "skills", "loom-plan", "TO-ISSUES.md"), "utf8");
   ok(toIssues.includes("ready-for-human"), "slicing still routes human-judgement work to ready-for-human");
+  const issueTemplate = rf(resolve(__dirname, "..", "skills", "loom-plan", "ISSUE-TEMPLATE.md"), "utf8");
+  const amend = rf(resolve(__dirname, "..", "skills", "loom-plan", "AMEND.md"), "utf8");
+  ok(toIssues.includes("profile.repositories[].path") && toIssues.includes("unknown name blocks"), "workspace slicing binds repository names to the validated profile");
+  ok(toIssues.includes("In canonical mode, do not add repository metadata") && !issueTemplate.includes("## Repositories"), "canonical issue template shape stays unchanged");
+  ok(toIssues.includes("dependent, repository-scoped issues") && toIssues.includes("list every locked repository explicitly"), "multi-repository slicing defaults to split issues and makes atomic locks explicit");
+  ok(toIssues.includes("creates no branch or worktree"), "Plan repository metadata creates no execution lane");
+  ok(amend.includes("confirmed `## Repositories` set is always an amendment"), "repository scope changes route through Plan amendment");
 
   // OMP command surface — one dispatcher command only
   const cmds = readdirSync(resolve(__dirname, "..", "commands")).filter((f) => f.endsWith(".md")).sort();

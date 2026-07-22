@@ -4,7 +4,7 @@ Entry condition: an existing pack's PRD is contradicted or outgrown, including a
 
 ## Procedure
 
-1. Grill only the contradiction and its blast radius. Keep facts and user-owned decisions separate. If the work becomes new scope or needs broad re-planning, stop and return to full Plan.
+1. Grill only the contradiction and its blast radius. A change to an issue's confirmed `## Repositories` set is always an amendment and follows this procedure, even when no other PRD text changes. Keep facts and user-owned decisions separate. If the work becomes new scope or needs broad re-planning, stop and return to full Plan.
 2. Use Gate 1 mechanics from [`TO-PRD.md`](TO-PRD.md) to preview the exact PRD/domain delta. Append one dated line to the PRD's `## Amendments` section (create it once) describing what changed and why. Changed target, action, scope, or base requires renewed confirmation.
 3. Preserve untouched issues byte-for-byte. Re-evaluate only affected issue statuses, acceptance criteria, and blockers against the amended contract.
 4. An answered `needs-info` issue returns to `ready-for-agent` only after the confirmed amendment resolves its contract and the affected rewrite is approved.

@@ -2,6 +2,15 @@
 
 Entry condition: the user confirmed the PRD and any configured worktree handoff returned successfully. If not, STOP — return to `TO-PRD.md`.
 
+## Repository scope
+
+Before drafting slices, resolve project context with `node hooks/workspace.cjs --project-context`. In workspace mode, that command validates the active profile; then read `<artifactRoot>/.loom/workspace.json` for its repository names:
+
+- In canonical mode, do not add repository metadata; issue cards retain the exact existing template shape.
+- In workspace mode, choose and confirm repository scope for every issue using only logical names from the validated profile (`profile.repositories[].path`). Insert `## Repositories` immediately before `## Verification command`, with one `- <logical-name>` entry per repository. An empty or unknown name blocks the Gate 2 preview and confirmation.
+- Default work spanning repositories to dependent, repository-scoped issues. Keep one issue spanning multiple repositories only when atomic delivery is required; list every locked repository explicitly in that issue.
+- Plan records ownership only. It creates no branch or worktree.
+
 ## Draft slices
 
 Break the PRD into **tracer-bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end — NOT a horizontal slice of one layer.
@@ -25,7 +34,7 @@ Iterate until the user approves the breakdown. Do NOT write issue files before a
 
 Each approved slice → `.loom/<feature-slug>/issues/<NN>-<slug>.md` via [`ISSUE-TEMPLATE.md`](ISSUE-TEMPLATE.md):
 
-- `Status: ready-for-agent`, acceptance criteria, and a deterministic verification command in every issue.
+- `Status: ready-for-agent`, acceptance criteria, and a deterministic verification command in every issue. In workspace mode only, add the confirmed `## Repositories` section defined above; do not alter `ISSUE-TEMPLATE.md` or canonical cards.
 - Order follows `Blocked by` fields (blockers get lower numbers); no separate execution-order file.
 - Work that needs human judgement (auth, payments, irreversible migrations, credential surfaces) → `Status: ready-for-human` instead.
 
@@ -73,7 +82,8 @@ Recommend host-native skills when scope touches security/perf/CI — do not fold
 - User stories are extensive; Testing Decisions and seams recorded in the PRD
 - Every issue has a verification command and acceptance criteria
 - PRD has in/out scope and quality gates
-- Issue `Blocked by` graph is consistent; no issue marked `done` at Plan time
+- Issue `Blocked by` graph is consistent; multi-repository work is split by default; no issue marked `done` at Plan time
+- In workspace mode, every issue repository name is present in the current validated `workspace.json`; in canonical mode, no issue has `## Repositories`
 - User passed both gates: confirmed the PRD, then approved the slices
 - CONTEXT terms match PRD vocabulary
 

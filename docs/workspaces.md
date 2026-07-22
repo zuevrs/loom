@@ -17,7 +17,7 @@ A workspace profile lives at `<workspace>/.loom/workspace.json`:
 }
 ```
 
-Paths are relative, validated, and contained by the workspace. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical.
+Repository `path` values are the stable logical names used in workspace issue cards as well as relative locations. Paths are validated and contained by the workspace. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical.
 
 ## Ownership
 

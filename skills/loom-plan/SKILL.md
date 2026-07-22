@@ -23,7 +23,7 @@ Produce a verifiable PRD + issue pack under `.loom/<feature-slug>/` without star
 
 ## Workspace ownership
 
-With a valid active workspace profile, write PRD/issues, CONTEXT, ADRs, and other Loom artifacts only under the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Registered service repositories are execution targets for reads, diffs, and tests — never additional Loom roots. Human background is optional in `docs/workspaces.md`; this skill is the runtime rule.
+With a valid active workspace profile, write PRD/issues, CONTEXT, ADRs, and other Loom artifacts only under the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Treat each validated `profile.repositories[].path` as that repository's logical name. Registered service repositories are execution targets for reads, diffs, and tests — never additional Loom roots. Human background is optional in `docs/workspaces.md`; this skill is the runtime rule.
 
 ## Route scope
 
