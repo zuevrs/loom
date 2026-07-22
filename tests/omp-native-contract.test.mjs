@@ -104,9 +104,7 @@ for (const token of [
   "worker_done` corresponding to the active task/dispatch",
   "REJECT keeps the same lane and dispatches a fresh rework worker",
   "second REJECT with overlapping blockers stops the pack",
-  "Reconstruct progress from issue status/Log/Verify on disk",
-  "Git branch/commit/tree state, and Orca worktree/task/dispatch state",
-  "ambiguous and stops for human resolution",
+  "root coordinator itself",
   "exactly one product-facing commit",
   "Never push, publish, merge, amend, squash, rebase, or force",
   "no private issue IDs, pack paths, model names, Loom branding, or orchestration mechanics",
@@ -164,6 +162,34 @@ for (const token of [
 ]) ok(orca.includes(token), `Orca consent mode distinction missing ${token}`);
 ok(!implement.includes("Prepare review command"), "Prepare review introduces a new command surface");
 ok(!orca.includes("publication manifest file"), "Orca introduces a publication manifest");
+for (const token of [
+  "validated workspace parser/registry", "exact registered path string", "canonical realpath", "before any Git command",
+  "status/blocker scan", "exactly one blocker-resolved runnable issue", "argument-array Git commands",
+  "git cat-file -e <sha>^{commit}", "git show -s --format=%T <sha>",
+  "git merge-base --is-ancestor <earlier> <lane-tip>", "git rev-parse HEAD", "git status --porcelain",
+  "native story-filtered Orca inventory", "without duplicating Orca's task model", "180-second bound",
+  "never delegate any resume decision step to a helper, subagent, or worker", "STOP` before dispatch",
+  "explicit unique coordinator `CONTINUE`",
+]) ok(orca.includes(token), `Canonical ORCA resume contract omits: ${token}`);
+for (const token of ["resume delegates exclusively", "../loom/ORCA.md", "§ Resume", "does not duplicate that algorithm"]) {
+  ok(implement.includes(token), `Implement resume delegation missing: ${token}`);
+}
+for (const forbidden of [
+  "git cat-file -e <sha>^{commit}", "git show -s --format=%T <sha>",
+  "git merge-base --is-ancestor <earlier> <lane-tip>", "git rev-parse HEAD", "git status --porcelain",
+  "180-second bound", "explicit unique coordinator `CONTINUE`", "native story-filtered Orca inventory",
+]) ok(!implement.includes(forbidden), `Implement duplicates ORCA resume protocol: ${forbidden}`);
+for (const source of [implement, orca]) {
+  ok(!source.includes("scripts/resume-decision.mjs"), "Resume contract claims a custom reference validator");
+  ok(!source.includes("optional helper") && !source.includes("helper is optional"), "Resume contract retains optional helper path");
+}
+ok(!existsSync(resolve(root, "scripts/resume-decision.mjs")), "Custom resume validator still exists");
+ok(!existsSync(resolve(root, "tests/resume-decision.test.mjs")), "Synthetic resume validator test still exists");
+const packageManifest = JSON.parse(read("package.json"));
+ok(!JSON.stringify(packageManifest).includes("resume-decision"), "npm manifest still wires custom resume validator");
+for (const artifact of [".loom/runtime.json", ".loom/checkouts.json", ".loom/resume.json", "resume-manifest.json"]) {
+  ok(!existsSync(resolve(root, artifact)), `Resume contract introduces runtime artifact: ${artifact}`);
+}
 const canonicalLoomStatuses = ["needs-triage", "needs-info", "ready-for-agent", "ready-for-human", "done", "wontfix"];
 const initSkill = read("skills/loom-init/SKILL.md");
 for (const status of canonicalLoomStatuses) ok(initSkill.includes("`" + status + "`"), `Canonical Loom status missing ${status}`);

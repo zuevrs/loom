@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "pilot": "lifecycle-pilot-20260722-2017",
+  "sanitization": "recorded logical product identities, event times, prose, and command outputs; runtime-global IDs and private filesystem paths omitted",
+  "lifecycleEvents": [
+    {
+      "at": "2026-07-22T17:32:41Z",
+      "type": "lane-created",
+      "repo": "catalog",
+      "lane": "Catalog reliability availability"
+    },
+    {
+      "at": "2026-07-22T17:32:41Z",
+      "type": "lane-created",
+      "repo": "notifications",
+      "lane": "Catalog reliability notifications"
+    },
+    {
+      "at": "2026-07-22T17:33:53Z",
+      "type": "attempt-started",
+      "repo": "catalog",
+      "change": "availability",
+      "attemptId": "catalog-availability-1",
+      "laneId": "Catalog reliability availability",
+      "workerSessionId": "worker-catalog-1"
+    },
+    {
+      "at": "2026-07-22T17:33:53Z",
+      "type": "attempt-started",
+      "repo": "notifications",
+      "change": "delivery success rate",
+      "attemptId": "notifications-delivery-rate-1",
+      "laneId": "Catalog reliability notifications",
+      "workerSessionId": "worker-notifications-1"
+    },
+    {
+      "at": "2026-07-22T17:33:53Z",
+      "type": "dependency-wait",
+      "repo": "catalog",
+      "change": "stock summary",
+      "waitFor": "availability APPROVE and verified commit"
+    },
+    {
+      "at": "2026-07-22T17:35:55Z",
+      "type": "verify-verdict",
+      "repo": "catalog",
+      "change": "availability",
+      "attemptId": "catalog-availability-1",
+      "attemptNumber": 1,
+      "verdict": "REJECT",
+      "finding": "zero-stock coverage missing"
+    },
+    {
+      "at": "2026-07-22T17:37:07Z",
+      "type": "attempt-finished",
+      "repo": "notifications",
+      "change": "delivery success rate",
+      "attemptId": "notifications-delivery-rate-1",
+      "attemptNumber": 1
+    },
+    {
+      "at": "2026-07-22T17:39:55Z",
+      "type": "attempt-started",
+      "repo": "catalog",
+      "change": "availability",
+      "attemptId": "catalog-availability-2",
+      "attemptNumber": 2,
+      "reason": "zero-stock coverage rework",
+      "laneId": "Catalog reliability availability",
+      "workerSessionId": "worker-catalog-2"
+    },
+    {
+      "at": "2026-07-22T17:42:23Z",
+      "type": "verify-verdict",
+      "repo": "catalog",
+      "change": "availability",
+      "attemptId": "catalog-availability-2",
+      "attemptNumber": 2,
+      "verdict": "APPROVE"
+    },
+    {
+      "at": "2026-07-22T17:42:23Z",
+      "type": "verify-verdict",
+      "repo": "notifications",
+      "change": "delivery success rate",
+      "attemptId": "notifications-delivery-rate-1",
+      "attemptNumber": 1,
+      "verdict": "APPROVE"
+    },
+    {
+      "at": "2026-07-22T17:59:01Z",
+      "type": "dependency-released",
+      "repo": "catalog",
+      "change": "stock summary",
+      "byCommit": "355cd82cecc35e0cd908469e708bcd853878c2bc"
+    },
+    {
+      "at": "2026-07-22T17:59:01Z",
+      "type": "attempt-started",
+      "repo": "catalog",
+      "change": "stock summary",
+      "attemptId": "catalog-stock-summary-1",
+      "attemptNumber": 1,
+      "laneId": "Catalog reliability availability",
+      "workerSessionId": "worker-catalog-3"
+    },
+    {
+      "at": "2026-07-22T18:01:13Z",
+      "type": "verify-verdict",
+      "repo": "catalog",
+      "change": "stock summary",
+      "attemptId": "catalog-stock-summary-1",
+      "attemptNumber": 1,
+      "verdict": "APPROVE"
+    }
+  ],
+  "commits": [
+    {
+      "repo": "catalog",
+      "change": "availability",
+      "sha": "355cd82cecc35e0cd908469e708bcd853878c2bc",
+      "tree": "0b112eb59cdd79a653aebd3f8322b5e999bf4cc0",
+      "message": "Expose catalog product availability"
+    },
+    {
+      "repo": "catalog",
+      "change": "stock summary",
+      "sha": "59c5aaec1233573e460aaa26ba2c10be529395f6",
+      "tree": "7348f84c6d60e427abb3f4ef142228eea0b69f8b",
+      "message": "Add catalog stock summary"
+    },
+    {
+      "repo": "notifications",
+      "change": "delivery success rate",
+      "sha": "d821a4d30746bedfcaff2e5c920cd56fadd9199f",
+      "tree": "92fb10798ca25f5cadeb3f58dfd8c2e71e346d39",
+      "message": "Report notification delivery success rate"
+    }
+  ],
+  "branches": [
+    {
+      "repo": "catalog",
+      "name": "Catalog-reliability-availability"
+    },
+    {
+      "repo": "notifications",
+      "name": "Catalog-reliability-notifications"
+    }
+  ],
+  "reviewProposals": [
+    {
+      "repo": "catalog",
+      "title": "Expose catalog availability and stock summary",
+      "body": "## Summary\n\n- Add an available flag to product listings using positive stock as the availability rule.\n- Add total-product and in-stock counts while keeping count semantics aligned with listing availability.\n- Cover positive stock, zero stock, and the resulting summary counts.\n\n## Validation\n\n- npm test passes on the catalog branch.\n- npm test passes on the locally merged catalog main branch."
+    },
+    {
+      "repo": "notifications",
+      "title": "Report notification delivery success rate",
+      "body": "## Summary\n\n- Add a stable one-decimal success-rate percentage to delivery summaries.\n- Return a finite numeric zero when no deliveries exist.\n- Cover mixed delivery, full success, and zero-delivery behavior.\n\n## Validation\n\n- npm test passes on the notifications branch.\n- npm test passes on the locally merged notifications main branch."
+    }
+  ],
+  "commandResults": [
+    {
+      "logicalName": "protected-api-boundary",
+      "exitCode": 0,
+      "stdout": [
+        "protected API repository unchanged"
+      ]
+    },
+    {
+      "logicalName": "pilot-git-and-protected-boundaries",
+      "exitCode": 0,
+      "stdout": [
+        "pilot Git and protected boundaries pass"
+      ]
+    },
+    {
+      "logicalName": "catalog-tests",
+      "exitCode": 0,
+      "stdout": [
+        "catalog baseline passed"
+      ]
+    },
+    {
+      "logicalName": "notifications-tests",
+      "exitCode": 0,
+      "stdout": [
+        "notifications baseline passed"
+      ]
+    }
+  ],
+  "resumeRows": [
+    {
+      "sequence": 1,
+      "probe": "coherent reconstruction",
+      "result": "CONTINUE",
+      "verdict": "CONTINUE"
+    },
+    {
+      "sequence": 2,
+      "probe": "first ambiguity probe",
+      "result": "CANCELED",
+      "verdict": null
+    },
+    {
+      "sequence": 3,
+      "probe": "bounded ambiguity probe",
+      "startedAt": "2026-07-22T18:28:35Z",
+      "endedAt": "2026-07-22T18:32:16Z",
+      "boundSeconds": 180,
+      "result": "TIMEOUT",
+      "verdict": null,
+      "inputs": [
+        "unknown catalog commit and tree",
+        "duplicate catalog lane"
+      ]
+    }
+  ],
+  "finalLaneInventory": [
+    {
+      "repo": "catalog",
+      "lane": "Catalog reliability availability",
+      "presence": "absent",
+      "liveTerminalCount": 0
+    },
+    {
+      "repo": "notifications",
+      "lane": "Catalog reliability notifications",
+      "presence": "present",
+      "workspaceStatus": "in-review",
+      "liveTerminalCount": 0
+    }
+  ],
+  "policyRecords": [
+    {
+      "control": "auto-shake",
+      "selected": "enabled",
+      "observed": "completion-captured"
+    },
+    {
+      "control": "prewalk",
+      "selected": "enabled",
+      "observed": "no-visible-switch-capture"
+    },
+    {
+      "control": "goal",
+      "selected": "off-under-orca",
+      "observed": "not-queried-live"
+    },
+    {
+      "control": "advisor",
+      "selected": "disabled",
+      "observed": "not-queried-live"
+    }
+  ],
+  "cleanupRows": [
+    {
+      "type": "cleanup_inventory",
+      "laneId": "Catalog reliability availability",
+      "laneSelector": "lane-catalog",
+      "merged": true,
+      "clean": true,
+      "active": false,
+      "status": "eligible"
+    },
+    {
+      "type": "cleanup_decision",
+      "laneId": "Catalog reliability availability",
+      "confirmationScope": "lane-catalog",
+      "action": "native exact removal",
+      "confirmed": true,
+      "performed": true,
+      "reason": "merged, clean, inactive"
+    },
+    {
+      "type": "cleanup_inventory",
+      "laneId": "Catalog reliability notifications",
+      "laneSelector": "lane-notifications",
+      "merged": true,
+      "clean": true,
+      "active": true,
+      "status": "in-review"
+    },
+    {
+      "type": "cleanup_decision",
+      "laneId": "Catalog reliability notifications",
+      "confirmationScope": null,
+      "action": null,
+      "confirmed": false,
+      "performed": false,
+      "reason": "active/in-review"
+    }
+  ]
+}

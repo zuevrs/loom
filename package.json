@@ -17,6 +17,6 @@
   },
   "keywords": ["agent", "harness", "skills", "enforcement", "discipline"],
   "scripts": {
-    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs && node tests/config.test.mjs && node tests/hermes-project-context-bridge.test.mjs && node tests/changelog-boundary.test.mjs && node tests/omp-native-contract.test.mjs"
+    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs && node tests/config.test.mjs && node tests/hermes-project-context-bridge.test.mjs && node tests/changelog-boundary.test.mjs && node tests/omp-native-contract.test.mjs && node tests/lifecycle-contract.test.mjs"
   }
 }

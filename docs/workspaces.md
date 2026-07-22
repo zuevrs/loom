@@ -28,3 +28,11 @@ Run `/loom setup workspace` from the intended root. Setup inventories repositori
 General project capabilities live separately in [`.loom/config.json`](orca.md), resolved from the same workspace `artifactRoot`. Enabling `{ "worktrees": "orca" }` opts into the short [Orca user flow](orca.md); host commands and lifecycle stay in the lazy adapter, not the workspace profile.
 
 Invalid profiles fail closed for explicit Loom work. Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots.
+
+## Daily pack workflow
+
+Plan records repository ownership with registered logical names and creates no worktrees. After the operator confirms Implement's compact pack preview, same-repository issues run sequentially and independent repositories may run in parallel through the selected runner. Verify gates one product-facing commit per approved issue; a rejection reuses the lane but starts a fresh worker. Resume reconstructs from workspace-owned issue records plus Git and Orca and stops when those sources disagree.
+
+Prepare review is a separate exact publication decision. With no hosted remote, readiness can still be reported as a manual outcome without claiming a review exists. Worktrees remain after review preparation. Following a human merge, Tend inventories exact local lanes and cleans only confirmed merged, clean, inactive lanes; all unsafe or ambiguous lanes are retained.
+
+A live disposable two-repository pilot validated workspace scheduling, fresh-worker rework, verified commits, coherent resume, manual-only review preparation, and selective cleanup while protected unrelated work stayed unchanged. The ambiguity helper timed out and returned no `STOP`; the pilot led to a fail-closed contract correction that sequences the existing workspace, issue, Git, and native Orca source owners before dispatch, without a custom executable validator or runtime manifest. See [Orca evidence and correction](orca.md).

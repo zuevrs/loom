@@ -65,7 +65,7 @@ Publication is per lane and non-transactional: record each successful push/revie
 
 ### Coordinator and maker boundaries
 
-The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from issue cards, PRD, Git, and Orca rather than retained chat memory. It exclusively writes `.loom`, dispatches each attempt to a fresh one-issue maker, and runs independent Verify after `worker_done`.
+The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from existing source owners rather than retained chat memory. When the Orca adapter is active, resume delegates exclusively to [`../loom/ORCA.md`](../loom/ORCA.md) § Resume; Implement does not duplicate that algorithm. The coordinator exclusively writes `.loom`, dispatches each attempt to a fresh one-issue maker, and runs independent Verify after `worker_done`.
 
 Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that attempt and returns control; it never marks the issue complete. Verify APPROVE permits the coordinator to create the one preauthorized product-facing commit and mark the issue done. Verify REJECT keeps the same lane and starts a fresh maker for rework. The coordinator, not a maker, may then dispatch another ready issue.
 
