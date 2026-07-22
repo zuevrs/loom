@@ -93,9 +93,9 @@ try {
   mkdirSync(broken);
   writeFileSync(join(broken, ".git"), "gitdir: missing\n");
   profile(ws, { workspace_id: "curated-id", repositories: [{ path: "api", remote: "git@example.test/api.git" }, { path: "broken" }] });
+  strictEqual(workspace.workspaceState(api)?.invalid, true, "registered repository Git identity errors invalidate the workspace profile");
   session = execFileSync(process.execPath, [sessionStart], { cwd: api, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  ok(session.includes("registered service working trees dirty: api"), "one failed status does not suppress dirty repositories");
-  ok(session.includes("registered service status unavailable: broken"), "recovery visibly reports per-repository status failure");
+  ok(session.includes("Workspace behavior is disabled") && session.includes("Workspace profile invalid"), "recovery reports fail-closed Git identity validation");
 
   writeFileSync(join(ws, ".loom", "workspace.json"), "{");
   const descendant = join(api, "src");
@@ -119,7 +119,17 @@ try {
   const escaped = join(tmp, "escaped");
   repo(escaped);
   symlinkSync(escaped, join(writerRoot, "linked"), "dir");
-  throws(() => workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "linked" }] }, writerRoot), /symlink escapes/);
+  throws(() => workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "linked" }] }, writerRoot), /canonical.*symlinks are not allowed/, "in-workspace repository symlinks stop before Git use");
+
+  const indirected = join(writerRoot, "indirected");
+  mkdirSync(indirected);
+  git(escaped, "config", "core.worktree", escaped);
+  writeFileSync(join(indirected, ".git"), `gitdir: ${join(escaped, ".git")}\n`);
+  throws(
+    () => workspace.validateWorkspaceProfile({ workspace_id: "bad", repositories: [{ path: "indirected" }] }, writerRoot),
+    /registered repository is no longer a Git root/,
+    "Git metadata resolving to a different canonical top-level is rejected"
+  );
 
   const dottedRepo = join(writerRoot, "..cache", "repo");
   repo(dottedRepo);

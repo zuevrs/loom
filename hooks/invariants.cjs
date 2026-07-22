@@ -4,7 +4,7 @@
 const PRE_LLM = `# Loom invariants (pre-turn guard)
 
 - Router is active: map intent → ritual skill before acting.
-- Human gate: never auto-merge, never auto-publish.
+- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.

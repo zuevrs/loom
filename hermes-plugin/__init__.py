@@ -29,7 +29,7 @@ DISCIPLINE = """# Loom universal invariants (pre-turn guard)
 - Ordinary prompts remain normal agent mode.
 - Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
 - Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
-- Human gate: never auto-merge, never auto-publish.
+- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
 - Existing .loom issues marked done require an APPROVE Verify signal.

@@ -64,8 +64,10 @@ function validateWorkspaceProfile(value, root) {
     if (!existsSync(path) || !statSync(path).isDirectory()) throw new Error(`repository path does not exist: ${repo.path}`);
     const real = realpathSync(path);
     const realRoot = realpathSync(resolve(root));
-    if (real === realRoot || !isInside(real, realRoot)) throw new Error(`repository symlink escapes workspace: ${repo.path}`);
+    if (real !== resolve(realRoot, portablePath)) throw new Error(`repository path must be canonical (symlinks are not allowed): ${repo.path}`);
+    if (real === realRoot || !isInside(real, realRoot)) throw new Error(`repository escapes workspace: ${repo.path}`);
     if (!existsSync(resolve(path, ".git"))) throw new Error(`repository is not a Git root: ${repo.path}`);
+    if (repositoryIdentity(real) !== real) throw new Error(`registered repository is no longer a Git root: ${repo.path}`);
     if (repo.remote !== undefined && typeof repo.remote !== "string") throw new Error("repository remote must be a string");
     return { ...repo, path: portablePath };
   });

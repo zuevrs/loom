@@ -17,7 +17,7 @@ A workspace profile lives at `<workspace>/.loom/workspace.json`:
 }
 ```
 
-Repository `path` values are the stable logical names used in workspace issue cards as well as relative locations. Paths are validated and contained by the workspace. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical.
+Repository `path` values are stable logical relative names used in workspace issue cards and resolved against the validated workspace/artifact root. Resume binds a logical name through that validated profile, normalizes the resulting absolute path, and accepts it only when it is both canonical on disk and the Git top-level; it never compares the original relative name with an absolute realpath. Unknown names, symlinks, and non-root paths stop. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical.
 
 ## Ownership
 

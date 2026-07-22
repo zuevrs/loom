@@ -163,7 +163,9 @@ for (const token of [
 ok(!implement.includes("Prepare review command"), "Prepare review introduces a new command surface");
 ok(!orca.includes("publication manifest file"), "Orca introduces a publication manifest");
 for (const token of [
-  "validated workspace parser/registry", "exact registered path string", "canonical realpath", "before any Git command",
+  "validated workspace parser/registry", "logical relative path", "resolve `registered.path`", "validated workspace/artifact root",
+  "resolved absolute path", "realpath", "canonical Git top-level", "Never compare the original relative string",
+  "Unknown names, symlinks, and non-root paths `STOP`", "already-absolute trusted root",
   "status/blocker scan", "exactly one blocker-resolved runnable issue", "argument-array Git commands",
   "git cat-file -e <sha>^{commit}", "git show -s --format=%T <sha>",
   "git merge-base --is-ancestor <earlier> <lane-tip>", "git rev-parse HEAD", "git status --porcelain",
@@ -185,6 +187,15 @@ for (const source of [implement, orca]) {
 }
 ok(!existsSync(resolve(root, "scripts/resume-decision.mjs")), "Custom resume validator still exists");
 ok(!existsSync(resolve(root, "tests/resume-decision.test.mjs")), "Synthetic resume validator test still exists");
+for (const invalidComparison of [
+  "registered.path === realpath", "registered.path == realpath", "repo.path === realpath", "repo.path == realpath",
+  "exact registered path string to equal its canonical realpath",
+]) ok(!orca.includes(invalidComparison), `ORCA resume compares a logical relative name directly with an absolute realpath: ${invalidComparison}`);
+for (const token of [
+  "logical relative paths", "resolved against the validated workspace/artifact root",
+  "absolute normalized path", "canonical Git top-level", "never compares the original relative name with an absolute realpath",
+  "Unknown names, symlinks, and non-root paths stop",
+]) ok(read("docs/workspaces.md").includes(token) || read("docs/orca.md").includes(token), `Workspace/Orca docs omit path semantics: ${token}`);
 const packageManifest = JSON.parse(read("package.json"));
 ok(!JSON.stringify(packageManifest).includes("resume-decision"), "npm manifest still wires custom resume validator");
 for (const artifact of [".loom/runtime.json", ".loom/checkouts.json", ".loom/resume.json", "resume-manifest.json"]) {
@@ -318,6 +329,20 @@ for (const stale of ["never-merge/publish gate", "no-merge/publish gate"]) {
 const consentSummary = "the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive";
 ok(implement.includes(consentSummary), "Implement summary omits accurate merge/publication consent boundary");
 ok(read("docs/unattended.md").includes(consentSummary), "Unattended docs summary omits accurate merge/publication consent boundary");
+const publicationSurfaces = [
+  "skills/loom-init/SKILL.md", "AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json",
+  "skills/loom-implement/SKILL.md", "skills/loom/UNATTENDED.md", "docs/unattended.md", "docs/orca.md",
+];
+for (const path of publicationSurfaces) {
+  const body = read(path);
+  ok(!body.includes("never auto-publish"), `${path} retains stale absolute never auto-publish wording`);
+}
+for (const path of ["skills/loom-init/SKILL.md", "AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
+  const body = read(path);
+  ok(body.includes("never auto-merge"), `${path} weakens the universal human merge gate`);
+  ok(body.includes("attended exact confirmation") && body.includes("configured unattended setup/launch authorization"), `${path} omits bounded publication authorization modes`);
+  ok(body.includes("mutually exclusive"), `${path} permits simultaneous attended and unattended consent`);
+}
 for (const recipe of ["docs-drift", "dep-audit", "smell-sweep", "coverage-raise", "dead-code"]) {
   const body = read(`recipes/${recipe}.md`);
   ok(body.includes("skills/loom/UNATTENDED.md"), `${recipe} does not point to executable runtime contract`);
