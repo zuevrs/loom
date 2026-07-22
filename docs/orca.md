@@ -6,8 +6,8 @@ Orca worktrees are an explicit project capability, not the default. Loom keeps t
 
 1. Start one main OMP session at the project or workspace root and run `/loom`.
 2. During Init, accept the optional Orca offer only if you want isolated worktrees for parallel stories. The confirmed write is `.loom/config.json` containing `{ "worktrees": "orca" }`.
-3. Confirm the PRD. Plan identifies touched Orca-registered repositories and previews the worktree actions before doing anything.
-4. Observe or intervene in the ordinary OMP TUI workers Orca opens. Loom runs issues sequentially unless independent services can safely proceed in parallel.
+3. Confirm the PRD and issue pack. Plan records and validates logical repository scope only; it creates or previews no worktree lanes.
+4. Run explicit `/loom implement <pack>` to review the compact whole-pack preview. After confirmation, Implement creates each story-service lane just in time when its first issue becomes runnable. Observe or intervene in the ordinary OMP TUI workers Orca opens; same-service issues serialize while independent services may proceed in parallel.
 5. The root session stages only the intended files, captures their tree, and independently verifies that identity. After APPROVE it commits only when the user opted in to auto-commit, then compares the commit tree; if reliable capture happened too late, it runs fresh Verify against the exact commit SHA/tree without amending. The stable lifecycle ends there and may offer a normal PR, but never automatically merges or cleans up.
 
 If Orca is unavailable or a touched repository is unregistered, Loom stops before Git changes and gives registration/config remediation. Technical commands and lifecycle constraints are lazy-loaded from [`skills/loom/ORCA.md`](../skills/loom/ORCA.md).

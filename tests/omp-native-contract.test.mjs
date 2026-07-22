@@ -57,13 +57,126 @@ ok(tend.includes("second-failure, tested-before-write"), "Tend does not own test
 
 for (const token of [
   "installed native Orca `orchestration` skill", "Task dependencies mirror", "fresh visible OMP worker per issue",
-  "exactly one OMP AskUser question", "Orca owns retries and liveness", "serializes all `.loom`",
+  "exactly one OMP AskUser question", "native orchestration lifecycle, waits, and liveness by reference", "serializes all `.loom`",
   "OMP 17.0.6 startup was live-verified", "reach a ready visible TUI showing Prewalk",
   "no actual prewalk model switch was observed",
 ]) ok(orca.includes(token), `Orca delegation missing ${token}`);
 ok(!orca.includes("orca orchestration dispatch"), "ORCA duplicates native CLI lifecycle prose");
 ok(implement.includes("exclusive Orca-or-Goal routing"), "Implement does not enforce runner exclusivity");
+for (const token of [
+  "explicit issue card/path selects exactly that issue",
+  "explicit pack directory/slug selects autonomous whole-pack mode after preview confirmation",
+  "bare Implement selects the lowest-numbered unblocked `ready-for-agent` issue",
+  "one compact confirmation preview containing every confirmed field",
+  "single opt-in for autonomous whole-pack execution",
+  "do not add a second per-issue commit gate",
+  "never authorizes push, hosted review/PR creation, merge, amend, squash, rebase, force",
+  "fall back to attended one-issue mode",
+  "Git prose language and repository/project conventions",
+  "activate exactly the previewed runner",
+  "Goal is never a workspace or Orca runner",
+  "root coordinator may run the confirmed pack until complete, blocked",
+  "worker_done` ends that attempt",
+  "Verify REJECT keeps the same lane and starts a fresh maker",
+  "One issue at a time per maker",
+  "dirty, on a non-default branch, occupied by other work",
+]) ok(implement.includes(token), `Implement routing/execution contract missing ${token}`);
+for (const forbidden of [
+  "Classification and preview do not activate whole-pack execution",
+  "story-service execution activation belongs to its separate contract",
+  "A pack target ends after its preview boundary",
+]) ok(!implement.includes(forbidden), `Implement retains preview-only contradiction: ${forbidden}`);
+for (const token of [
+  "Goal is off", "must not appear as an alternative", "canonical single repository",
+  "Never offer Goal for a workspace",
+]) ok(adapter.includes(token), `OMP runner route missing ${token}`);
+for (const token of [
+  "confirmed whole-pack preview activates native supervised orchestration",
+  "single opt-in for exactly one post-APPROVE verified commit per issue",
+  "Plan creates no worktree or runtime task",
+  "one story x service worktree just in time",
+  "Accept the actual branch returned by Orca",
+  "runtime/checkouts manifest",
+  "product-facing story, service, and status language without Loom branding",
+  "serialize by issue number unless explicit blockers require another order",
+  "Independent service lanes may run in parallel",
+  "atomic multi-repository issue acquires every listed lane",
+  "worker_done` corresponding to the active task/dispatch",
+  "REJECT keeps the same lane and dispatches a fresh rework worker",
+  "second REJECT with overlapping blockers stops the pack",
+  "Reconstruct progress from issue status/Log/Verify on disk",
+  "Git branch/commit/tree state, and Orca worktree/task/dispatch state",
+  "ambiguous and stops for human resolution",
+  "exactly one product-facing commit",
+  "Never push, publish, merge, amend, squash, rebase, or force",
+  "no private issue IDs, pack paths, model names, Loom branding, or orchestration mechanics",
+  "current user's language",
+  "history informs style and conventions only, never language",
+]) ok(orca.includes(token), `Orca story-service contract missing ${token}`);
+ok(orca.includes("installed native Orca `orchestration` skill"), "Orca does not delegate lifecycle mechanics to native orchestration");
+ok(!orca.includes("orca orchestration dispatch"), "ORCA duplicates native CLI lifecycle prose");
+ok(!orca.includes("Plan's existing confirmation may create story worktrees"), "ORCA retains Plan-time worktree creation");
+ok(!orca.includes("pack slug and absolute PRD path"), "ORCA leaks private pack metadata into worktree comments");
+ok(orca.includes("confirmed whole-pack preview is sufficient for that pack"), "Orca commit boundary adds a second pack commit gate");
+const plan = read("skills/loom-plan/SKILL.md");
+ok(plan.includes("Plan creates no branches, worktrees, or runtime tasks"), "Plan still owns execution isolation");
+
+// Cross-contract lifecycle invariants: these fail when individually plausible policies conflict.
+ok(
+  implement.includes("confirmed preview is the single opt-in for autonomous whole-pack execution") &&
+  orca.includes("confirmed whole-pack preview activates native supervised orchestration"),
+  "Implement confirmation does not activate the Orca runner"
+);
+ok(
+  implement.includes("Goal is never a workspace or Orca runner") &&
+  adapter.includes("Never offer Goal for a workspace") &&
+  adapter.includes("native Orca orchestration is the only runner"),
+  "Goal routing leaks into workspace or Orca execution"
+);
+ok(
+  implement.includes("worker_done` ends that attempt") &&
+  orca.includes("That message ends one attempt, not the issue") &&
+  orca.includes("APPROVE alone completes the issue"),
+  "worker completion bypasses independent Verify"
+);
+ok(
+  implement.includes("root coordinator may run the confirmed pack") &&
+  implement.includes("One issue at a time per maker") &&
+  implement.includes("root coordinator may continue the confirmed pack with fresh makers"),
+  "maker hard stop incorrectly stops the root coordinator"
+);
+ok(
+  plan.includes("Plan creates no branches, worktrees, or runtime tasks") &&
+  orca.includes("one story x service worktree just in time") &&
+  orca.includes("never during Plan or merely from preview"),
+  "story-service lane is created before its first runnable issue"
+);
+const orcaDocs = read("docs/orca.md");
+ok(
+  orcaDocs.includes("Plan records and validates logical repository scope only") &&
+  orcaDocs.includes("it creates or previews no worktree lanes") &&
+  orcaDocs.includes("explicit `/loom implement <pack>`") &&
+  orcaDocs.includes("creates each story-service lane just in time") &&
+  plan.includes("Plan creates no branches, worktrees, or runtime tasks") &&
+  orca.includes("Create one story x service worktree just in time"),
+  "public Orca flow disagrees with Plan/Implement JIT lane ownership"
+);
+ok(
+  !orcaDocs.includes("Plan identifies touched Orca-registered repositories and previews the worktree actions"),
+  "public Orca flow retains Plan-time worktree preview"
+);
+ok(
+  orca.includes("Independent service lanes may run in parallel") &&
+  orca.includes("atomic multi-repository issue acquires every listed lane") &&
+  orca.includes("serialize by issue number unless explicit blockers require another order"),
+  "lane scheduler permits same-repo or atomic overlap"
+);
+
 for (const token of ["concrete build/fix/add request", "Implement owns its Verify completion"]) ok(dispatcher.includes(token), `Dispatcher missing ${token}`);
+for (const token of [
+  "an issue card selects that one issue", "a pack directory/slug selects that whole pack",
+  "no target selects the next single issue", "Never reinterpret a pack target as its first issue",
+]) ok(dispatcher.includes(token), `Dispatcher Implement routing missing ${token}`);
 ok(!dispatcher.includes("SCHEDULE.md") && !dispatcher.includes("`/loom schedule"), "Dispatcher exposes deferred schedule route");
 ok(!existsSync(resolve(root, "skills/loom/SCHEDULE.md")), "Deferred public schedule adapter still exists");
 for (const token of [

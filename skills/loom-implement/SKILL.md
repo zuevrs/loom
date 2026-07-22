@@ -1,6 +1,6 @@
 ---
 name: loom-implement
-description: Implement a single issue from the active Loom pack. Use when a specific issue is ready and unblocked. Not for scoping new work (loom-plan), status/warp upkeep (loom-tend), or judging a finished change (loom-verify).
+description: Implement one issue or coordinate a confirmed whole pack from the active Loom project. Not for scoping new work (loom-plan), status/warp upkeep (loom-tend), or judging a finished change (loom-verify).
 disable-model-invocation: true
 ---
 
@@ -8,27 +8,56 @@ disable-model-invocation: true
 
 ## Goal
 
-Ship one vertical slice that satisfies issue acceptance with minimal diff.
+Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh issue attempts, with minimal diffs and Verify-gated commits.
 
 ## Inputs
 
-- Active issue path (`.loom/<feature>/issues/<NN>-*.md`)
+- Optional explicit issue path or pack directory/slug
 - Parent PRD
 - Project conventions (git style, test/lint commands)
-- **Fresh session:** PRD + this issue only
+- **Fresh maker session:** PRD + one issue only
 
 ## Workspace ownership
 
 With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
 Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md): run only in the Orca-reported worktree and leave issue/PRD/`.loom` writes and final Verify to the root coordinator.
 
-## Whole-pack and unattended intent
+## Selection and whole-pack intent
 
-On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) for context, prewalk, Advisor, and runner routing. Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, lazy-load and follow the executable shared contract in [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md). Distribution `docs/` is never runtime input.
+Resolve the existing command surface deterministically before any execution:
+
+- an explicit issue card/path selects exactly that issue;
+- an explicit pack directory/slug selects autonomous whole-pack mode after preview confirmation;
+- bare Implement selects the lowest-numbered unblocked `ready-for-agent` issue, never the whole pack.
+
+Do not add or suggest another slash command. On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) for context, prewalk, Advisor, and runner routing. When unattended intent applies, lazy-load and follow the executable shared contract in [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md). Distribution `docs/` is never runtime input.
+
+### Whole-pack preview and consent
+
+For a selected pack, show one compact confirmation preview containing every confirmed field:
+
+- runner: Orca or OMP Goal;
+- planned logical repositories and worktree actions, including bases where known;
+- fresh OMP worker per issue, maker prewalk, and native auto-shake;
+- current root Advisor state (workers/checkers never use Advisor) and Goal state;
+- independent Verify after every issue;
+- commit policy: exactly one product-facing commit after Verify APPROVE per issue;
+- finish policy: stop with a pack result and keep push, hosted review/PR creation, merge, and cleanup outside this confirmation;
+- Git prose language and repository/project conventions.
+
+The confirmed preview is the single opt-in for autonomous whole-pack execution and exactly one verified commit after Verify APPROVE per issue; do not add a second per-issue commit gate. It never authorizes push, hosted review/PR creation, merge, amend, squash, rebase, force, or cleanup. Changed issue, repository, worktree action, or base renews confirmation. If the user declines commit authorization, fall back to attended one-issue mode under its applicable explicit consent boundary.
+
+After confirmation, activate exactly the previewed runner. With Orca, follow [`../loom/ORCA.md`](../loom/ORCA.md) and the installed native `orchestration` skill through complete, blocker, or the existing two-strikes stop. Without Orca, follow OMP's canonical-repository Goal fallback. Goal is never a workspace or Orca runner.
+
+### Coordinator and maker boundaries
+
+The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from issue cards, PRD, Git, and Orca rather than retained chat memory. It exclusively writes `.loom`, dispatches each attempt to a fresh one-issue maker, and runs independent Verify after `worker_done`.
+
+Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that attempt and returns control; it never marks the issue complete. Verify APPROVE permits the coordinator to create the one preauthorized product-facing commit and mark the issue done. Verify REJECT keeps the same lane and starts a fresh maker for rework. The coordinator, not a maker, may then dispatch another ready issue.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
-Fresh-context-per-issue survives batching: the orchestrating session spawns **one fresh implement sub-agent per issue** (input: PRD + that issue — the same contract as a fresh session) and holds only blocker order and verify verdicts. `loom-verify` after each worker yields is run by the **orchestrator**. On OMP, follow the adapter's exclusive Orca-or-Goal routing; Goal must stop if fresh workers are unavailable rather than chaining issues. On other hosts, chaining is a documented fallback **only when the host cannot spawn sub-agents**; prefer attended sequential sessions and record the limitation. This fallback never applies inside OMP Goal.
+Fresh-context-per-issue survives batching: the coordinator creates **one fresh implement worker per issue attempt** (input: PRD + that issue — the same contract as a fresh maker session) and holds only scheduling and Verify verdicts. `loom-verify` after each worker yields is run by the **coordinator**. On OMP, follow the adapter's exclusive Orca-or-Goal routing; Goal must stop if fresh workers are unavailable rather than chaining issues. On other hosts, chaining is a documented fallback **only when the host cannot spawn sub-agents**; prefer attended sequential sessions and record the limitation. This fallback never applies inside OMP Goal.
 
 ## Unattended mode (background agents, CI, scheduled runs)
 
@@ -36,7 +65,7 @@ Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely
 
 ## Direct small-fix route
 
-Without a named issue, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or issue. Full `loom-verify` remains mandatory.
+Without a named issue or pack, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or issue. Full `loom-verify` remains mandatory. Work directly in the target checkout unless it is dirty, on a non-default branch, occupied by other work, or the user explicitly requests isolation. Only those conflicts authorize requesting Orca isolation; do not create isolation merely because Orca is available.
 
 ## Execution consent
 
@@ -51,7 +80,7 @@ Selecting a named issue explicitly authorizes issue-scoped project changes, `## 
 
 ## Process
 
-1. For issue work, require exactly one named issue and read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. Not told which issue? The session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full — the fresh-context contract is PRD + this issue, and a field run that ignored it spent 8 turns reading five cards to pick one. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
+1. Apply **Selection and whole-pack intent** first. A confirmed pack target enters the coordinator path above; each maker receives only its PRD and issue. For one-issue work, read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. For bare Implement when no issue was named, the session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full in a maker — the fresh-context contract is PRD + this issue. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
 2. **Pre-flight baseline:** run the project's existing checks (test/lint commands from conventions) BEFORE touching code. A red baseline makes "tests pass" unattributable — note pre-existing failures in `## Log`; if the issue's own verification path is already red, stop and report instead of building on it.
 3. **Never invent a load-bearing decision silently.** Issue silent on output format, interface names, error contracts, edge behavior? The PRD's Implementation Decisions and Assumptions answer first; if the PRD is silent too, ask the user (attended) or flip to `needs-info` (unattended). An issue deliberately carries no file paths — interpreting it against the PRD is your job; inventing what the PRD never decided is not.
    **Surface the assumptions you do make.** The gap this guards: the PRD answered, but your reading of it isn't the only possible one. Before writing non-trivial code, print the numbered list — `Assumptions: 1. … — correct me now or I proceed with these` — to the chat (attended) or into `## Log` (unattended). An assumption surfaced costs one line; the same assumption discovered by a checker costs a REJECT lap. Trivial issues skip the block — an empty ritual is noise.
@@ -78,7 +107,7 @@ Selecting a named issue explicitly authorizes issue-scoped project changes, `## 
 13. **Self-review, then verify.** Before spawning checkers, read your own full diff top-to-bottom with the issue beside it — hunting leftover debug/dead code, files touched beyond the issue's scope, `## Log` claims the diff doesn't back, the acceptance criterion you forgot. Fix what you find: a blocker caught here costs one turn; the same blocker from a checker costs a REJECT lap.
     **Simplify while green.** If the diff is heavier than acceptance requires — a dead branch, an abstraction nothing else uses, the same shape written twice — run one behavior-preserving simplification pass now: touched files only, one move at a time, checks after each move, behavior identical. This is subtraction, not restructuring — renaming concepts, moving seams, or redesigning modules is a refactor, and refactors are verify findings or new issues, never a step-13 detour. Don't simplify what you don't understand (the odd-looking guard may be load-bearing — Chesterton's fence).
     Then run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). Verify writes its verdict into the issue's `## Verify` section — the APPROVE line there is the enforcement signal, and its format is load-bearing: a line **starting with** `APPROVE` (canonically `APPROVE — {date} — spec pass, standards pass`). Prose like `**Verdict: APPROVE**` does not satisfy the stop gate. Self-review replaces neither checker — it removes the embarrassments before fresh eyes spend time on them.
-14. **Close the session.** After `done`, end your report with the handoff line: name the next lowest-numbered unblocked `ready-for-agent` issue (or "pack complete — consider `loom-tend`") and recommend a **fresh session** for it. Do not start the next issue in this session — the fresh-session contract is per issue, and it dies silently the moment you keep going.
+14. **Close the maker session.** After `done`, end its report with the next lowest-numbered unblocked `ready-for-agent` issue (or pack complete). A standalone one-issue run recommends a fresh session and stops. In confirmed pack mode, the maker stops but the root coordinator may dispatch that next issue to a fresh maker.
 
 ## Discipline ladder
 
@@ -102,9 +131,9 @@ Before writing code, stop at the **first rung that holds**:
 
 ## Hard stops
 
-- One issue at a time.
+- One issue at a time per maker; the root coordinator may continue the confirmed pack with fresh makers.
 - No unrelated refactors.
-- Never auto-commit unless user asked (attended mode; unattended mode commits to its dedicated branch — see Unattended mode).
+- Never commit without the applicable explicit opt-in; a confirmed whole-pack preview supplies it for one post-APPROVE commit per issue.
 - Verification failed → issue stays not-`done`.
 - **No verify digest → no done.** Runnable checks passing is necessary but not sufficient.
 
@@ -132,7 +161,7 @@ Before writing code, stop at the **first rung that holds**:
 | "Skip verify for tiny change" | Verify runs on every implement completion — no yield without digest |
 | "Tests pass, we're done" | Tests ≠ verify; maker/checker split is mandatory |
 | "I'll batch commits/issues" | One issue, one slice, one verify |
-| "Issue's done, I'll just pick up the next one here" | Fresh session per issue. Hand off with the next-issue line and stop |
+| "Issue's done, I'll just pick up the next one here" | A maker stops. Only the root coordinator may dispatch the next issue to a fresh maker. |
 | "Batch run — I'll chain all issues in my context" | Spawn a fresh sub-agent per issue; chain only if the host can't spawn sub-agents |
 | "This abstraction will help later" | No abstractions nobody asked for |
 | "The issue doesn't say — I'll pick something sensible" | Load-bearing gap: PRD first, then ask or `needs-info`. Silent invention is the failure mode |
