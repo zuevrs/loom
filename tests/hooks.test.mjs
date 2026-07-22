@@ -715,10 +715,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(impl.includes("correct me now or I proceed"), "assumption block carries the correct-me-now contract");
     // 3. PR body contract: the unattended human gate gets a fixed shape
     const unattended = read("skills/loom/UNATTENDED.md");
-    ok(unattended.includes("### PR body contract"), "unattended doc fixes the PR description shape");
-    ok(unattended.includes("drop a section entirely when it's empty"), "PR contract drops empty sections, not ceremony");
-    ok(unattended.includes("lead with the blocker"), "draft PRs lead with the blocker");
-    ok(impl.includes("PR body contract"), "implement unattended mode points at the PR body contract");
+    ok(unattended.includes("### Public hosted-review body contract"), "unattended doc fixes the public review description shape");
+    ok(unattended.includes("drop a section entirely when it is empty"), "public review contract drops empty sections, not ceremony");
+    ok(unattended.includes("lead with the sanitized blocker"), "draft reviews lead with the sanitized blocker");
+    ok(impl.includes("public hosted-review body contract"), "implement unattended mode points at the public review body contract");
     // 4. simplify-while-green: maker-initiated subtraction pass between the
     // discipline ladder (prevent) and the standards checker (judge)
     ok(impl.includes("Simplify while green"), "self-review carries the simplification pass");
