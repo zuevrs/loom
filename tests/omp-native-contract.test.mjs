@@ -228,6 +228,32 @@ for (const token of [
   "an issue card selects that one issue", "a pack directory/slug selects that whole pack",
   "no target selects the next single issue", "Never reinterpret a pack target as its first issue",
 ]) ok(dispatcher.includes(token), `Dispatcher Implement routing missing ${token}`);
+ok(dispatcher.includes("explicit merged-worktree/local-lane cleanup"), "Dispatcher does not route explicit merged lane cleanup to Tend");
+for (const token of [
+  "This is Tend's existing maintenance route, not a new slash command",
+  "Inventory first, read-only",
+  "durable host merge record must identify the same repository and review/head branch",
+  "closed-unmerged review", "dirty worktree", "no durable review pointer or merge record",
+  "active/blocked/rework state", "ambiguous identity", "orphaned worktree/branch",
+  "default-removable lanes", "Changed review state, HEAD/base, cleanliness, activity, identity",
+  "native exact-selector `orca worktree rm`", "Require Orca to report successful removal",
+  "Only after verified native removal", "normal merged-safe Git deletion",
+  "Never use force deletion", "`orca orchestration reset --all`",
+  "Remote branches remain host policy and are never part of the default proposal",
+  "Cleanup is nontransactional per lane", "Before any retry, rerun the full read-only inventory",
+  "product-facing or hosted summary is synthesized separately", "human merge gate remains active",
+]) ok(tend.includes(token), `Tend merged-lane cleanup contract missing ${token}`);
+for (const token of [
+  "read-only correlation of durable hosted-review merge evidence",
+  "Only uniquely matched, durably merged, clean, inactive story-service lanes",
+  "native exact-selector `orca worktree rm`", "verifies the exact worktree/card is absent",
+  "Only after verified native removal", "never deletes a remote branch by default", "`orca orchestration reset --all`",
+  "Cleanup is nontransactional per lane", "Tend observes the human-performed merge",
+]) ok(orca.includes(token), `Orca Tend cleanup handoff missing ${token}`);
+for (const contract of [tend, orca]) {
+  ok(contract.includes("never use `git worktree remove`") || contract.includes("never falls back to `git worktree remove`"), "Cleanup contract does not forbid raw Git worktree removal");
+}
+ok(!tend.includes("git branch -D"), "Tend cleanup permits force deletion");
 ok(!dispatcher.includes("SCHEDULE.md") && !dispatcher.includes("`/loom schedule"), "Dispatcher exposes deferred schedule route");
 ok(!existsSync(resolve(root, "skills/loom/SCHEDULE.md")), "Deferred public schedule adapter still exists");
 for (const token of [
