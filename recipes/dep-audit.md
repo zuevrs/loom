@@ -6,7 +6,7 @@ cadence: weekly
 
 # Recipe: dep-audit — vulnerabilities and rot in dependencies
 
-You are running unattended. Contract: `docs/unattended.md` (branch → PR, never merge). Discovery tier: **do not modify code or lockfiles** — your diff contains only `.loom/` stub issues and your report.
+You are running unattended. Runtime contract: load and follow installed `skills/loom/UNATTENDED.md`. Discovery tier: **do not modify code or lockfiles** — your diff contains only `.loom/` stub issues and your report.
 
 Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
 

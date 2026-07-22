@@ -38,9 +38,9 @@ Use `.loom/workspace.json` only after explicit workspace setup. It is generated 
    - Create `.loom/` if missing (no PRD/issues yet)
 5. On an OMP host/project only, lazy-load [`../loom/OMP.md`](../loom/OMP.md) and make its two independent optional offers: (1) the recommended context+worker preset and (2) the exact current smol model copied to the disabled Advisor role. Each has its own exact preview and bounded confirmation; target `<artifactRoot>/.omp/config.yml`, never blindly rewrite existing YAML, never enable Advisor, and leave memory off.
 6. Detect Orca project registration project-nonmutatingly. When the CLI and registration are available, offer exactly once: `Use Orca worktrees for parallel stories?` Preview the exact write `{ "worktrees": "orca" }` to `<artifactRoot>/.loom/config.json`; write only after confirmation. Never enable automatically.
-7. When `.loom` and/or `AGENTS.md` are untracked in a Git root, offer an initial root control-plane commit with the exact paths; never commit automatically.
+7. When `.loom` and/or `AGENTS.md` control-plane files are untracked in a Git root, Init is not complete until the user explicitly chooses **commit now** or **later**. For commit now, show the exact paths and command and require a bounded confirmation; never auto-commit. For later, finish with a named `Uncommitted control plane` warning in the summary.
 8. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
-9. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes (`docs/unattended.md`) for the recurring audits.
+9. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes for recurring audits (human wiring is optional in `docs/unattended.md`).
 10. If nothing needed: `No changes needed` + what was checked.
 
 ## Workspace setup branch
@@ -59,7 +59,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v3.1.0 -->
+<!-- loom:begin version=v3.2.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -144,3 +144,4 @@ Before acting, reconstruct state from `.loom/` (active PRD, issue cards, statuse
 - `.loom/` exists
 - User content outside delimiters untouched
 - Summary printed (or `No changes needed`)
+- In a Git root, untracked control-plane files have an explicit commit-now choice or an `Uncommitted control plane` warning

@@ -6,6 +6,18 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [3.2.0] - 2026-07-22
+
+### Highlights
+
+- **Smaller dispatcher** — Loom routes one hop to one ritual and disappears; Build explicitly transfers completion ownership to Implement, including Verify. No public schedule route or dispatcher orchestration is added.
+- **Executable runtime boundary** — unattended safety now lives in the shared `skills/loom/UNATTENDED.md` fragment. Distribution `docs/` is human reference only; project context and ADRs remain project truth.
+- **Safer, leaner setup** — Init requires an explicit commit-now or later decision for untracked control-plane files, with a named warning for later. OMP keeps global prewalk and the evidenced 80k threshold without invented relative or named maker-agent syntax.
+
+### Migration steps
+
+- Unattended runners and copied recipes should load or compose `skills/loom/UNATTENDED.md`; `docs/unattended.md` remains optional human wiring.
+
 ## [3.1.0] - 2026-07-21
 
 ### Highlights
@@ -1110,7 +1122,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/zuevrs/loom/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/zuevrs/loom/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/zuevrs/loom/compare/v2.0.2...v3.0.0
 [2.0.2]: https://github.com/zuevrs/loom/compare/v2.0.1...v2.0.2

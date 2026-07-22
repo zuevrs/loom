@@ -1,6 +1,6 @@
 # OMP native adapter
 
-Load this adapter only in an OMP project session. Loom supplies issue and Verify policy; OMP supplies context management, workers, Goal, Advisor, and TTSR. Loom never invokes compaction itself. `/loop` and scheduled automations are deferred from this release. Keep `memory.backend` off: Loom files are project truth; personal preferences belong in explicit rules/config.
+Load this adapter only in an OMP project session. Loom supplies issue and Verify policy; OMP supplies context management, workers, Goal, Advisor, and TTSR. Loom never invokes compaction itself. Keep `memory.backend` off: Loom files are project truth; personal preferences belong in explicit rules/config.
 
 ## Project preset
 
@@ -19,7 +19,7 @@ task:
   prewalk: true
 ```
 
-Native auto-shake is conservative: it protects the recent 16k tokens and skill reads and requires at least a 4k saving. Manual `/shake` remains the aggressive rescue. Prefer a fresh worker. If one cannot be created, use native `/handoff` only at Plan→Implement or issue→issue boundaries; never carry Plan plus multiple issues in one TUI. `/compact soft <phase-specific focus>` is manual rescue only when the phase cannot safely change. Loom itself never invokes `/shake` or `/compact` automatically.
+No verified OMP contract in this repository or retained pilot evidence exposes a relative 60% idle-threshold config key, so retain the live-validated absolute `idleThresholdTokens: 80000` rather than inventing syntax. Native auto-shake is conservative: it protects the recent 16k tokens and skill reads and requires at least a 4k saving. Manual `/shake` remains the aggressive rescue. Prefer a fresh worker. If one cannot be created, use native `/handoff` only at Plan→Implement or issue→issue boundaries; never carry Plan plus multiple issues in one TUI. `/compact soft <phase-specific focus>` is manual rescue only when the phase cannot safely change. Loom itself never invokes `/shake` or `/compact` automatically.
 
 2. Cheap Advisor role, disabled. Read `omp config get modelRoles --json`, copy the exact current `modelRoles.smol` model ID, and preview:
 
@@ -34,7 +34,7 @@ If the config is absent, preview the exact complete YAML and create it only afte
 
 ## Workers and decisions
 
-Generic OMP task workers use `task.prewalk`: the strong/current model plans the concrete issue and begins implementation, then hands off at the first edit/write to the current smol role. Coordinator, Grill/Plan, Verify/checkers never prewalk. Orca visible OMP workers are fresh per issue and launch with `--prewalk --config <artifactRoot>/.omp/config.yml`, because service worktrees cannot discover the workspace-root project config. If a load-bearing decision appears after the switch, raise a decision gate/`needs-info`; never guess.
+Generic OMP task workers use `task.prewalk`: the strong/current model plans the concrete issue and begins implementation, then hands off at the first edit/write to the current smol role. Coordinator, Grill/Plan, Verify/checkers never prewalk. Orca visible OMP workers are fresh per issue and launch with `--prewalk --config <artifactRoot>/.omp/config.yml`, because service worktrees cannot discover the workspace-root project config. Discovery workers may keep this global prewalk enabled: because discovery makes no code edit, no first-edit switch occurs. If a load-bearing decision appears after the switch, raise a decision gate/`needs-info`; never guess.
 
 ## Advisor
 

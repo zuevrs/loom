@@ -24,7 +24,7 @@ Invalid `.loom/config.json` stops before config-dependent or Git actions with re
 
 ## Whole-pack and unattended intent
 
-On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) for context, prewalk, Advisor, and runner routing. Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, read and follow the canonical branch/report/never-merge contract in [`docs/unattended.md`](../../docs/unattended.md); do not recreate its runner mechanics here.
+On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) for context, prewalk, Advisor, and runner routing. Implement owns one named issue only. The host owns whole-pack/background scheduling while preserving dependency order, one issue at a time, a fresh maker context per issue, Verify before `done`, and the human merge/publish gate. When unattended intent applies, lazy-load and follow the executable shared contract in [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md). Distribution `docs/` is never runtime input.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
@@ -32,12 +32,7 @@ Fresh-context-per-issue survives batching: the orchestrating session spawns **on
 
 ## Unattended mode (background agents, CI, scheduled runs)
 
-No human is watching, so the human gate moves to the PR. See [`docs/unattended.md`](../../docs/unattended.md) for host wiring; the contract:
-
-- Work in a **dedicated branch**. Committing there is expected — the "never auto-commit" hard stop is an attended-mode rule. **Never push to the default branch, never merge** — that stays human.
-- Finish = push the branch and **open a PR**: diff summary, verify digest, `## Log`, open questions — the PR description is the report channel, and its section shape is fixed (see `docs/unattended.md` § PR body contract; empty sections are dropped, draft PRs lead with the blocker).
-- `loom-verify` stays mandatory before the PR. No sub-agent support in the runner → sequential Spec then Standards in-context, limitation documented in the digest.
-- Any stop condition — `needs-info`, scope-creep stub, red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — write the status and the question into the issue file, then open a **draft PR** with whatever exists and the blocker named in the description. Silent death is the only forbidden exit.
+Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely. It owns isolation, report exits, Verify, blockers, budget/stagnation, PR body contract, zero-findings behavior, and the never-merge/publish gate. Host wiring may be consulted by humans, but execution must not require distribution `docs/`.
 
 ## Direct small-fix route
 

@@ -28,7 +28,7 @@ const {
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./hooks/workspace.cjs");
 const { readProjectConfig, invalidProjectConfigAlert } = require("./hooks/config.cjs");
 
-const MANAGED_BLOCK_VERSION = "v3.1.0";
+const MANAGED_BLOCK_VERSION = "v3.2.0";
 
 const INVARIANTS = PRE_LLM;
 

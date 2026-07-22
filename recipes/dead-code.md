@@ -6,7 +6,7 @@ cadence: monthly
 
 # Recipe: dead-code — deletion with proof
 
-You are running unattended. Contract: `docs/unattended.md` — dedicated branch, commits allowed, `loom-verify` before the PR, never merge. Change tier: this run deletes code. Deletion over addition is the discipline — but only with proof.
+You are running unattended. Runtime contract: load and follow installed `skills/loom/UNATTENDED.md`. Change tier: this run deletes code. Deletion over addition is the discipline — but only with proof.
 
 Running attended (a human asked for this in chat)? Same task, discipline, and verify — but the human gates the diff in chat; skip the branch/PR exit unless they ask for one.
 

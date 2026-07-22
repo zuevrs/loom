@@ -566,9 +566,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
   // loop-me vocabulary re-homed after loom-loop removal orphaned it (taken v0.2.x)
-  const unattended = read("docs/unattended.md");
+  const unattended = read("skills/loom/UNATTENDED.md");
   ok(unattended.includes("push right") && unattended.includes("brief"), "unattended human gate carries push-right/brief vocabulary");
-  ok(unattended.includes("asked once, late, with everything prepared"), "push right defers the checkpoint");
+  ok(unattended.includes("do maximal safe work before the checkpoint") && unattended.includes("one decision-ready handoff"), "push right defers the checkpoint");
 
   // ponytail comprehension + root-cause rules
   ok(
@@ -693,7 +693,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     }
 
     // unattended lane gates new loops on the four-condition test
-    const unattended = read("docs/unattended.md");
+    const unattended = read("skills/loom/UNATTENDED.md");
     ok(unattended.includes("Should this be a loop at all?"), "unattended doc carries the loop test section");
     ok(unattended.includes("Verification is automatable"), "loop test demands an objective red-capable gate");
   }
@@ -714,7 +714,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(impl.includes("Surface the assumptions you do make"), "implement surfaces assumptions before non-trivial code");
     ok(impl.includes("correct me now or I proceed"), "assumption block carries the correct-me-now contract");
     // 3. PR body contract: the unattended human gate gets a fixed shape
-    const unattended = read("docs/unattended.md");
+    const unattended = read("skills/loom/UNATTENDED.md");
     ok(unattended.includes("### PR body contract"), "unattended doc fixes the PR description shape");
     ok(unattended.includes("drop a section entirely when it's empty"), "PR contract drops empty sections, not ceremony");
     ok(unattended.includes("lead with the blocker"), "draft PRs lead with the blocker");
@@ -1259,19 +1259,21 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
-  // Unattended contract lives in the implement skill and the doc, and they agree.
+  // Implement lazy-loads the canonical executable unattended contract.
   const impl = read("skills/loom-implement/SKILL.md");
-  ok(impl.includes("## Unattended mode"), "implement has the unattended section");
-  ok(impl.includes("Never push to the default branch, never merge"), "unattended: merge stays human");
-  ok(impl.includes("draft PR"), "unattended: blockers exit as draft PRs");
+  const unattendedRuntime = read("skills/loom/UNATTENDED.md");
+  ok(impl.includes("## Unattended mode") && impl.includes("UNATTENDED.md"), "implement has the unattended section and runtime pointer");
+  ok(unattendedRuntime.includes("Never push to the default branch") && unattendedRuntime.includes("merge"), "unattended: merge stays human");
+  ok(unattendedRuntime.includes("draft PR"), "unattended: blockers exit as draft PRs");
   ok(impl.includes("Pre-flight baseline"), "implement runs baseline before code");
   ok(impl.includes("Never invent a load-bearing decision silently"), "implement carries question calibration");
   ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
 
-  const doc = read("docs/unattended.md");
-  for (const phrase of ["Branch, not trunk", "Report is the exit", "Verify still runs", "draft PR"]) {
-    ok(doc.includes(phrase), `unattended doc states: ${phrase}`);
+  for (const phrase of ["dedicated branch", "report", "Run `loom-verify`", "draft PR"]) {
+    ok(unattendedRuntime.includes(phrase), `unattended runtime states: ${phrase}`);
   }
+  const doc = read("docs/unattended.md");
+  ok(doc.includes("human reference") && doc.includes("never mandatory runtime input"), "human wiring doc declares runtime boundary");
   ok(doc.includes("loom-implement"), "doc points at the canonical skill text");
 
   // Recipe catalog: five files, valid tier frontmatter, discovery never edits code.
@@ -1280,7 +1282,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     const recipe = read(`recipes/${name}.md`);
     ok(recipe.startsWith("---"), `${name} has frontmatter`);
     ok(recipe.includes(`tier: ${tier}`), `${name} is ${tier} tier`);
-    ok(recipe.includes("docs/unattended.md"), `${name} cites the contract`);
+    ok(recipe.includes("skills/loom/UNATTENDED.md") && !recipe.includes("docs/unattended.md"), `${name} cites the executable contract`);
     ok(/cadence: (daily|weekly|monthly)/.test(recipe), `${name} suggests a cadence`);
     if (tier === "discovery") ok(recipe.includes("do not modify code"), `${name} is read-only on code`);
   }
@@ -1314,8 +1316,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(read("skills/loom-plan/GRILL.md").includes(".loom/research/"), "research findings persist with citations");
   ok(read("skills/loom-grill/SKILL.md").includes("../loom-plan/GRILL.md"), "loom-grill loads canonical primary-source research discipline");
 
-  ok(read("docs/unattended.md").includes("Runaway protection"), "unattended doc has runaway semantics");
-  ok(read("docs/unattended.md").includes("same error twice in a row means stop"), "stagnation rule: no third identical attempt");
+  ok(read("skills/loom/UNATTENDED.md").includes("Budget and stagnation"), "unattended runtime has runaway semantics");
+  ok(read("skills/loom/UNATTENDED.md").includes("same unchanged error twice stops"), "stagnation rule: no third identical attempt");
 }
 
 // v0.9.0 — install lifecycle closed: doctor + uninstall documented, tend knows both rot types
@@ -2410,7 +2412,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     ["CHANGELOG.md", "OMP + Orca visible-TUI flow was verified live"],
   ]) ok(read(path).includes(phrase), `${path} records live visible-TUI E2E evidence`);
   const dispatcher = read("skills/loom/SKILL.md");
-  ok(dispatcher.includes("concrete build/fix/add request") && dispatcher.includes("run `loom-verify`"), "dispatcher routes concrete small fixes through Implement then Verify");
+  ok(dispatcher.includes("concrete build/fix/add request") && dispatcher.includes("Implement owns its Verify completion"), "dispatcher routes concrete small fixes through Implement then Verify");
   ok(dispatcher.includes("investigate, why/how, decide") && dispatcher.includes("PRD/issues or multiple sessions"), "dispatcher separates Grill and Plan intent");
   ok(dispatcher.includes("explicit natural-language target wins"), "explicit target wins routing");
   for (const removed of ["skills/loom-plan/CHECKOUTS-TEMPLATE.md", "skills/loom-plan/EXECUTION.md", "skills/loom-tend/LAND.md", "commands/loom-implement.md"]) ok(!existsSync(resolve(__dirname, "..", removed)), `${removed} removed`);

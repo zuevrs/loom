@@ -2,43 +2,11 @@
 
 Loom ships no runner (see ADR history: host-native execution won). Every host already knows how to run an agent unattended — background agents, cloud agents, cron + headless CLI, autonomous frameworks. What they need from Loom is a **contract** so an unwatched run stays safe, and **recipes** for the recurring maintenance work worth automating.
 
-## The contract
+## Runtime contract boundary
 
-An unattended run picks up work a human already scoped — a `Status: ready-for-agent` issue from a `.loom/` pack, or a recipe from [`recipes/`](../recipes/). The rules (canonical text: `loom-implement` § Unattended mode):
+The canonical executable contract is [`skills/loom/UNATTENDED.md`](../skills/loom/UNATTENDED.md). Runners must compose or load that fragment directly; this document is wiring and explanation for humans, never mandatory runtime input. The fragment owns isolation, report exits, Verify, blockers, budget/stagnation, the PR body contract, zero-findings behavior, and the no-merge/publish gate.
 
-1. **Branch, not trunk.** All work happens in a dedicated branch. Commits there are expected. Pushing to the default branch or merging is never the agent's call.
-2. **Report is the exit for anything written.** A run that produced changes — code or stub issues — ends in a report plus local branch: diff, verify digest, issue `## Log`, open questions in the description. Commit subjects and any configured PR's public title/summary describe product purpose in the project language, not Loom bookkeeping. A dedicated `References` section may carry issue/PRD/ADR links for traceability. The human gate that attended mode puts in the chat moves to the configured runner handoff. Two words govern that gate: **push right** — defer the checkpoint as far as it will go, do maximal work before involving the human so they are asked once, late, with everything prepared; and **brief** — the checkpoint presents a tight, decision-ready summary (what was produced, why, where to look), never the raw output. A discovery run with **zero findings** writes nothing and exits with its "nothing found" report in the runner's own log — no empty PR. "Silent death" (forbidden below) means dying mid-run without a report, not a clean zero-finding exit.
-3. **Verify still runs.** `loom-verify` (Spec + Standards) before the PR. Runner can't spawn sub-agents → sequential checkers, limitation documented in the digest.
-4. **Blockers surface as draft PRs.** `needs-info`, scope-creep stubs, a red pre-flight baseline, wrong-PRD discovery, ESCALATE_HUMAN — status and question written into the issue file, draft PR opened with whatever exists, blocker named first in the description. Silent death is the only forbidden exit.
-5. **Discipline stays on.** Hooks, managed block, and status gates are invocation-independent — a cron job gets the same Stop gate as a chat session.
-6. **Runaway protection.** Recipes are single-pass by design — one run, one PR, no retry loop inside the run. Set the runner's native budget/timeout as the outer bound — every transport has one: Actions `timeout-minutes`, Codex `/goal`'s budget cap, Cursor `/loop`'s stop condition ("stop after N ticks") and Automations' schedule, the host's token budget elsewhere. And the stagnation rule: the **same error twice in a row means stop** — exit through the draft-PR path with the error named, never a third identical attempt. An agent retrying an unchanged failure is spending money to stand still.
-
-### PR body contract
-
-The description is the handoff, and its shape is fixed — the reviewer should never reconstruct intent from the diff. Sections, in order; **drop a section entirely when it's empty** (an empty heading is ceremony, not information):
-
-```markdown
-## Summary
-{what changed and why — 2-4 sentences, issue/PRD linked}
-
-## Test plan
-- [x] {command} → pass          <!-- from the verify digest's Checks executed -->
-- [ ] {anything only a human can check, if any}
-
-## Verify
-{verdict line + blockers/notes from the digest — silent pass, loud fail}
-
-## Log
-{the issue's ## Log bullets — decisions, deviations, open questions}
-
-## Rollout
-{only when PRD § Risks is non-empty: migration/flag/revert notes}
-
-## Open questions
-{what needs the human, one line each}
-```
-
-Draft PRs (blocked runs) lead with the blocker instead of Summary — the first line names what stopped the run and what decision unblocks it.
+Project `CONTEXT.md`, `PRODUCT.md`, `DESIGN.md`, and project `docs/adr/` remain project truth. Loom's distribution `docs/` directory is human reference only.
 
 ## Should this be a loop at all?
 
@@ -46,7 +14,7 @@ Four conditions, all required — a task that fails one belongs in an attended c
 
 1. **It repeats.** The same task on a cadence, not a one-off with a timer on it.
 2. **Verification is automatable.** A gate that goes red on bad output exists (tests, linters, the stop-gate CI check) — a loop whose only judge is another opinion reviews itself into circles.
-3. **A budget bounds it.** The runner's native timeout/budget is set (§ Runaway protection above); an unbounded loop is an incident, not automation.
+3. **A budget bounds it.** The runner's native timeout/budget is set by the canonical runtime contract; an unbounded loop is an incident, not automation.
 4. **The tools exist.** The agent can actually reach what the task needs (repo, package registry, CI logs) — a loop that can only guess will file guesses.
 
 ## Two tiers of recipes
@@ -66,7 +34,7 @@ Stub issues from recipes that run outside a feature pack go to `.loom/maintenanc
 
 ## Host wiring
 
-The recipe file is the prompt. Point your runner at it.
+Compose the executable `skills/loom/UNATTENDED.md` fragment with the complete recipe and point the runner at that final prompt.
 
 ### GitHub Actions (cron + headless CLI)
 
@@ -76,13 +44,23 @@ on:
 jobs:
   loom-recipe:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: claude -p "$(cat recipes/docs-drift.md)"   # or: codex exec / omp -p --auto-approve
+        with: { path: target }
+      - uses: actions/checkout@v4
+        with:
+          repository: zuevrs/loom
+          ref: v3.2.0
+          path: loom-runtime
+      - run: |
+          prompt="$(cat ../loom-runtime/skills/loom/UNATTENDED.md; printf '\n\n--- COMPLETE RECIPE ---\n\n'; cat ../loom-runtime/recipes/docs-drift.md)"
+          claude -p "$prompt" < /dev/null
+        working-directory: target
         env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
 ```
 
-Same shape for `codex exec "$(cat …)"` and `omp -p --auto-approve "$(cat …)"`. Give the job a token that can push branches and open PRs — not merge.
+Use the same `prompt=...` composition with `codex exec "$prompt" < /dev/null` or `omp -p --auto-approve "$prompt" < /dev/null`. Both complete files from the pinned Loom checkout become one argument, separated by a fixed marker; the target checkout stays the command working directory. Give the job credentials to push a branch and open a draft PR — never merge.
 
 When stdin is a pipe but empty (some CI shells, wrapper scripts), close it explicitly — `claude -p "…" < /dev/null`, `codex exec … < /dev/null`, `pi -p … < /dev/null` — or the CLI waits on "additional input from stdin" and the run hangs.
 
@@ -110,17 +88,17 @@ Set the goal's budget cap as the outer bound — that is the runaway brake for a
 
 ### Cursor (Background Agents / Automations / `/loop`)
 
-Create an Automation or launch a Background Agent with the recipe file as the prompt (attach or paste it). Cursor's agents already work branch-and-PR-shaped, which matches the contract; set the schedule in the Automation for recurring runs.
+Create an Automation or Background Agent with one prompt containing, in order, the complete installed `~/.loom/skills/loom/UNATTENDED.md`, a clear `--- COMPLETE RECIPE ---` separator, and the complete installed recipe. Attach/paste both files or generate that composed prompt before setup; never attach the recipe alone or assume the target repository contains `skills/loom/`.
 
-For a **local** recurring cadence there is also the `/loop` skill (Cursor 3.5+): `/loop 1d run recipes/docs-drift.md` re-runs a discovery recipe on a schedule inside your session. Know its shape: it is a scheduler, not a goal runtime — it dies when the app closes, and its cost bound is whatever stop condition you give it (tick count, "stop after N runs"). Persistent schedules belong to Automations.
+For a **local** recurring cadence, `/loop` (Cursor 3.5+) must invoke the same composed prompt, not only a recipe path. Know its shape: it is a scheduler, not a goal runtime — it dies when the app closes, and its cost bound is the explicit stop condition; persistent schedules belong to Automations.
 
 ### OMP
 
-OMP `/loop` and scheduled automations are explicitly deferred from Loom 3.1.0. For an attended multi-issue pack without Orca, `/loom` may preview `/goal set <objective>` plus a finite total `/goal budget` above current root-session usage. After the Goal ends, drop it as appropriate and trust `/goal show` status. This is not recurring recipe wiring. Headless checker roles remain available: `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`.
+For an attended multi-issue pack without Orca, Loom may preview `/goal set <objective>` plus a finite total `/goal budget` above current root-session usage. After the Goal ends, drop it as appropriate and trust `/goal show` status. Global project prewalk remains enabled; discovery makes no code edit, so no first-edit switch occurs. Headless checker roles remain available: `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`.
 
 ### Autonomous frameworks (OpenClaw, Hermes, and friends)
 
-Any framework that can run an agent with a prompt file and git access can run a recipe — the contract is prose, not an API. Wire the recipe as the task prompt and make the framework's "done" condition be "PR opened". Loom's Hermes plugin injects the discipline automatically; on other frameworks confirm the managed block (`AGENTS.md`) is in the agent's context.
+Any framework with prompt-file and Git support can run a recipe. Build one prompt from the complete installed `UNATTENDED.md`, a clear separator, and the complete installed recipe; do not point it at the recipe alone or a target-repo-relative Loom path. Make its done condition `PR opened` (draft when blocked). Loom's Hermes plugin injects base discipline, but the composed unattended contract is still required.
 
 ## What NOT to automate
 

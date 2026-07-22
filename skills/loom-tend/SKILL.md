@@ -35,7 +35,7 @@ With a valid active workspace profile, resolve `.loom/` packs, CONTEXT, ADRs, an
    - **Install freshness** — managed block version vs installed Loom; stale → recommend `loom-init` + `node ~/.loom/scripts/install.mjs --doctor` on script hosts
    - **Orphaned notes** — `.loom/grills/*.md`, `.loom/research/*.md` never became scope
    - **Completed packs** — all issues `done`/`wontfix` → offer `.loom/archive/<pack>/` (user approves)
-   - **Recurring audits** — same finding class again? Offer matching recipe from `~/.loom/recipes/` (`docs/unattended.md` for wiring); recipe stubs land in `.loom/maintenance/issues/`
+   - **Recurring audits** — same finding class again? Offer matching recipe from `~/.loom/recipes/` (optional human wiring: `docs/unattended.md`); recipe stubs land in `.loom/maintenance/issues/`
 4. Present one outcome and its evidence. If it requires writes, propose exact targets/actions and current bases; changed target, action, scope, or base requires renewed confirmation. Apply only after confirmation.
 5. For a stale `ready-for-agent` issue, Tend may correct it to `done` only when implementation evidence exists **and** a valid existing APPROVE is proven to cover the current relevant diff/fixed point, with no relevant change after that verdict. Existing APPROVE alone is insufficient. If identity/coverage cannot be proven, or behavior changed after APPROVE, surface the gap and route to a fresh `loom-verify`; do not change it to `done`. **Tend never creates, fabricates, substitutes, or extends a verdict.**
 6. Stop after that outcome. Recipe scheduling, capture-learning, and comprehension/spot-check prompts are optional follow-ups when directly supported by the finding, never mandatory phases.

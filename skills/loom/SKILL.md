@@ -9,7 +9,7 @@ slash: true
 
 ## Goal
 
-Route an explicit Loom entry to exactly one existing ritual without duplicating or paraphrasing that ritual.
+Route an explicit Loom entry to exactly one ritual without duplicating or paraphrasing the target.
 
 ## Inputs
 
@@ -30,10 +30,10 @@ Route an explicit Loom entry to exactly one existing ritual without duplicating 
 3. Classify exactly one outcome:
    - **Explore locally** — investigate, why/how, decide, debug, or unclear intent → load `loom-grill`.
    - **Plan work** — work explicitly needing a PRD/issues or multiple sessions → load `loom-plan`.
-   - **Build** — concrete build/fix/add request, including an obvious small fix without an issue, or an explicit/resumed issue → load `loom-implement`; after applied changes, run `loom-verify`.
+   - **Build** — concrete build/fix/add request, including an obvious small fix without an issue, or an explicit/resumed issue → load `loom-implement`; Implement owns its Verify completion.
    - **Review ready work** — judge a diff/branch/ready issue → load `loom-verify`.
    - **Maintain project** — audit status, warp, debt, or stale packs → load `loom-tend`.
-4. Resolve workspace ownership per `docs/workspaces.md`: activate only at the workspace root or inside a registered repository; invalid workspace state warns and disables workspace behavior outside explicit Loom work.
+4. Resolve workspace ownership from the nearest valid `.loom/workspace.json`: workspace behavior activates only at its root or inside a registered repository; invalid workspace state warns and disables workspace behavior outside explicit Loom work.
 5. Obvious explicit intent routes immediately into project-nonmutating analysis. An explicit natural-language target wins over persisted work and keyword heuristics. When intent is genuinely ambiguous, ask one question with the recommended route.
 6. For bare Loom entry, recommend one deterministic resume candidate in this order: relevant rework or interrupted-work evidence; then exactly one actionable pack, next-up issue, or confirmed PRD awaiting slicing. A named issue/pack is an explicit target from the user's request, not a bare-entry candidate. Multiple candidates or unresolved dirty-tree attribution require exactly one question with a recommended route.
 7. **Execute the one-hop handoff.** If the host skill mechanism permits invoking the explicitly selected user-invoked ritual, invoke that skill. Otherwise locate and read the selected sibling `skills/<ritual>/SKILL.md` from the same installed Loom tree as this dispatcher and follow it in the current context. Transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This fallback is direct instruction loading, not spawning, recursive dispatch, or lifecycle orchestration.

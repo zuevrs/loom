@@ -6,7 +6,7 @@ cadence: weekly
 
 # Recipe: coverage-raise — one module, behavioral tests at its seam
 
-You are running unattended. Contract: `docs/unattended.md` — dedicated branch, commits allowed, `loom-verify` before the PR, never merge. Change tier: this run modifies test code (and only test code).
+You are running unattended. Runtime contract: load and follow installed `skills/loom/UNATTENDED.md`. Change tier: this run modifies test code (and only test code).
 
 Running attended (a human asked for this in chat)? Same task, discipline, and verify — but the human gates the diff in chat; skip the branch/PR exit unless they ask for one.
 

@@ -75,69 +75,27 @@ Verify's two checkers default to the host's **fast/cheap tier** — judging is c
 | OpenCode | inherit by default | define checker agents with models in `opencode.json` |
 | Codex and others | inherit the session model (no per-sub-agent model API today) | switch the session model before verify |
 
-For scheduled/CI work, use the host-native runner documented for that host. OMP `/loop` and scheduled automations are deferred from Loom 3.1.0; attended multi-issue packs use the OMP TUI Goal contract below or Orca, never both.
+For scheduled/CI work, use the host-native runner and compose the executable `skills/loom/UNATTENDED.md` contract with the recipe. Loom 3.2 adds no public schedule route or scheduler state. Attended multi-issue packs use OMP TUI Goal or Orca, never both.
 
-## Loom + OMP (maximum synergy)
+## Loom + OMP quick workflow
 
-Loom owns **what** to build (PRD, issues, verify contract). OMP owns **how** the agent runs (enforcement, orchestration, review). They complement — not compete.
+| Need | Loom entry | Native OMP/Orca carrier |
+|---|---|---|
+| Plan/explore | `/loom plan …` / `/loom` | Loom ritual; stock OMP `/plan` remains unchanged |
+| Implement one issue | `/loom implement …` | fresh `task` worker; Implement owns Verify |
+| Verify | `loom-verify` | isolated Spec + Standards agents when discovered; sequential fallback otherwise |
+| Multi-issue pack | explicit pack request | configured Orca, otherwise confirmed `/goal set` + finite `/goal budget` |
+| Maintain | `loom-tend` | Loom status/warp/debt audit |
 
-### Setup (once)
+Key OMP contracts:
 
-```bash
-omp plugin install git:github.com/zuevrs/loom
-cd your-project && omp
-# In session: run loom-init — creates .loom/, AGENTS.md managed block
+- **Context and workers:** the optional project preset keeps native auto-shake and global `task.prewalk`; no verified relative 60% key exists, so the live-validated `idleThresholdTokens: 80000` remains. Fresh maker workers switch at first edit/write; discovery makes no code edit and needs no prewalk override.
+- **Runner exclusivity:** `.loom/config.json` with `worktrees: "orca"` selects Orca; otherwise an explicit pack can use `/goal set` and a total `/goal budget` above already-consumed root-session tokens. Each issue gets a fresh sub-agent with the PRD and that single issue, followed by coordinator Verify. After completion/cancel/budget stop, trust `/goal show` status.
+- **Advisor and TTSR:** Advisor is an optional disabled-by-default behavior linter, never a checker. Tend may propose a tested TTSR rule only after a second deterministic local failure.
+- **Evidence and limits:** OMP 17.0.6 accepted shake/80k/prewalk/Advisor config and an Orca worker reached a Prewalk-ready TUI; no actual model switch was observed. Live OMP stop blocking, native verify batch, and Orca overlapping-run serialization remain unevidenced. Some OMP versions do not discover plugin checker agents, so Verify uses its documented fallback.
+- **Headless and human gate:** checker roles remain available as `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`. No native runner may auto-merge or publish; automation run history and Verify evidence support the human decision.
 
-# Update to latest (required — without --force OMP reuses the cached tarball):
-omp plugin install git:github.com/zuevrs/loom --force
-```
-
-### Daily workflow
-
-| Phase | Loom | OMP feature | Why together |
-|-------|------|-------------|--------------|
-| **Entry** | `/loom` — routes by intent (plan, grill, implement, verify, tend) | `commands/` + `skills/` | One entry point; rituals stay skills, not six duplicate commands |
-| **Plan** | `/loom plan …` or skill `loom-plan` → grill → PRD → issues | — | Loom planning is the three-phase ritual; native `/plan` is left stock OMP |
-| **Explore / debug** | `/loom` — investigate, decide, act with confirmation | — | Relentless interview without PRD machinery; upgrade to Plan if scope grows |
-| **Implement** | `/loom implement …` for an issue or concrete small fix | fresh `task` worker + optional **Advisor** in coordinator | `task.prewalk` lets the strong model plan then hands off at first write; Advisor is only a behavior linter and never replaces Verify |
-| **Verify** | `loom-verify` | `task` → `loom-verify-spec` + `loom-verify-standards` (when OMP discovers plugin agents; see caveat above) | Loom defines digest; OMP agents run as isolated checkers |
-| **Done gate** | write `## Verify` → `Status: done` | **session_stop** + TTSR | Hard block if verify missing; reminder on premature done write |
-| **Multi-issue** | blocker-ordered fresh worker per issue + coordinator Verify | Orca **or** TUI `/goal set` + `/goal budget` | Orca is exclusive when configured. Otherwise an explicit pack request gets one objective/budget preview; no unlimited default, chaining, merge, or publish |
-| **Maintenance** | `loom-tend` | — | Warp audit, stale issues, `loom:` debt |
-
-### OMP features that amplify Loom
-
-| OMP feature | Loom policy |
-|---|---|
-| **Auto-shake / `/shake`** | Recommended project preset uses conservative native auto-shake; Loom never triggers it. Manual `/shake` is aggressive rescue. `/compact soft <focus>` is manual phase-preserving rescue only. |
-| **`task.prewalk`** | Generic task workers plan with the strong/current model and switch to smol at first edit/write. Coordinator, Grill/Plan, Verify/checkers never prewalk. |
-| **`/handoff`** | Fallback only when a fresh worker cannot be created, at Plan→Implement or issue→issue boundary. Never carry Plan plus multiple issues in one TUI. |
-| **Advisor** | Optional fast behavior linter for confirmation, one-question cadence, baseline, scope, and Verify. Manually `/advisor on` only in long attended coordinator/Grill/Plan or complex coordinator Implement; never workers or Verify. |
-| **`/goal set <objective>` + `/goal budget <tokens>`** | Without Orca, preview current consumed tokens + remaining-work allowance + a total above current usage. After completion/cancel/budget stop, `/goal drop` as appropriate, then trust `/goal show` status over the statusline. |
-| **Orca orchestration** | Exclusive runner when `.loom/config.json` has `worktrees: "orca"`; native Orca skill owns DAG/dispatch/wait/retry mechanics. |
-| **TTSR `/omfg`** | Capture is a Tend-owned proposal only after the second deterministic local occurrence; `omp ttsr test` positive+negative evidence precedes any confirmed rule write. |
-| **`task` checker agents** | Isolated Spec and Standards judges after implement when available; otherwise use the documented Verify fallback. |
-| **Headless roles / doctor** | `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`; run `omp plugin doctor loom` after updates. |
-
-The complete project-local context, worker, Goal, Advisor, and TTSR contract lives in [`skills/loom/OMP.md`](../skills/loom/OMP.md); Advisor profile/setup detail is in [`omp-advisor.md`](omp-advisor.md). Keep `memory.backend` off: Loom files are project truth.
-
-### Planning on OMP
-
-Loom planning on OMP starts with **`/loom`** (routes to `loom-plan`) or the precision skill **`loom-plan`** — the three-phase ritual (`GRILL.md` → `TO-PRD.md` → `TO-ISSUES.md`) with user gates between phases. OMP **`commands/`** exposes only `/loom`; rituals load through the dispatcher or `skill://` reads. Native **`/plan`** is deliberately left stock: an earlier `context`-event patch that rewrote OMP's plan-mode cadence was withdrawn (live runs showed models circumventing it — batching questions through the `ask` array, skipping gates — while the string-match added fragility).
-
-**Limitation (upstream):** a plugin cannot programmatically *enable* OMP plan mode, nor configure its question cadence — no plan-mode or prompt-override API is exposed to extensions. A first-class Loom plan with OMP's read-only sandbox is blocked on upstream OMP changes, tracked in [oh-my-pi](https://github.com/can1357/oh-my-pi).
-
-### Example session
-
-```
-> /loom plan JWT auth feature              # → loom-plan (grill → PRD → issues)
-> Implement issue 001-auth-endpoint        # → loom-implement
-> Verify                                   # → task: loom-verify-spec + loom-verify-standards
-> (agent writes ## Verify, sets Status: done)
-> Implement issue 002-token-refresh        # → next ready-for-agent issue
-```
-
-For an attended multi-issue pack without Orca, Loom previews a generated blocker-ordered objective and a finite total budget showing root-session tokens already consumed plus an issue-derived remaining-work allowance; the total must exceed current usage. It then uses native TUI `/goal set <objective>` and `/goal budget <confirmed tokens>`. Each slice gets a fresh sub-agent with the PRD and that single issue, followed by coordinator Verify. On completion, cancellation, or budget stop, drop as appropriate and confirm status with `/goal show`; terminal history may remain.
+Setup: `omp plugin install git:github.com/zuevrs/loom --force`, then run `loom-init` in the project. Full contracts: [`skills/loom/OMP.md`](../skills/loom/OMP.md), [`skills/loom/ORCA.md`](../skills/loom/ORCA.md), [Advisor profile](omp-advisor.md), and [unattended lane](unattended.md).
 
 ## Templates
 
