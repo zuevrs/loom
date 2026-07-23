@@ -6,6 +6,40 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - _No unreleased changes yet._
 
+## [4.0.0] - 2026-07-24
+
+### Highlights
+
+- **Long-lived progressive stories** — validated `.loom/<story>/STORY.md` state keeps one story resumable across issue completion, follow-ups, review, and post-merge archive; material scope progressively adds PRD, issues, context, and ADRs.
+- **Source-owned workspace lifecycle** — Git and native Orca/OMP state remain authoritative for dirty resume, one-writer service lanes, independent-repository parallelism, reusable workers, and compact handoffs without a Loom runtime registry.
+- **Explicit lifecycle boundaries** — issue Verify APPROVE completes and unblocks without committing; separately confirmed finish creates local commits only, publish performs external effects separately, and exact post-merge Tend archives before confirmed cleanup.
+
+### Breaking changes
+
+- APPROVE and unattended pack/setup confirmation no longer authorize commits, pushes, hosted reviews, or publication. STORY remains `open` until explicit finish, `awaiting-review` after successful local finish, and becomes `done` only through explicit post-merge Tend archive.
+- The v3 resume/verified-commit lifecycle is removed from active behavior. Loom v4 has no compatibility mode, duplicate resume manifest, orchestration registry, automatic Tend, or automatic publication.
+
+### Migration steps
+
+- Reinstall or update Loom, restart the host, and run `loom-init` in active projects so every installed adapter and managed block reports v4.0.0.
+- Do not rely on APPROVE to commit. Use explicit `/loom finish` for confirmed local commits, then `/loom publish` for separately confirmed remote effects; after actual merge, use exact `/loom tend` for archive and eligible cleanup.
+- Replace transcript- or manifest-based resume wiring with validated STORY plus authoritative Git and native Orca state. Remove v3 automation that commits or opens reviews after unattended Verify; no compatibility mode is provided.
+
+### Adapter impacts
+
+- Orca remains the native owner of worktree, task, dispatch, terminal, and card identities; OMP remains the native owner of shake, prewalk, Advisor, Goal, and handoff signals. Unsupported or contradictory native state stops before mutation.
+- All other hosts receive the same lifecycle through installed skills and invariant mirrors; their enforcement tier remains limited to the evidence documented in `docs/hosts.md`.
+
+### Safety changes
+
+- Finish never pushes; publish requires a fresh exact inventory and separate confirmation; Tend requires durable merge evidence, archives before `done`, and removes only exact merged, clean, inactive local lanes after another confirmation.
+- Unattended runs are report-only and leave STORY open. They receive no commit, push, hosted-review, publication, merge, archive, or cleanup authority.
+
+### Known limitations
+
+- The v4 two-overlapping-story pilot executed against fresh disposable repositories. It observed native Orca/OMP lane and dispatch provenance, dirty resume and contradiction STOP, worker reuse, stale Verify with fresh checks, local-only finish, sequential local-bare publication, review reopen/appended history, merge ancestry, archive/readback, selective cleanup, recognized native `/shake` with a truthful `Nothing to shake.` result, same-terminal resume, and fresh same-worktree OMP handoff.
+- Hosted PR/review behavior, native issue-card mutation, a visible maker Prewalk signal, real-remote publication, live OMP stop blocking, native checker batching, and some host adapters remain unverified as described in `docs/hosts.md` and the v4 release ledger.
+
 ## [3.3.0] - 2026-07-22
 
 ### Highlights
@@ -1146,7 +1180,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/zuevrs/loom/compare/v3.3.0...v4.0.0
 [3.3.0]: https://github.com/zuevrs/loom/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/zuevrs/loom/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/zuevrs/loom/compare/v3.0.0...v3.1.0

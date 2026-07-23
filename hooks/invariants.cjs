@@ -4,7 +4,7 @@
 const PRE_LLM = `# Loom invariants (pre-turn guard)
 
 - Router is active: map intent → ritual skill before acting.
-- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
+- Human merge gate is universal: never auto-merge. Configured unattended setup/launch, APPROVE, and pack confirmation authorize no commit, push, hosted review, publication, or other Git/host mutation; unattended is report-only and STORY remains open. Only separately explicit attended finish may create exact confirmed local commits after final independent Verify; publish remains separate.
 - One issue at a time; fresh session per issue for Implement.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
@@ -15,6 +15,8 @@ const PRE_LLM = `# Loom invariants (pre-turn guard)
 const REQUIRED_PHRASES = [
   "Router is active",
   "never auto-merge",
+  "authorize no commit, push, hosted review, publication, or other Git/host mutation",
+  "unattended is report-only",
   "Maker/checker separation",
   "No verify digest",
 ];

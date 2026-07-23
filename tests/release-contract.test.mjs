@@ -1,0 +1,25 @@
+import { equal, match, ok } from "node:assert";
+import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+const root=resolve(dirname(fileURLToPath(import.meta.url)),".."); const read=(p)=>readFileSync(resolve(root,p),"utf8");
+const pkg=JSON.parse(read("package.json")); equal(pkg.version,"4.0.0");
+for(const p of [".claude-plugin/plugin.json",".codex-plugin/plugin.json","kiro-agent.json"]) equal(JSON.parse(read(p)).version,pkg.version,p);
+const carriers=["AGENTS.md","skills/loom-init/SKILL.md","hooks/loom-session-start.cjs","omp-extension.mjs","opencode-plugin.mjs","hermes-plugin/__init__.py","hermes-plugin/plugin.yaml","docs/unattended.md"];
+for(const p of carriers) ok(read(p).includes("4.0.0"),`${p} is not v4`);
+const current=["AGENTS.md","README.md","RELEASE.md","skills/loom/STORY.md","skills/loom/SKILL.md","skills/loom/ORCA.md","skills/loom/OMP.md","skills/loom/UNATTENDED.md","skills/loom-implement/SKILL.md","skills/loom-tend/SKILL.md","docs/glossary.md","docs/hosts.md","docs/orca.md","docs/workspaces.md","docs/unattended.md",... ["coverage-raise","dead-code","dep-audit","docs-drift","smell-sweep"].map(x=>`recipes/${x}.md`)].map(read).join("\n");
+for(const stale of [/single opt-in for exactly one post-APPROVE verified commit/,/exactly one product-facing commit after Verify APPROVE/,/APPROVE permits the coordinator to create/,/setup\/launch authorization supplies.*push/,/automatically (?:runs? Tend|archives?|cleans? up)/i,/resume manifest is authoritative/i]) ok(!stale.test(current),`active v4 surface retains stale authority: ${stale}`);
+for(const required of ["APPROVE","no commit","explicit finish","local commits","publish","report-only","STORY","native Orca","no registry"]) ok(current.includes(required),`missing cumulative lifecycle mirror: ${required}`);
+const changelog=read("CHANGELOG.md"); match(changelog,/## \[4\.0\.0\] - 2026-07-24[\s\S]*### Breaking changes[\s\S]*no compatibility mode/i); match(changelog,/\[4\.0\.0\]: https:\/\/github\.com\/zuevrs\/loom\/compare\/v3\.3\.0\.\.\.v4\.0\.0/);
+const pilot=read("docs/evidence/V4-PILOT.md"); for(const token of ["contract simulation","Observed-native sequence","dirty uncommitted","material follow-up","local bare","archive before `done`","STOP"]) ok(pilot.includes(token));
+const observed=read("docs/evidence/v4-pilot-observed.md"), ledger=read("docs/evidence/v4-release-ledger.md");
+for(const stale of ["pilot is prepared but not yet executed","not yet executed","no private ledger was needed"]) ok(!`${changelog}\n${observed}\n${ledger}`.toLowerCase().includes(stale),`stale release evidence: ${stale}`);
+for(const token of ["v4-release-ledger.md","Native `/shake` was recognized","Nothing to shake.","fresh OMP terminal","same Alpha/catalog worktree","SPEC APPROVE","STANDARDS APPROVE"]) ok(observed.includes(token),`observed evidence missing ${token}`);
+for(const token of ["Status: completed pilot evidence","selector_not_found","HEAD unchanged","dispatched_at: 2026-07-23 21:45:32","SPEC APPROVE","STANDARDS APPROVE","refs remained only `main`","pilot/alpha-catalog","0311d0c","merge-base --is-ancestor","f4565b4f42d263f8679c744659e71adb9d0a77054400287b09435f5e5b10f661","removed: true","Nothing to shake.","9910a1a73c110bf6f0b6a8bdba90241e97f6d27111b34b9d963fba2c8fd4203d","Fresh same-worktree handoff","Old terminal preserved"]) ok(ledger.includes(token),`release ledger missing ${token}`);
+for(const evidence of [observed,ledger]) { ok(evidence.includes("<pilot-root>"),"evidence needs pilot-root placeholder"); ok(!/\/Users\/|term_[0-9a-f]{8}|ctx_[0-9a-f]{8}|task_[0-9a-f]{8}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(evidence),"private runtime identity/path leaked"); }
+const ignore=read(".npmignore"); for(const token of [".loom/","agent-transcripts/","transcripts/","agent-tools/","*.tgz","*.tmp"]) ok(ignore.includes(token),`.npmignore missing ${token}`);
+const packed=JSON.parse(execFileSync("npm",["pack","--dry-run","--json"],{cwd:root,encoding:"utf8"}))[0].files.map(x=>x.path);
+for(const wanted of ["docs/evidence/V4-PILOT.md","docs/evidence/v4-pilot-observed.md","docs/evidence/v4-release-ledger.md","tests/release-contract.test.mjs"]) ok(packed.includes(wanted),`public package missing ${wanted}`);
+for(const path of packed) ok(!/(^|\/)\.loom\/|lifecycle-pilot-v4-final|agent-transcripts|transcripts|agent-tools|(?:^|\/)(?:tmp|temp)(?:\/|$)|\.tgz$|\.log$/i.test(path),`prohibited package path: ${path}`);
+console.log("v4 release boundary canaries passed");

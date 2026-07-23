@@ -69,6 +69,8 @@ Create a release commit (or final release batch) with product-facing message.
 
 ## 6) Tag and push
 
+STOP before this section. Inventory the exact tag, branch/ref pushes, GitHub release, and any other remote effect, then obtain separate explicit confirmation for that exact inventory. Preparing or approving the local release candidate is not consent to publish it.
+
 ```bash
 git tag vX.Y.Z
 git push origin main --tags

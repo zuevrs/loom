@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Goal
 
-Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh issue attempts, with minimal diffs and Verify-gated commits.
+Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh issue attempts, with minimal diffs and independent Verify.
 
 ## Inputs
 
@@ -20,6 +20,8 @@ Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh is
 ## Workspace ownership
 
 With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes.
+For any follow-up to active story work, apply its canonical **Adaptive continuation** section before the ordinary issue process; do not duplicate or broaden its classifiers here.
 Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md): run only in the Orca-reported worktree and leave issue/PRD/`.loom` writes and final Verify to the root coordinator.
 
 ## Selection and whole-pack intent
@@ -38,44 +40,34 @@ For a selected pack, show one compact confirmation preview containing every conf
 
 - runner: Orca or OMP Goal;
 - planned logical repositories and worktree actions, including bases where known;
-- fresh OMP worker per issue, maker prewalk, and native auto-shake;
+- worker policy: reusable one-writer service terminals with Orca, otherwise a fresh OMP worker per issue; maker prewalk and native auto-shake;
 - current root Advisor state (workers/checkers never use Advisor) and Goal state;
 - independent Verify after every issue;
-- commit policy: exactly one product-facing commit after Verify APPROVE per issue;
-- finish policy: stop with a pack result and keep push, hosted review/PR creation, merge, and cleanup outside this confirmation;
+- authority policy: APPROVE may complete an issue but grants no commit or host mutation;
+- finish policy: stop with a pack result; only a later explicit finish runs STORY’s exact finish inventory and confirmation; publish remains separate;
 - Git prose language and repository/project conventions.
 
-The confirmed preview is the single opt-in for autonomous whole-pack execution and exactly one verified commit after Verify APPROVE per issue; do not add a second per-issue commit gate. It never authorizes push, hosted review/PR creation, merge, amend, squash, rebase, force, or cleanup. Changed issue, repository, worktree action, or base renews confirmation. If the user declines commit authorization, fall back to attended one-issue mode under its applicable explicit consent boundary.
+The confirmed preview opts into autonomous whole-pack execution only. It never authorizes a commit, push, hosted review/PR creation, merge, amend, squash, rebase, force, cleanup, or other Git/host mutation. Changed issue, repository, worktree action, or base renews confirmation.
 
 After confirmation, activate exactly the previewed runner. With Orca, follow [`../loom/ORCA.md`](../loom/ORCA.md) and the installed native `orchestration` skill through complete, blocker, or the existing two-strikes stop. Without Orca, follow OMP's canonical-repository Goal fallback. Goal is never a workspace or Orca runner.
 
-### Prepare review
+### Explicit story finish
 
-This section governs attended Prepare review only. Its separate exact confirmation is mandatory before any push or hosted review. It does not govern or revoke a configured unattended runner's already-authorized dedicated-branch and hosted-review exit under [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md); those are distinct invocation modes, never simultaneous consent rules for one invocation.
-
-Offer Prepare review only after a whole-pack readiness inventory proves every included issue has an APPROVE line, its committed SHA/tree still matches the identity Verify judged, every lane is clean, and current repository checks pass. This is evidence assembly, not another pack-level LLM Verify. An incomplete pack stops; it may offer a partial **draft** bundle only behind its own exact, separate confirmation.
-
-Show one confirmation inventory listing each affected service, branch and base, verified commit/tree, check result, intended push, hosted review target and draft/ordinary state, plus exactly the completed maker/checker terminals to close. Confirmation authorizes only those pushes and at most one hosted review/PR per listed service. It never authorizes merge, rebase, amend, squash, force, branch/worktree cleanup, remote deletion, or an unlisted terminal close. A changed inventory renews confirmation; prior pack/commit consent is never publication consent.
-
-Generate a lane-specific product-facing title and body from that lane's diff, acceptance criteria, and current checks. Synthesize a sanitized public projection: never copy private `## Log`, Verify prose/digest, or private control-plane text verbatim; exclude Loom names, pack/private paths, issue IDs, model names, orchestration/terminal/worktree mechanics, and other private markers. Include only explicit public ticket or ADR URLs already present in source material, and place them only in a public References section; private `.loom` paths, pack/issue IDs, and PRD/issue references are forbidden. Explicit repository/project language instructions win; otherwise use the current user's language. Git history supplies style and conventions only, never language.
-
-Fetch each base and assess drift without rewriting history. Safe drift permits an ordinary hosted review. A conflict or red current base is a blocker and may produce only a draft that says what blocks review. Use host-neutral “hosted review” wording; when `gh` is available for a GitHub remote, its normal push/PR path may publish the confirmed lane. For unsupported or absent hosted remotes, report the honest manual outcome and do not claim an external review exists. Do not create a Loom publication manifest.
-
-Publication is per lane and non-transactional: record each successful push/review immediately, stop or continue only within the confirmed inventory after a failure, and never roll back a successful hosted review. The final summary distinguishes published, failed, draft, and manual lanes. After publication, keep every included approved Loom issue `Status: done`; `in-review` is not a Loom issue status. Set only the exact listed Orca worktree cards to native `workspace-status: in-review`, close exactly the confirmed completed maker/checker terminals, keep the root coordinator alive through that summary, and retain every worktree for Tend after merge.
+Finish is never entered by APPROVE, issue completion, or whole-pack confirmation. Only an explicit finish route from the dispatcher loads and follows [`../loom/STORY.md`](../loom/STORY.md) § Explicit finish boundary. It owns the exact inventory, renewed bounded confirmation, checks, independent final Spec+Standards on one boundary, immediate boundary recheck, ordinary local commits/hooks, failure/partial evidence, `awaiting-review` transition, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
 
 ### Coordinator and maker boundaries
 
-The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from existing source owners rather than retained chat memory. When the Orca adapter is active, resume delegates exclusively to [`../loom/ORCA.md`](../loom/ORCA.md) § Resume; Implement does not duplicate that algorithm. The coordinator exclusively writes `.loom`, dispatches each attempt to a fresh one-issue maker, and runs independent Verify after `worker_done`.
+The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from existing source owners rather than retained chat memory. When the Orca adapter is active, resume delegates exclusively to [`../loom/ORCA.md`](../loom/ORCA.md) § Resume; Implement does not duplicate that algorithm. The coordinator exclusively writes `.loom`, dispatches bounded one-issue assignments under the selected runner's worker policy, and runs independent Verify after `worker_done`.
 
-Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that attempt and returns control; it never marks the issue complete. Verify APPROVE permits the coordinator to create the one preauthorized product-facing commit and mark the issue done. Verify REJECT keeps the same lane and starts a fresh maker for rework. The coordinator, not a maker, may then dispatch another ready issue.
+Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that bounded assignment and returns control; it never marks the issue complete or closes a terminal. Verify APPROVE permits the coordinator to mark the issue done and unblock its dependents, but grants no commit or host mutation and leaves STORY `open`. With Orca, Verify REJECT keeps the lane and re-dispatches its healthy idle maker with the compact delta defined by the adapter; other runners start a fresh maker for rework. The coordinator, not a maker, may then dispatch another ready issue.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
-Fresh-context-per-issue survives batching: the coordinator creates **one fresh implement worker per issue attempt** (input: PRD + that issue — the same contract as a fresh maker session) and holds only scheduling and Verify verdicts. `loom-verify` after each worker yields is run by the **coordinator**. On OMP, follow the adapter's exclusive Orca-or-Goal routing; Goal must stop if fresh workers are unavailable rather than chaining issues. On other hosts, chaining is a documented fallback **only when the host cannot spawn sub-agents**; prefer attended sequential sessions and record the limitation. This fallback never applies inside OMP Goal.
+Issue isolation survives batching: the coordinator sends only the issue-scoped input allowed by the selected runner and holds only scheduling and Verify verdicts. Orca uses its long-lived service terminal plus compact re-dispatch delta; OMP Goal creates **one fresh implement worker per issue attempt** (input: PRD + that issue). `loom-verify` after each worker yields is run by the **coordinator**. Goal must stop if fresh workers are unavailable rather than chaining issues. On other hosts, chaining is a documented fallback **only when the host cannot spawn sub-agents**; prefer attended sequential sessions and record the limitation. This fallback never applies inside OMP Goal.
 
 ## Unattended mode (background agents, CI, scheduled runs)
 
-Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely. It owns isolation, report exits, Verify, blockers, budget/stagnation, public hosted-review body contract, zero-findings behavior, and the consent boundary: the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive. Host wiring may be consulted by humans, but execution must not require distribution `docs/`.
+Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely. It owns isolation, report-only exits, Verify, blockers, budget/stagnation, and zero-findings behavior. Unattended setup/launch and APPROVE authorize no commit, push, hosted review, or other Git/host mutation; only a separately explicit attended finish may create its confirmed local commits, while publish remains separate. STORY otherwise remains `open`. Host wiring may be consulted by humans, but execution must not require distribution `docs/`.
 
 ## Direct small-fix route
 
@@ -83,7 +75,7 @@ Without a named issue or pack, treat the user's concrete build/fix/add request a
 
 ## Execution consent
 
-Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions.
+Selecting a named issue explicitly authorizes issue-scoped project changes, `## Log` updates, every Verify verdict write-back, and `Status: done` only after APPROVE. It does not authorize scope expansion or external actions. It never authorizes a commit or publication. Whole-pack confirmation does not expand that authority.
 
 ## Outputs
 
@@ -121,7 +113,7 @@ Selecting a named issue explicitly authorizes issue-scoped project changes, `## 
 13. **Self-review, then verify.** Before spawning checkers, read your own full diff top-to-bottom with the issue beside it — hunting leftover debug/dead code, files touched beyond the issue's scope, `## Log` claims the diff doesn't back, the acceptance criterion you forgot. Fix what you find: a blocker caught here costs one turn; the same blocker from a checker costs a REJECT lap.
     **Simplify while green.** If the diff is heavier than acceptance requires — a dead branch, an abstraction nothing else uses, the same shape written twice — run one behavior-preserving simplification pass now: touched files only, one move at a time, checks after each move, behavior identical. This is subtraction, not restructuring — renaming concepts, moving seams, or redesigning modules is a refactor, and refactors are verify findings or new issues, never a step-13 detour. Don't simplify what you don't understand (the odd-looking guard may be load-bearing — Chesterton's fence).
     Then run **`loom-verify`** before marking `done` — **do not yield** until a verify digest exists (or documented host limitation for parallel sub-agents). Verify writes its verdict into the issue's `## Verify` section — the APPROVE line there is the enforcement signal, and its format is load-bearing: a line **starting with** `APPROVE` (canonically `APPROVE — {date} — spec pass, standards pass`). Prose like `**Verdict: APPROVE**` does not satisfy the stop gate. Self-review replaces neither checker — it removes the embarrassments before fresh eyes spend time on them.
-14. **Close the maker session.** After `done`, end its report with the next lowest-numbered unblocked `ready-for-agent` issue (or pack complete). A standalone one-issue run recommends a fresh session and stops. In confirmed pack mode, the maker stops but the root coordinator may dispatch that next issue to a fresh maker.
+14. **End the maker assignment.** After `done`, end its report with the next lowest-numbered unblocked `ready-for-agent` issue (or pack complete). A standalone one-issue run recommends a fresh session and stops. In confirmed pack mode, the maker stops; with Orca its healthy terminal idles for compact-delta reuse, while other runners may create a fresh maker. The root coordinator may continue the confirmed pack with bounded assignments.
 
 ## Discipline ladder
 
@@ -145,9 +137,9 @@ Before writing code, stop at the **first rung that holds**:
 
 ## Hard stops
 
-- One issue at a time per maker; the root coordinator may continue the confirmed pack with fresh makers.
+- One issue at a time per maker assignment; the root coordinator may continue the confirmed pack with bounded assignments under the selected runner policy.
 - No unrelated refactors.
-- Never commit without the applicable explicit opt-in; a confirmed whole-pack preview supplies it for one post-APPROVE commit per issue.
+- Never treat APPROVE, issue completion, or whole-pack confirmation as commit or publication authority.
 - Verification failed → issue stays not-`done`.
 - **No verify digest → no done.** Runnable checks passing is necessary but not sufficient.
 
@@ -175,8 +167,8 @@ Before writing code, stop at the **first rung that holds**:
 | "Skip verify for tiny change" | Verify runs on every implement completion — no yield without digest |
 | "Tests pass, we're done" | Tests ≠ verify; maker/checker split is mandatory |
 | "I'll batch commits/issues" | One issue, one slice, one verify |
-| "Issue's done, I'll just pick up the next one here" | A maker stops. Only the root coordinator may dispatch the next issue to a fresh maker. |
-| "Batch run — I'll chain all issues in my context" | Spawn a fresh sub-agent per issue; chain only if the host can't spawn sub-agents |
+| "Issue's done, I'll just pick up the next one here" | A maker stops. Only the root coordinator may dispatch the next issue; Orca reuses the healthy idle lane terminal with a compact delta, while other runners may use a fresh maker. |
+| "Batch run — I'll chain all issues in my context" | Follow the runner policy: Orca re-dispatches bounded compact deltas to the service terminal; Goal spawns a fresh sub-agent per issue; host-limited chaining is fallback only. |
 | "This abstraction will help later" | No abstractions nobody asked for |
 | "The issue doesn't say — I'll pick something sensible" | Load-bearing gap: PRD first, then ask or `needs-info`. Silent invention is the failure mode |
 | "Baseline was already red, my tests pass though" | Unattributable. Pre-flight first; inherited failures go in `## Log` |

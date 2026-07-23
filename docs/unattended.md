@@ -4,7 +4,7 @@ Loom ships no runner (see ADR history: host-native execution won). Every host al
 
 ## Runtime contract boundary
 
-The canonical executable contract is [`skills/loom/UNATTENDED.md`](../skills/loom/UNATTENDED.md). Runners must compose or load that fragment directly; this document is wiring and explanation for humans, never mandatory runtime input. The fragment owns isolation, report exits, Verify, blockers, budget/stagnation, the PR body contract, zero-findings behavior, and the consent boundary: the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive.
+The canonical executable contract is [`skills/loom/UNATTENDED.md`](../skills/loom/UNATTENDED.md). Runners must compose or load that fragment directly; this document is wiring and explanation for humans, never mandatory runtime input. The fragment owns isolation, report-only exits, Verify, blockers, budget/stagnation, and zero-findings behavior. Current v4 unattended setup/launch and APPROVE authorize no commit, push, hosted review, or other Git/host mutation; STORY remains open. Only a separately explicit attended finish may create confirmed local commits after final independent Verify; publish is available only through a separately explicit attended invocation and digest-bound confirmation and the human merge gate remains universal.
 
 Project `CONTEXT.md`, `PRODUCT.md`, `DESIGN.md`, and project `docs/adr/` remain project truth. Loom's distribution `docs/` directory is human reference only.
 
@@ -21,10 +21,10 @@ Four conditions, all required — a task that fails one belongs in an attended c
 
 | Tier | Writes | Ends in | Risk |
 |---|---|---|---|
-| **Discovery** — audit, report | Only `needs-triage` stub issues (+ a report in the PR/issue) | PR with stubs, or an issue comment | Read-only on code; safe on any cadence |
-| **Change** — modify code | Code, through the full contract above | Reviewed PR | Runs the whole implement + verify lane |
+| **Discovery** — audit, report | Only `needs-triage` stub issues plus a private runner report | Report-only | Read-only on code; safe on any cadence |
+| **Change** — modify code | Code, through the full contract above | Private runner report with STORY open | Runs Implement + Verify without commit/publication |
 
-Start with discovery recipes; graduate a task to the change tier once its PRs come back boring.
+Start with discovery recipes; graduate a task to the change tier once its reports and human-reviewed changes become routine.
 
 Catalog: [`recipes/`](../recipes/) — `docs-drift`, `dep-audit`, `smell-sweep` (discovery); `coverage-raise`, `dead-code` (change). Recipes live in the Loom repo — copy the ones you use into your project (or `cat` them from your Loom clone, e.g. `~/.loom/recipes/`) so the runner can read them.
 
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: zuevrs/loom
-          ref: v3.3.0
+          ref: v4.0.0
           path: loom-runtime
       - run: |
           prompt="$(cat ../loom-runtime/skills/loom/UNATTENDED.md; printf '\n\n--- COMPLETE RECIPE ---\n\n'; cat ../loom-runtime/recipes/docs-drift.md)"
@@ -60,7 +60,7 @@ jobs:
         env: { ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }
 ```
 
-Use the same `prompt=...` composition with `codex exec "$prompt" < /dev/null` or `omp -p --auto-approve "$prompt" < /dev/null`. Both complete files from the pinned Loom checkout become one argument, separated by a fixed marker; the target checkout stays the command working directory. Give the job credentials to push a branch and open a draft PR — never merge.
+Use the same `prompt=...` composition with `codex exec "$prompt" < /dev/null` or `omp -p --auto-approve "$prompt" < /dev/null`. Both complete files from the pinned Loom checkout become one argument, separated by a fixed marker; the target checkout stays the command working directory. Do not give the job push or hosted-review credentials. It exits with a private runner report and leaves STORY open; publication requires a separate explicit attended `/loom publish` invocation and exact confirmed inventory.
 
 When stdin is a pipe but empty (some CI shells, wrapper scripts), close it explicitly — `claude -p "…" < /dev/null`, `codex exec … < /dev/null`, `pi -p … < /dev/null` — or the CLI waits on "additional input from stdin" and the run hangs.
 
@@ -80,8 +80,8 @@ Codex Goal Mode (CLI v0.128.0+, GA 2026-05) is a natural carrier for the issue l
 
 ```text
 /goal Work through the Status: ready-for-agent issues in .loom/<pack>/ one at a time,
-following loom-implement § Unattended mode: dedicated branch, verify before PR, PR per issue.
-Stop when none remain or a blocker surfaces (draft PR, blocker named).
+following loom-implement § Unattended mode: isolate when available, verify each issue, report only.
+Stop when none remain or a blocker surfaces (private report, blocker named); do not commit, push, or open a PR.
 ```
 
 Set the goal's budget cap as the outer bound — that is the runaway brake for a multi-hour run.
@@ -98,7 +98,7 @@ For an attended multi-issue pack without Orca, Loom may preview `/goal set <obje
 
 ### Autonomous frameworks (OpenClaw, Hermes, and friends)
 
-Any framework with prompt-file and Git support can run a recipe. Build one prompt from the complete installed `UNATTENDED.md`, a clear separator, and the complete installed recipe; do not point it at the recipe alone or a target-repo-relative Loom path. Make its done condition `PR opened` (draft when blocked). Loom's Hermes plugin injects base discipline, but the composed unattended contract is still required.
+Any framework with prompt-file and Git support can run a recipe. Build one prompt from the complete installed `UNATTENDED.md`, a clear separator, and the complete installed recipe; do not point it at the recipe alone or a target-repo-relative Loom path. Make its done condition `private report produced` (blocker first when blocked); do not grant Git/host mutation authority. Loom's Hermes plugin injects base discipline, but the composed unattended contract is still required.
 
 ## What NOT to automate
 

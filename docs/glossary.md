@@ -54,7 +54,15 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 ## Work artifacts
 
-**PRD** — Build plan under `.loom/<feature>/PRD.md`.
+**STORY** — Canonical compact current state under `.loom/<story>/STORY.md`. It is created after the first confirmed durable decision or immediately before the first project write; read-only questions create nothing.
+
+**Finish** — Separately explicit, confirmed final Verify and local-commit boundary. It never pushes and moves a successful story to `awaiting-review`.
+
+**Publish** — Separately explicit, confirmed external-effect boundary for sequential push/hosted review. It never merges and leaves the story `awaiting-review`.
+
+**Post-merge Tend** — Exact `/loom tend` after durable merge evidence: archive durable artifacts/public refs before `done`, then separately confirm eligible local cleanup. It is never automatic.
+
+**PRD** — Progressive build plan under `.loom/<story>/PRD.md` when material scope earns it.
 
 **Issue** — One grabbable slice under `.loom/<feature>/issues/`.
 
@@ -68,4 +76,4 @@ User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CO
 
 `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
 
-After Verify APPROVE → write `## Verify` section, then set `Status: done`. Work needing human judgement → `ready-for-human`.
+After Verify APPROVE → write `## Verify`, then an issue may become `done` and unblock dependents. APPROVE creates no commit or publication and leaves STORY `open`. Work needing human judgement → `ready-for-human`.

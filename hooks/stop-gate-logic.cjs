@@ -50,7 +50,7 @@ function latestVerifySection(content) {
 function latestVerifyVerdict(content) {
   const latest = latestVerifySection(content);
   if (!latest) return null;
-  const verdicts = [...latest.matchAll(/^(APPROVE|REJECT|ESCALATE|ESCALATE_HUMAN)\b/gm)];
+  const verdicts = [...latest.matchAll(/^(APPROVE|REJECT|STALE|ESCALATE|ESCALATE_HUMAN)\b/gm)];
   return verdicts.length ? verdicts.at(-1)[1] : null;
 }
 

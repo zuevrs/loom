@@ -18,6 +18,7 @@ Investigate a question, resolve it through disciplined interview, then materiali
 ## Workspace ownership
 
 With a valid active workspace profile, write `CONTEXT.md`, ADRs, and `.loom/research/` notes only under the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run reads, diffs, and gates in the relevant registered service repository. Loom artifacts belong at the workspace owner, not inside registered service repositories.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes.
 
 ## Outputs
 

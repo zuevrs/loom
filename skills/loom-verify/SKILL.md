@@ -18,19 +18,21 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 
 ## Outputs
 
-Structured digest (below). **Spec-backed Loom issue:** persisted into the issue's `## Verify` section on every verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop; the written REJECT line is what the next fresh session inherits. **Standards-only / no issue file:** digest only — chat when attended, PR when unattended; no issue write-back or status change.
+Structured digest (below). **Spec-backed Loom issue:** persisted into the issue's `## Verify` section on every verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop; the written REJECT line is what the next fresh session inherits. **Standards-only / no issue file:** digest only — chat when attended, private runner report when unattended; no issue write-back or status change.
 
-**No issue file** (direct small-fix, ad-hoc diff review): the digest is the deliverable — chat when attended, PR description when unattended. Nothing to write back, no status to set; every other rule (two checkers, evidence, hard stops) applies unchanged.
+**No issue file** (direct small-fix, ad-hoc diff review): the digest is the deliverable — chat when attended, private runner report when unattended. Nothing to write back, no status to set; every other rule (two checkers, evidence, hard stops) applies unchanged.
 
 **Review branches:**
 
-- **Spec-backed** — an issue, PRD, or explicit user contract exists. Run normal Spec + Standards Verify. A direct small-fix's explicit request is a spec even without an issue file; deliver its digest in chat/PR and set no status.
+- **Spec-backed** — an issue, PRD, or explicit user contract exists. Run normal Spec + Standards Verify. A direct small-fix's explicit request is a spec even without an issue file; deliver its digest in chat or the private runner report and set no status.
 - **Standards-only** — no issue, PRD, or user contract exists. Run Standards/code review only; state `Spec unavailable — no issue/PRD/user contract supplied`. Do not spawn, require, or simulate a Spec checker. Its verdict cannot complete a Loom issue or authorize any Loom status change.
 
 ## Workspace ownership
 
 With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run each ordinary existing Git diff/check command in the relevant registered service repository; this is not aggregate Verify and adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
-Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md); the root coordinator pins the judged tree/diff, owns Verify write-back, and records repo + service commit SHA after an approved matching commit.
+Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md); the root coordinator pins the judged tree/diff and owns Verify write-back.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes. APPROVE may complete an issue and unblock dependents; it leaves STORY `open` and grants no Git or host mutation.
+For an intermediate Verify after changed acceptance, public/inter-service contract, data path, or security path, use STORY's canonical **Adaptive continuation** trigger and normal Spec+Standards process. Judge only the affected completed boundary; append the ordinary verdict after `STALE`, with no commit authority.
 
 ## Process
 
@@ -100,13 +102,13 @@ REJECT
 
 (Remaining sections filled likewise.) A finding without a quoted spec line or a named source is an opinion, not evidence.
 
-Status effects for a Spec-backed Loom issue: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change. Standards-only verdicts are chat/PR review output and never write an issue verdict or status.
+Status effects for a Spec-backed Loom issue: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change. Standards-only verdicts are chat/private-report review output and never write an issue verdict or status.
 
 **An APPROVE vouches only for the diff it judged** (Spec-backed Loom issue). Any change after the verdict — however small — reruns the objective gates and is logged in the issue as `Post-verify delta: {what, why, gates rerun}`; a change that touches product behavior gets a fresh verify instead, not a delta note.
 
 **Two strikes rule** (Spec-backed Loom issue; attended mirror of the unattended stagnation rule): a second REJECT on the same issue whose blockers overlap the first is a stop signal, not a third lap — re-implementing against an unchanged misunderstanding spends checkers to stand still. Present the user the fork explicitly: Plan re-entry (amend the PRD/issue — see `loom-plan` § Route scope), accept the finding as explicit `loom:` debt, or drop the issue. The `## Verify` section already holds both REJECT lines as evidence.
 
-**ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. **Spec-backed Loom issue:** attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue plus a **draft PR** whose description leads with the escalation (see loom-implement § Unattended mode). Issue status stays untouched. **Standards-only / no issue file:** deliver the digest in chat/PR only — no issue write-back.
+**ESCALATE_HUMAN is a deliverable, not a shrug.** It must carry: what needs the human (one sentence), the exact decision or evidence that's missing, and what happens if nobody acts. **Spec-backed Loom issue:** attended → the digest itself plus `ESCALATE_HUMAN — {date} — {reason}` written into the issue's `## Verify` section; unattended → the same line in the issue plus a blocker-first private runner report (see loom-implement § Unattended mode); no commit, push, or hosted review. Issue status stays untouched. **Standards-only / no issue file:** deliver the digest in chat/private report only — no issue write-back.
 
 ## Issue file write-back (enforcement contract)
 
@@ -179,4 +181,4 @@ For other supported hosts (Pi, Windsurf, Kiro, Hermes, Cline, Droid, OpenClaw), 
 - Branch-required checker(s) ran: Spec+Standards in parallel for Spec-backed, Standards only for Standards-only (or documented host limitation/red-gate short-circuit)
 - Digest has all required sections
 - Checks executed section lists commands with pass/fail, or the explicit `no runnable checks — {why}` line
-- Spec-backed issue verdict is written into `## Verify`; direct-fix/Standards-only digest is delivered in chat/PR. Standards-only never completes a Loom issue
+- Spec-backed issue verdict is written into `## Verify`; direct-fix/Standards-only digest is delivered in chat/private report. Standards-only never completes a Loom issue

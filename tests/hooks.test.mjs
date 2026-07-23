@@ -565,10 +565,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
-  // loop-me vocabulary re-homed after loom-loop removal orphaned it (taken v0.2.x)
   const unattended = read("skills/loom/UNATTENDED.md");
-  ok(unattended.includes("push right") && unattended.includes("brief"), "unattended human gate carries push-right/brief vocabulary");
-  ok(unattended.includes("do maximal safe work before the checkpoint") && unattended.includes("one decision-ready handoff"), "push right defers the checkpoint");
+  ok(unattended.includes("report-only") && unattended.includes("private runner report"), "unattended exits through a private report");
+  ok(unattended.includes("authorizes no commit, push, hosted review/PR"), "unattended setup grants no Git/host authority");
 
   // ponytail comprehension + root-cause rules
   ok(
@@ -713,12 +712,11 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     // the only reading" — silent invention caught one lap before the checkers
     ok(impl.includes("Surface the assumptions you do make"), "implement surfaces assumptions before non-trivial code");
     ok(impl.includes("correct me now or I proceed"), "assumption block carries the correct-me-now contract");
-    // 3. PR body contract: the unattended human gate gets a fixed shape
+    // 3. Unattended remains report-only until explicit finish/publish boundaries.
     const unattended = read("skills/loom/UNATTENDED.md");
-    ok(unattended.includes("### Public hosted-review body contract"), "unattended doc fixes the public review description shape");
-    ok(unattended.includes("drop a section entirely when it is empty"), "public review contract drops empty sections, not ceremony");
-    ok(unattended.includes("lead with the sanitized blocker"), "draft reviews lead with the sanitized blocker");
-    ok(impl.includes("public hosted-review body contract"), "implement unattended mode points at the public review body contract");
+    ok(unattended.includes("Every run exits report-only"), "unattended has a report-only exit");
+    ok(unattended.includes("Do not create public Git prose or a hosted review"), "unattended forbids publication");
+    ok(impl.includes("report-only exits"), "implement points at report-only unattended behavior");
     // 4. simplify-while-green: maker-initiated subtraction pass between the
     // discipline ladder (prevent) and the standards checker (judge)
     ok(impl.includes("Simplify while green"), "self-review carries the simplification pass");
@@ -870,10 +868,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const initSkill = rf(resolve(__dirname, "..", "skills", "loom-init", "SKILL.md"), "utf8");
 
   ok(impl.includes("## Batch mode"), "implement documents batch mode");
-  ok(impl.includes("one fresh implement worker per issue attempt"), "batch mode creates fresh maker per attempt");
+  ok(impl.includes("Orca uses its long-lived service terminal plus compact re-dispatch delta") && impl.includes("OMP Goal creates **one fresh implement worker per issue attempt**"), "batch mode distinguishes Orca reuse from Goal fresh makers");
   ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
   for (const doc of [agents, initSkill]) {
-    ok(doc.includes("in batch/goal runs spawn a fresh sub-agent per issue"), "managed block extends fresh-session rule to batch runs");
+    ok(doc.includes("Orca reuses a healthy service-lane terminal with a compact issue delta") && doc.includes("other batch/goal runs spawn a fresh sub-agent per issue"), "managed block distinguishes Orca reuse from other batch runs");
   }
   ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
   ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
@@ -1270,13 +1268,13 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   const impl = read("skills/loom-implement/SKILL.md");
   const unattendedRuntime = read("skills/loom/UNATTENDED.md");
   ok(impl.includes("## Unattended mode") && impl.includes("UNATTENDED.md"), "implement has the unattended section and runtime pointer");
-  ok(unattendedRuntime.includes("Never push to the default branch") && unattendedRuntime.includes("merge"), "unattended: merge stays human");
-  ok(unattendedRuntime.includes("draft PR"), "unattended: blockers exit as draft PRs");
+  ok(unattendedRuntime.includes("authorizes no commit, push, hosted review/PR") && unattendedRuntime.includes("human merge gate"), "unattended grants no Git/host authority");
+  ok(unattendedRuntime.includes("blocker-first private report"), "unattended: blockers exit by private report");
   ok(impl.includes("Pre-flight baseline"), "implement runs baseline before code");
   ok(impl.includes("Never invent a load-bearing decision silently"), "implement carries question calibration");
   ok(impl.includes("Plan re-entry"), "wrong-PRD discovery routes back to plan");
 
-  for (const phrase of ["dedicated branch", "report", "Run `loom-verify`", "draft PR"]) {
+  for (const phrase of ["host-native isolation", "report-only", "Run `loom-verify`", "private report"]) {
     ok(unattendedRuntime.includes(phrase), `unattended runtime states: ${phrase}`);
   }
   const doc = read("docs/unattended.md");
@@ -1735,8 +1733,8 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
   ok(impl.includes("## Direct small-fix route"), "implement directly handles concrete no-issue fixes");
   ok(!impl.includes("delegates exactly one hop") && impl.includes("Full `loom-verify` remains mandatory"), "small-fix route stays in Implement then Verify");
   ok(read("skills/loom-grill/SKILL.md").includes("chat** (attended) or the **PR description"), "grill small-fix verify digest lives in chat or PR");
-  ok(impl.includes("Close the maker session"), "implement ends each maker attempt with handoff");
-  ok(impl.includes("maker stops but the root coordinator may dispatch"), "handoff separates maker stop from coordinator continuation");
+  ok(impl.includes("End the maker assignment"), "implement ends each maker assignment with handoff");
+  ok(impl.includes("maker stops; with Orca its healthy terminal idles") && impl.includes("root coordinator may continue the confirmed pack with bounded assignments"), "handoff separates maker stop from coordinator continuation");
   ok(impl.includes("Second REJECT from verify with overlapping blockers"), "implement knows the two-strikes stop");
   ok(impl.includes("amendment route"), "wrong-PRD failure mode points at the amendment route");
 
@@ -1864,7 +1862,7 @@ print(repr(mod._anomaly_alert(pathlib.Path(sys.argv[2]))))`,
 {
   const { spawnSync } = await import("node:child_process");
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
-  const { stateSnapshot, lastVerdictIsReject, dirtyTreeCount } = requireCjs(
+  const { stateSnapshot, lastVerdictIsReject, latestVerifyVerdict, isDoneWithoutVerify, dirtyTreeCount } = requireCjs(
     resolve(__dirname, "..", "hooks", "stop-gate-logic.cjs")
   );
 
@@ -1924,11 +1922,21 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])) or "")`,
   writeFileSync(join(dir, "007-same-approve.md"), "# G\n\n## Verify\n\nREJECT — x\nAPPROVE — fixed\n\n## Status\n\nStatus: ready-for-agent\n");
   writeFileSync(join(dir, "008-done-reject.md"), "# H\n\n## Verify\n\nAPPROVE — old\nREJECT — current\n\n## Status\n\nStatus: done\n");
   writeFileSync(join(dir, "009-done-approve.md"), "# I\n\n## Verify\n\nREJECT — old\nAPPROVE — current\n\n## Status\n\nStatus: done\n");
+  const staleDone = "# J\n\n## Verify\n\nAPPROVE — old\nSTALE — affected: acceptance\n\n## Status\n\nStatus: done\n";
+  const reapprovedDone = staleDone.replace("\n\n## Status", "\nAPPROVE — current\n\n## Status");
+  writeFileSync(join(dir, "010-done-stale.md"), staleDone);
+  writeFileSync(join(dir, "011-done-reapproved.md"), reapprovedDone);
+  strictEqual(latestVerifyVerdict(staleDone), "STALE", "STALE supersedes an earlier APPROVE");
+  strictEqual(isDoneWithoutVerify(staleDone), true, "done issue with latest STALE is not verified");
+  strictEqual(latestVerifyVerdict(reapprovedDone), "APPROVE", "later APPROVE supersedes STALE");
+  strictEqual(isDoneWithoutVerify(reapprovedDone), false, "later APPROVE restores verified done acceptance");
   const orderedSnap = stateSnapshot(tmp);
   ok(orderedSnap.includes("006-same-reject.md"), "snapshot flags same-section latest REJECT as rework");
   ok(!orderedSnap.match(/rework pending[^\n]*007-same-approve\.md/), "snapshot resolves same-section latest APPROVE");
   ok(orderedSnap.match(/done without APPROVE[^\n]*008-done-reject\.md/), "snapshot blocks stale APPROVE followed by REJECT");
   ok(!orderedSnap.match(/done without APPROVE[^\n]*009-done-approve\.md/), "snapshot accepts latest APPROVE after REJECT");
+  ok(orderedSnap.match(/done without APPROVE[^\n]*010-done-stale\.md/), "snapshot blocks earlier APPROVE followed by STALE");
+  ok(!orderedSnap.match(/done without APPROVE[^\n]*011-done-reapproved\.md/), "snapshot accepts later APPROVE after STALE");
   const pyOrdered = pySnap(tmp);
   if (pyOrdered !== null) {
     ok(pyOrdered.includes("006-same-reject.md"), "Hermes snapshot flags same-section latest REJECT");
@@ -2393,7 +2401,7 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
   for (const phrase of [
     "verified live on 2026-07-21",
     "user starts one ordinary main OMP session",
-    "During Implement preview",
+    "During adaptive Implement preview",
     "product-facing story, service, and status language without Loom branding",
     "Zero matches permits the confirmed JIT create",
     "multiple or inconsistent matches stop for human resolution",
@@ -2405,12 +2413,10 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
     "changed files/repositories",
     "base SHA plus diff/tree identity",
     "records maker evidence in `## Log`",
-    "stage exactly intended files",
-    "without auto-staging unrelated files",
-    "`git write-tree` and base SHA",
-    "`git rev-parse HEAD^{tree}`",
-    "mismatch requires re-Verify",
-    "stable lifecycle ends at a verified commit",
+    "APPROVE alone may complete the issue and unblock dependents",
+    "leaves STORY `open` and grants no Git/host mutation",
+    "Future story boundaries",
+    "does not infer or implement them from APPROVE",
     "other hosts remain unverified",
   ]) ok(adapter.includes(phrase), `Orca adapter carries: ${phrase}`);
   for (const [path, phrase] of [

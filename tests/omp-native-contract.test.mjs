@@ -56,28 +56,27 @@ for (const token of ["second observed occurrence", "omp ttsr test", "positive an
 ok(tend.includes("second-failure, tested-before-write"), "Tend does not own tested second-failure capture");
 
 for (const token of [
-  "installed native Orca `orchestration` skill", "Task dependencies mirror", "fresh visible OMP worker per issue",
+  "installed native Orca `orchestration` skill", "Task dependencies mirror", "one healthy visible OMP maker terminal per service lane",
   "exactly one OMP AskUser question", "native orchestration lifecycle, waits, and liveness by reference", "serializes all `.loom`",
   "OMP 17.0.6 startup was live-verified", "reach a ready visible TUI showing Prewalk",
   "no actual prewalk model switch was observed",
 ]) ok(orca.includes(token), `Orca delegation missing ${token}`);
 ok(!orca.includes("orca orchestration dispatch"), "ORCA duplicates native CLI lifecycle prose");
-ok(implement.includes("exclusive Orca-or-Goal routing"), "Implement does not enforce runner exclusivity");
+ok(implement.includes("activate exactly the previewed runner") && implement.includes("Goal is never a workspace or Orca runner"), "Implement does not enforce runner exclusivity");
 for (const token of [
   "explicit issue card/path selects exactly that issue",
   "explicit pack directory/slug selects autonomous whole-pack mode after preview confirmation",
   "bare Implement selects the lowest-numbered unblocked `ready-for-agent` issue",
   "one compact confirmation preview containing every confirmed field",
-  "single opt-in for autonomous whole-pack execution",
-  "do not add a second per-issue commit gate",
-  "never authorizes push, hosted review/PR creation, merge, amend, squash, rebase, force",
-  "fall back to attended one-issue mode",
+  "opts into autonomous whole-pack execution only",
+  "never authorizes a commit, push, hosted review/PR creation, merge, amend, squash, rebase, force",
+  "APPROVE may complete an issue but grants no commit or host mutation",
   "Git prose language and repository/project conventions",
   "activate exactly the previewed runner",
   "Goal is never a workspace or Orca runner",
   "root coordinator may run the confirmed pack until complete, blocked",
-  "worker_done` ends that attempt",
-  "Verify REJECT keeps the same lane and starts a fresh maker",
+  "worker_done` ends that bounded assignment",
+  "With Orca, Verify REJECT keeps the lane and re-dispatches its healthy idle maker",
   "One issue at a time per maker",
   "dirty, on a non-default branch, occupied by other work",
 ]) ok(implement.includes(token), `Implement routing/execution contract missing ${token}`);
@@ -91,111 +90,69 @@ for (const token of [
   "Never offer Goal for a workspace",
 ]) ok(adapter.includes(token), `OMP runner route missing ${token}`);
 for (const token of [
-  "confirmed whole-pack preview activates native supervised orchestration",
-  "single opt-in for exactly one post-APPROVE verified commit per issue",
+  "confirmed whole-pack preview activates native supervised orchestration only",
+  "APPROVE, issue completion, and whole-pack confirmation authorize no commit",
   "Plan creates no worktree or runtime task",
   "one story x service worktree just in time",
-  "Accept the actual branch returned by Orca",
+  "Accept the actual branch and base returned by Orca",
   "runtime/checkouts manifest",
   "product-facing story, service, and status language without Loom branding",
   "serialize by issue number unless explicit blockers require another order",
-  "Independent service lanes may run in parallel",
+  "explicitly independent registered repositories may run in parallel",
   "atomic multi-repository issue acquires every listed lane",
   "worker_done` corresponding to the active task/dispatch",
-  "REJECT keeps the same lane and dispatches a fresh rework worker",
+  "APPROVE alone may complete the issue and unblock dependents",
+  "leaves STORY `open` and grants no Git/host mutation",
+  "REJECT keeps the same lane and re-dispatches its healthy idle maker with the compact delta",
   "second REJECT with overlapping blockers stops the pack",
-  "root coordinator itself",
-  "exactly one product-facing commit",
-  "Never push, publish, merge, amend, squash, rebase, or force",
-  "no private issue IDs, pack paths, model names, Loom branding, or orchestration mechanics",
-  "current user's language",
-  "history informs style and conventions only, never language",
 ]) ok(orca.includes(token), `Orca story-service contract missing ${token}`);
 ok(orca.includes("installed native Orca `orchestration` skill"), "Orca does not delegate lifecycle mechanics to native orchestration");
 ok(!orca.includes("orca orchestration dispatch"), "ORCA duplicates native CLI lifecycle prose");
 ok(!orca.includes("Plan's existing confirmation may create story worktrees"), "ORCA retains Plan-time worktree creation");
 ok(!orca.includes("pack slug and absolute PRD path"), "ORCA leaks private pack metadata into worktree comments");
-ok(orca.includes("confirmed whole-pack preview is sufficient for that pack"), "Orca commit boundary adds a second pack commit gate");
-
 for (const token of [
-  "Offer Prepare review only after a whole-pack readiness inventory",
-  "every included issue has an APPROVE line",
-  "committed SHA/tree still matches the identity Verify judged",
-  "every lane is clean", "current repository checks pass",
-  "not another pack-level LLM Verify",
-  "partial **draft** bundle only behind its own exact, separate confirmation",
-  "prior pack/commit consent is never publication consent",
-  "at most one hosted review/PR per listed service",
-  "never copy private `## Log`, Verify prose/digest",
-  "explicit public ticket or ADR URLs already present",
-  "current user's language", "Git history supplies style and conventions only",
-  "Safe drift permits an ordinary hosted review",
-  "conflict or red current base is a blocker",
-  "when `gh` is available for a GitHub remote",
-  "unsupported or absent hosted remotes", "do not claim an external review exists",
-  "Do not create a Loom publication manifest",
-  "never roll back a successful hosted review",
-  "keep every included approved Loom issue `Status: done`", "`in-review` is not a Loom issue status",
-  "exact listed Orca worktree cards to native `workspace-status: in-review`", "retain every worktree",
-]) ok(implement.includes(token), `Prepare review contract missing ${token}`);
-ok(implement.includes("never authorizes merge, rebase, amend, squash, force, branch/worktree cleanup"), "Prepare review permission boundary permits history or cleanup");
-ok(implement.includes("or an unlisted terminal close"), "Prepare review permission boundary permits unlisted terminal closure");
+  "Future story boundaries",
+  "explicit future story-level authority boundaries",
+  "does not infer or implement them from APPROVE",
+  "Existing issue `done` and blocker behavior remains available",
+]) ok(orca.includes(token), `Orca future boundary contract missing ${token}`);
 for (const token of [
-  "Orca still owns branch naming, base, settings, attribution",
-  "without merge, rebase, or other history rewrite",
-  "Push and create at most one review per confirmed service",
-  "recording partial failures without rolling back successful reviews",
-  "close exactly the confirmed completed maker/checker terminals",
-  "never the root coordinator before its publication summary",
-  "Approved Loom issues remain `Status: done`", "`in-review` is only Orca native workspace state",
-  "`workspace-status: in-review` on exactly the listed worktree cards", "retain worktrees and branches",
-]) ok(orca.includes(token), `Orca Prepare review adapter missing ${token}`);
-for (const token of [
-  "This section governs attended Prepare review only",
-  "separate exact confirmation is mandatory before any push or hosted review",
-  "distinct invocation modes, never simultaneous consent rules for one invocation",
-]) ok(implement.includes(token), `Attended Prepare review mode missing ${token}`);
-for (const token of [
-  "configured unattended invocation instead follows UNATTENDED setup/launch consent",
-  "does not enter attended Prepare review",
-  "the attended confirmation does not apply to that invocation",
-]) ok(orca.includes(token), `Orca consent mode distinction missing ${token}`);
+  "Explicit story finish",
+  "never entered by APPROVE, issue completion, or whole-pack confirmation",
+  "exact inventory",
+  "Finish creates no push or hosted review",
+]) ok(implement.includes(token), `Implement finish boundary contract missing ${token}`);
 ok(!implement.includes("Prepare review command"), "Prepare review introduces a new command surface");
 ok(!orca.includes("publication manifest file"), "Orca introduces a publication manifest");
 for (const token of [
-  "validated workspace parser/registry", "logical relative path", "resolve `registered.path`", "validated workspace/artifact root",
-  "resolved absolute path", "realpath", "canonical Git top-level", "Never compare the original relative string",
-  "Unknown names, symlinks, and non-root paths `STOP`", "already-absolute trusted root",
-  "status/blocker scan", "exactly one blocker-resolved runnable issue", "argument-array Git commands",
-  "git cat-file -e <sha>^{commit}", "git show -s --format=%T <sha>",
-  "git merge-base --is-ancestor <earlier> <lane-tip>", "git rev-parse HEAD", "git status --porcelain",
-  "native story-filtered Orca inventory", "without duplicating Orca's task model", "180-second bound",
-  "never delegate any resume decision step to a helper, subagent, or worker", "STOP` before dispatch",
-  "explicit unique coordinator `CONTINUE`",
+  "validated current STORY", "authoritative current `git status` and `git diff`", "native Orca's story-filtered",
+  "Transcripts are optional context only", "Missing, duplicate, stale, unknown, or contradictory",
+  "dirty uncommitted diff is normal resumable state", "one compact actionable resume delta",
 ]) ok(orca.includes(token), `Canonical ORCA resume contract omits: ${token}`);
 for (const token of ["resume delegates exclusively", "../loom/ORCA.md", "§ Resume", "does not duplicate that algorithm"]) {
   ok(implement.includes(token), `Implement resume delegation missing: ${token}`);
 }
-for (const forbidden of [
-  "git cat-file -e <sha>^{commit}", "git show -s --format=%T <sha>",
-  "git merge-base --is-ancestor <earlier> <lane-tip>", "git rev-parse HEAD", "git status --porcelain",
-  "180-second bound", "explicit unique coordinator `CONTINUE`", "native story-filtered Orca inventory",
-]) ok(!implement.includes(forbidden), `Implement duplicates ORCA resume protocol: ${forbidden}`);
-for (const source of [implement, orca]) {
+const staleResumePhrases = [
+  "validated workspace parser/registry", "resolve `registered.path`", "canonical Git top-level **before resume Git checks**",
+  "status/blocker scan", "exactly one blocker-resolved runnable issue", "git status --porcelain",
+  "git cat-file -e <sha>^{commit}", "git merge-base --is-ancestor", "latest approved lane tip",
+  "require `git status --porcelain` to be empty", "commit-tree boundaries", "180-second bound",
+  "within 180 seconds", "explicit unique coordinator `CONTINUE`", "Only an explicit unique coordinator `CONTINUE` permits dispatch",
+];
+for (const source of [orca, implement]) {
+  for (const forbidden of staleResumePhrases) ok(!source.includes(forbidden), `Active runtime retains old resume contract: ${forbidden}`);
   ok(!source.includes("scripts/resume-decision.mjs"), "Resume contract claims a custom reference validator");
   ok(!source.includes("optional helper") && !source.includes("helper is optional"), "Resume contract retains optional helper path");
 }
 ok(!existsSync(resolve(root, "scripts/resume-decision.mjs")), "Custom resume validator still exists");
 ok(!existsSync(resolve(root, "tests/resume-decision.test.mjs")), "Synthetic resume validator test still exists");
-for (const invalidComparison of [
-  "registered.path === realpath", "registered.path == realpath", "repo.path === realpath", "repo.path == realpath",
-  "exact registered path string to equal its canonical realpath",
-]) ok(!orca.includes(invalidComparison), `ORCA resume compares a logical relative name directly with an absolute realpath: ${invalidComparison}`);
-for (const token of [
-  "logical relative paths", "resolved against the validated workspace/artifact root",
-  "absolute normalized path", "canonical Git top-level", "never compares the original relative name with an absolute realpath",
-  "Unknown names, symlinks, and non-root paths stop",
-]) ok(read("docs/workspaces.md").includes(token) || read("docs/orca.md").includes(token), `Workspace/Orca docs omit path semantics: ${token}`);
+const currentResumeDocs = ["README.md", "docs/orca.md", "docs/workspaces.md", "docs/hosts.md"]
+  .map((path) => read(path).split(/Historical v3\.3|A historical v3\.3|A v3\.3 live/)[0])
+  .join("\n");
+for (const token of ["Actionable resume currently reconciles", "validated STORY, authoritative Git status/diff, and native Orca identities"]) {
+  ok(currentResumeDocs.includes(token), `Current docs omit actionable resume boundary: ${token}`);
+}
+for (const forbidden of staleResumePhrases) ok(!currentResumeDocs.includes(forbidden), `Current docs retain old resume algorithm: ${forbidden}`);
 const packageManifest = JSON.parse(read("package.json"));
 ok(!JSON.stringify(packageManifest).includes("resume-decision"), "npm manifest still wires custom resume validator");
 for (const artifact of [".loom/runtime.json", ".loom/checkouts.json", ".loom/resume.json", "resume-manifest.json"]) {
@@ -211,8 +168,8 @@ ok(plan.includes("Plan creates no branches, worktrees, or runtime tasks"), "Plan
 
 // Cross-contract lifecycle invariants: these fail when individually plausible policies conflict.
 ok(
-  implement.includes("confirmed preview is the single opt-in for autonomous whole-pack execution") &&
-  orca.includes("confirmed whole-pack preview activates native supervised orchestration"),
+  implement.includes("confirmed preview opts into autonomous whole-pack execution only") &&
+  orca.includes("confirmed whole-pack preview activates native supervised orchestration only"),
   "Implement confirmation does not activate the Orca runner"
 );
 ok(
@@ -222,21 +179,21 @@ ok(
   "Goal routing leaks into workspace or Orca execution"
 );
 ok(
-  implement.includes("worker_done` ends that attempt") &&
-  orca.includes("That message ends one attempt, not the issue") &&
-  orca.includes("APPROVE alone completes the issue"),
+  implement.includes("worker_done` ends that bounded assignment") &&
+  orca.includes("That message ends one bounded assignment, not the issue") &&
+  orca.includes("APPROVE alone may complete the issue and unblock dependents"),
   "worker completion bypasses independent Verify"
 );
 ok(
   implement.includes("root coordinator may run the confirmed pack") &&
   implement.includes("One issue at a time per maker") &&
-  implement.includes("root coordinator may continue the confirmed pack with fresh makers"),
+  implement.includes("root coordinator may continue the confirmed pack with bounded assignments"),
   "maker hard stop incorrectly stops the root coordinator"
 );
 ok(
   plan.includes("Plan creates no branches, worktrees, or runtime tasks") &&
   orca.includes("one story x service worktree just in time") &&
-  orca.includes("never during Plan or merely from preview"),
+  orca.includes("never during Plan, before confirmation"),
   "story-service lane is created before its first runnable issue"
 );
 const orcaDocs = read("docs/orca.md");
@@ -254,7 +211,7 @@ ok(
   "public Orca flow retains Plan-time worktree preview"
 );
 ok(
-  orca.includes("Independent service lanes may run in parallel") &&
+  orca.includes("explicitly independent registered repositories may run in parallel") &&
   orca.includes("atomic multi-repository issue acquires every listed lane") &&
   orca.includes("serialize by issue number unless explicit blockers require another order"),
   "lane scheduler permits same-repo or atomic overlap"
@@ -294,55 +251,43 @@ ok(!tend.includes("git branch -D"), "Tend cleanup permits force deletion");
 ok(!dispatcher.includes("SCHEDULE.md") && !dispatcher.includes("`/loom schedule"), "Dispatcher exposes deferred schedule route");
 ok(!existsSync(resolve(root, "skills/loom/SCHEDULE.md")), "Deferred public schedule adapter still exists");
 for (const token of [
-  "dedicated branch or host-native isolated worktree", "structured report", "zero findings writes nothing",
-  "loom-verify", "Silent death is forbidden", "same unchanged error twice", "native timeout/token budget",
-  "## Summary", "## Test plan", "## Open questions", "Never push to the default branch",
-]) ok(unattended.includes(token), `Unattended runtime contract missing ${token}`);
-for (const token of [
-  "public Git body is a separately generated sanitized projection",
-  "never copy private Log or Verify/digest text verbatim",
-  "### Public hosted-review body contract",
-  "Exclude Loom/pack/private paths and IDs",
-  "explicit public ticket or ADR URLs already present",
-  "only in `## References`", "Never include `.loom` paths, pack/issue IDs, PRD/issue references",
-  "or paste private issue `## Log` or Verify/digest prose into Git",
-  "synthesize every public section from scratch",
-]) ok(unattended.includes(token), `Unattended public privacy boundary missing ${token}`);
-const publicBodyTemplate = unattended.slice(unattended.indexOf("### Public hosted-review body contract"), unattended.indexOf("## Discovery writes"));
-ok(!publicBodyTemplate.includes("## Verify\n") && !publicBodyTemplate.includes("## Log\n"), "Public body template exposes private Verify or Log sections");
-ok(!publicBodyTemplate.includes("issue/PRD references") && !publicBodyTemplate.includes("PRD Risks"), "Public body template requests private PRD/issue references");
-ok(publicBodyTemplate.includes("## References") && publicBodyTemplate.includes("public ticket or ADR URL"), "Public body template lacks restricted public References");
-for (const token of [
-  "Configuring and launching this unattended runner authorizes commits, push of that dedicated branch",
-  "This contract governs only a runner explicitly configured and launched for unattended execution",
-  "do not pause for attended Prepare review confirmation",
-  "an attended Implement invocation must use Prepare review's separate exact bundle confirmation",
-  "These modes are mutually exclusive for one invocation",
-  "Neither mode authorizes auto-merge",
-  "human merge gate remain active; the configured hosted-review exit remains authorized",
-]) ok(unattended.includes(token), `Unattended consent mode missing ${token}`);
+  "host-native isolation", "Every run exits report-only", "zero findings", "Run `loom-verify`",
+  "Silent death is forbidden", "same unchanged error twice", "native timeout/token budget",
+  "authorizes no commit, push, hosted review/PR", "leaves STORY `open`", "human merge gate remains universal",
+  "blocker-first private report", "Do not commit, push, or open a draft PR",
+]) ok(unattended.includes(token), `Unattended report-only contract missing ${token}`);
+for (const forbidden of [
+  "authorizes commits", "hosted-review exit", "Public hosted-review body contract", "open a **draft PR**",
+  "configured hosted-review exit", "Prepare review confirmation",
+]) ok(!unattended.includes(forbidden), `Unattended retains stale publication authority: ${forbidden}`);
 ok(implement.includes("../loom/UNATTENDED.md") && implement.includes("Distribution `docs/` is never runtime input"), "Implement does not lazy-load shared unattended contract");
 const unattendedSummary = [implement, read("docs/unattended.md")].join("\n");
-for (const stale of ["never-merge/publish gate", "no-merge/publish gate"]) {
-  ok(!unattendedSummary.includes(stale), `Unattended summary retains stale universal publication gate: ${stale}`);
+for (const token of ["report-only", "no commit, push, hosted review", "STORY remains open", "separately explicit attended finish"]) {
+  ok(unattendedSummary.includes(token), `Unattended summary missing v4 boundary: ${token}`);
 }
-const consentSummary = "the human merge gate is universal; publication requires either attended exact bundle confirmation or configured unattended setup/launch authorization, and those modes are mutually exclusive";
-ok(implement.includes(consentSummary), "Implement summary omits accurate merge/publication consent boundary");
-ok(read("docs/unattended.md").includes(consentSummary), "Unattended docs summary omits accurate merge/publication consent boundary");
-const publicationSurfaces = [
-  "skills/loom-init/SKILL.md", "AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json",
-  "skills/loom-implement/SKILL.md", "skills/loom/UNATTENDED.md", "docs/unattended.md", "docs/orca.md",
+const authorityMirrors = [
+  "AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json",
+  "skills/loom-init/SKILL.md", "skills/loom-implement/SKILL.md", "skills/loom-verify/SKILL.md",
+  "skills/loom/UNATTENDED.md", "docs/unattended.md",
+  "recipes/docs-drift.md", "recipes/dep-audit.md", "recipes/smell-sweep.md", "recipes/coverage-raise.md", "recipes/dead-code.md",
 ];
-for (const path of publicationSurfaces) {
+const stalePositiveAuthority = [
+  "Publication requires either attended exact confirmation or configured unattended setup/launch authorization",
+  "Publication requires attended exact confirmation or configured unattended setup/launch authorization",
+  "authorizes commits, push", "hosted-review exit", "open a **draft PR**", "PR titled", "independent commits",
+];
+for (const path of authorityMirrors) {
   const body = read(path);
-  ok(!body.includes("never auto-publish"), `${path} retains stale absolute never auto-publish wording`);
+  for (const stale of stalePositiveAuthority) ok(!body.includes(stale), `${path} retains stale positive authority: ${stale}`);
 }
-for (const path of ["skills/loom-init/SKILL.md", "AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
+for (const path of ["AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
   const body = read(path);
-  ok(body.includes("never auto-merge"), `${path} weakens the universal human merge gate`);
-  ok(body.includes("attended exact confirmation") && body.includes("configured unattended setup/launch authorization"), `${path} omits bounded publication authorization modes`);
-  ok(body.includes("mutually exclusive"), `${path} permits simultaneous attended and unattended consent`);
+  for (const required of [
+    "separately explicit attended finish", "unattended setup/launch", "APPROVE", "pack confirmation",
+    "authorize no commit, push, hosted review, publication, or other Git/host mutation", "unattended is report-only",
+  ]) ok(body.includes(required), `${path} omits active v4 authority invariant: ${required}`);
 }
+
 for (const recipe of ["docs-drift", "dep-audit", "smell-sweep", "coverage-raise", "dead-code"]) {
   const body = read(`recipes/${recipe}.md`);
   ok(body.includes("skills/loom/UNATTENDED.md"), `${recipe} does not point to executable runtime contract`);
@@ -353,11 +298,10 @@ const unattendedDocs = read("docs/unattended.md");
 const stopConditions = ["`needs-info`", "scope creep", "red pre-flight baseline", "wrong-PRD discovery", "`ESCALATE_HUMAN`"];
 for (const condition of stopConditions) ok(unattended.includes(condition), `Unattended blocker contract missing ${condition}`);
 for (const required of [
-  "On any unattended stop condition", "persist the status and question", "then open a **draft PR** with whatever exists",
-  "first line names the blocker", "draft-PR exit is mandatory", "do not replace it with a local-only report or commit",
-]) ok(unattended.includes(required), `Mandatory blocker-to-draft-PR contract missing: ${required}`);
+  "blocker-first private report", "Do not commit, push, or open a draft PR", "persist the status/question",
+]) ok(unattended.includes(required), `Mandatory blocker report contract missing: ${required}`);
 const githubWiring = unattendedDocs.slice(unattendedDocs.indexOf("### GitHub Actions"), unattendedDocs.indexOf("### The verify gate"));
-const loomCheckout = "repository: zuevrs/loom\n          ref: v3.3.0\n          path: loom-runtime";
+const loomCheckout = "repository: zuevrs/loom\n          ref: v4.0.0\n          path: loom-runtime";
 const composedPrompt = String.raw`prompt="$(cat ../loom-runtime/skills/loom/UNATTENDED.md; printf '\n\n--- COMPLETE RECIPE ---\n\n'; cat ../loom-runtime/recipes/docs-drift.md)"`;
 ok(githubWiring.includes("with: { path: target }") && githubWiring.includes(loomCheckout), "hosted example does not keep target and pinned Loom checkouts distinct");
 ok(githubWiring.indexOf(loomCheckout) < githubWiring.indexOf(composedPrompt), "hosted example composes before checking out pinned Loom");
@@ -365,7 +309,7 @@ ok(githubWiring.includes(composedPrompt) && githubWiring.includes("working-direc
 ok(!githubWiring.includes("~/.loom"), "hosted example assumes a preinstalled ~/.loom tree");
 ok(unattendedDocs.includes('claude -p "$prompt" < /dev/null') && unattendedDocs.includes('omp -p --auto-approve "$prompt" < /dev/null'), "headless examples do not pass the composed prompt as one argument");
 ok(unattendedDocs.includes("never attach the recipe alone") && unattendedDocs.includes("same composed prompt"), "Cursor wiring permits recipe-only unattended prompts");
-ok(unattendedDocs.includes("do not point it at the recipe alone") && unattendedDocs.includes("draft when blocked"), "autonomous framework wiring permits recipe-only or non-draft blocked exits");
+ok(unattendedDocs.includes("do not point it at the recipe alone") && unattendedDocs.includes("private report produced"), "autonomous framework wiring permits recipe-only or non-draft blocked exits");
 ok(!unattendedDocs.includes('claude -p "$(cat recipes/docs-drift.md)"'), "legacy recipe-only headless example remains");
 ok(read("README.md").includes("docs/hosts.md#loom--omp-quick-workflow"), "README OMP anchor does not target quick-workflow heading");
 for (const token of ["Live OMP 17.0.6 accepted", "80k idle threshold", "Native `/goal set`/`budget`/`show`/`drop` lifecycle", "not a full multi-issue Goal run"]) {

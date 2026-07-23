@@ -2,7 +2,7 @@
 
 This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
 
-<!-- loom:begin version=v3.3.0 -->
+<!-- loom:begin version=v4.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -30,12 +30,13 @@ Begins only after explicit `/loom` or work on a selected Loom issue.
 - Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
 - Workspace mode: root owns Loom artifacts; service repos are evidence/execution targets only.
 - Issue consent covers issue-scoped changes, `## Log`, Verify write-back, `Status: done` after APPROVE — not scope expansion or external actions.
+- APPROVE and whole-pack confirmation authorize no commit or publication; story lifecycle is separate.
 - One issue at a time; fresh maker context per issue. No verify digest → no done.
 
 ### Invariants
 
 - Router is active: map intent → ritual skill before acting.
-- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
+- Human merge gate is universal: never auto-merge. Configured unattended setup/launch, APPROVE, and pack confirmation authorize no commit, push, hosted review, publication, or other Git/host mutation; unattended is report-only and STORY remains open. Only separately explicit attended finish may create exact confirmed local commits after final independent Verify; publish remains separate.
 - Maker/checker separation: Implement never self-approves.
 
 ### Router
@@ -52,7 +53,7 @@ Map intent to ritual skills:
 
 **Confusable pairs:** concrete "build/fix/add X" → Implement, investigate/why/how/decide/unclear → Grill, work needing PRD/issues or multiple sessions → Plan; explicit natural-language target wins; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
+**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; Orca reuses a healthy service-lane terminal with a compact issue delta; other batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
 **Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 

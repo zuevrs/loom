@@ -16,7 +16,7 @@ from pathlib import Path
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = PLUGIN_DIR.parent / "skills"
-MANAGED_BLOCK_VERSION = "v3.3.0"
+MANAGED_BLOCK_VERSION = "v4.0.0"
 
 WORKSPACE_DISCIPLINE = """
 
@@ -29,7 +29,7 @@ DISCIPLINE = """# Loom universal invariants (pre-turn guard)
 - Ordinary prompts remain normal agent mode.
 - Lazy discipline: YAGNI → reuse → stdlib → platform → installed dependency → one line → minimum code.
 - Not lazy about trust boundaries, security, privacy, secrets, data loss, and accessibility.
-- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
+- Human merge gate is universal: never auto-merge. Configured unattended setup/launch, APPROVE, and pack confirmation authorize no commit, push, hosted review, publication, or other Git/host mutation; unattended is report-only and STORY remains open. Only separately explicit attended finish may create exact confirmed local commits after final independent Verify; publish remains separate.
 - Maker/checker separation: Implement never self-approves.
 - No verify digest → no done.
 - Existing .loom issues marked done require an APPROVE Verify signal.

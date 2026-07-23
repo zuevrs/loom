@@ -8,7 +8,7 @@ cadence: monthly
 
 You are running unattended. Runtime contract: load and follow installed `skills/loom/UNATTENDED.md`. Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
 
-Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
+Running attended? Same task and hard stops; report findings in chat. Unattended also exits report-only under `UNATTENDED.md`. It never invokes publish; publication requires a separate explicit attended `/loom publish` inventory and confirmation.
 
 ## Task
 
@@ -20,7 +20,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per smell cluster (not per instance — group by module) under `.loom/maintenance/issues/`.
-- A PR titled `smell-sweep: {date}` with the stubs; description = table of possible smells with file references. Zero findings → no PR; state "no smells above baseline" in the runner log and exit clean.
+- A private runner report with the stubs and possible-smells table. Zero findings → state "no smells above baseline" and exit clean. No commit, push, or hosted review.
 
 ## Hard stops
 

@@ -27,6 +27,7 @@ A **workspace setup** is an explicit opt-in branch for a folder containing indep
 ### Workspace profile
 
 Use `.loom/workspace.json` only after explicit workspace setup. It is generated and validated by Loom; it is not required in a canonical repo-only project. Registered service repos are context/execution targets, not additional Loom roots.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes. Use the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`; do not paraphrase it.
 
 ## Process
 
@@ -51,7 +52,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 2. Run the shared read-only inventory: `node scripts/inspect-workspace <root> --json`.
 3. Show a compact summary and proposed profile (`workspace_id`, `repositories`, optional `context_paths`). Do not read service source or run service tests during setup.
 4. Ask for one bounded confirmation before writing. Delegate to `node scripts/setup-workspace <root> --confirm --profile <profile.json>`; the script writes the workspace-root managed `AGENTS.md` block (when needed) and `.loom/workspace.json` in one confirmed apply (each file is replaced atomically; a crash between files may leave mixed revisions — re-run setup to reconcile). It never writes into registered service repositories.
-5. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, warn that artifacts are unversioned. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
+5. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, emit the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
 6. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init.
 
 ### Managed block to write
@@ -59,7 +60,7 @@ When the user explicitly asks to set up a multi-repo workspace:
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v3.3.0 -->
+<!-- loom:begin version=v4.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
@@ -87,12 +88,13 @@ Begins only after explicit `/loom` or work on a selected Loom issue.
 - Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
 - Workspace mode: root owns Loom artifacts; service repos are evidence/execution targets only.
 - Issue consent covers issue-scoped changes, `## Log`, Verify write-back, `Status: done` after APPROVE — not scope expansion or external actions.
+- APPROVE and whole-pack confirmation authorize no commit or publication; story lifecycle is separate.
 - One issue at a time; fresh maker context per issue. No verify digest → no done.
 
 ### Invariants
 
 - Router is active: map intent → ritual skill before acting.
-- Human merge gate is universal: never auto-merge. Publication requires either attended exact confirmation or configured unattended setup/launch authorization; the modes are mutually exclusive, and nothing may publish beyond that bounded authorization.
+- Human merge gate is universal: never auto-merge. Configured unattended setup/launch, APPROVE, and pack confirmation authorize no commit, push, hosted review, publication, or other Git/host mutation; unattended is report-only and STORY remains open. Only separately explicit attended finish may create exact confirmed local commits after final independent Verify; publish remains separate.
 - Maker/checker separation: Implement never self-approves.
 
 ### Router
@@ -109,7 +111,7 @@ Map intent to ritual skills:
 
 **Confusable pairs:** concrete "build/fix/add X" → Implement, investigate/why/how/decide/unclear → Grill, work needing PRD/issues or multiple sessions → Plan; explicit natural-language target wins; judging a change → Verify, fixing its findings → Implement.
 
-**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; in batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
+**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; Orca reuses a healthy service-lane terminal with a compact issue delta; other batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
 
 **Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
 

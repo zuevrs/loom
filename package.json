@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "description": "Skills-first harness for agent workflows",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -17,6 +17,6 @@
   },
   "keywords": ["agent", "harness", "skills", "enforcement", "discipline"],
   "scripts": {
-    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs && node tests/config.test.mjs && node tests/hermes-project-context-bridge.test.mjs && node tests/changelog-boundary.test.mjs && node tests/omp-native-contract.test.mjs && node tests/lifecycle-contract.test.mjs"
+    "test": "node tests/hooks.test.mjs && node tests/workspace.test.mjs && node tests/config.test.mjs && node tests/hermes-project-context-bridge.test.mjs && node tests/changelog-boundary.test.mjs && node tests/omp-native-contract.test.mjs && node tests/orca-lane-contract.test.mjs && node tests/resume-omp-contract.test.mjs && node tests/lifecycle-contract.test.mjs && node tests/story-contract.test.mjs && node tests/adaptive-follow-up-contract.test.mjs && node tests/finish-contract.test.mjs && node tests/publish-tend-contract.test.mjs && node tests/release-contract.test.mjs"
   }
 }

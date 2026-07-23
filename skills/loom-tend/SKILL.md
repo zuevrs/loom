@@ -17,6 +17,7 @@ Use CONTEXT/ADRs, PRODUCT/DESIGN when present, issue statuses, and relevant diff
 ## Workspace ownership
 
 With a valid active workspace profile, resolve `.loom/` packs, CONTEXT, ADRs, and maintenance writes from the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Scan registered service repositories for code/warp drift only; never write Loom artifacts into them.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes.
 
 ## Outputs
 
@@ -25,7 +26,7 @@ With a valid active workspace profile, resolve `.loom/` packs, CONTEXT, ADRs, an
 
 ## Process
 
-1. If the user names a maintenance outcome, inspect only enough evidence to establish it. Bare Tend samples the available signals and recommends/selects the single strongest evidence-backed finding; it does not mandate a full sweep.
+1. Exact `/loom tend` from an awaiting-review story is the archive route: load STORY.md Explicit Tend archive boundary, run `planTendArchive` and its digest-bound separate confirmation, archive/read back before `done`, then separately run and confirm `planTendCleanup`. No other wording starts archive, monitoring, or cleanup. Otherwise, if the user names a maintenance outcome, inspect only enough evidence to establish it. Bare Tend samples the available signals and recommends/selects the single strongest evidence-backed finding; it does not mandate a full sweep.
 2. On OMP, lazy-load [`../loom/OMP.md`](../loom/OMP.md) only when repeated-failure/TTSR evidence is relevant. Implement and Advisor leave evidence; Tend alone may propose the adapter's second-failure, tested-before-write rule outcome.
 3. Candidate signals include:
    - **Warp drift** — CONTEXT/ADRs (+ PRODUCT/DESIGN when present) vs codebase (`rg` for rejected synonyms; ADRs describing behavior the code no longer implements)
@@ -45,7 +46,7 @@ When capture-learning approves a project skill: create `skills/<name>/SKILL.md` 
 
 ## Merged lane cleanup
 
-This is Tend's existing maintenance route, not a new slash command. Review-created `in-review` worktrees are deliberately retained until this route proves merge. Tend may then mark only those exact Orca worktree cards completed and remove their local lane after confirmation. The human merge gate remains active: Tend observes merge state and never merges.
+This is Tend's existing maintenance route, not a new slash command. Cleanup follows a successful explicit Tend archive and does not define `done`. Review-created `in-review` worktrees are deliberately retained until this route proves merge. Tend may then mark only those exact Orca worktree cards completed and remove their local lane after confirmation. The human merge gate remains active: Tend observes merge state and never merges.
 
 1. **Inventory first, read-only.** Before proposing deletion, correlate the related hosted review's current state and durable merged evidence with the actual repository ID/root, local branch/ref and HEAD, worktree ID/path, cleanliness, and Orca workspace/card state. Also inspect active terminals, tasks/dispatches, blockers, rework, and conflicting or orphaned attribution. Use exact host and Git queries; do not infer merge from a closed review, issue status, branch naming, commit message, missing remote ref, or chat memory. A durable host merge record must identify the same repository and review/head branch; contradictory or insufficient disk/Git/Orca/host evidence is ambiguity.
 2. Classify every exact lane in the inventory:

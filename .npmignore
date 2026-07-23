@@ -1,0 +1,16 @@
+# Public docs, evidence, runbook, and tests are intentionally packaged.
+.loom/
+**/.loom/
+**/lifecycle-pilot-v4-final/
+**/pilot-raw/
+**/raw-evidence/
+**/agent-transcripts/
+**/transcripts/
+**/agent-tools/
+*.log
+*.tmp
+*.temp
+*.tgz
+.DS_Store
+__pycache__/
+node_modules/

@@ -243,7 +243,7 @@ function projectContext(start) {
 }
 
 function nonGitOwnerWarning(context) {
-  return context?.nonGitOwner ? `Warning: Loom artifact owner is not a Git root: ${context.artifactRoot}. Durable Loom writes have no owner-level Git safety net.` : null;
+  return context?.nonGitOwner ? `Warning: This workspace is not a Git repository: ${context.artifactRoot}. Loom artifacts are unversioned and Git-backed isolation/recovery guarantees do not apply.` : null;
 }
 
 function projectContextPointers(context) {

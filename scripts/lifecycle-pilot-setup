@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Creates disposable local Git evidence only. It does not claim native Orca/OMP observation.
+set -euo pipefail
+ROOT="${1:-$(mktemp -d "${TMPDIR:-/tmp}/loom-v4-pilot.XXXXXX")}"; mkdir -p "$ROOT/repos" "$ROOT/remotes" "$ROOT/worktrees"
+git_config=(-c user.name='Loom Pilot' -c user.email='pilot@example.invalid')
+init_repo() {
+  local name="$1"
+  local repo="$ROOT/repos/$name" remote="$ROOT/remotes/$name.git"
+  git init -q -b main "$repo"; printf '%s\n' "export const value = 1;" > "$repo/index.js"
+  git -C "$repo" "${git_config[@]}" add index.js; git -C "$repo" "${git_config[@]}" commit -qm "Initial $name fixture"
+  git init -q --bare "$remote"; git -C "$repo" remote add disposable "$remote"; git -C "$repo" push -q -u disposable main
+}
+init_repo catalog; init_repo notifications
+for story in alpha beta; do
+  git -C "$ROOT/repos/catalog" worktree add -q -b "pilot/$story-catalog" "$ROOT/worktrees/$story-catalog" main
+  git -C "$ROOT/repos/notifications" worktree add -q -b "pilot/$story-notifications" "$ROOT/worktrees/$story-notifications" main
+done
+# Dirty, uncommitted boundaries make switching/resume observable without granting commit authority.
+printf '%s\n' "export const alpha = 'dirty';" >> "$ROOT/worktrees/alpha-catalog/index.js"
+printf '%s\n' "export const beta = 'dirty';" >> "$ROOT/worktrees/beta-catalog/index.js"
+printf '%s\n' "export const alphaNotice = 'dirty';" >> "$ROOT/worktrees/alpha-notifications/index.js"
+printf '%s\n' "export const betaNotice = 'dirty';" >> "$ROOT/worktrees/beta-notifications/index.js"
+printf '{"fixture":"contract simulation","root":"%s","remote":"local bare Git only"}\n' "$ROOT" > "$ROOT/capabilities.json"
+printf '%s\n' "$ROOT"

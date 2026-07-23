@@ -8,7 +8,7 @@ cadence: weekly
 
 You are running unattended. Runtime contract: load and follow installed `skills/loom/UNATTENDED.md`. Discovery tier: **do not modify code** — your diff contains only `.loom/` stub issues and your report.
 
-Running attended (a human asked for this in chat)? Same task and hard stops — but report findings in the chat, write stubs directly, and skip the branch/PR exit.
+Running attended? Same task and hard stops; report findings in chat. Unattended also exits report-only under `UNATTENDED.md`. It never invokes publish; publication requires a separate explicit attended `/loom publish` inventory and confirmation.
 
 ## Task
 
@@ -20,7 +20,7 @@ Running attended (a human asked for this in chat)? Same task and hard stops — 
 ## Output
 
 - One `needs-triage` stub issue per confirmed drift (three lines: what drifted, evidence, where) under the active `.loom/` pack or `.loom/maintenance/issues/`.
-- A PR titled `docs-drift: {date}` containing the stubs, with the findings table in the description. Zero findings → no PR; state "no drift found" in the runner log and exit clean.
+- A private runner report containing the stubs and findings table. Zero findings → state "no drift found" and exit clean. No commit, push, or hosted review.
 
 ## Hard stops
 
