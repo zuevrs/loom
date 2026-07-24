@@ -161,3 +161,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local setup, checks, and PR process
 ## License
 
 [MIT](LICENSE)
+
+## Loom v5 candidate contract
+
+The unreleased v5 contract uses STORY v2, stable workspace repository names, scoped coordinator-owned knowledge, explicit owner versioning, local-only Finish, and product-merge-first Tend. Start with [the v5 migration guide](docs/migration-v5.md); observed disposable evidence and unsupported boundaries are in [the release ledger](docs/evidence/v5-release-ledger.md).

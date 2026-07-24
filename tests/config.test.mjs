@@ -32,7 +32,7 @@ try {
   const workspace = join(tmp, "workspace");
   const service = join(workspace, "api"); repo(service);
   mkdirSync(join(workspace, ".loom"));
-  writeFileSync(join(workspace, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "ws", repositories: [{ path: "api" }] }));
+  writeFileSync(join(workspace, ".loom", "workspace.json"), JSON.stringify({ schema_version: 5, name: "ws", artifact_owner: { versioning: "unversioned" }, repositories: [{ name: "api", path: "api" }] }));
   writeFileSync(join(workspace, ".loom", "config.json"), '{"worktrees":"orca"}\n');
   result = readProjectConfig(service);
   strictEqual(result.context.mode, "workspace");

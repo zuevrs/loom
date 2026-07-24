@@ -50,17 +50,18 @@ When the user explicitly asks to set up a multi-repo workspace:
 
 1. Treat the current workspace root as the scan root. If launched from a service Git-root, identify the intended parent only from explicit user context; do not silently create a local profile.
 2. Run the shared read-only inventory: `node scripts/inspect-workspace <root> --json`.
-3. Show a compact summary and proposed profile (`workspace_id`, `repositories`, optional `context_paths`). Do not read service source or run service tests during setup.
-4. Ask for one bounded confirmation before writing. Delegate to `node scripts/setup-workspace <root> --confirm --profile <profile.json>`; the script writes the workspace-root managed `AGENTS.md` block (when needed) and `.loom/workspace.json` in one confirmed apply (each file is replaced atomically; a crash between files may leave mixed revisions — re-run setup to reconcile). It never writes into registered service repositories.
-5. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, emit the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
-6. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init.
+3. Show a compact summary and exact v5 proposed profile (`schema_version`, stable workspace/repository `name`, `artifact_owner.versioning`, `path`, optional `remote`/`context_paths`) plus setup-only `canonical_path` evidence. Do not read service source or run service tests during setup.
+4. For an old schema, show a guided v5 replacement; never accept aliases. Derive repository-name candidates from basenames and stop on collisions for explicit names. For a non-Git owner, stop until the user chooses the canonical baseline (confirmed owner Git initialization and exact service-path ignores) or completed unversioned baseline. Never configure a remote.
+5. Ask for one bounded confirmation before writing. Delegate to `node scripts/setup-workspace <root> --confirm --profile <profile.json>`; the script prevalidates the resulting profile, privacy/structure rules, Git identity, and owner-worktree targets before mutation. Canonical setup stages a newly created owner Git operation, commits only owner memory, creates one `story/<name>` worktree per open Story, and attempts to roll back that new Git state and owner writes on failure, reporting exact residual actions if any cleanup fails; completed unversioned setup retains the atomic owner transaction. It never writes into registered service repositories.
+6. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, emit the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
+7. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init.
 
 ### Managed block to write
 
 Merge into user's `AGENTS.md` between delimiters. Preserve all user content outside the block.
 
 ```markdown
-<!-- loom:begin version=v4.0.0 -->
+<!-- loom:begin version=v5.0.0 -->
 ## Loom Base Rule
 
 Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.

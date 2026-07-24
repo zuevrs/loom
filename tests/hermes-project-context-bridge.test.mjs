@@ -15,7 +15,7 @@ try {
   const ws = join(tmp, "workspace"), api = join(ws, "api"), sibling = join(ws, "sibling"), canonical = join(tmp, "canonical");
   repo(api, "git@example.test/api.git"); repo(sibling); repo(canonical);
   mkdirSync(join(ws, ".loom"));
-  writeFileSync(join(ws, ".loom", "workspace.json"), JSON.stringify({ workspace_id: "fixture", repositories: [{ path: "api", remote: "git@example.test/api.git" }] }));
+  writeFileSync(join(ws, ".loom", "workspace.json"), JSON.stringify({ schema_version: 5, name: "fixture", artifact_owner: { versioning: "unversioned" }, repositories: [{ name: "api", path: "api", remote: "git@example.test/api.git" }] }));
   const registered = context(api);
   strictEqual(registered.mode, "workspace");
   strictEqual(registered.artifactRoot, resolve(ws));

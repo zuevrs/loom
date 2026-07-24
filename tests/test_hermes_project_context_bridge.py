@@ -43,7 +43,7 @@ class HermesProjectContextBridgeTest(unittest.TestCase):
         repo(self.canonical)
         (self.ws / ".loom").mkdir()
         self.profile = self.ws / ".loom" / "workspace.json"
-        self.profile.write_text(json.dumps({"workspace_id": "fixture", "repositories": [{"path": "api", "remote": "git@example.test/api.git"}]}))
+        self.profile.write_text(json.dumps({"schema_version": 5, "name": "fixture", "artifact_owner": {"versioning": "unversioned"}, "repositories": [{"name": "api", "path": "api", "remote": "git@example.test/api.git"}]}))
         self.deep = self.api.joinpath(*(f"level-{i}" for i in range(24)))
         self.deep.mkdir(parents=True)
 

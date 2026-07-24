@@ -3,7 +3,7 @@
 
 const { existsSync, readFileSync, realpathSync, statSync, mkdirSync, writeFileSync, renameSync, copyFileSync } = require("node:fs");
 const { execFileSync } = require("node:child_process");
-const { resolve, dirname, relative, isAbsolute, sep } = require("node:path");
+const { resolve, dirname, relative, isAbsolute, sep, basename } = require("node:path");
 
 const PROFILE = [".loom", "workspace.json"];
 const GIT_TIMEOUT_MS = 5000;
@@ -45,57 +45,52 @@ function normalizeRelativePath(path, label = "path") {
 
 function validateWorkspaceProfile(value, root) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("profile must be an object");
-  const allowedKeys = new Set(["workspace_id", "repositories", "context_paths"]);
+  const allowedKeys = new Set(["schema_version", "name", "artifact_owner", "repositories", "context_paths"]);
   for (const key of Object.keys(value)) if (!allowedKeys.has(key)) throw new Error(`unknown profile field: ${key}`);
-  if (typeof value.workspace_id !== "string") throw new Error("workspace_id must be a string");
-  const workspace_id = value.workspace_id.trim();
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(workspace_id) || workspace_id.length > 64) throw new Error("workspace_id must be 1..64 lowercase ASCII letters/digits with internal hyphens");
+  if (value.schema_version !== 5) throw new Error("schema_version must be exactly 5");
+  if (typeof value.name !== "string") throw new Error("name must be a string");
+  const name = value.name.trim();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || name.length > 64) throw new Error("name must be 1..64 lowercase ASCII letters/digits with internal hyphens");
+  if (!value.artifact_owner || typeof value.artifact_owner !== "object" || Array.isArray(value.artifact_owner)) throw new Error("artifact_owner must be an object");
+  for (const key of Object.keys(value.artifact_owner)) if (key !== "versioning") throw new Error(`unknown artifact_owner field: ${key}`);
+  if (!["git", "unversioned"].includes(value.artifact_owner.versioning)) throw new Error('artifact_owner.versioning must be "git" or "unversioned"');
   if (!Array.isArray(value.repositories) || value.repositories.length === 0) throw new Error("repositories must be a non-empty array");
-  const seen = new Set();
+  const seenNames = new Set(), seenPaths = new Set();
   const repositories = value.repositories.map((repo) => {
     if (!repo || typeof repo !== "object" || Array.isArray(repo)) throw new Error("repository entries must be objects");
-    for (const key of Object.keys(repo)) if (key !== "path" && key !== "remote") throw new Error(`unknown repository field: ${key}`);
+    for (const key of Object.keys(repo)) if (!["name", "path", "remote"].includes(key)) throw new Error(`unknown repository field: ${key}`);
+    if (typeof repo.name !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(repo.name) || repo.name.length > 64) throw new Error("repository name must be 1..64 lowercase ASCII letters/digits with internal hyphens");
+    if (seenNames.has(repo.name)) throw new Error(`duplicate repository name: ${repo.name}`);
+    seenNames.add(repo.name);
     const portablePath = normalizeRelativePath(repo.path, "repository path");
     const path = resolve(root, portablePath);
-    const key = path.toLowerCase();
-    if (seen.has(key)) throw new Error(`duplicate repository path: ${repo.path}`);
-    seen.add(key);
+    const pathKey = path.toLowerCase();
+    if (seenPaths.has(pathKey)) throw new Error(`duplicate repository path: ${repo.path}`);
+    seenPaths.add(pathKey);
     if (path === resolve(root) || !isInside(path, resolve(root))) throw new Error(`repository escapes workspace: ${repo.path}`);
     if (!existsSync(path) || !statSync(path).isDirectory()) throw new Error(`repository path does not exist: ${repo.path}`);
-    const real = realpathSync(path);
-    const realRoot = realpathSync(resolve(root));
+    const real = realpathSync(path), realRoot = realpathSync(resolve(root));
     if (real !== resolve(realRoot, portablePath)) throw new Error(`repository path must be canonical (symlinks are not allowed): ${repo.path}`);
     if (real === realRoot || !isInside(real, realRoot)) throw new Error(`repository escapes workspace: ${repo.path}`);
     if (!existsSync(resolve(path, ".git"))) throw new Error(`repository is not a Git root: ${repo.path}`);
     if (repositoryIdentity(real) !== real) throw new Error(`registered repository is no longer a Git root: ${repo.path}`);
-    if (repo.remote !== undefined && typeof repo.remote !== "string") throw new Error("repository remote must be a string");
-    return { ...repo, path: portablePath };
+    if (repo.remote !== undefined && (typeof repo.remote !== "string" || !repo.remote.trim())) throw new Error("repository remote must be a non-empty string");
+    return { name: repo.name, path: portablePath, ...(repo.remote !== undefined ? { remote: repo.remote } : {}) };
   });
   if (value.context_paths !== undefined && !Array.isArray(value.context_paths)) throw new Error("context_paths must be an array");
   const context_paths = (value.context_paths || []).map((contextPath) => {
     const portableContextPath = normalizeRelativePath(contextPath, "context path");
     const resolved = resolve(root, portableContextPath);
     if (!isInside(resolved, resolve(root))) throw new Error(`context path escapes workspace: ${contextPath}`);
-    if (existsSync(resolved)) {
-      const real = realpathSync(resolved);
-      if (!isInside(real, realpathSync(resolve(root)))) throw new Error(`context symlink escapes workspace: ${contextPath}`);
-    }
+    if (existsSync(resolved) && !isInside(realpathSync(resolved), realpathSync(resolve(root)))) throw new Error(`context symlink escapes workspace: ${contextPath}`);
     return portableContextPath;
   });
   if (new Set(context_paths.map((path) => path.toLowerCase())).size !== context_paths.length) throw new Error("context_paths must not contain duplicates");
-  return {
-    workspace_id,
-    repositories,
-    ...(value.context_paths !== undefined ? { context_paths } : {}),
-  };
+  return { schema_version: 5, name, artifact_owner: { versioning: value.artifact_owner.versioning }, repositories, ...(value.context_paths !== undefined ? { context_paths } : {}) };
 }
 
 function serializeWorkspaceProfile(profile) {
-  return {
-    workspace_id: profile.workspace_id,
-    repositories: profile.repositories,
-    ...(profile.context_paths ? { context_paths: profile.context_paths } : {}),
-  };
+  return { schema_version: 5, name: profile.name, artifact_owner: profile.artifact_owner, repositories: profile.repositories, ...(profile.context_paths ? { context_paths: profile.context_paths } : {}) };
 }
 
 function writeWorkspaceProfile(value, root) {
@@ -156,6 +151,8 @@ function findWorkspace(start) {
 
 function validateWorkspaceRepositories(profile) {
   if (!profile || profile.invalid) throw new Error("workspace profile is invalid");
+  const actualOwner = findGitRoot(profile.root) === realpathSync(resolve(profile.root)) ? "git" : "unversioned";
+  if (profile.artifact_owner.versioning !== actualOwner) throw new Error(`artifact owner versioning mismatch: declared ${profile.artifact_owner.versioning}, actual ${actualOwner}`);
   for (const repo of profile.repositories) {
     const path = resolve(profile.root, repo.path);
     if (!existsSync(resolve(path, ".git"))) throw new Error(`repository is not a Git root: ${repo.path}`);
@@ -196,7 +193,7 @@ function workspaceRoot(start) {
 
 function findGitRoot(start) {
   try {
-    return resolve(execFileSync("git", ["-C", resolve(start), "rev-parse", "--show-toplevel"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "pipe", "ignore"] }).trim());
+    return realpathSync(execFileSync("git", ["-C", resolve(start), "rev-parse", "--show-toplevel"], { encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "pipe", "ignore"] }).trim());
   } catch {
     return null;
   }
@@ -259,13 +256,24 @@ function projectContextPointers(context) {
   return pointers;
 }
 
+function activeArtifactMapping(profile) {
+  if (!profile || profile.invalid) throw new Error("workspace profile is invalid");
+  return Object.fromEntries(profile.repositories.map((repo) => [repo.name, resolve(profile.root, repo.path)]));
+}
+
+function writableStoriesRequireIsolation(stories, host = "native") {
+  if (!Array.isArray(stories)) throw new Error("stories must be an array");
+  const writable = stories.filter((story) => story?.writable !== false);
+  return host !== "orca" && writable.length > 1;
+}
+
 function workspacePointers(profile) {
   if (!profile) return [];
   if (profile.invalid) return [`Workspace profile invalid: ${profile.profilePath} (${profile.error})`];
   const pointers = [
-    `Workspace: ${profile.workspace_id}`,
+    `Workspace: ${profile.name}`,
     `Workspace profile: ${profile.profilePath}`,
-    `Workspace repos: ${profile.repositories.length} registered`,
+    `Workspace repositories: ${profile.repositories.map((repo) => repo.name).join(", ")}`,
   ];
   for (const contextPath of profile.context_paths || []) {
     const path = resolve(profile.root, contextPath);
@@ -274,7 +282,7 @@ function workspacePointers(profile) {
   return pointers;
 }
 
-module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, serializeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, projectContext, projectContextPointers, nonGitOwnerWarning };
+module.exports = { profilePath, readWorkspaceProfile, writeWorkspaceProfile, serializeWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, dirtyRepositories, findWorkspace, workspaceState, workspaceRoot, workspacePointers, activeArtifactMapping, writableStoriesRequireIsolation, projectContext, projectContextPointers, nonGitOwnerWarning };
 
 if (require.main === module) {
   const args = process.argv.slice(2);

@@ -4,30 +4,32 @@ Workspace mode is an opt-in topology and ownership adapter for a folder containi
 
 ## Topology
 
-A workspace profile lives at `<workspace>/.loom/workspace.json`:
+A workspace profile lives at `<workspace>/.loom/workspace.json`. Version 5 is exact; legacy keys are not aliases:
 
 ```json
 {
-  "workspace_id": "payments-platform",
+  "schema_version": 5,
+  "name": "payments-platform",
+  "artifact_owner": { "versioning": "git" },
   "repositories": [
-    { "path": "services/api", "remote": "git.example.com/team/api" },
-    { "path": "services/auth", "remote": "git.example.com/team/auth" }
+    { "name": "api", "path": "services/api", "remote": "git.example.com/team/api" },
+    { "name": "auth", "path": "services/auth" }
   ],
   "context_paths": ["CONTEXT.md"]
 }
 ```
 
-Repository `path` values are stable logical relative names used in workspace issue cards and resolved against the validated workspace/artifact root. The profile activates only at the workspace root or inside a registered repository; an unregistered sibling remains canonical. Actionable resume currently reconciles validated STORY, authoritative Git status/diff, and native Orca identities, stopping exact mismatches before dispatch.
+`name` is the stable repository identity used by issues and active-artifact mappings; `path` is its current workspace-relative location. `remote` is optional. `canonical_path` appears only in setup proposals as evidence and is never persisted. Setup proposes basename-derived names, but stops on collisions and requires explicit unique names. Runtime resolves the active mapping from declared names to validated current paths and verifies that `artifact_owner.versioning` (`git` or `unversioned`) matches the owner's actual Git state.
 
-## Ownership
+## Ownership and setup
 
-The workspace root alone owns Loom context, ADRs, `.loom` packs/logs/Verify records, archives, and managed blocks. Registered service repositories remain product repositories and execution/evidence targets. Loom never creates service-local Loom artifacts.
+The workspace root alone owns Loom context, ADRs, `.loom` packs/logs/Verify records, and managed blocks. Registered service repositories remain product repositories and execution/evidence targets. Loom never creates service-local Loom artifacts.
 
-Run `/loom setup workspace` from the intended root. Setup inventories repositories project-nonmutatingly, previews the profile, and writes only after bounded confirmation. A non-Git workspace root is allowed, but Loom emits the canonical warning: artifacts are unversioned and Git-backed isolation/recovery guarantees do not apply.
+Run `/loom setup workspace` from the intended root. Setup inventories project-nonmutatingly and proposes a guided v5 replacement for old schemas; it never treats legacy fields as aliases. For a non-Git owner, setup stops on the baseline choice: `canonical` means prevalidated owner `git init`, exact root-anchored service ignores, a completed canonical memory commit, and open-Story owner worktrees, while `completed` keeps the owner explicitly unversioned. Setup does not configure a remote. Confirmation covers the exact owner/profile writes only.
 
-General project capabilities live separately in [`.loom/config.json`](orca.md), resolved from the same workspace `artifactRoot`. Enabling `{ "worktrees": "orca" }` opts into the short [Orca user flow](orca.md); host commands and lifecycle stay in the lazy adapter, not the workspace profile.
+Owner worktree memory is owner coordination state, separate from native service lanes. Runtime profiles persist no checkout or worktree paths. Canonical setup materializes one `story/<name>` owner worktree for every open Story. One non-Orca writable story needs no additional service-lane isolation; parallel writable non-Orca stories require isolated worktrees or equivalent native isolation. Orca continues to own its service-lane identity and isolation.
 
-Invalid profiles fail closed for explicit Loom work. Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots.
+General project capabilities live separately in [`.loom/config.json`](orca.md), resolved from the same workspace `artifactRoot`. Invalid profiles fail closed for explicit Loom work. Profiles and knowledge records must not contain credentials, secrets, raw sensitive payloads, or source snapshots.
 
 ## Daily pack workflow
 
@@ -36,3 +38,7 @@ The operator manually creates the top-level Orca story card at this validated wo
 Explicit finish inventories exact lanes and current Git boundaries, confirms them, runs final independent Spec+Standards, creates local commits with ordinary hooks, and prepares a sanitized review bundle with no push. Publish is available only through a separately explicit attended invocation and digest-bound confirmation. Explicit attended publish separately confirms exact current finished lanes and publishes sequentially with partial successes retained. Following durable per-service merge evidence, exact `/loom tend` archives durable sanitized workspace-owned artifacts/public refs before `done`, then separately inventories exact local lanes and cleans only confirmed merged, clean, inactive lanes; all unsafe or ambiguous lanes are retained.
 
 A historical v3.3 live disposable two-repository pilot validated workspace scheduling, fresh-worker rework, verified commits, coherent resume, manual-only review preparation, and selective cleanup; those commit/resume results are not current v4 capability while protected unrelated work stayed unchanged. The ambiguity helper timed out and returned no `STOP`; the pilot led to a fail-closed contract correction that sequences the existing workspace, issue, Git, and native Orca source owners before dispatch, without a custom executable validator or runtime manifest. See [Orca evidence and correction](orca.md).
+
+Finish integrates artifact-owner memory as a typed local boundary separate from service lanes. Git mode binds the exact verified STORY/PRD/issues and relevant ADR/CONTEXT inventory to an owner commit/tree; owner publication is excluded by default. Unversioned mode uses an atomic owner write with exact readback. Partial owner/service outcomes remain retryable and are never rolled back.
+
+After durable product merges, Tend serializes one owner-main writer, previews semantic reconciliation, stops textual or semantic conflicts for Grill, and uses ordinary merge only. Git archives move the Story to `.loom/archive/<story>` with a manifest binding owner commit/tree, service merge refs, and shared CONTEXT/ADR pointers/digests without copying the full warp. Unversioned archives retain the full projection and read it back. Cleanup is a separate service-lane-only confirmation after `done`.

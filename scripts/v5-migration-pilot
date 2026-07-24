@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# Disposable local evidence: native Git/worktree actions plus executable Loom planner results.
+set -euo pipefail
+ROOT="${1:-$(mktemp -d "${TMPDIR:-/tmp}/loom-v5-pilot.XXXXXX")}"; export ROOT
+LOOM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"; export LOOM_ROOT
+GIT=(-c user.name='Loom Pilot' -c user.email='pilot@example.invalid')
+commit() { git -C "$1" "${GIT[@]}" commit -qm "$2"; }
+mkdir -p "$ROOT/owner/.loom/alpha/issues" "$ROOT/owner/.loom/beta/issues" "$ROOT/services" "$ROOT/remotes" "$ROOT/worktrees/owner" "$ROOT/worktrees/services"
+printf '/services/\n' > "$ROOT/owner/.gitignore"
+cat > "$ROOT/owner/CONTEXT.md" <<'EOF'
+# Contracts
+
+Shared inter-service contracts for the pilot.
+
+## Language
+
+**order-events**:
+_Kind_: Contract
+_Scope_: catalog, notifications
+Alpha proposal: pending.
+
+Shared compatibility envelope.
+
+Beta proposal: pending.
+EOF
+mkdir -p "$ROOT/owner/docs/adr"
+printf '# ADR 0001: Order events\n\nScope: catalog, notifications; Contract: order-events.\n' > "$ROOT/owner/docs/adr/0001-order-events.md"
+for story in alpha beta; do cat > "$ROOT/owner/.loom/$story/STORY.md" <<EOF
+---
+story: $story
+lifecycle: open
+updated: 2026-07-24
+version: 2
+---
+## Goal
+Deliver the $story order-events behavior.
+## Current State
+The isolated pilot lane is ready.
+## Decisions
+## Open Questions
+## Checks
+Run the executable planner and native Git checks.
+## Handoff
+## Verify
+EOF
+printf '# %s PRD\n\nRequire compatible order events.\n' "$story" > "$ROOT/owner/.loom/$story/PRD.md"; printf '# %s issue\n\nAcceptance: planner and Git evidence agree.\n' "$story" > "$ROOT/owner/.loom/$story/issues/01.md"; done
+git init -q -b main "$ROOT/owner"; git -C "$ROOT/owner" "${GIT[@]}" add .; commit "$ROOT/owner" 'Baseline Git-backed owner memory'
+for service in catalog notifications; do
+  repo="$ROOT/services/$service"; remote="$ROOT/remotes/$service.git"; mkdir -p "$repo"; git init -q -b main "$repo"; printf '%s\n' "export const service = '$service';" > "$repo/index.js"; git -C "$repo" "${GIT[@]}" add .; commit "$repo" "Baseline $service"; git init -q --bare "$remote"; git -C "$repo" remote add disposable "$remote"; git -C "$repo" push -qu disposable main
+  for story in alpha beta; do git -C "$repo" worktree add -q -b "pilot/$story-$service" "$ROOT/worktrees/services/$story-$service" main; done
+done
+for story in alpha beta; do git -C "$ROOT/owner" worktree add -q -b "story/$story" "$ROOT/worktrees/owner/$story" main; done
+# Two isolated owner writers update separate lines with a semantic disagreement that Git can merge textually.
+python3 - <<'INNER'
+from pathlib import Path
+import os
+r=Path(os.environ['ROOT'])/'worktrees/owner'
+for story,value in [('alpha','order-events-v2'),('beta','order-events-compatible-v1')]:
+ p=r/story/'CONTEXT.md'; s=p.read_text(); s=s.replace(f'{story.title()} proposal: pending',f'{story.title()} proposal: {value}'); p.write_text(s)
+ q=r/story/'.loom'/story/'STORY.md'; q.write_text(q.read_text()+"\nFinish: local owner boundary integrated.\n")
+INNER
+for story in alpha beta; do git -C "$ROOT/worktrees/owner/$story" "${GIT[@]}" add CONTEXT.md .loom; commit "$ROOT/worktrees/owner/$story" "$story local owner Finish"; for service in catalog notifications; do lane="$ROOT/worktrees/services/$story-$service"; printf '%s\n' "export const ${story}Change = true;" > "$lane/$story.js"; git -C "$lane" "${GIT[@]}" add .; commit "$lane" "$story local $service Finish"; done; done
+# Finish is local: disposable remotes still expose only baseline main.
+for service in catalog notifications; do test "$(git --git-dir="$ROOT/remotes/$service.git" for-each-ref --format='%(refname)' | wc -l | tr -d ' ')" = 1; done
+# Durable product merges happen before any owner Tend integration.
+for service in catalog notifications; do for story in alpha beta; do git -C "$ROOT/services/$service" "${GIT[@]}" merge -q --no-ff "pilot/$story-$service" -m "Merge $story $service product change"; done; done
+export CATALOG_HEAD="$(git -C "$ROOT/services/catalog" rev-parse pilot/beta-catalog)" CATALOG_TREE="$(git -C "$ROOT/services/catalog" rev-parse pilot/beta-catalog^{tree})" CATALOG_MERGE="$(git -C "$ROOT/services/catalog" rev-parse main)"
+export NOTIFICATIONS_HEAD="$(git -C "$ROOT/services/notifications" rev-parse pilot/beta-notifications)" NOTIFICATIONS_TREE="$(git -C "$ROOT/services/notifications" rev-parse pilot/beta-notifications^{tree})" NOTIFICATIONS_MERGE="$(git -C "$ROOT/services/notifications" rev-parse main)"
+# The executable planner observes a semantic-only conflict and stops, then accepts an explicit reconciled inventory.
+planner_actions="$(node <<'NODE'
+const loom=process.env.LOOM_ROOT; const story=require(loom+'/hooks/story.cjs');
+const fs=require('fs'), path=require('path');
+for(const name of ['alpha','beta']) story.parseStory(fs.readFileSync(path.join(process.env.ROOT,'owner','.loom',name,'STORY.md'),'utf8'),path.join(process.env.ROOT,'owner','.loom',name,'STORY.md'));
+const continuation=story.planActiveContinuation({intent:'change',stories:[{name:'alpha',lifecycle:'open',activeContext:true},{name:'beta',lifecycle:'open',activeContext:false}],selectedStory:null});
+const context=story.validateContextKnowledge({registeredRepositories:['catalog','notifications'],entries:[{name:'order-events',kind:'Contract',scope:['catalog','notifications']}]});
+const scope=story.validateAdrScope({scope:{repositories:['catalog','notifications'],contracts:['order-events']},registeredRepositories:['catalog','notifications'],contractNames:context.contracts});
+const worker=story.planKnowledgeWrite({actor:'worker',changes:['CONTEXT','ADR']}); const coordinator=story.planKnowledgeWrite({actor:'coordinator',changes:['CONTEXT','ADR']});
+const native=(repository,key)=>process.env[`${repository.toUpperCase()}_${key}`];
+const lane=(repository,n)=>({repository,repositoryId:`repo-${n}`,nativeId:`lane-${n}`,branch:`pilot/beta-${repository}`,base:'main',commit:native(repository,'HEAD'),tree:native(repository,'TREE'),publicationRef:`https://example.invalid/${repository}/review/1`,host:'local',remote:'disposable'});
+const proof=(repository,n)=>({type:'accepted-local-merge',repository,repositoryId:`repo-${n}`,nativeId:`lane-${n}`,branch:`pilot/beta-${repository}`,headCommit:native(repository,'HEAD'),targetBranch:'main',mergeCommit:native(repository,'MERGE'),ancestryObserved:true,acceptedByUser:true,observedAt:'2026-07-24T09:00:00Z'});
+const input={story:{id:'beta',lifecycle:'awaiting-review'},owner:{ownerId:'workspace-owner',versioning:'git',targetBranch:'main',storyCommit:'owner-beta',storyTree:'owner-beta-tree',mainCommit:'owner-alpha'},publishedLanes:[lane('catalog',1),lane('notifications',2)],mergeProofs:[proof('catalog',1),proof('notifications',2)],writer:{writerId:'tend-writer',exclusive:true},deltas:[{kind:'CONTEXT',path:'CONTEXT.md',beforeDigest:'1'.repeat(64),afterDigest:'2'.repeat(64),summary:'Choose one order-events compatibility contract'}],conflicts:{textual:false,semantic:true},adrCollisions:[]};
+const stopped=story.planTendReconciliation(input), reconciled=story.planTendReconciliation({...input,conflicts:{textual:false,semantic:false}});
+if(continuation.action!=='CONTINUE'||!context.valid||!scope.valid||worker.action!=='DECISION_NEEDED'||coordinator.action!=='WRITE')process.exit(1);
+console.log(`${stopped.action},${reconciled.action},${continuation.action},${worker.action},${coordinator.action}`);
+NODE
+)"; test "$planner_actions" = 'GRILL_STOP,RECONCILIATION_PREVIEW,CONTINUE,DECISION_NEEDED,WRITE'
+# Explicit reconciliation: ordinary owner merges, with the semantic choice written before commit.
+git -C "$ROOT/owner" "${GIT[@]}" merge -q --no-ff story/alpha -m 'Tend alpha owner memory'
+git -C "$ROOT/owner" "${GIT[@]}" merge -q --no-ff --no-commit story/beta
+printf '# Contracts\n\norder-events: v2 with a documented v1 compatibility envelope\n' > "$ROOT/owner/CONTEXT.md"
+git -C "$ROOT/owner" "${GIT[@]}" add CONTEXT.md; commit "$ROOT/owner" 'Reconcile beta semantic contract during Tend'
+# Archive projection is accepted by executable Tend before the matching native Git archive commit.
+export OWNER_COMMIT="$(git -C "$ROOT/owner" rev-parse HEAD)" OWNER_TREE="$(git -C "$ROOT/owner" rev-parse HEAD^{tree})"
+archive_action="$(node <<'NODE'
+const fs=require('fs'),path=require('path'),crypto=require('crypto');const story=require(process.env.LOOM_ROOT+'/hooks/story.cjs');const root=path.join(process.env.ROOT,'owner');
+const digest=s=>crypto.createHash('sha256').update(s).digest('hex'); const id='beta', target=`.loom/archive/${id}`;
+const native=(repository,key)=>process.env[`${repository.toUpperCase()}_${key}`];
+const lane=(repository,n)=>({repository,repositoryId:`repo-${n}`,nativeId:`lane-${n}`,branch:`pilot/beta-${repository}`,base:'main',commit:native(repository,'HEAD'),tree:native(repository,'TREE'),publicationRef:`https://example.invalid/${repository}/review/1`,host:'local',remote:'disposable'});
+const proof=(repository,n)=>({type:'accepted-local-merge',repository,repositoryId:`repo-${n}`,nativeId:`lane-${n}`,branch:`pilot/beta-${repository}`,headCommit:native(repository,'HEAD'),targetBranch:'main',mergeCommit:native(repository,'MERGE'),ancestryObserved:true,acceptedByUser:true,observedAt:'2026-07-24T09:00:00Z'});
+const lanes=[lane('catalog',1),lane('notifications',2)],proofs=[proof('catalog',1),proof('notifications',2)],delta={kind:'CONTEXT',path:'CONTEXT.md',beforeDigest:'1'.repeat(64),afterDigest:'2'.repeat(64),summary:'Choose compatible order-events contract'};
+const recInput={story:{id,lifecycle:'awaiting-review'},owner:{ownerId:'workspace-owner',versioning:'git',targetBranch:'main',storyCommit:'owner-beta',storyTree:'owner-beta-tree',mainCommit:'owner-alpha'},publishedLanes:lanes,mergeProofs:proofs,writer:{writerId:'tend-writer',exclusive:true},deltas:[delta],conflicts:{textual:false,semantic:false},adrCollisions:[]};const preview=story.planTendReconciliation(recInput);const integration={method:'ordinary-merge',status:'integrated',commit:process.env.OWNER_COMMIT,tree:process.env.OWNER_TREE,writerId:'tend-writer',appliedDeltas:preview.inventory.deltas};const rec=story.planTendReconciliationResult({inventory:recInput,confirmedDigest:preview.digest,currentInventory:recInput,integration});
+const pointers=[{category:'CONTEXT',path:'CONTEXT.md',contentDigest:digest(fs.readFileSync(path.join(root,'CONTEXT.md'),'utf8'))},{category:'ADR',path:'docs/adr/0001-order-events.md',contentDigest:digest(fs.readFileSync(path.join(root,'docs/adr/0001-order-events.md'),'utf8'))}];
+const manifest=JSON.stringify({story:id,owner:{commit:process.env.OWNER_COMMIT,tree:process.env.OWNER_TREE},serviceMerges:rec.receipt.serviceMerges,sharedPointers:pointers},null,2)+'\n';const artifacts=['STORY.md','PRD.md','issues/01.md'].map(p=>({path:`${target}/${p}`,content:fs.readFileSync(path.join(root,'.loom',id,p),'utf8')}));artifacts.push({path:`${target}/MANIFEST.json`,content:manifest});
+const archiveInput={story:{id,lifecycle:'awaiting-review'},publishedLanes:lanes,mergeProofs:proofs,owner:{ownerId:'workspace-owner',versioning:'git',archiveTarget:target,writeMode:'git-local-integration'},reconciliation:rec.receipt,artifacts,sharedPointers:pointers,unresolvedFeedback:false};const ap=story.planTendArchive(archiveInput);if(ap.action!=='ARCHIVE_PREVIEW')throw Error(ap.reason);fs.writeFileSync(path.join(process.env.ROOT,'beta-manifest.json'),manifest);fs.writeFileSync(path.join(process.env.ROOT,'beta-archive-input.json'),JSON.stringify(archiveInput));fs.writeFileSync(path.join(process.env.ROOT,'beta-archive-digest'),ap.digest);console.log(ap.action);
+NODE
+)"; test "$archive_action" = ARCHIVE_PREVIEW
+mkdir -p "$ROOT/owner/.loom/archive"; for story_name in alpha beta; do git -C "$ROOT/owner" mv ".loom/$story_name" ".loom/archive/$story_name"; if test "$story_name" = beta; then cp "$ROOT/beta-manifest.json" "$ROOT/owner/.loom/archive/beta/MANIFEST.json"; else printf '{"story":"alpha"}\n' > "$ROOT/owner/.loom/archive/alpha/MANIFEST.json"; fi; done
+git -C "$ROOT/owner" "${GIT[@]}" add .loom; commit "$ROOT/owner" 'Archive reconciled pilot stories'
+archive_commit="$(git -C "$ROOT/owner" rev-parse HEAD)"; archive_tree="$(git -C "$ROOT/owner" rev-parse HEAD^{tree})"; export archive_commit archive_tree
+archive_result="$(node <<'NODE'
+const fs=require('fs');const story=require(process.env.LOOM_ROOT+'/hooks/story.cjs');const inventory=JSON.parse(fs.readFileSync(process.env.ROOT+'/beta-archive-input.json'));const preview=story.planTendArchive(inventory);const records=preview.inventory.artifacts.map(({path,contentDigest})=>({path,contentDigest}));const result=story.planTendArchiveResult({inventory,confirmedDigest:fs.readFileSync(process.env.ROOT+'/beta-archive-digest','utf8'),currentInventory:inventory,archive:{writtenArtifacts:records,readBackArtifacts:records,writeMethod:'git-local-integration',integration:{commit:process.env.archive_commit,tree:process.env.archive_tree,archiveDigest:preview.digest,parentCommit:process.env.OWNER_COMMIT}}});console.log(result.action);
+NODE
+)"; test "$archive_result" = DONE
+# Exact cleanup eligibility now holds; remove clean inactive service lanes and merged branches.
+for service in catalog notifications; do for story in alpha beta; do git -C "$ROOT/services/$service" worktree remove "$ROOT/worktrees/services/$story-$service"; git -C "$ROOT/services/$service" branch -d "pilot/$story-$service" >/dev/null; done; done
+# Observe the explicitly declined degraded unversioned owner path.
+mkdir -p "$ROOT/unversioned/api"; git init -q -b main "$ROOT/unversioned/api"; printf 'fixture\n' > "$ROOT/unversioned/api/README.md"; git -C "$ROOT/unversioned/api" "${GIT[@]}" add .; commit "$ROOT/unversioned/api" 'Baseline service'
+node "$LOOM_ROOT/scripts/setup-workspace" "$ROOT/unversioned" --baseline completed --confirm > "$ROOT/unversioned-result.json"
+test "$(node -p "require('$ROOT/unversioned/.loom/workspace.json').artifact_owner.versioning")" = unversioned
+test ! -e "$ROOT/unversioned/.git"
+printf 'pilot_root=%s\nplanner_actions=%s\narchive_planner=%s,%s\nowner_worktrees=2\nservice_lanes=4\nremote_refs_after_finish=2\nproduct_merges_before_tend=true\narchive_commit=%s\narchive_tree=%s\ncleanup_remaining_service_worktrees=%s\nunversioned_mode=unversioned\n' "$ROOT" "$planner_actions" "$archive_action" "$archive_result" "$archive_commit" "$archive_tree" "$(find "$ROOT/worktrees/services" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')"

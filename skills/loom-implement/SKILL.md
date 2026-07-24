@@ -53,7 +53,11 @@ After confirmation, activate exactly the previewed runner. With Orca, follow [`.
 
 ### Explicit story finish
 
-Finish is never entered by APPROVE, issue completion, or whole-pack confirmation. Only an explicit finish route from the dispatcher loads and follows [`../loom/STORY.md`](../loom/STORY.md) § Explicit finish boundary. It owns the exact inventory, renewed bounded confirmation, checks, independent final Spec+Standards on one boundary, immediate boundary recheck, ordinary local commits/hooks, failure/partial evidence, `awaiting-review` transition, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
+Finish is never entered by APPROVE, issue completion, or whole-pack confirmation. Only an explicit finish route from the dispatcher lazy-loads and follows [`../loom/FINISH.md`](../loom/FINISH.md). It owns the exact inventory, renewed bounded confirmation, checks, independent final Spec+Standards on one boundary, immediate boundary recheck, ordinary local commits/hooks, failure/partial evidence, `awaiting-review` transition, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
+
+### Explicit story publish
+
+Publish is never inferred from finish, APPROVE, or review readiness. Only an explicit publish route from the dispatcher lazy-loads and follows [`../loom/PUBLISH.md`](../loom/PUBLISH.md); its separate digest confirmation owns only the exact pending push and hosted-review effects.
 
 ### Coordinator and maker boundaries
 

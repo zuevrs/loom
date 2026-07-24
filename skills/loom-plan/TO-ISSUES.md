@@ -9,7 +9,7 @@ Before drafting slices, resolve project context with `node hooks/workspace.cjs -
 - In canonical mode, do not add repository metadata; issue cards retain the exact existing template shape.
 - In workspace mode, choose and confirm repository scope for every issue using only logical names from the validated profile (`profile.repositories[].path`). Insert `## Repositories` immediately before `## Verification command`, with one `- <logical-name>` entry per repository. An empty or unknown name blocks the Gate 2 preview and confirmation.
 - Default work spanning repositories to dependent, repository-scoped issues. Keep one issue spanning multiple repositories only when atomic delivery is required; list every locked repository explicitly in that issue.
-- Plan records ownership only. It creates no branch or worktree.
+- Plan records ownership only. It creates no branch or worktree. On continuation, use `planAmendment`: amend/reopen an affected same slice, create a new card for a new independently verifiable slice, and leave unrelated cards byte-for-byte unchanged.
 
 ## Draft slices
 

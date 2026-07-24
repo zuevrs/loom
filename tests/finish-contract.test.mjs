@@ -15,7 +15,9 @@ for (const phrase of ["finish this", "commit this", "close the story", "/loom fi
 throws(() => story.classifyFinishIntent(null), /string/);
 
 const lane = { repository: "catalog", repositoryId: "repo-1", nativeId: "lane-1", branch: "feature/catalog", base: "main", head: "abc123", diff: "2 files, +8 -1", intendedFiles: ["src/catalog.js", "test/catalog.test.js"], repoEvidenceExact: true, laneEvidenceExact: true, indexSafe: true, baseCurrent: true, driftPolicy: "project policy: current", unexplainedDiff: false, experiment: false };
-const inventoryInput = { story: { id: "catalog-reliability", lifecycle: "open" }, lanes: [lane], staleIssues: [], openIssues: [], checks: ["npm test"], verify: { axes: ["Spec", "Standards"], independentAvailable: true }, commitPlan: [{ repository: "catalog", messages: ["Improve catalog reliability"], independentSplit: false }], reviewBundle: { title: "Improve catalog reliability", summary: "Makes availability accurate.", checks: "npm test" } };
+const ownerFile = (path, category, digit) => ({ path, category, contentDigest: digit.repeat(64) });
+const owner = { ownerId: "workspace-owner", versioning: "git", integration: "git-local-integration", files: [ownerFile(".loom/catalog-reliability/STORY.md", "STORY", "1"), ownerFile(".loom/catalog-reliability/PRD.md", "PRD", "2"), ownerFile(".loom/catalog-reliability/issues/01-work.md", "issues", "3"), ownerFile("docs/adr/0139-catalog.md", "ADR", "4"), ownerFile("CONTEXT.md", "CONTEXT", "5")], remoteExcluded: true };
+const inventoryInput = { story: { id: "catalog-reliability", lifecycle: "open" }, owner, lanes: [lane], staleIssues: [], openIssues: [], checks: ["npm test"], verify: { axes: ["Spec", "Standards"], independentAvailable: true }, commitPlan: [{ repository: "catalog", messages: ["Improve catalog reliability"], independentSplit: false }], reviewBundle: { title: "Improve catalog reliability", summary: "Makes availability accurate.", checks: "npm test" } };
 const preview = story.planFinishInventory(inventoryInput);
 equal(preview.action, "PREVIEW");
 equal(preview.confirmationRequired, true);
@@ -38,8 +40,11 @@ equal(story.planFinishInventory({ ...inventoryInput, commitPlan: [{ repository: 
 equal(story.planFinishInventory({ ...inventoryInput, lanes: [lane, { ...lane }] }).action, "STOP");
 for (const leak of ["Loom issue 05", "maker update", "model: fast", "orchestration task", "dispatch worktree", "/Users/alice/project", ".loom/story"]) equal(story.planFinishInventory({ ...inventoryInput, commitPlan: [{ repository: "catalog", messages: [leak], independentSplit: false }] }).action, "STOP", leak);
 
-const execution = { inventory: inventoryInput, confirmedDigest: preview.digest, currentInventory: inventoryInput, checksPassed: true, finalVerify: { spec: "APPROVE", standards: "APPROVE", independent: true, sameBoundary: true }, boundaryRecheck: { headAndDiffMatch: true, indexSafe: true }, commitResults: [] };
-deepStrictEqual(story.planFinishResult(execution), { action: "COMMIT_ALLOWED", lifecycle: "open", commitsRemaining: ["catalog"] });
+const ownerPending = { status: "pending", commit: null, tree: null, writtenFiles: [], readBackFiles: [] };
+const ownerIntegrated = { status: "integrated", commit: "owner456", tree: "owner-tree", writtenFiles: owner.files.map(({path,contentDigest})=>({path,contentDigest})), readBackFiles: owner.files.map(({path,contentDigest})=>({path,contentDigest})) };
+const execution = { inventory: inventoryInput, confirmedDigest: preview.digest, currentInventory: inventoryInput, checksPassed: true, finalVerify: { spec: "APPROVE", standards: "APPROVE", independent: true, sameBoundary: true }, boundaryRecheck: { headAndDiffMatch: true, indexSafe: true }, ownerResult: ownerIntegrated, commitResults: [] };
+deepStrictEqual(story.planFinishResult({ ...execution, ownerResult: ownerPending }), { action: "INTEGRATION_ALLOWED", lifecycle: "open", owner: preview.inventory.owner, servicesRemaining: ["catalog"] });
+deepStrictEqual(story.planFinishResult(execution), { action: "COMMIT_ALLOWED", lifecycle: "open", owner: { commit: "owner456", tree: "owner-tree" }, commitsRemaining: ["catalog"] });
 for (const patch of [
   { confirmedDigest: changed.digest }, { currentInventory: changed.inventory }, { checksPassed: false },
   { finalVerify: { ...execution.finalVerify, spec: "REJECT" } },
@@ -50,11 +55,11 @@ for (const patch of [
 ]) equal(story.planFinishResult({ ...execution, ...patch }).lifecycle, "open");
 equal(story.planFinishResult({ ...execution, finalVerify: { ...execution.finalVerify, independent: false } }).action, "READY_FOR_HUMAN");
 const committed = { repository: "catalog", status: "committed", commit: "def456", hookPassed: true, verifiedTreeMatches: true };
-deepStrictEqual(story.planFinishResult({ ...execution, commitResults: [committed] }), { action: "SUCCESS", lifecycle: "awaiting-review", commits: [{ repository: "catalog", commit: "def456" }], reviewBundleReady: true, prohibitedEffects: ["push", "hosted-review", "publication"] });
+deepStrictEqual(story.planFinishResult({ ...execution, commitResults: [committed] }), { action: "SUCCESS", lifecycle: "awaiting-review", owner: { commit: "owner456", tree: "owner-tree" }, commits: [{ repository: "catalog", commit: "def456" }], reviewBundleReady: true, prohibitedEffects: ["push", "hosted-review", "publication"] });
 for (const result of [
   { ...committed, hookPassed: false }, { ...committed, verifiedTreeMatches: false },
   { ...committed, status: "failed", commit: null },
-]) equal(story.planFinishResult({ ...execution, commitResults: [result] }).action, "STOP");
+]) equal(story.planFinishResult({ ...execution, commitResults: [result] }).action, "PARTIAL");
 const secondLane = { ...lane, repository: "notifications", repositoryId: "repo-2", nativeId: "lane-2" };
 const multiPreview = story.planFinishInventory({ ...inventoryInput, lanes: [lane, secondLane], commitPlan: [...inventoryInput.commitPlan, { repository: "notifications", messages: ["Improve notifications"], independentSplit: false }] });
 const reorderedInventory = { ...multiPreview.inventory, lanes: [...multiPreview.inventory.lanes].reverse().map((item) => ({ ...item, intendedFiles: [...item.intendedFiles].reverse() })), commitPlan: [...multiPreview.inventory.commitPlan].reverse(), checks: [...multiPreview.inventory.checks].reverse() };
@@ -65,7 +70,7 @@ for (const currentInventory of [
   { ...multiPreview.inventory, lanes: [...multiPreview.inventory.lanes, { ...secondLane, repository: "billing", repositoryId: "repo-3", nativeId: "lane-3" }], commitPlan: [...multiPreview.inventory.commitPlan, { repository: "billing", messages: ["Improve billing"], independentSplit: false }] },
   { ...multiPreview.inventory, lanes: multiPreview.inventory.lanes.map((item) => item.repository === "catalog" ? { ...item, head: "substituted" } : item) },
 ]) { const result = story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory, commitResults: [] }); equal(result.action, "STOP"); equal(result.lifecycle, "open"); }
-deepStrictEqual(story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory: reorderedInventory, commitResults: [] }), { action: "COMMIT_ALLOWED", lifecycle: "open", commitsRemaining: ["catalog", "notifications"] });
+deepStrictEqual(story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory: reorderedInventory, commitResults: [] }), { action: "COMMIT_ALLOWED", lifecycle: "open", owner: { commit: "owner456", tree: "owner-tree" }, commitsRemaining: ["catalog", "notifications"] });
 const substitutedInventory = { ...inventoryInput, story: { ...inventoryInput.story, id: "reviewer-substitution" } };
 for (const attack of [
   { ...execution, inventory: substitutedInventory, currentInventory: substitutedInventory },
@@ -73,11 +78,12 @@ for (const attack of [
   { ...execution, inventory: { ...inventoryInput, lanes: [] } }, { ...execution, currentInventory: { ...inventoryInput, extra: true } },
 ]) { const result = story.planFinishResult(attack); equal(result.action, "STOP"); equal(result.lifecycle, "open"); }
 const partial = story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory: multiPreview.inventory, commitResults: [committed, { repository: "notifications", status: "failed", commit: null, hookPassed: false, verifiedTreeMatches: false }] });
-equal(partial.action, "PARTIAL"); equal(partial.lifecycle, "open"); deepStrictEqual(partial.commits, [{ repository: "catalog", commit: "def456" }]);
+equal(partial.action, "PARTIAL"); equal(partial.lifecycle, "open"); equal(partial.owner.commit, "owner456"); deepStrictEqual(partial.commits, [{ repository: "catalog", commit: "def456" }]);
 
 
 
 for (const bad of [
+  { ...inventoryInput, owner: { ...owner, remoteExcluded: false } }, { ...inventoryInput, owner: { ...owner, integration: "service-lane" } }, { ...inventoryInput, owner: { ...owner, files: owner.files.filter((x)=>x.category!=="issues") } },
   { ...inventoryInput, lanes: [] }, { ...inventoryInput, checks: [] }, { ...inventoryInput, checks: [" "] },
   { ...inventoryInput, lanes: [{ ...lane, diff: "" }] }, { ...inventoryInput, lanes: [{ ...lane, intendedFiles: [] }] },
   { ...inventoryInput, lanes: [{ ...lane, intendedFiles: ["src/catalog.js", "src/catalog.js"] }] },
@@ -125,10 +131,10 @@ for (const results of [
 const reversePartial = story.planFinishResult({ ...multiExecution, commitResults: [failedNotification, committed] });
 equal(reversePartial.action, "PARTIAL"); deepStrictEqual(reversePartial.commits, [{ repository: "catalog", commit: "def456" }]);
 
-const runtime = ["skills/loom/STORY.md", "skills/loom/SKILL.md", "skills/loom-implement/SKILL.md", "README.md", "docs/workspaces.md", "docs/orca.md", "docs/unattended.md"].map(read).join("\n");
+const runtime = ["skills/loom/FINISH.md", "skills/loom/SKILL.md", "skills/loom-implement/SKILL.md", "README.md", "docs/workspaces.md", "docs/orca.md", "docs/unattended.md"].map(read).join("\n");
 for (const token of ["exact inventory", "same exact current boundary", "ordinary Git hooks", "awaiting-review", "sanitized review bundle", "no push"]) ok(runtime.includes(token), `missing finish contract: ${token}`);
 for (const stale of ["Finish and publish are future", "future explicit finish/publish", "defines no finish or publication mechanics"]) ok(!runtime.includes(stale), `stale finish wording: ${stale}`);
 match(read("skills/loom/SKILL.md"), /classifyFinishIntent/);
-match(read("skills/loom/STORY.md"), /planFinishInventory/);
-match(read("skills/loom/STORY.md"), /planFinishResult/);
+match(read("skills/loom/FINISH.md"), /planFinishInventory/);
+match(read("skills/loom/FINISH.md"), /planFinishResult/);
 console.log("explicit finish contract tests passed");

@@ -4,7 +4,37 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-- _No unreleased changes yet._
+- No changes yet.
+
+## [5.0.0] - 2026-07-24
+
+### Highlights
+
+- **STORY v2 continuation** — compact Current State, semantic checkpoints, proportional amendments, and affected-only stale Verify evidence keep active Stories current without becoming transcripts.
+- **Scoped shared memory** — CONTEXT Contracts and workspace ADRs declare repository/Contract scope; workers escalate decisions and the root Story coordinator alone writes durable shared memory.
+- **Versioned owner lifecycle** — stable repository identity, isolated owner worktrees, typed local Finish integration, and serialized post-product-merge Tend reconciliation preserve explicit authority across parallel Stories.
+
+### Breaking changes
+
+- Workspace schema 5 replaces path-as-identity records with stable repository names and requires `artifact_owner.versioning` to declare `git` or degraded `unversioned` mode. Active STORY v1 artifacts migrate to STORY v2; archived v1 Stories remain readable but are not writable.
+
+### Migration steps
+
+- Follow `docs/migration-v5.md`: preview and confirm stable repository-name mappings, resolve collisions without aliases, declare owner versioning, migrate active Stories only, then rerun `loom-init` so installed adapters and managed blocks report v5.0.0.
+- Git-backed owners must isolate parallel writable Stories in owner worktrees. If Git setup is declined, record degraded unversioned mode and its reduced guarantees. Existing v4 finish/publish/Tend authority boundaries remain unchanged.
+
+### Adapter impacts
+
+- Workspace-aware hosts resolve service lanes by stable repository identity while treating checkout paths as runtime evidence. Non-Orca parallel isolation is supported through ordinary Git worktrees; no checkout registry or runtime engine was added.
+
+### Safety changes
+
+- Declared and observed owner versioning must match; mismatches fail closed. Central memory rejects secrets, raw payloads/configs, runtime IDs, local paths, and unsafe service pointers.
+- Finish remains local, owner publication requires separate inventory and confirmation, product merges precede Tend, semantic conflicts stop for reconciliation, and cleanup remains separately confirmed.
+
+### Known limitations
+
+- The disposable pilot observed non-Orca native Git isolation and a declined unversioned path. Orca, hosted publication, real remotes, native host cards/terminals, and automatic semantic resolution were intentionally not exercised; see `docs/evidence/V5-MIGRATION-PILOT.md` and `docs/evidence/v5-release-ledger.md`.
 
 ## [4.0.0] - 2026-07-24
 
@@ -1180,7 +1210,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/zuevrs/loom/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/zuevrs/loom/compare/v3.3.0...v4.0.0
 [3.3.0]: https://github.com/zuevrs/loom/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/zuevrs/loom/compare/v3.1.0...v3.2.0

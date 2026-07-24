@@ -54,3 +54,8 @@
 | Risk | Mitigation |
 |------|-----------|
 | ...  | ...       |
+
+
+## Amendments
+
+{Material changes only. One concise dated pointer per semantic amendment: `- YYYY-MM-DD — <what changed and why; affected issue names>`. Keep the sections above current; do not duplicate their content here. This section may remain empty until the first amendment.}

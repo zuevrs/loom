@@ -8,6 +8,9 @@ ADRs live in `docs/adr/` as `NNNN-slug.md`. Create the directory lazily. Number 
 ## Status
 Accepted | Superseded by ADR-NNNN | Amended by ADR-NNNN
 
+## Scope
+workspace-wide | repositories: <registered-name, ...> | contracts: <Contract-name, ...>
+
 ## Context
 {Why this decision came up — the forces at play.}
 
@@ -20,6 +23,8 @@ Accepted | Superseded by ADR-NNNN | Amended by ADR-NNNN
 ## Notes
 - {Amendments, links to related ADRs, future considerations.}
 ```
+
+In workspace mode, every new or amended workspace ADR has exactly one validated Scope: `workspace-wide`, registered logical repository names, named Contracts from `CONTEXT.md`, or repository and Contract lists together. Use names in prose and links, never bare IDs. Existing service-local ADRs remain canonical and are linked rather than copied. A clarification is a dated note; an unused compatible decision may amend in place; an incompatible applied decision creates a new ADR whose status supersedes the old one. Only the root story coordinator writes workspace ADRs; workers return `decision-needed`.
 
 Research-shaped decisions carry their source links in `## Why` or `## Notes` ([GRILL.md](GRILL.md) research discipline).
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // loom: explicit workspace setup proposal/apply flow; confirmation is the --confirm boundary.
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, rmSync, copyFileSync, readdirSync } from "node:fs";
-import { join, resolve, basename } from "node:path";
+import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync, rmSync, copyFileSync, readdirSync, statSync } from "node:fs";
+import { join, resolve, basename, dirname } from "node:path";
 import { createRequire } from "node:module";
 const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, serializeWorkspaceProfile } = createRequire(import.meta.url)("../hooks/workspace.cjs");
 
@@ -57,12 +57,171 @@ function applyTransaction(root, agents, profile, preserveProfile = false) {
     if (profileTemp) renameSync(profileTemp, profilePath);
     return { changed: true, profilePath, backupPath: resultBackupPath, agentsPath, agents_changed: agentsChanged, profile_changed: profileChanged };
   } catch (error) {
-    for (const temp of temporary) try { rmSync(temp, { force: true }); } catch {}
-    if (oldAgents === null) { if (agentsChanged) try { rmSync(agentsPath, { force: true }); } catch {} } else if (agentsChanged) try { writeFileSync(agentsPath, oldAgents); } catch {}
-    if (oldProfile === null) { if (profileChanged) try { rmSync(profilePath, { force: true }); } catch {} } else if (profileChanged) try { writeFileSync(profilePath, oldProfile); } catch {}
-    if (profileChanged) { try { if (oldBackup === null) rmSync(backupPath, { force: true }); else writeFileSync(backupPath, oldBackup); } catch {} }
-    if (createdDirectory) try { rmSync(join(root, ".loom"), { recursive: true, force: true }); } catch {}
+    const rollbackErrors = [];
+    const rollback = (action, operation) => { try { operation(); } catch (rollbackError) { rollbackErrors.push(`${action}: ${rollbackError.message}`); } };
+    for (const temp of temporary) rollback(`remove temporary file ${temp}`, () => rmSync(temp, { force: true }));
+    if (agentsChanged) rollback(`restore ${agentsPath}`, () => { if (oldAgents === null) rmSync(agentsPath, { force: true }); else writeFileSync(agentsPath, oldAgents); });
+    if (profileChanged) rollback(`restore ${profilePath}`, () => { if (oldProfile === null) rmSync(profilePath, { force: true }); else writeFileSync(profilePath, oldProfile); });
+    if (profileChanged) rollback(`restore ${backupPath}`, () => { if (oldBackup === null) rmSync(backupPath, { force: true }); else writeFileSync(backupPath, oldBackup); });
+    if (createdDirectory) rollback(`remove newly created ${join(root, ".loom")}`, () => rmSync(join(root, ".loom"), { recursive: true, force: true }));
+    if (rollbackErrors.length) throw new Error(`${error.message}; rollback incomplete; residual actions:
+${rollbackErrors.join("\n")}`);
     throw error;
+  }
+}
+
+function openStories(root) {
+  const loom = join(root, ".loom");
+  if (!existsSync(loom)) return [];
+  return readdirSync(loom, { withFileTypes: true }).filter((entry) => entry.isDirectory() && entry.name !== "archive").flatMap((entry) => {
+    const path = join(loom, entry.name, "STORY.md");
+    if (!existsSync(path)) return [];
+    const source = readFileSync(path, "utf8");
+    return /^lifecycle: open$/m.test(source) ? [entry.name] : [];
+  }).sort();
+}
+
+function ownerWorktrees(root, stories) {
+  const parent = join(dirname(root), `.${basename(root)}-loom-owner-worktrees`);
+  return stories.map((story) => ({ story, branch: `story/${story}`, path: join(parent, story) }));
+}
+
+function ownerMemoryPaths(root, profile) {
+  const candidates = ["AGENTS.md", ".loom/workspace.json", ".gitignore", "CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"];
+  if (existsSync(join(root, "docs", "adr"))) for (const name of readdirSync(join(root, "docs", "adr"))) candidates.push(`docs/adr/${name}`);
+  if (existsSync(join(root, ".loom"))) for (const story of openStories(root)) {
+    const base = `.loom/${story}`;
+    const walk = (relativePath) => {
+      const absolute = join(root, relativePath);
+      for (const entry of readdirSync(absolute, { withFileTypes: true })) {
+        const child = `${relativePath}/${entry.name}`;
+        if (entry.isDirectory()) walk(child); else candidates.push(child);
+      }
+    };
+    walk(base);
+  }
+  const serviceRoots = profile.repositories.map((repo) => `${repo.path.replace(/\/$/, "")}/`);
+  return [...new Set(candidates)].filter((path) => existsSync(join(root, path)) && statSync(join(root, path)).isFile() && !serviceRoots.some((service) => `${path}/`.startsWith(service))).sort();
+}
+
+function ownerMemoryPrivacyViolations(root, paths) {
+  const checks = [
+    ["credential or secret assignment", /(?:-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|(?:^|[\s{,])["']?[A-Za-z0-9_.-]*(?:password|passwd|secret|token|api[_-]?key|private[_-]?key|client[_-]?secret)[A-Za-z0-9_.-]*["']?\s*[:=]\s*["']?[^\s"'{}\[\],]+|authorization\s*:\s*bearer\s+[^\s]+)/i],
+    ["raw payload or config", /(?:^|\n)\s*(?:payload|request|response|headers|environment|env|config(?:uration)?)\s*[:=]\s*(?:\{|\[)/i],
+    ["runtime identifier", /\b(?:task|terminal|session|worker)_[A-Za-z0-9_-]+\b/i],
+    ["absolute or local path", /(?:^|[\s"'=:(])(?:["']\/[^"'\r\n]+["']|\/[^\s"'`),;:]*|~[\/][^\s"'`),;:]*|[A-Za-z]:[\\/][^\s"'`),;:]*|\\\\[^\s\\]+\\[^\s"'`),;:]*)/],
+  ];
+  const violations = [];
+  for (const path of paths) {
+    const content = readFileSync(join(root, path), "utf8");
+    for (const [reason, pattern] of checks) if (pattern.test(content)) violations.push(`${path}: ${reason}`);
+  }
+  return violations;
+}
+
+function resultingIgnore(root, profile) {
+  const path = join(root, ".gitignore");
+  const existing = existsSync(path) ? readFileSync(path, "utf8") : "";
+  const required = profile.repositories.map((repo) => `/${repo.path.replace(/\/$/, "")}/`);
+  const lines = existing.split(/\r?\n/);
+  const missing = required.filter((line) => !lines.includes(line));
+  return { path, content: `${existing}${existing && !existing.endsWith("\n") ? "\n" : ""}${missing.length ? `${missing.join("\n")}\n` : ""}`, required };
+}
+
+function prevalidateCanonical(root, profile, agents) {
+  if (existsSync(join(root, ".git"))) throw new Error("canonical initialization requires a newly created owner .git");
+  if (!existsSync(root) || !statSync(root).isDirectory()) throw new Error("workspace root must be an existing directory");
+  const ignore = resultingIgnore(root, profile);
+  if (ignore.required.some((line) => !line.startsWith("/") || !line.endsWith("/"))) throw new Error("service privacy ignores must be exact root-anchored directories");
+  for (const repo of profile.repositories) {
+    const service = resolve(root, repo.path);
+    if (service === root || !service.startsWith(`${root}/`)) throw new Error(`registered service escapes owner: ${repo.path}`);
+  }
+  const worktrees = ownerWorktrees(root, openStories(root));
+  for (const item of worktrees) {
+    if (existsSync(item.path)) throw new Error(`owner Story worktree target already exists: ${item.path}`);
+    if (execFileSync("git", ["check-ref-format", "--branch", item.branch], { encoding: "utf8" }).trim() !== item.branch) throw new Error(`invalid owner Story branch: ${item.branch}`);
+  }
+  for (const key of ["user.name", "user.email"]) {
+    try { if (!execFileSync("git", ["config", "--global", "--get", key], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim()) throw new Error(); }
+    catch { throw new Error(`canonical baseline requires configured Git ${key}`); }
+  }
+  validateWorkspaceProfile({ ...profile, artifact_owner: { versioning: "git" } }, root);
+  return { profile: { ...profile, artifact_owner: { versioning: "git" } }, ignore, worktrees, agents };
+}
+
+function applyCanonical(root, plan, existingProfile) {
+  const oldIgnore = existsSync(plan.ignore.path) ? readFileSync(plan.ignore.path, "utf8") : null;
+  const agentsPath = join(root, "AGENTS.md"), profilePath = join(root, ".loom", "workspace.json"), backupPath = `${profilePath}.bak`;
+  const oldAgents = existsSync(agentsPath) ? readFileSync(agentsPath, "utf8") : null;
+  const oldProfile = existsSync(profilePath) ? readFileSync(profilePath, "utf8") : null;
+  const oldBackup = existsSync(backupPath) ? readFileSync(backupPath, "utf8") : null;
+  const worktreeInventory = plan.worktrees.map((item) => ({ ...item, pathExisted: existsSync(item.path), parent: dirname(item.path), parentExisted: existsSync(dirname(item.path)), branchExisted: false }));
+  const createdParents = [];
+  const sameFile = (path, old) => old === null ? !existsSync(path) : existsSync(path) && readFileSync(path, "utf8") === old;
+  try {
+    execFileSync("git", ["-C", root, "init", "-q", "-b", "main"]);
+    if (process.env.LOOM_SETUP_FAIL_AT === "after-git-init") throw new Error("forced setup failure after git init");
+    if (plan.ignore.content !== oldIgnore) writeFileSync(plan.ignore.path, plan.ignore.content);
+    const result = applyTransaction(root, plan.agents, plan.profile, Boolean(existingProfile && JSON.stringify(plan.profile) === JSON.stringify(existingProfile)));
+    if (process.env.LOOM_SETUP_FAIL_AT === "after-owner-writes") throw new Error("forced setup failure after owner writes");
+    const memory = ownerMemoryPaths(root, plan.profile);
+    const privacyViolations = ownerMemoryPrivacyViolations(root, memory.filter((path) => path !== "AGENTS.md" && path !== ".gitignore"));
+    if (privacyViolations.length) throw new Error(`owner memory privacy gate rejected:
+${privacyViolations.join("\n")}`);
+    execFileSync("git", ["-C", root, "add", "--", ...memory]);
+    const staged = execFileSync("git", ["-C", root, "diff", "--cached", "--name-only", "-z"], { encoding: "utf8" }).split("\0").filter(Boolean);
+    if (staged.some((path) => plan.profile.repositories.some((repo) => `${path}/`.startsWith(`${repo.path.replace(/\/$/, "")}/`)))) throw new Error("privacy gate rejected staged service contents");
+    execFileSync("git", ["-C", root, "commit", "-qm", "Establish canonical Loom owner memory"]);
+    for (const item of worktreeInventory) {
+      if (!item.parentExisted) { mkdirSync(item.parent, { recursive: true }); createdParents.push(item.parent); }
+      execFileSync("git", ["-C", root, "worktree", "add", "-q", "-b", item.branch, item.path, "main"]);
+      if (process.env.LOOM_SETUP_FAIL_AT === "after-worktree-add") throw new Error("forced setup failure after worktree add");
+    }
+    return { ...result, baseline_commit: execFileSync("git", ["-C", root, "rev-parse", "HEAD"], { encoding: "utf8" }).trim(), owner_worktrees: plan.worktrees };
+  } catch (error) {
+    const rollbackErrors = [];
+    const rollback = (action, operation) => {
+      try {
+        if (process.env.LOOM_SETUP_ROLLBACK_FAIL_AT === action) throw new Error(`forced rollback failure at ${action}`);
+        operation();
+      } catch (rollbackError) { rollbackErrors.push(`${action}: ${rollbackError.message}`); }
+    };
+    if (existsSync(join(root, ".git"))) for (const item of [...worktreeInventory].reverse()) {
+      if (!item.pathExisted && existsSync(item.path)) rollback(`remove owner worktree ${item.path}`, () => {
+        try { execFileSync("git", ["-C", root, "worktree", "remove", "--force", item.path]); }
+        catch { rmSync(item.path, { recursive: true, force: true }); execFileSync("git", ["-C", root, "worktree", "prune"]); }
+      });
+      if (!item.branchExisted) rollback(`remove owner branch ${item.branch}`, () => {
+        try { execFileSync("git", ["-C", root, "branch", "-D", item.branch], { stdio: "ignore" }); }
+        catch { try { execFileSync("git", ["-C", root, "show-ref", "--verify", "--quiet", `refs/heads/${item.branch}`], { stdio: "ignore" }); throw new Error("branch remains"); } catch (checkError) { if (checkError.message === "branch remains") throw checkError; } }
+      });
+    }
+    for (const parent of [...createdParents].reverse()) rollback(`remove newly created worktree parent ${parent}`, () => rmSync(parent));
+    rollback("remove newly created owner Git metadata", () => rmSync(join(root, ".git"), { recursive: true, force: true }));
+    rollback("restore .gitignore", () => { if (oldIgnore === null) rmSync(plan.ignore.path, { force: true }); else writeFileSync(plan.ignore.path, oldIgnore); });
+    const restore = (path, old) => rollback(`restore ${path}`, () => { if (old === null) rmSync(path, { force: true }); else writeFileSync(path, old); });
+    restore(agentsPath, oldAgents); restore(profilePath, oldProfile); restore(backupPath, oldBackup);
+    if (oldProfile === null && existsSync(join(root, ".loom")) && readdirSync(join(root, ".loom")).length === 0) rollback("remove newly empty .loom directory", () => rmSync(join(root, ".loom"), { recursive: true }));
+    const residuals = [];
+    if (existsSync(join(root, ".git"))) {
+      residuals.push("newly created owner Git metadata remains");
+      let registrations = "";
+      try { registrations = execFileSync("git", ["-C", root, "worktree", "list", "--porcelain"], { encoding: "utf8" }); } catch (checkError) { residuals.push(`cannot verify residual worktree registrations: ${checkError.message}`); }
+      for (const item of worktreeInventory) {
+        if (registrations.split(/\r?\n/).includes(`worktree ${item.path}`)) residuals.push(`owner worktree registration remains: ${item.path}`);
+        try { execFileSync("git", ["-C", root, "show-ref", "--verify", "--quiet", `refs/heads/${item.branch}`], { stdio: "ignore" }); residuals.push(`owner branch remains: ${item.branch}`); } catch {}
+      }
+    }
+    if (!sameFile(plan.ignore.path, oldIgnore)) residuals.push(".gitignore was not restored");
+    for (const [path, old] of [[agentsPath, oldAgents], [profilePath, oldProfile], [backupPath, oldBackup]]) if (!sameFile(path, old)) residuals.push(`${path} was not restored`);
+    for (const item of worktreeInventory) {
+      if (existsSync(item.path) !== item.pathExisted) residuals.push(`owner worktree path state differs: ${item.path}`);
+      if (existsSync(item.parent) !== item.parentExisted && !item.parentExisted) residuals.push(`newly created worktree parent remains: ${item.parent}`);
+    }
+    if (rollbackErrors.length || residuals.length) throw new Error(`${error.message}; rollback incomplete; residual actions:
+${[...rollbackErrors, ...residuals].join("\n")}`);
+    throw new Error(`${error.message}; newly created owner Git and setup writes rolled back after explicit absence/restoration verification`);
   }
 }
 
@@ -71,31 +230,54 @@ const rootArg = args.shift();
 let confirm = false;
 let profileFile = null;
 let depth = null;
+let initOwnerGit = false;
+let baseline = null;
 let usageError = !rootArg;
 for (let index = 0; index < args.length && !usageError; index++) {
   const flag = args[index];
   if (flag === "--confirm" && !confirm) confirm = true;
-  else if ((flag === "--profile" || flag === "--depth") && args[index + 1] && !args[index + 1].startsWith("--")) {
+  else if (flag === "--init-owner-git" && !initOwnerGit) initOwnerGit = true;
+  else if ((flag === "--profile" || flag === "--depth" || flag === "--baseline") && args[index + 1] && !args[index + 1].startsWith("--")) {
     if (flag === "--profile" && profileFile === null) profileFile = args[++index];
     else if (flag === "--depth" && depth === null) depth = args[++index];
+    else if (flag === "--baseline" && baseline === null) baseline = args[++index];
     else usageError = true;
   } else usageError = true;
 }
-if (usageError || (confirm && !profileFile) || (depth !== null && (!/^\d+$/.test(depth) || Number(depth) < 1))) {
-  console.error("usage: setup-workspace <workspace-root> [--depth <positive-integer>] [--profile <profile.json>] [--confirm]");
+if (usageError || (initOwnerGit && !confirm) || (baseline !== null && !["canonical", "completed"].includes(baseline)) || (depth !== null && (!/^\d+$/.test(depth) || Number(depth) < 1))) {
+  console.error("usage: setup-workspace <workspace-root> [--depth <positive-integer>] [--profile <profile.json>] [--baseline canonical|completed] [--init-owner-git] [--confirm]");
   process.exit(2);
 }
 
 const root = resolve(rootArg);
 const agents = managedAgents(root);
 const canonical = (path) => path.replaceAll("\\", "/").toLowerCase();
+const stableName = (path) => basename(path).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "repository";
+function repositoriesFromInventory(items) {
+  const names = items.map((repo) => stableName(repo.path));
+  const duplicate = names.find((name, index) => names.indexOf(name) !== index);
+  if (duplicate) throw new Error(`repository name collision for basename candidate "${duplicate}"; provide explicit unique names and retry`);
+  return items.map((repo, index) => ({ name: names[index], path: repo.path.replaceAll("\\", "/"), canonical_path: resolve(root, repo.path), ...(repo.remote ? { remote: repo.remote } : {}) }));
+}
+function setupProfile(value) {
+  const copy = structuredClone(value);
+  for (const repo of copy.repositories || []) {
+    if (repo.canonical_path !== undefined) {
+      if (resolve(repo.canonical_path) !== resolve(root, repo.path)) throw new Error(`canonical_path does not match repository path: ${repo.path}`);
+      delete repo.canonical_path;
+    }
+  }
+  return validateWorkspaceProfile(copy, root);
+}
 try {
   const inspectArgs = [root, "--json", ...(depth === null ? [] : ["--depth", depth])];
   const inventory = JSON.parse(execFileSync(resolve(import.meta.dirname, "inspect-workspace"), inspectArgs, { encoding: "utf8" }));
   const existingContext = ["CONTEXT.md", "CONTEXT-MAP.md", "SERVICES.md"].filter((file) => existsSync(join(root, file)));
   const inventoryProfile = {
-    workspace_id: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "workspace",
-    repositories: inventory.git_roots.map((repo) => ({ path: repo.path.replaceAll("\\", "/"), ...(repo.remote ? { remote: repo.remote } : {}) })),
+    schema_version: 5,
+    name: basename(root).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "workspace",
+    artifact_owner: { versioning: inventory.root_is_git ? "git" : "unversioned" },
+    repositories: repositoriesFromInventory(inventory.git_roots).map(({ canonical_path, ...repo }) => repo),
     ...(existingContext.length ? { context_paths: existingContext } : {}),
   };
   const loadedProfile = readWorkspaceProfile(root);
@@ -104,7 +286,9 @@ try {
   if (loadedProfile?.invalid) existingProfileError = loadedProfile.error;
   else if (loadedProfile) {
     existingProfile = {
-      workspace_id: loadedProfile.workspace_id,
+      schema_version: loadedProfile.schema_version,
+      name: loadedProfile.name,
+      artifact_owner: loadedProfile.artifact_owner,
       repositories: loadedProfile.repositories,
       ...(loadedProfile.context_paths !== undefined ? { context_paths: loadedProfile.context_paths } : {}),
     };
@@ -112,7 +296,19 @@ try {
     catch (error) { existingProfileError = error.message; }
   }
   const proposed = existingProfileError ? inventoryProfile : existingProfile || inventoryProfile;
-  const profile = profileFile ? validateWorkspaceProfile(JSON.parse(readFileSync(resolve(profileFile), "utf8")), root) : proposed;
+  let rawExisting = null;
+  if (existsSync(join(root, ".loom", "workspace.json"))) {
+    try { rawExisting = JSON.parse(readFileSync(join(root, ".loom", "workspace.json"), "utf8")); }
+    catch { rawExisting = { malformed: true }; }
+  }
+  const oldSchemaMigration = rawExisting && rawExisting.schema_version !== 5 ? {
+    from: "legacy", aliases: false,
+    proposal: inventoryProfile,
+    guidance: "Review stable repository names and owner versioning, then confirm the exact v5 replacement. Legacy fields are not aliases."
+  } : null;
+  let profile = profileFile ? setupProfile(JSON.parse(readFileSync(resolve(profileFile), "utf8"))) : proposed;
+  if (!inventory.root_is_git && baseline === "canonical") profile = validateWorkspaceProfile({ ...profile, artifact_owner: { versioning: "git" } }, root);
+  if (!inventory.root_is_git && baseline === "completed") profile = validateWorkspaceProfile({ ...profile, artifact_owner: { versioning: "unversioned" } }, root);
   if (profile.repositories.length === 0) throw new Error(`no repositories found at depth ${depth ?? "2"}; retry /loom setup workspace with greater depth (or pass --depth <positive-integer> to this utility)`);
   const proposedPaths = new Set((existingProfile || proposed).repositories.map((repo) => canonical(repo.path)));
   const inventoryPaths = new Set(inventory.git_roots.map((repo) => canonical(repo.path)));
@@ -123,6 +319,8 @@ try {
   const proposal = {
     workspace_root: ".",
     profile,
+    setup_repositories: profile.repositories.map((repo) => ({ ...repo, canonical_path: resolve(root, repo.path) })),
+    ...(oldSchemaMigration ? { migration: oldSchemaMigration } : {}),
     ...(existingProfileError ? { existing_profile_error: existingProfileError } : {}),
     inventory: { root_is_git: inventory.root_is_git, root_git_state: inventory.root_git_state, repositories: inventory.git_roots, root_assets: rootAssets(root, agents) },
     inventory_drift: inventoryDrift,
@@ -132,14 +330,25 @@ try {
     errors: inventory.errors,
     root_write: { agents: agents.status, profile: existingProfile && JSON.stringify(profile) === JSON.stringify(existingProfile) ? "preserve-valid" : existingProfile ? "will-refresh" : "will-create" },
   };
+  if (!inventory.root_is_git && baseline === null) proposal.warnings.push("Artifact owner baseline is ambiguous: choose canonical (initialize owner Git before Loom writes) or completed (keep artifacts unversioned).");
   if (!confirm) {
     process.stdout.write(`${JSON.stringify({ mode: "proposal", ...proposal }, null, 2)}\n`);
     process.exit(0);
   }
+  if (!inventory.root_is_git && baseline === null) throw new Error("artifact owner baseline is ambiguous; pass --baseline canonical with --init-owner-git, or --baseline completed");
+  if (baseline === "canonical" && !initOwnerGit && !inventory.root_is_git) throw new Error("canonical baseline requires confirmed --init-owner-git");
+  if (baseline === "completed" && initOwnerGit) throw new Error("completed baseline cannot initialize owner Git");
   const validatedProfile = validateWorkspaceProfile(profile, root);
-  validateWorkspaceRepositories({ ...validatedProfile, root });
-  const result = applyTransaction(root, agents, validatedProfile, Boolean(existingProfile && !existingProfileError && JSON.stringify(validatedProfile) === JSON.stringify(existingProfile)));
-  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, profile: validatedProfile, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath, agents_path: result.agentsPath, agents_changed: result.agents_changed ?? false, profile_changed: result.profile_changed ?? false }, null, 2)}\n`);
+  let result;
+  if (initOwnerGit) {
+    const plan = prevalidateCanonical(root, validatedProfile, agents);
+    result = applyCanonical(root, plan, existingProfile && !existingProfileError ? existingProfile : null);
+    validateWorkspaceRepositories({ ...plan.profile, root });
+  } else {
+    validateWorkspaceRepositories({ ...validatedProfile, root });
+    result = applyTransaction(root, agents, validatedProfile, Boolean(existingProfile && !existingProfileError && JSON.stringify(validatedProfile) === JSON.stringify(existingProfile)));
+  }
+  process.stdout.write(`${JSON.stringify({ mode: "applied", ...proposal, profile: initOwnerGit ? { ...validatedProfile, artifact_owner: { versioning: "git" } } : validatedProfile, owner_worktrees: result.owner_worktrees || [], baseline_commit: result.baseline_commit || null, changed: result.changed, profile_path: result.profilePath, backup_path: result.backupPath, agents_path: result.agentsPath, agents_changed: result.agents_changed ?? false, profile_changed: result.profile_changed ?? false }, null, 2)}\n`);
 } catch (error) {
   console.error(`workspace setup failed: ${error.message}`);
   process.exit(1);

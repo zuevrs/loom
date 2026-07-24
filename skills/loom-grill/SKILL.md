@@ -29,6 +29,9 @@ Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions 
 
 ## Process
 
+When an open story owns the topic, enter STORY Adaptive continuation first. Grill may then amend the current PRD/issues and scoped knowledge through one confirmed semantic bundle despite the ordinary no-PRD/no-issues output below; this is continuation, not a new Plan. Preserve initial intent after the bundle: pure discussion stops, while discuss-and-change continues to Implement/Verify.
+
+
 1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a PRD and issue pack.
 2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, pending domain delta, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and PRD/issue exit gate in Plan; return here when the interview crystallises into an action or the user stops.
 3. **Resolve the thread** — follow the canon until the load-bearing branches are explicit. End naturally when investigation finds nothing actionable. When something becomes actionable, continue through Grill's gate below.
