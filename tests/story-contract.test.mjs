@@ -102,12 +102,9 @@ const invalid = [
 ];
 for (const [name, content, path = storyPath()] of invalid) throws(() => validateStory(content, path), /invalid STORY:/, name);
 
-deepStrictEqual(storyCreationDecision({ readOnly: true, durableDecisionConfirmed: false, projectWritePending: false }), "none");
-deepStrictEqual(storyCreationDecision({ readOnly: false, durableDecisionConfirmed: false, projectWritePending: false }), "none");
-deepStrictEqual(storyCreationDecision({ readOnly: false, durableDecisionConfirmed: true, projectWritePending: false }), "create");
-deepStrictEqual(storyCreationDecision({ readOnly: false, durableDecisionConfirmed: false, projectWritePending: true }), "create");
-throws(() => storyCreationDecision({ readOnly: true, durableDecisionConfirmed: true, projectWritePending: false }), /contradicts/);
-throws(() => storyCreationDecision({ readOnly: true, durableDecisionConfirmed: false, projectWritePending: true }), /contradicts/);
+deepStrictEqual(storyCreationDecision({ durableEvent: null }), "none");
+for (const durableEvent of ["decision", "scope-change", "issue-completion", "blocker", "handoff", "delegation", "pre-shake"]) deepStrictEqual(storyCreationDecision({ durableEvent }), "create");
+throws(() => storyCreationDecision({ durableEvent: "project-write" }), /supported semantic event/);
 
 deepStrictEqual(validateStory(renderStorySeed({ story: "seed-story", updated: "2026-07-23", goal: "Goal", outcome: "Outcome", checks: "npm test" }), storyPath("seed-story")).lifecycle, "open");
 const workspace = require(resolve(root, "hooks/workspace.cjs"));
@@ -139,7 +136,7 @@ deepStrictEqual(workspace.nonGitOwnerWarning({ nonGitOwner: true, artifactRoot: 
 
 const storyContract = read("skills/loom/STORY.md");
 ok(storyContract.includes("node hooks/story.cjs"));
-match(storyContract, /first confirmed durable decision or immediately before the first project write/);
+match(storyContract, /ordinary project edits alone do not create a Story|project-file edit by itself is not a creation trigger/);
 match(storyContract, /Read-only questions create nothing/);
 const rituals = ["loom-init", "loom-plan", "loom-grill", "loom-implement", "loom-verify", "loom-tend"];
 const duplicatedRules = ["first confirmed durable decision", "immediately before the first project write", "Read-only work creates no STORY", "seed preview"];

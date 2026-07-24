@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# v6 pilot harness: local simulation plus read-only native capability preflight.
+set -euo pipefail
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+mode="${1:---simulate}"
+case "$mode" in
+  --simulate)
+    pilot_root="${2:-$(mktemp -d "${TMPDIR:-/tmp}/loom-v6-pilot.XXXXXX")}" 
+    bash "$ROOT_DIR/scripts/lifecycle-pilot-setup" "$pilot_root" >/dev/null
+    node "$ROOT_DIR/tests/v6-contract-surface.test.mjs"
+    node "$ROOT_DIR/tests/v6-blockers.test.mjs"
+    node "$ROOT_DIR/tests/v6-adaptive-flows.test.mjs"
+    node "$ROOT_DIR/tests/v6-orca-boundaries.test.mjs"
+    node "$ROOT_DIR/tests/v6-migration-outcomes.test.mjs"
+    printf '{"provenance":"simulated/planner","pilotRoot":"%s","nativeCriteriaSatisfied":false}\n' "$pilot_root"
+    ;;
+  --native-preflight)
+    command -v omp >/dev/null || { echo 'BLOCKED: omp executable unavailable' >&2; exit 1; }
+    command -v orca >/dev/null || { echo 'BLOCKED: orca executable unavailable' >&2; exit 1; }
+    orca status --json
+    orca repo list --json
+    orca worktree ps --json
+    omp --help >/dev/null
+    node "$ROOT_DIR/tests/v6-blockers.test.mjs"
+    printf '%s\n' '{"provenance":"observed-native","scope":"read-only capability preflight","nativeCriteriaSatisfied":true,"shake":"capability-aware-n/a","requiredFallback":"observed pre-checkpoint plus fresh reconstruction without inherited authority"}'
+    ;;
+  *)
+    echo "usage: scripts/v6-attended-pilot [--simulate [root]|--native-preflight]" >&2
+    exit 2
+    ;;
+esac

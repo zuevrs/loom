@@ -1,67 +1,15 @@
 # Loom
 
-This file demonstrates the managed block that `loom-init` writes into your project's `AGENTS.md`. The block below is the canonical reference — hosts that read `AGENTS.md` (Claude Code, Codex, Cursor) pick it up automatically.
+This file demonstrates the compact managed block that `loom-init` copies from this installed Loom tree. It is a pointer into the canonical runtime contracts, not a second copy of them.
 
-<!-- loom:begin version=v5.0.0 -->
-## Loom Base Rule
+<!-- loom:begin version=v6.0.0 -->
+## Loom Strong Partner
 
-Keep the universal Loom safety floor active; enter the Loom lane only on explicit Loom intent.
+Always apply the minimum engineering floor: evidence before claims; understand the real flow; YAGNI → reuse → stdlib/platform/dependency → minimum code; fail-capable checks; never trade away trust-boundary validation, security, privacy, data-loss prevention, or accessibility.
 
-### Discipline
+Enter Loom only for explicit `/loom` intent or a selected Loom issue. Load `skills/loom/SKILL.md`; it loads the canonical `CONSTITUTION.md` and `AUTHORITY.md`, reconstructs relevant durable state read-only, routes the user’s natural-language outcome to one skill, and disappears. Rituals are skills, not states or a mandatory sequence.
 
-Lazy senior dev mode: **the best code is the code you never wrote.** Lazy means efficient, not careless.
+Actual mutations require matching current identity/state evidence and explicit narrow expiring authority at the action boundary. Implement never self-approves; no Verify evidence means no done. APPROVE, continuation, recovery, whole-pack confirmation, Finish, Publish, and Tend do not authorize one another. Never auto-merge, push, publish, release, archive, or clean up.
 
-Before writing code, stop at the first rung that holds: YAGNI → reuse in repo → stdlib → platform → installed dep → one line → minimum code.
-
-- Prefer minimal working change over broad rewrites.
-- Mark `loom:` comments only for deliberate simplifications that cut a real corner (state ceiling + upgrade path).
-- Not lazy about: trust-boundary validation, security, data-loss errors, accessibility, explicit requests.
-- Non-trivial logic leaves one runnable check before `done`.
-- Waits are work time: no back-to-back no-op polls — blocking wait, or spaced polls with prepared work between them.
-- Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim.
-- Confirm before project writes in setup/apply flows.
-- **External prose:** product purpose in commits/PRs/comments, not mechanics. **Language:** repo convention → project → user; ritual names/`loom:` stay English. **Traceability:** issue/PRD/ADR refs in trailers/PR References, not subjects.
-
-### Loom lane
-
-Begins only after explicit `/loom` or work on a selected Loom issue.
-
-- Use the `loom` dispatcher; reconstruct `.loom/` before selecting persisted work; explicit target wins.
-- Nonmutating reads/commands until a bounded apply gate names exact targets/actions; changed scope/base renews consent.
-- Workspace mode: root owns Loom artifacts; service repos are evidence/execution targets only.
-- Issue consent covers issue-scoped changes, `## Log`, Verify write-back, `Status: done` after APPROVE — not scope expansion or external actions.
-- APPROVE and whole-pack confirmation authorize no commit or publication; story lifecycle is separate.
-- One issue at a time; fresh maker context per issue. No verify digest → no done.
-
-### Invariants
-
-- Router is active: map intent → ritual skill before acting.
-- Human merge gate is universal: never auto-merge. Configured unattended setup/launch, APPROVE, and pack confirmation authorize no commit, push, hosted review, publication, or other Git/host mutation; unattended is report-only and STORY remains open. Only separately explicit attended finish may create exact confirmed local commits after final independent Verify; publish remains separate.
-- Maker/checker separation: Implement never self-approves.
-
-### Router
-
-Map intent to ritual skills:
-
-- setup/install/project wiring → `loom-init`
-- planning/scope/prd/issues/slicing → `loom-plan`
-- investigate/explore/ask/"why/how"/debug/decide → `loom-grill`
-- concrete implementation/build/fix/add, with or without an issue → `loom-implement`
-- review/check/gates/acceptance → `loom-verify`
-- maintenance/status cleanup/knowledge capture → `loom-tend`
-- recurring audit on a schedule → a recipe from `recipes/` (wiring: `docs/unattended.md`)
-
-**Confusable pairs:** concrete "build/fix/add X" → Implement, investigate/why/how/decide/unclear → Grill, work needing PRD/issues or multiple sessions → Plan; explicit natural-language target wins; judging a change → Verify, fixing its findings → Implement.
-
-**Scope routing:** small concrete fix → `loom-implement`; multi-session or work requiring PRD/issues → `loom-plan` first; **Fresh session per issue** — PRD + one issue only; Orca reuses a healthy service-lane terminal with a compact issue delta; other batch/goal runs spawn a fresh sub-agent per issue; domain breadth → host-native skills.
-
-**Ambiguous active build:** list `Status: ready-for-agent` issues and ask **one** clarifying question.
-
-### Session state
-
-Before acting, reconstruct state from `.loom/` (active PRD, issue cards, statuses, blocker graph) and project docs/ADRs.
-
-### Status vocabulary
-
-`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
+Core release support: OMP, OpenCode, Codex, and Orca. Other installed hosts remain legacy/best-effort outside core parity.
 <!-- loom:end -->

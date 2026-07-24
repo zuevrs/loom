@@ -2,6 +2,7 @@
 
 const { basename, dirname, resolve } = require("node:path");
 const { exactObject, exactSchemaMismatches, fail, nonemptyString, stringArrayMismatches } = require("./planner-utils.cjs");
+const { validateSemanticCheckpoint } = require("./v6-contracts.cjs");
 
 const STORY_KEYS = ["story", "lifecycle", "updated", "version"];
 const STORY_HEADINGS = ["Goal", "Outcome", "Decisions", "Open Questions", "Checks", "Handoff", "Verify"];
@@ -79,11 +80,47 @@ function renderStorySeed({ story, updated, goal, outcome, checks }) {
 }
 
 function storyCreationDecision(input) {
-  exactObject(input, ["readOnly", "durableDecisionConfirmed", "projectWritePending"], "creation decision");
-  const { readOnly, durableDecisionConfirmed, projectWritePending } = input;
-  if (typeof readOnly !== "boolean" || typeof durableDecisionConfirmed !== "boolean" || typeof projectWritePending !== "boolean") fail("creation decision inputs must be booleans");
-  if (readOnly && (durableDecisionConfirmed || projectWritePending)) fail("read-only work contradicts a durable decision or pending project write");
-  return durableDecisionConfirmed || projectWritePending ? "create" : "none";
+  exactObject(input, ["durableEvent"], "creation decision");
+  const durableEvents = new Set(["decision", "scope-change", "issue-completion", "blocker", "handoff", "delegation", "pre-shake"]);
+  if (input.durableEvent === null) return "none";
+  if (typeof input.durableEvent !== "string" || !durableEvents.has(input.durableEvent)) fail("durableEvent must be a supported semantic event or null");
+  return "create";
+}
+
+function planVerificationTier(input) {
+  exactObject(input, ["risk", "specBacked", "changedBoundaries"], "verification tier");
+  if (!["low", "medium", "high"].includes(input.risk) || typeof input.specBacked !== "boolean") fail("invalid verification risk or spec boundary");
+  if (!Array.isArray(input.changedBoundaries) || input.changedBoundaries.some((value) => typeof value !== "string" || !value.trim()) || new Set(input.changedBoundaries).size !== input.changedBoundaries.length) fail("changedBoundaries must be unique nonempty strings");
+  const tiers = {
+    low: { checks: "focused", standards: "independent", spec: input.specBacked ? "targeted" : "user-contract" },
+    medium: { checks: "touched-surface", standards: "independent", spec: input.specBacked ? "changed-boundaries" : "user-contract" },
+    high: { checks: "full-relevant-suite", standards: "independent", spec: input.specBacked ? "full-issue" : "user-contract" },
+  };
+  return { tier: input.risk, ...tiers[input.risk], changedBoundaries: [...input.changedBoundaries] };
+}
+
+function planRework(input) {
+  exactObject(input, ["findings", "changedBoundaries"], "rework");
+  if (!Array.isArray(input.findings) || input.findings.length === 0) fail("rework findings must be nonempty");
+  for (const finding of input.findings) {
+    exactObject(finding, ["id", "boundary"], "rework finding");
+    if (!nonemptyString(finding.id) || !nonemptyString(finding.boundary)) fail("rework finding fields must be nonempty");
+  }
+  if (new Set(input.findings.map(({ id }) => id)).size !== input.findings.length) fail("rework finding ids must be unique");
+  if (!Array.isArray(input.changedBoundaries) || input.changedBoundaries.some((value) => !nonemptyString(value))) fail("changedBoundaries must be strings");
+  const affected = [...new Set(input.findings.map(({ boundary }) => boundary).filter((boundary) => input.changedBoundaries.includes(boundary)))];
+  return { action: "REWORK_BATCH", findings: input.findings.map(({ id }) => id), staleEvidence: affected, recheck: affected };
+}
+
+function planSemanticResume(input) {
+  exactObject(input, ["checkpoint", "laneEvidenceReceipt", "now", "maxAgeMs"], "semantic resume");
+  const checkpoint = validateSemanticCheckpoint(input.checkpoint);
+  if (checkpoint.action === "STOP") fail(checkpoint.reason);
+  const { validateLaneEvidenceReceipt } = require("./lane-evidence.cjs");
+  const receipt = validateLaneEvidenceReceipt(input.laneEvidenceReceipt, { now: input.now, maxAgeMs: input.maxAgeMs });
+  if (receipt.action === "STOP") fail(receipt.reason);
+  if (checkpoint.storyId !== receipt.storyId) fail("checkpoint and LaneEvidenceReceipt Story differ");
+  return { action: "RESUME", authorityInherited: false, checkpoint, touchedRepositories: receipt.touchedRepositories.map(({ repository, repositoryId }) => ({ repository, repositoryId })), observedAt: receipt.observedAt };
 }
 
 
@@ -164,57 +201,6 @@ function planFollowUp(input) {
   };
 }
 
-function planActionableResume(input) {
-  const top = exactSchemaMismatches(input, ["story", "registeredRepositories", "gitLanes", "orcaLanes"], "resume evidence");
-  if (top.length) return { action: "STOP", mismatches: top };
-  const mismatches = [];
-  mismatches.push(...exactSchemaMismatches(input.story, ["lifecycle", "goal", "completed", "openQuestions", "staleVerify", "nextAction", "lanes"], "STORY"));
-  if (mismatches.length) return { action: "STOP", mismatches };
-  if (!LIFECYCLES.has(input.story.lifecycle)) mismatches.push(`STORY lifecycle is invalid: ${String(input.story.lifecycle)}`);
-  for (const key of ["goal", "nextAction"]) if (!nonemptyString(input.story[key])) mismatches.push(`STORY ${key} must be a nonempty string`);
-  for (const key of ["completed", "openQuestions", "staleVerify"]) mismatches.push(...stringArrayMismatches(input.story[key], `STORY ${key}`));
-  for (const [key, label] of [["lanes", "STORY lanes"], ["registeredRepositories", "registeredRepositories"], ["gitLanes", "gitLanes"], ["orcaLanes", "orcaLanes"]]) if (!Array.isArray(key === "lanes" ? input.story.lanes : input[key])) mismatches.push(`${label} must be an array`);
-  if (mismatches.length) return { action: "STOP", mismatches };
-
-  const registeredKeys = ["repository", "repositoryId"];
-  input.registeredRepositories.forEach((record, index) => {
-    const name = `registeredRepositories[${index}]`; const shape = exactSchemaMismatches(record, registeredKeys, name); mismatches.push(...shape);
-    if (!shape.length) for (const key of registeredKeys) if (!nonemptyString(record[key])) mismatches.push(`${name} ${key} must be a nonempty string`);
-  });
-  const storyLaneKeys = ["repository", "repositoryId", "laneId", "taskId", "terminalId", "cardStatus", "assignment"];
-  const gitLaneKeys = ["repository", "repositoryId", "status", "diffSummary", "materialChanges", "head"];
-  const orcaLaneKeys = [...storyLaneKeys, "observedHead"];
-  const validateLanes = (lanes, keys, label) => lanes.forEach((lane, index) => {
-    const name = `${label}[${index}]`; const shape = exactSchemaMismatches(lane, keys, name); mismatches.push(...shape); if (shape.length) return;
-    for (const key of keys.filter((key) => key !== "materialChanges")) if (!nonemptyString(lane[key])) mismatches.push(`${name} ${key} must be a nonempty string`);
-    if (keys.includes("materialChanges")) mismatches.push(...stringArrayMismatches(lane.materialChanges, `${name} materialChanges`));
-  });
-  validateLanes(input.story.lanes, storyLaneKeys, "STORY lanes"); validateLanes(input.gitLanes, gitLaneKeys, "Git lanes"); validateLanes(input.orcaLanes, orcaLaneKeys, "Orca lanes");
-  if (mismatches.length) return { action: "STOP", mismatches };
-
-  const duplicate = (values, label, field) => { for (const value of new Set(values.filter((item, index) => values.indexOf(item) !== index))) mismatches.push(`${label} duplicates ${field} ${value}`); };
-  const all = [["registration", input.registeredRepositories], ["STORY", input.story.lanes], ["Git", input.gitLanes], ["Orca", input.orcaLanes]];
-  for (const [label, records] of all) { duplicate(records.map(({ repository }) => repository), label, "repository"); duplicate(records.map(({ repositoryId }) => repositoryId), label, "repositoryId"); }
-  if (mismatches.length) return { action: "STOP", mismatches };
-  const registeredById = new Map(input.registeredRepositories.map((record) => [record.repositoryId, record.repository]));
-  for (const [label, records] of all.slice(1)) {
-    for (const { repository, repositoryId } of records) {
-      if (!registeredById.has(repositoryId)) mismatches.push(`${label} has unregistered repositoryId ${repositoryId}`);
-      else if (registeredById.get(repositoryId) !== repository) mismatches.push(`${label} alias mismatch for repositoryId ${repositoryId}: registered=${registeredById.get(repositoryId)}, evidence=${repository}`);
-    }
-    for (const { repository, repositoryId } of input.registeredRepositories) if (!records.some((record) => record.repositoryId === repositoryId && record.repository === repository)) mismatches.push(`${label} missing registered repository pair ${repository}/${repositoryId}`);
-  }
-  if (mismatches.length) return { action: "STOP", mismatches };
-
-  for (const { repository, repositoryId } of input.registeredRepositories) {
-    const story = input.story.lanes.find((lane) => lane.repositoryId === repositoryId); const git = input.gitLanes.find((lane) => lane.repositoryId === repositoryId); const orca = input.orcaLanes.find((lane) => lane.repositoryId === repositoryId);
-    for (const key of storyLaneKeys.filter((key) => !["repository", "repositoryId"].includes(key))) if (story[key] !== orca[key]) mismatches.push(`${repository} ${key} differs: STORY=${story[key]}, Orca=${orca[key]}`);
-    if (orca.observedHead !== git.head) mismatches.push(`${repository} HEAD differs: Git=${git.head}, Orca=${orca.observedHead}`);
-  }
-  if (mismatches.length) return { action: "STOP", mismatches };
-  return { action: "RESUME", goal: input.story.goal, completed: [...input.story.completed], currentDiff: input.gitLanes.map(({ repository, repositoryId, status, diffSummary }) => ({ repository, repositoryId, status, diffSummary })), openQuestions: [...input.story.openQuestions], lanes: input.orcaLanes.map(({ repository, repositoryId, laneId, taskId, terminalId, cardStatus, assignment }) => ({ repository, repositoryId, laneId, taskId, terminalId, cardStatus, assignment })), staleVerify: [...input.story.staleVerify], materialChanges: input.gitLanes.flatMap(({ repository, repositoryId, materialChanges }) => materialChanges.map((change) => ({ repository, repositoryId, change }))), nextAction: input.story.nextAction };
-}
-
 function actionableDeltaMismatches(value) {
   const mismatches = exactSchemaMismatches(value, ["goal", "nextAction", "lanes"], "actionableDelta"); if (mismatches.length) return mismatches;
   if (!nonemptyString(value.goal)) mismatches.push("actionableDelta goal must be a nonempty string"); if (!nonemptyString(value.nextAction)) mismatches.push("actionableDelta nextAction must be a nonempty string");
@@ -274,4 +260,4 @@ function planReviewEvent(input) {
 
 
 
-module.exports = { classifyEdit, isDurableDecision, planActionableResume, planFollowUp, planOmpBoundary, planReviewEvent, renderStorySeed, requiresIntermediateVerify, smallestArtifact, storyCreationDecision, validateStory };
+module.exports = { classifyEdit, isDurableDecision, planFollowUp, planOmpBoundary, planReviewEvent, planRework, planSemanticResume, planVerificationTier, renderStorySeed, requiresIntermediateVerify, smallestArtifact, storyCreationDecision, validateStory };

@@ -75,12 +75,16 @@ for skill in loom-init loom-plan loom-grill loom-implement loom-verify loom-tend
   fi
 done
 
-# Check managed block mentions all skills from skills/
+# The compact managed block points to the dispatcher; the dispatcher owns skill routing.
+if ! grep -Fq 'skills/loom/SKILL.md' "$AGENTS" 2>/dev/null; then
+  errors+=("AGENTS.md must point to skills/loom/SKILL.md")
+fi
 for skill_dir in "$SKILLS_DIR"/*/; do
   [ -d "$skill_dir" ] || continue
   skill_name=$(basename "$skill_dir")
-  if ! grep -q "$skill_name" "$AGENTS" 2>/dev/null; then
-    errors+=("skills/$skill_name exists but not mentioned in AGENTS.md")
+  [ "$skill_name" = "loom" ] && continue
+  if ! grep -q "$skill_name" "$SKILLS_DIR/loom/SKILL.md" 2>/dev/null; then
+    errors+=("skills/$skill_name exists but not mentioned in dispatcher")
   fi
 done
 
@@ -112,7 +116,6 @@ invariant_targets=(
   "$ROOT/hooks/invariants.cjs"
   "$ROOT/hermes-plugin/__init__.py"
   "$ROOT/kiro-agent.json"
-  "$AGENTS"
 )
 
 invariant_import_targets=(

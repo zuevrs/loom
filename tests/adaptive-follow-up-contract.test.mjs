@@ -22,9 +22,9 @@ function rejectsShapes(fn, valid, name) {
   throws(() => fn({ ...valid, unknown: false }), /exactly/, name + " unknown");
 }
 
-const creation = { readOnly: false, durableDecisionConfirmed: false, projectWritePending: false };
+const creation = { durableEvent: null };
 rejectsShapes(story.storyCreationDecision, creation, "storyCreationDecision");
-throws(() => story.storyCreationDecision({ ...creation, readOnly: "no" }), /booleans/);
+throws(() => story.storyCreationDecision({ durableEvent: "project-write" }), /supported semantic event/);
 
 rejectsShapes(story.classifyEdit, boundaries, "classifyEdit");
 for (const key of Object.keys(boundaries)) equal(story.classifyEdit({ ...boundaries, [key]: true }), "material", key);

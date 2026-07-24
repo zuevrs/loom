@@ -10,7 +10,7 @@ const { stateSnapshot, versionDriftWarning } = require("./stop-gate-logic.cjs");
 const { findWorkspace, workspaceRoot, workspaceState, workspacePointers } = require("./workspace.cjs");
 const { readProjectConfig, invalidProjectConfigAlert } = require("./config.cjs");
 
-const MANAGED_BLOCK_VERSION = "v5.0.0";
+const MANAGED_BLOCK_VERSION = "v6.0.0";
 
 function findProjectRoot() {
   let dir = process.cwd();

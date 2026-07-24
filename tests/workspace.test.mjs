@@ -221,7 +221,7 @@ try {
   ok(!existsSync(join(confirmApi, ".loom")), "confirm never writes into registered service repo");
   deepStrictEqual(new Set(listFiles(confirmApi)), beforeApi, "confirm leaves service repo files unchanged");
   ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("Custom intro"), "confirm preserves user AGENTS.md content outside managed block");
-  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v5.0.0 -->"), "confirm managed block matches loom-init template version");
+  ok(readFileSync(join(confirmRoot, "AGENTS.md"), "utf8").includes("<!-- loom:begin version=v6.0.0 -->"), "confirm managed block matches loom-init template version");
 
   const serviceCtx = workspace.projectContext(confirmApi);
   strictEqual(serviceCtx.mode, "workspace");

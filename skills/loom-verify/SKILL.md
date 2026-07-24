@@ -5,6 +5,8 @@ description: Fresh checker — Spec + Standards in parallel. Use automatically a
 
 **Judge only. Never fix.**
 
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+
 ## Goal
 
 Judge the change on two axes without fixing it. Fresh eyes, maker/checker separation.
@@ -18,7 +20,7 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 
 ## Outputs
 
-Structured digest (below). **Spec-backed Loom issue:** persisted into the issue's `## Verify` section on every verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → user decides re-implement / accept `loom:` debt / drop; the written REJECT line is what the next fresh session inherits. **Standards-only / no issue file:** digest only — chat when attended, private runner report when unattended; no issue write-back or status change.
+Structured digest (below). **Spec-backed Loom issue:** persisted into the issue's `## Verify` section on every verdict — APPROVE and REJECT both. On dual pass → issue `Status: done`. On fail → batch all current findings into one rework handoff; ask the user only when a genuine user-owned decision remains, otherwise re-implement the batch, accept explicit `loom:` debt, or drop; the written REJECT line is what the next fresh session inherits. **Standards-only / no issue file:** digest only — chat when attended, private runner report when unattended; no issue write-back or status change.
 
 **No issue file** (direct small-fix, ad-hoc diff review): the digest is the deliverable — chat when attended, private runner report when unattended. Nothing to write back, no status to set; every other rule (two checkers, evidence, hard stops) applies unchanged.
 
@@ -31,13 +33,13 @@ Structured digest (below). **Spec-backed Loom issue:** persisted into the issue'
 
 With a valid active workspace profile, resolve issue/PRD/context/ADR paths, Verify write-back, and stop/lint scans from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run each ordinary existing Git diff/check command in the relevant registered service repository; this is not aggregate Verify and adds no coordinator, manifest, per-repo verdict protocol, or lifecycle.
 Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md); the root coordinator pins the judged tree/diff and owns Verify write-back.
-Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes. APPROVE may complete an issue and unblock dependents; it leaves STORY `open` and grants no Git or host mutation.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) when Verify creates a durable semantic event; issue verdict write-back does not require creating a separate Story. APPROVE may complete an issue and unblock dependents; it leaves STORY `open` and grants no Git or host mutation.
 For an intermediate Verify after changed acceptance, public/inter-service contract, data path, or security path, use STORY's canonical **Adaptive continuation** trigger and normal Spec+Standards process. Judge only the affected completed boundary; append the ordinary verdict after `STALE`, with no commit authority.
 
 ## Process
 
 1. Pin fixed point; confirm diff is non-empty.
-2. **Run the objective gates before spawning anyone**: everything listed in issue/PRD, **plus the repo's own lint/typecheck/test commands when they exist** (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE. Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. And a cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence. **Any red gate short-circuits: REJECT now**, blockers name the failing commands, write-back happens as usual, and checkers are **not spawned** (record in Sub-agent evidence: `not spawned — objective gate red`) — judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
+2. **Run the objective gates before spawning anyone**: the risk-proportional tier from `planVerificationTier`: issue-required checks plus focused, touched-surface, or full relevant repository gates as justified by the changed boundary (package scripts, Makefile, CI config — discover, don't invent). A repo with a lint script that verify never ran is an unearned APPROVE. Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. And a cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence. **Any red gate short-circuits: REJECT now**, blockers name the failing commands, write-back happens as usual, and checkers are **not spawned** (record in Sub-agent evidence: `not spawned — objective gate red`) — judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
 3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers:
    - **Spec-backed:** spawn **two parallel checker sub-agents** (separate context — `Subagent` tool or host equivalent):
      - **Spec**: does change satisfy issue + PRD? Quote spec lines for findings. Pass `loomRole: "spec-checker"` in spawn data.
@@ -104,7 +106,7 @@ REJECT
 
 Status effects for a Spec-backed Loom issue: **APPROVE** → write `## Verify` section into issue file, then set issue `Status: done`. **REJECT** → write the verdict too (below); no auto status change. Standards-only verdicts are chat/private-report review output and never write an issue verdict or status.
 
-**An APPROVE vouches only for the diff it judged** (Spec-backed Loom issue). Any change after the verdict — however small — reruns the objective gates and is logged in the issue as `Post-verify delta: {what, why, gates rerun}`; a change that touches product behavior gets a fresh verify instead, not a delta note.
+**An APPROVE vouches only for the diff and boundaries it judged** (Spec-backed Loom issue). Any change after the verdict — however small — reruns the objective gates and is logged in the issue as `Post-verify delta: {what, why, gates rerun}`; a change that touches product behavior gets a fresh verify instead, not a delta note.
 
 **Two strikes rule** (Spec-backed Loom issue; attended mirror of the unattended stagnation rule): a second REJECT on the same issue whose blockers overlap the first is a stop signal, not a third lap — re-implementing against an unchanged misunderstanding spends checkers to stand still. Present the user the fork explicitly: Plan re-entry (amend the PRD/issue — see `loom-plan` § Route scope), accept the finding as explicit `loom:` debt, or drop the issue. The `## Verify` section already holds both REJECT lines as evidence.
 

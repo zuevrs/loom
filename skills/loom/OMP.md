@@ -20,6 +20,7 @@ task:
 ```
 
 No verified OMP contract in this repository or retained pilot evidence exposes a relative 60% idle-threshold config key, so retain the live-validated absolute `idleThresholdTokens: 80000` rather than inventing syntax. Native auto-shake is conservative: it protects the recent 16k tokens and skill reads and requires at least a 4k saving. Manual `/shake` remains the aggressive rescue. Outside Orca prefer a fresh worker and use native `/handoff` only at phase or issue boundaries when one cannot be created. With Orca, follow `ORCA.md`'s source-owned resume and one-offer handoff contract. `/compact soft <phase-specific focus>` is manual rescue only when the phase cannot safely change. Loom itself never invokes `/shake` or `/compact` automatically.
+The packaged OMP extension exposes no executable attended-confirmation event, so its code adapter always returns `DENY`; native host action approval around a fixed execution closure is a convention-only gate, not proof of human attendance.
 
 2. Cheap Advisor role, disabled. Read `omp config get modelRoles --json`, copy the exact current `modelRoles.smol` model ID, and preview:
 

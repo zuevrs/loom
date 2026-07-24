@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 **One maintenance outcome. Never expand scope. Never create APPROVE.**
 
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+
 ## Goal
 
 Produce exactly one evidence-backed maintenance outcome per invocation: a surfaced finding, a routed next action, or a bounded confirmed correction.

@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 **NEVER write PRD/issues without explicit user go-ahead.**
 
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+
 ## Goal
 
 Produce a verifiable PRD + issue pack under `.loom/<feature-slug>/` without starting implementation.

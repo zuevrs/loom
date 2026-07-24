@@ -639,15 +639,9 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(verify.includes("Respawn that checker **once**"), "verify caps null-yield respawns at one");
     ok(verify.includes("never a third spawn"), "verify forbids a third spawn on repeated null yields");
   }
-  // 3. wait discipline binds every lane on every host (goal-lane polls were outside
-  // the verify-only prose that already existed)
-  for (const [p, label] of [
-    ["AGENTS.md", "managed block"],
-    ["skills/loom-init/SKILL.md", "init template"],
-    ["opencode-plugin.mjs", "opencode injection"],
-  ]) {
-    ok(read(p).includes("Waits are work time: no back-to-back no-op polls"), `${label} carries the wait-discipline line`);
-  }
+  // 3. wait discipline has one canonical owner loaded by every Loom invocation.
+  ok(read("skills/loom/CONSTITUTION.md").includes("Waits are work time"), "constitution owns wait discipline");
+  ok(read("skills/loom/SKILL.md").includes("CONSTITUTION.md"), "dispatcher loads wait discipline through constitution");
 
   // v0.23.2 evidence-first verify: sources converge (Osmani "evidence as hard exit
   // criterion" / reviewers refuse diffs without test output; 0xCodez "second agent
@@ -676,14 +670,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(impl.includes("silent pass, loud fail"), "implement captures evidence silent-pass loud-fail");
     ok(impl.includes("verification ladder") && impl.includes("smoke run"), "implement carries the static→tests→smoke ladder");
 
-    // managed block carries the output-economy line on every surface
-    for (const [p, label] of [
-      ["AGENTS.md", "managed block"],
-      ["skills/loom-init/SKILL.md", "init template"],
-      ["opencode-plugin.mjs", "opencode injection"],
-    ]) {
-      ok(read(p).includes("Silent pass, loud fail: a green check is cited in one line; failing output lands verbatim."), `${label} carries the silent-pass loud-fail line`);
-    }
+    // The always-loaded constitution owns output economy; adapters need not concatenate copies.
+    ok(read("skills/loom/CONSTITUTION.md").includes("Silent pass, loud fail"), "constitution owns silent-pass loud-fail");
 
     // standards checkers own the falsifiability check, both dialects word-identical
     for (const p of ["agents/loom-verify-standards.md", ".claude-plugin/agents/loom-verify-standards.md"]) {
@@ -799,16 +787,10 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     ok(grill.includes("../loom-plan/GRILL.md") && canon.includes("One `ask` call = exactly ONE question"), "grill loads the canon that owns one-question discipline");
     ok(grill.includes("decisions owned by the user") && canon.includes("Facts vs decisions"), "grill directs facts and decisions through the canon");
 
-    // router update
-    for (const [p, label] of [
-      ["AGENTS.md", "managed block"],
-      ["skills/loom-init/SKILL.md", "init template"],
-    ]) {
-      const content = read(p);
-      ok(content.includes("investigate/explore/ask"), `${label} router routes investigate/explore to grill`);
-      ok(content.includes("investigate/why/how/decide/unclear → Grill"), `${label} confusable-pairs updated`);
-      ok(!content.includes("no docs wanted"), `${label} drops old 'no docs wanted' grill description`);
-    }
+    // Natural-language routing belongs to the dispatcher, not global surfaces.
+    const route = read("skills/loom/SKILL.md");
+    ok(route.includes("investigate, why/how, decide, debug, or unclear intent"), "dispatcher routes investigation to Grill");
+    ok(!route.includes("no docs wanted"), "dispatcher drops old Grill wording");
 
     const ocp = read("opencode-plugin.mjs");
     ok(ocp.includes("investigate/why/how/decide/unclear"), "opencode injection describes Grill intent");
@@ -870,9 +852,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(impl.includes("## Batch mode"), "implement documents batch mode");
   ok(impl.includes("Orca uses its long-lived service terminal plus compact re-dispatch delta") && impl.includes("OMP Goal creates **one fresh implement worker per issue attempt**"), "batch mode distinguishes Orca reuse from Goal fresh makers");
   ok(impl.includes("only when the host cannot spawn sub-agents"), "chaining is fallback only");
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("Orca reuses a healthy service-lane terminal with a compact issue delta") && doc.includes("other batch/goal runs spawn a fresh sub-agent per issue"), "managed block distinguishes Orca reuse from other batch runs");
-  }
+  ok(impl.includes("Orca uses its long-lived service terminal plus compact re-dispatch delta") && impl.includes("OMP Goal creates **one fresh implement worker per issue attempt**"), "Implement owns runner-specific worker behavior");
+  ok(agents.includes("CONSTITUTION.md") && initSkill.includes("single template source"), "global and Init surfaces point to canonical owners");
   ok(verify.includes("attempt them once per session"), "verify attempts named checker agents once per session");
   ok(verify.includes("never assume unavailability without one recorded attempt"), "verify forbids assumed unavailability");
   ok(verify.includes("Prefer the host's blocking wait"), "verify has host-neutral wait rule");
@@ -992,9 +973,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
   ok(grill.includes("Never write PRD or issue cards"), "loom-grill forbids PRD/issues (Plan territory)");
   ok(grill.includes("Never materialize a code write or ADR without explicit user confirmation"), "loom-grill requires confirm before action");
   ok(grill.includes("lightweight ADR"), "loom-grill writes lightweight ADRs for decisions");
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("loom-grill"), "managed block routes loom-grill");
-  }
+  ok(rf(resolve(__dirname, "..", "skills/loom/SKILL.md"), "utf8").includes("loom-grill"), "dispatcher routes loom-grill");
+  ok(agents.includes("skills/loom/SKILL.md") && initSkill.includes("single template source"), "global surfaces defer routing to dispatcher");
   ok(existsSync(resolve(__dirname, "..", "commands", "loom.md")), "loom dispatcher command exists");
 }
 
@@ -1060,9 +1040,8 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
     const desc = rf(resolve(skillsDir, skill, "SKILL.md"), "utf8").match(/^description: (.*)$/m)[1];
     ok(re.test(desc), `${skill} description carries a negative example`);
   }
-  for (const doc of [agents, initSkill]) {
-    ok(doc.includes("**Confusable pairs:**"), "managed block disambiguates confusable ritual pairs");
-  }
+  ok(rf(resolve(skillsDir, "loom", "SKILL.md"), "utf8").includes("natural-language"), "dispatcher owns natural-language routing");
+  ok(!agents.includes("**Confusable pairs:**") && !initSkill.includes("**Confusable pairs:**"), "global surfaces do not duplicate routing authority");
 
   // implement Log — maker's claim survives the session; verify checks it against the diff
   const impl = rf(resolve(skillsDir, "loom-implement", "SKILL.md"), "utf8");
@@ -1300,7 +1279,7 @@ const { findUnverifiedDoneIssues, check } = requireCjs(
 
   // Verify upgrades: default objective gates + escalation spec.
   const verify = read("skills/loom-verify/SKILL.md");
-  ok(verify.includes("repo's own lint/typecheck/test commands"), "verify runs repo-native gates by default");
+  ok(verify.includes("risk-proportional tier") && verify.includes("focused, touched-surface, or full relevant repository gates"), "verify selects repo-native gates proportionally to risk");
   ok(verify.includes("ESCALATE_HUMAN is a deliverable"), "escalation carries content and a channel");
   ok(/ESCALATE_HUMAN — \{date\}/.test(verify), "escalation persisted into the issue file");
 }
@@ -1461,8 +1440,8 @@ print(mod._state_snapshot(pathlib.Path(sys.argv[2])))`,
   ok(tend.includes(".loom/maintenance/issues/"), "tend knows the recipe stub inbox");
 
   const routerLine = "recurring audit on a schedule";
-  ok(read("AGENTS.md").includes(routerLine), "managed block routes recurring audits to recipes");
-  ok(read("skills/loom-init/SKILL.md").includes(routerLine), "init template carries the recipes route");
+  ok(read("skills/loom-tend/SKILL.md").includes("recurring") || read("skills/loom/SKILL.md").includes("Maintain project"), "maintenance routing remains available");
+  ok(!read("AGENTS.md").includes(routerLine), "managed block does not duplicate detailed recipe routing");
   ok(read("opencode-plugin.mjs").includes("Recurring audits"), "opencode router mentions recipes");
   ok(read("kiro-agent.json").includes("Recurring audits"), "kiro router mentions recipes");
   ok(read("skills/loom-init/SKILL.md").includes("scheduled recipes"), "init summary names the maintenance pair");
@@ -1731,7 +1710,7 @@ print(mod._anomaly_alert(pathlib.Path(sys.argv[2])))`,
 
   const impl = read("skills/loom-implement/SKILL.md");
   ok(impl.includes("## Direct small-fix route"), "implement directly handles concrete no-issue fixes");
-  ok(!impl.includes("delegates exactly one hop") && impl.includes("Full `loom-verify` remains mandatory"), "small-fix route stays in Implement then Verify");
+  ok(!impl.includes("delegates exactly one hop") && impl.includes("Independent Verify remains mandatory, but its depth is proportional to risk"), "small-fix route stays compressed while preserving independent Verify");
   ok(read("skills/loom-grill/SKILL.md").includes("chat** (attended) or the **PR description"), "grill small-fix verify digest lives in chat or PR");
   ok(impl.includes("End the maker assignment"), "implement ends each maker assignment with handoff");
   ok(impl.includes("maker stops; with Orca its healthy terminal idles") && impl.includes("root coordinator may continue the confirmed pack with bounded assignments"), "handoff separates maker stop from coordinator continuation");
@@ -1812,7 +1791,7 @@ for x in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(x)`,
   const bump = resolve(__dirname, "..", "scripts", "bump-version");
   const dryRun = spawnSync(process.execPath, [bump, "--dry", "9.9.9"], { encoding: "utf8" });
   strictEqual(dryRun.status, 0, "bump --dry exits 0");
-  strictEqual((dryRun.stdout.match(/^would bump: /gm) || []).length, 12, "dry-run lists all 12 carriers");
+  strictEqual((dryRun.stdout.match(/^would bump: /gm) || []).length, 11, "dry-run lists all 11 version carriers");
   ok(!dryRun.stdout.includes("bumped:"), "dry-run writes nothing");
   const usage = spawnSync(process.execPath, [bump], { encoding: "utf8" });
   strictEqual(usage.status, 1, "no version → usage error");
@@ -2181,7 +2160,7 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
   ok(/extension is not loaded[\s\S]*restart OMP/i.test(ttsr), "TTSR rule tells the user to restart OMP when the extension is dead");
   ok(/restart the host process/.test(read("README.md")), "README upgrade flow requires a host restart after plugin update");
   const verify = read("skills/loom-verify/SKILL.md");
-  ok(verify.includes("An APPROVE vouches only for the diff it judged"), "loom-verify scopes APPROVE to the judged diff");
+  ok(verify.includes("An APPROVE vouches only for the diff and boundaries it judged"), "loom-verify scopes APPROVE to the judged diff");
   ok(verify.includes("Post-verify delta"), "loom-verify names the post-verify delta log format");
 }
 
@@ -2204,18 +2183,13 @@ print(mod._version_drift_warning("v1.0", "v1.0.0"))`,
 // ritual-time rules live in the ritual that uses them (ETH agentfile-overhead lens)
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
-  for (const p of ["AGENTS.md", "skills/loom-init/SKILL.md"]) {
-    // version=v<digit> anchors past the "vX.Y.Z" placeholder in loom-init's Outputs prose
-    const block = read(p).match(/<!-- loom:begin version=v\d[\s\S]*?loom:end -->/)[0];
-    // universal sections survive
-    for (const keep of ["### Discipline", "### Invariants", "### Router", "**Confusable pairs:**", "### Session state", "### Status vocabulary", "needs-triage`, `needs-info"])
-      ok(block.includes(keep), `${p} block keeps universal section: ${keep}`);
-    // ritual-time content is out — carried by GRILL.md, loom-verify, TO-ISSUES.md instead
-    for (const gone of ["Invocation policy", "Transitions: unlabeled", "Transition rules live", "After Verify passes", "Model-invoked"])
-      ok(!block.includes(gone), `${p} block sheds ritual-time content: ${gone}`);
-    // ceiling = post-trim size (59) + small headroom, well under the pre-trim 73
-    ok(block.split("\n").length <= 65, `${p} block stays under the 65-line ceiling`);
-  }
+  const block = read("AGENTS.md").match(/<!-- loom:begin version=v\d[\s\S]*?loom:end -->/)[0];
+  for (const keep of ["skills/loom/SKILL.md", "CONSTITUTION.md", "AUTHORITY.md", "narrow expiring authority", "legacy/best-effort"])
+    ok(block.includes(keep), `managed block keeps canonical pointer: ${keep}`);
+  for (const gone of ["### Router", "**Confusable pairs:**", "### Session state", "### Status vocabulary", "Transitions: unlabeled"])
+    ok(!block.includes(gone), `managed block sheds duplicated detail: ${gone}`);
+  ok(block.split("\n").length <= 20, "managed block stays compact");
+  ok(read("skills/loom-init/SKILL.md").includes("Copy the delimited managed block verbatim"), "Init uses the canonical root template");
   // the moved rules still exist at their ritual homes (no rule was lost, only relocated)
   ok(read("skills/loom-plan/GRILL.md").includes("Transitions: unlabeled"), "transitions relocated to plan triage");
   ok(read("skills/loom-verify/SKILL.md").includes("set issue `Status: done`"), "verify carries the done transition");
@@ -2381,17 +2355,8 @@ for w in mod._lint_warnings(pathlib.Path(sys.argv[2])): print(w)`,
 {
   const read = (p) => readFileSync(resolve(__dirname, "..", p), "utf8");
   const phrase = "deliberate simplifications that cut a real corner";
-  for (const p of [
-    "AGENTS.md",
-    "skills/loom-init/SKILL.md",
-    "skills/loom-implement/SKILL.md",
-    "hooks/invariants.cjs",
-    "opencode-plugin.mjs",
-    "hermes-plugin/__init__.py",
-    "docs/glossary.md",
-  ]) {
-    ok(read(p).includes(phrase), `${p} narrows loom marker to real corner-cuts`);
-  }
+  ok(read("skills/loom/CONSTITUTION.md").includes(phrase), "constitution owns the marker rule");
+  ok(read("skills/loom/SKILL.md").includes("CONSTITUTION.md"), "dispatcher loads the marker rule canonically");
 }
 
 // v3.0.0 — capability config, lazy Orca adapter, one-command surface

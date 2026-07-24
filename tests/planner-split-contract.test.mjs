@@ -12,12 +12,12 @@ const publishPlanner = require(resolve(root, "hooks/publish-planner.cjs"));
 const tendPlanner = require(resolve(root, "hooks/tend-planner.cjs"));
 
 const exportsBeforeSplit = [
-  "assertPublicProse", "classifyEdit", "classifyFinishIntent", "classifyPublishIntent", "classifyTendIntent",
-  "isDurableDecision", "parseStory", "planActionableResume", "planActiveContinuation", "planAdrEvolution", "planAmendment", "planFinishInventory", "planFinishResult", "planFollowUp",
-  "planKnowledgeWrite", "planOmpBoundary", "planPublishInventory", "planPublishResult", "planReviewEvent", "planSemanticBundle",
-  "planStoryMigration", "planTendArchive", "planTendArchiveResult", "planTendCleanup", "planTendCleanupResult", "planTendReconciliation", "planTendReconciliationResult", "renderStorySeed", "renderStoryV2Seed",
-  "requiresIntermediateVerify", "smallestArtifact", "storyCreationDecision", "validateAdrScope", "validateContextKnowledge", "validateStory",
-];
+  "assertPublicProse", "classifyEdit", "classifyFinishIntent", "classifyPublishIntent", "classifyTendIntent", "collectLaneEvidenceReceipt", "createOutcomeReceipt",
+  "digestLiveEvidence", "digestMutationRequest", "guardLifecycleAction", "guardMutation", "isDurableDecision", "mintMutationAuthority", "parseStory", "planActiveContinuation", "planAdrEvolution", "planAmendment", "planFinishInventory", "planFinishResult", "planFollowUp",
+  "planGuardedCleanupCommand", "planKnowledgeWrite", "planOmpBoundary", "planRework", "planPublishInventory", "planPublishResult", "planReviewEvent", "planSemanticBundle",
+  "planSemanticResume", "planStoryMigration", "planTendArchive", "planTendArchiveResult", "planTendCleanup", "planTendCleanupResult", "planTendReconciliation", "planTendReconciliationResult", "renderStorySeed", "renderStoryV2Seed",
+  "planVerificationTier", "requiresIntermediateVerify", "smallestArtifact", "storyCreationDecision", "validateAdrScope", "validateCheckpointForWrite", "validateContextKnowledge", "validateLaneEvidenceReceipt", "validateLiveEvidence", "validateMutationRequest", "validateSemanticCheckpoint", "validateStory", "validateStoryIntent", "writeSemanticCheckpoint",
+].sort();
 deepStrictEqual(Object.keys(story).sort(), exportsBeforeSplit, "compatibility facade export authority changed");
 for (const family of [resume, finishPlanner, publishPlanner, tendPlanner]) {
   for (const [name, planner] of Object.entries(family)) equal(story[name], planner, `${name} facade does not preserve planner identity`);

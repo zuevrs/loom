@@ -7,8 +7,14 @@ const publish = require("./publish-planner.cjs");
 const tend = require("./tend-planner.cjs");
 const continuation = require("./continuation.cjs");
 const knowledge = require("./knowledge.cjs");
+const laneEvidence = require("./lane-evidence.cjs");
+const v6Contracts = require("./v6-contracts.cjs");
+const mutationGuard = require("./mutation-guard.cjs");
+const { createAttendedMutationAdapter: _privateAdapterFactory, fingerprintLiveState: _privateStateFingerprint, ...publicMutationGuard } = mutationGuard;
+const lifecycleGuard = require("./lifecycle-guard.cjs");
+const storyWriter = require("./story-writer.cjs");
 
-module.exports = { ...storyResume, ...finish, ...publish, ...tend, ...continuation, ...knowledge };
+module.exports = { ...storyResume, ...finish, ...publish, ...tend, ...continuation, ...knowledge, ...laneEvidence, ...v6Contracts, ...publicMutationGuard, ...lifecycleGuard, ...storyWriter };
 
 if (require.main === module) {
   const file = process.argv[2];

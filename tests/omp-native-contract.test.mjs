@@ -125,7 +125,7 @@ for (const token of [
 ok(!implement.includes("Prepare review command"), "Prepare review introduces a new command surface");
 ok(!orca.includes("publication manifest file"), "Orca introduces a publication manifest");
 for (const token of [
-  "validated current STORY", "authoritative current `git status` and `git diff`", "native Orca's story-filtered",
+  "stable Story identity", "authoritative current `git status` and `git diff`", "native Orca's story-filtered",
   "Transcripts are optional context only", "Missing, duplicate, stale, unknown, or contradictory",
   "dirty uncommitted diff is normal resumable state", "one compact actionable resume delta",
 ]) ok(orca.includes(token), `Canonical ORCA resume contract omits: ${token}`);
@@ -159,9 +159,9 @@ for (const artifact of [".loom/runtime.json", ".loom/checkouts.json", ".loom/res
   ok(!existsSync(resolve(root, artifact)), `Resume contract introduces runtime artifact: ${artifact}`);
 }
 const canonicalLoomStatuses = ["needs-triage", "needs-info", "ready-for-agent", "ready-for-human", "done", "wontfix"];
-const initSkill = read("skills/loom-init/SKILL.md");
-for (const status of canonicalLoomStatuses) ok(initSkill.includes("`" + status + "`"), `Canonical Loom status missing ${status}`);
-ok(!canonicalLoomStatuses.includes("in-review") && !initSkill.includes("`in-review`"), "Canonical Loom vocabulary gained in-review");
+const statusOwner = read("docs/glossary.md");
+for (const status of canonicalLoomStatuses) ok(statusOwner.includes("`" + status + "`"), `Canonical Loom status missing ${status}`);
+ok(!canonicalLoomStatuses.includes("in-review") && !statusOwner.includes("`in-review`"), "Canonical Loom vocabulary gained in-review");
 ok(!implement.includes("Status: in-review") && !orca.includes("Status: in-review"), "Prepare review writes in-review as a Loom issue status");
 const plan = read("skills/loom-plan/SKILL.md");
 ok(plan.includes("Plan creates no branches, worktrees, or runtime tasks"), "Plan still owns execution isolation");
@@ -280,13 +280,11 @@ for (const path of authorityMirrors) {
   const body = read(path);
   for (const stale of stalePositiveAuthority) ok(!body.includes(stale), `${path} retains stale positive authority: ${stale}`);
 }
-for (const path of ["AGENTS.md", "hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"]) {
-  const body = read(path);
-  for (const required of [
-    "separately explicit attended finish", "unattended setup/launch", "APPROVE", "pack confirmation",
-    "authorize no commit, push, hosted review, publication, or other Git/host mutation", "unattended is report-only",
-  ]) ok(body.includes(required), `${path} omits active v4 authority invariant: ${required}`);
-}
+const canonicalAuthority = read("skills/loom/AUTHORITY.md");
+for (const required of ["Finish", "Publish", "Tend", "APPROVE", "whole-pack confirmation", "explicit, narrow, and expiring"])
+  ok(canonicalAuthority.includes(required), `canonical authority omits lifecycle boundary: ${required}`);
+for (const path of ["hooks/invariants.cjs", "hermes-plugin/__init__.py", "kiro-agent.json"])
+  ok(read(path).includes("APPROVE"), `${path} retains enforcement guard while canonical prose owns authority`);
 
 for (const recipe of ["docs-drift", "dep-audit", "smell-sweep", "coverage-raise", "dead-code"]) {
   const body = read(`recipes/${recipe}.md`);
@@ -301,7 +299,7 @@ for (const required of [
   "blocker-first private report", "Do not commit, push, or open a draft PR", "persist the status/question",
 ]) ok(unattended.includes(required), `Mandatory blocker report contract missing: ${required}`);
 const githubWiring = unattendedDocs.slice(unattendedDocs.indexOf("### GitHub Actions"), unattendedDocs.indexOf("### The verify gate"));
-const loomCheckout = "repository: zuevrs/loom\n          ref: v5.0.0\n          path: loom-runtime";
+const loomCheckout = "repository: zuevrs/loom\n          ref: v6.0.0\n          path: loom-runtime";
 const composedPrompt = String.raw`prompt="$(cat ../loom-runtime/skills/loom/UNATTENDED.md; printf '\n\n--- COMPLETE RECIPE ---\n\n'; cat ../loom-runtime/recipes/docs-drift.md)"`;
 ok(githubWiring.includes("with: { path: target }") && githubWiring.includes(loomCheckout), "hosted example does not keep target and pinned Loom checkouts distinct");
 ok(githubWiring.indexOf(loomCheckout) < githubWiring.indexOf(composedPrompt), "hosted example composes before checking out pinned Loom");

@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "sanitized": true,
+  "receipts": [
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T20:44:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "owner, catalog, notifications",
+      "action": "Ready runtime; registered disposable owner; created Alpha/Beta owner OMP coordinators and four isolated Orca-owned service lanes",
+      "summary": "Runtime ready; all logical lanes visible and independently addressed",
+      "digest": "d986969ce3341def0e7e8c96bfac9fcc1ca023cd9efb26bc8ba56957a44c510a",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T20:46:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "Created bounded tasks with explicit input/output/limits; Beta notifications completion released pending Alpha notifications task",
+      "summary": "Native task/dispatch provenance completed; dependency remained pending until predecessor worker completion",
+      "digest": "a4aa17c897714366ade49004d78b98b514d61da07c27d99e22d787df193106bb",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T20:48:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "OMP makers performed compressed Alpha catalog and durable Beta notifications changes; fresh OMP checker terminals ran read-only proportional Verify",
+      "summary": "Both independent checks reported PASS with empty modified-file lists",
+      "digest": "5c93d26c1dcc7f06d9a35c1257e5e407bd1f521266c45550d33c91bdd391d044",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T20:48:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "Agent-first worktree startup prompt followed by injected dispatch",
+      "summary": "Initial persistent OMP terminals remained occupied by their startup prompts; one evidence-based dispatch attempt did not execute. Recovery used fresh same-worktree OMP terminals and explicit task reset, preserving provenance.",
+      "digest": "52c26394a828339510f213e5d31fd5e3b61b99e69bbc22455cf3f84ba251e85b",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Initial persistent OMP terminals remained occupied by their startup prompts; one evidence-based dispatch attempt did not execute. Recovery used fresh same-worktree OMP terminals and explicit task reset, preserving provenance."
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T20:48:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "Durable Story semantics and checkpoint recording",
+      "summary": "Native OMP agents loaded Loom rituals and executed tasks, but no pilot-specific durable Story artifact or canonical `SemanticCheckpoint` writer was exposed in the native Orca/OMP command surface; durable semantics therefore cannot be claimed observed.",
+      "digest": "0a48500bd0403e29b094795450b31006b216750f950ce3bd17d3c6072a5af905",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Native OMP agents loaded Loom rituals and executed tasks, but no pilot-specific durable Story artifact or canonical `SemanticCheckpoint` writer was exposed in the native Orca/OMP command surface; durable semantics therefore cannot be claimed observed."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T20:57:00.000Z",
+      "story": "Alpha",
+      "repositories": "catalog",
+      "action": "Rethought accepted Alpha catalog boundary in the existing lane, then dispatched only the affected independent targeted recheck",
+      "summary": "Original Alpha catalog evidence became stale; notifications evidence was not rerun; targeted recheck completed",
+      "digest": "eac4817649b67e4f742a89e38314c2bea1991fce9c1c53d2333bfc65437b5a15",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:00:00.000Z",
+      "story": "Beta",
+      "repositories": "notifications",
+      "action": "Started fresh OMP session in the same Orca worktree and supplied a read-only reconstruction prompt without lifecycle preamble",
+      "summary": "Fresh session reconstructed lane state and explicitly made no edit, commit, push, or lifecycle message",
+      "digest": "d57c606c5c524c70b9cbdc3974dacbef549b04fb62919a1f2d718083fc23a77e",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T21:00:00.000Z",
+      "story": "Beta",
+      "repositories": "notifications",
+      "action": "Native context-pressure shake",
+      "summary": "Fresh same-worktree reconstruction and no-authority behavior were observed, but the Orca/OMP surface exposed no measurable context-pressure or native shake primitive. This is a truthful native no-op under ordinary context, not an observed pressure event.",
+      "digest": "68834ec7e6d237078a62cab4f5065ac5561746db93db0999b7a994540e8f7e54",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Fresh same-worktree reconstruction and no-authority behavior were observed, but the Orca/OMP surface exposed no measurable context-pressure or native shake primitive. This is a truthful native no-op under ordinary context, not an observed pressure event."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:03:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "Recollected Git state, created local Finish commits, ran syntax checks, and queried disposable remotes before publishing",
+      "summary": "Four local lane commits existed while corresponding remote lane refs were absent; no push occurred during Finish",
+      "digest": "7a31748d5a24a371b93563e4b4de685a2662bb808878d90d4252be3e39f3593e",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:04:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "catalog, notifications",
+      "action": "Sequential disposable publish; first Beta lane succeeded, second Beta lane targeted advanced remote main and failed non-fast-forward; refreshed inventory",
+      "summary": "First published ref remained; failed lane remained local; refreshed remote main pointed to Alpha notifications; no replay of first Beta lane",
+      "digest": "b05f6109ff1865a1ddf6841ad25f57b4833c3ebedfee0a210af0bf8de8148d64",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T21:04:00.000Z",
+      "story": "Alpha",
+      "repositories": "notifications",
+      "action": "Attempted to force Alpha second-lane failure using remote main",
+      "summary": "Push unexpectedly succeeded because it was a fast-forward. This advanced only the disposable remote and is retained honestly; Beta then exercised the required native partial-failure path.",
+      "digest": "5441841c8f56b00b04c24437780259368df0b8cd096cd38711181050784458f9",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Push unexpectedly succeeded because it was a fast-forward. This advanced only the disposable remote and is retained honestly; Beta then exercised the required native partial-failure path."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:06:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "owner, catalog, notifications",
+      "action": "Tend/cleanup selected Alpha owner and Alpha service lanes, then inventoried surviving runtime state",
+      "summary": "Alpha resources removed; Beta catalog lane and Beta owner coordinator remained; branches were preserved",
+      "digest": "e682e31b62a576ccb923737a0afe8ffa3bd43d51ae6987a0aa18f54249e15c19",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T21:05:00.000Z",
+      "story": "Beta",
+      "repositories": "notifications",
+      "action": "Negative over-broad cleanup guard probe against live Beta notifications lane",
+      "summary": "`worktree rm --force` succeeded instead of denying an active/unpublished lane. Branch was preserved, but runtime resources were removed; broad-cleanup fail-closed criterion failed and Beta was not fully untouched.",
+      "digest": "ec75ac220a05431ec06bbf95b60a693d66b31b5daff6d44352551485837276b1",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "`worktree rm --force` succeeded instead of denying an active/unpublished lane. Branch was preserved, but runtime resources were removed; broad-cleanup fail-closed criterion failed and Beta was not fully untouched."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:05:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "owner, catalog, notifications",
+      "action": "Negative mismatched identity selector, stale completed-task redispatch, and absent sender authority checks",
+      "summary": "All three failed before mutation with selector-not-found, completed-task-not-ready, and no-active-sender-terminal errors respectively",
+      "digest": "6ff9aa7e62160065f4d80095c297d829d0965cc1ef5794698926e098872bb755",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T21:06:00.000Z",
+      "story": "Alpha",
+      "repositories": "catalog, notifications",
+      "action": "Tend reconciliation/archive and accepted local merge evidence",
+      "summary": "Selective native cleanup was observed, but no native Loom Tend reconciliation/archive command or accepted merge-evidence authority was available; cleanup must not be described as complete Tend.",
+      "digest": "b889f28bcd0c3f11adad540f34e3d6516e25db72b5ad54a38a2278a843a43699",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Selective native cleanup was observed, but no native Loom Tend reconciliation/archive command or accepted merge-evidence authority was available; cleanup must not be described as complete Tend."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:06:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "none",
+      "action": "Pilot-specific contract checks",
+      "summary": "v6 contract surface, adaptive flows, Orca boundaries, and migration/outcome checks all passed",
+      "digest": "2d26a599ad5b823d1d79ba73354aa0664875d64adc8abb4a4fe0aaec69c6f777",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "blocked",
+      "observedAt": "2026-07-25T21:06:00.000Z",
+      "story": "Alpha, Beta",
+      "repositories": "none",
+      "action": "Final release approval",
+      "summary": "At observation time, final Spec and Standards approval had not been supplied; both later independently APPROVED, resolving this historical gate.",
+      "digest": "27049095872144507b0c097c46bc94b7eb4481fd9d79966ed6263d549d00e1e0",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": "Historical observation only: final Spec and Standards approval was absent at this timestamp and was later resolved by both independent APPROVE verdicts."
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:16:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "owner",
+      "action": "Coordinator invoked the confirmed `writeSemanticCheckpoint` seam for a pre-shake durable event in the disposable owner Story, validated the checkpoint and STORY, and committed only owner memory",
+      "summary": "Writer returned `WRITTEN` with exact readback digest; canonical version-2 STORY validation passed",
+      "digest": "028838f266ad5602d0767c2e81e7536891927fd9041a48517816cb5e5d989ab9",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:16:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "notifications",
+      "action": "Recreated only the missing notifications lane from the registered disposable repository with an OMP first terminal; recollected Orca worktree/terminal and native Git state; called canonical `collectLaneEvidenceReceipt`",
+      "summary": "Fresh receipt matched Orca and Git HEAD, clean recovery branch, one touched repository, and digest `b03a4d6ed0fba9b918ef62cbb92ae790562c77cabcbe51a97e626256616be2ba`",
+      "digest": "990437f082f248334028bcecf6b12af7c8bd8ec475a60ae7a86091a951421bd7",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:17:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "notifications",
+      "action": "Minted exact attended cleanup authority from fresh evidence and exercised `planGuardedCleanupCommand` before argv",
+      "summary": "Exact request returned `EXECUTE`; stale evidence, absent authority, and over-broad targets returned `DENY`; emitted argv contained no `--force`",
+      "digest": "189cd7a67080cd25083411e82bc429627c70b00f9e699b9fa72a5a7688652cd9",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:17:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "notifications, owner",
+      "action": "Started a fresh OMP session in the same Orca-owned notifications worktree and reconstructed scope/evidence from the coordinator-owned checkpoint plus fresh lane state",
+      "summary": "Fresh session reported no inherited task/dispatch or mutation authority and made no edit, commit, push, or lifecycle message",
+      "digest": "43e8aa86370c10e20e33d220c7a2e27db4340099042e715099c5e5681cca4cc5",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "not exercised",
+      "observedAt": "2026-07-25T21:17:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "notifications",
+      "action": "Literal native context-pressure shake",
+      "summary": "OMP v17.0.6 and the current Orca CLI expose fresh/resume/session creation but no measurable pressure/shake capability. The contract permits reconstruction from a pre-shake checkpoint; therefore the fresh reconstruction is evidence for reconstruction/no-authority only, while literal shake remains N/A rather than observed.",
+      "digest": "43e8aa86370c10e20e33d220c7a2e27db4340099042e715099c5e5681cca4cc5",
+      "technicalAcceptance": false,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:18:00.000Z",
+      "story": "Beta recovery",
+      "repositories": "notifications, owner",
+      "action": "Native OMP dispatch produced and committed the disposable lane change; local notifications `main` accepted it via ordinary `--no-ff` merge with ancestry proof; owner `main` ordinarily merged the Story, wrote and committed archive records; fresh clean/inactive evidence then authorized `orca worktree rm` without `--force`",
+      "summary": "Accepted-local-merge ancestry, owner reconciliation, archive commit, native worktree absence, merged branch cleanup, and no hosted-merge claim were all observed",
+      "digest": "20de187d731ac675b6f15bd626f066f48ac07589955af2ee157d9d7f064bb33d",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:22:00.000Z",
+      "story": "Other surviving Story",
+      "repositories": "catalog, owner",
+      "action": "Inventoried Orca after selective Beta recovery cleanup",
+      "summary": "Existing catalog lane and persistent owner coordinator remained present at their prior heads; only the recovery notifications lane was removed",
+      "digest": "19bc0e38d597942958a7a16f228136894b5c14ab047aaae9ac1503ec39ccf89f",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    },
+    {
+      "provenance": "observed-native",
+      "observedAt": "2026-07-25T21:23:00.000Z",
+      "story": "Alpha, Beta recovery",
+      "repositories": "none",
+      "action": "Ran blocker behavior, v6 contract surface, adaptive flows, Orca boundaries, migration/outcomes, and Publish/Tend contract checks",
+      "summary": "All six pilot-relevant checks passed",
+      "digest": "6c7cf1684cd03f7e4066069fd79b1a3cf6d681e0e500fee0b6ac08425194e01b",
+      "technicalAcceptance": true,
+      "unresolvedBlocker": null
+    }
+  ],
+  "candidate": {
+    "version": "6.0.0",
+    "technicalAcceptance": "passed",
+    "independentReviews": {
+      "spec": "APPROVE",
+      "standards": "APPROVE"
+    },
+    "unresolvedBlockers": [],
+    "releaseAuthorized": true
+  }
+}

@@ -6,6 +6,39 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [6.0.0] - 2026-07-25
+
+### Highlights
+
+- Adaptive Strong Partner contract guarantees understood, captured, implemented, and verified outcomes without mandatory Story ceremony for safe compact work.
+- Orca remains sole runtime owner while exact lane receipts bind Story, repository, branch, HEAD, worktree, native selector/status, and operation target.
+- Attended mutations use adapter-private process-local capabilities and bound execution closures; raw confirmation claims cannot mint authority.
+
+### Breaking changes
+
+- v6 preserves v5 data readability and guided semantic migration, not mandatory v5 STORY-on-write, universal full-Verify, or duplicated workflow gates.
+- Outcome evidence is now structured `{ kind, source, observedAt, digest, summary }`; free-form evidence strings are rejected.
+
+### Migration steps
+
+- Follow `docs/migration-v6.md`, preview active Story migrations, explicitly confirm exact writes, and rerun `loom-init` so managed surfaces report v6.0.0. Archived v5 evidence remains read-only.
+- Host adapters must use a real attended confirmation callback/event to enter a bound mutation closure. Hosts without an executable API deny in code and remain convention-only behind their native action gate.
+
+### Adapter impacts
+
+- OMP, OpenCode, Codex, and Orca are the v6 core focus. Installed adapters expose no public raw-confirmation capture or authority object.
+- Literal context-pressure shake is capability-conditional; when unavailable, record `N/A` and use checkpoint plus fresh same-worktree reconstruction with no inherited authority.
+
+### Safety changes
+
+- Copied/fabricated capability and authority records, stale evidence, unrelated Story receipts, dirty cleanup claims, contradictory native inactivity, and target substitutions fail closed.
+- Pilot evidence is parsed from a sanitized structural ledger; earlier blocked events remain preserved.
+
+### Known limitations
+
+- The installed OMP/Orca surface exposes no measurable context-pressure/shake primitive; the attended pilot therefore records shake `N/A` and proves only the required checkpoint/reconstruction/no-authority fallback.
+- Final release remains blocked on independent human/checker Spec and Standards approval. No commit, tag, push, GitHub release, or package publication is part of this candidate.
+
 ## [5.0.0] - 2026-07-24
 
 ### Highlights
@@ -1210,7 +1243,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/zuevrs/loom/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/zuevrs/loom/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/zuevrs/loom/compare/v3.3.0...v4.0.0
 [3.3.0]: https://github.com/zuevrs/loom/compare/v3.2.0...v3.3.0

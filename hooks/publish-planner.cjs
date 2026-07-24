@@ -1,6 +1,7 @@
 "use strict";
 
 const { assertPublicProse } = require("./finish-planner.cjs");
+const { validateLaneEvidenceReceipt } = require("./lane-evidence.cjs");
 const { canonicalCopy, exactSchemaMismatches, fail, hashValue, strictStringArrayMismatches, trimmedString } = require("./planner-utils.cjs");
 function publicProseMismatch(value, name) {
   try { assertPublicProse(value); return null; } catch (error) { return `${name}: ${error.message}`; }
@@ -48,8 +49,9 @@ function planPublishInventory(input) {
 }
 
 function planPublishResult(input) {
-  const shape = exactSchemaMismatches(input, ["inventory", "confirmedDigest", "currentInventory", "results"], "publish result");
+  const shape = exactSchemaMismatches(input, ["inventory", "confirmedDigest", "currentInventory", "results", "laneEvidenceReceipt", "now", "maxAgeMs"], "publish result");
   if (shape.length) return stopAwaiting(shape.join("; "));
+  const laneEvidence=validateLaneEvidenceReceipt(input.laneEvidenceReceipt,{now:input.now,maxAgeMs:input.maxAgeMs}); if(laneEvidence.action==="STOP") return stopAwaiting(`fresh LaneEvidenceReceipt required: ${laneEvidence.reason}`);
   const preview = planPublishInventory(input.inventory), current = planPublishInventory(input.currentInventory);
   if (preview.action !== "PREVIEW" || current.action !== "PREVIEW" || preview.digest !== input.confirmedDigest || preview.digest !== current.digest) return stopAwaiting("publish inventory or confirmation is stale");
   if (!Array.isArray(input.results)) return stopAwaiting("publish results must be an array");
@@ -67,7 +69,7 @@ function planPublishResult(input) {
     if (result.outcome === 'failed' && (!trimmedString(result.error) || result.publicRef !== null)) return stopAwaiting("failed publication requires error and no public ref");
     outcomes.push(canonicalCopy(result)); failed = result.outcome === 'failed';
   }
-  if (!input.results.length) return { action: "PUBLISH_ALLOWED", lifecycle: "awaiting-review", lanes: remaining.map(({ repository }) => repository) };
+  if (!input.results.length) return { action: "GUARD_REQUIRED", operation: "publish", lifecycle: "awaiting-review", lanes: remaining.map(({ repository }) => repository), requests:remaining.map((lane)=>({operation:"publish",targets:[lane.repository],scope:{storyId:preview.inventory.story.id,inventoryDigest:preview.digest}})), evidenceRequirement:{laneReceiptDigest:input.laneEvidenceReceipt.digest,inventoryDigest:preview.digest} };
   const successes = outcomes.filter(({ outcome }) => outcome !== 'failed');
   return { action: failed ? (successes.length ? "PARTIAL" : "FAILURE") : (outcomes.length === remaining.length ? "SUCCESS" : "CONTINUE"), lifecycle: "awaiting-review", outcomes, cardStatus: "in-review", retainWorktrees: true, retryRequiresRefreshedRemainingInventory: failed };
 }

@@ -210,38 +210,17 @@ do
 done
 
 
-# AGENTS managed block and loom-init managed block template must stay identical.
-tmp_agents="$(mktemp)"
-tmp_init="$(mktemp)"
-cleanup() {
-  rm -f "$tmp_agents" "$tmp_init"
-}
-trap cleanup EXIT
-
-awk '
-  /<!-- loom:begin version=/ {in_block=1}
-  in_block {print}
-  /<!-- loom:end -->/ {if (in_block) exit}
-' "$AGENTS" > "$tmp_agents"
-
-awk '
-  /^```markdown$/ {fence_count++; in_block=(fence_count==1); next}
-  in_block && /^```$/ {exit}
-  in_block {print}
-' "$INIT_SKILL" > "$tmp_init"
-
-if [ ! -s "$tmp_agents" ] || [ ! -s "$tmp_init" ]; then
-  errors+=("could not extract managed block from AGENTS.md or loom-init template")
-elif ! cmp -s "$tmp_agents" "$tmp_init"; then
-  errors+=("AGENTS managed block differs from skills/loom-init/SKILL.md template")
+# Init must consume the single managed-block template from root AGENTS.md.
+if ! grep -Fq 'Copy the delimited managed block verbatim' "$INIT_SKILL"; then
+  errors+=("loom-init must reuse the canonical AGENTS.md managed block")
+fi
+if grep -Eq '<!-- loom:begin version=v[0-9]' "$INIT_SKILL"; then
+  errors+=("loom-init duplicates a managed block template")
 fi
 
-# Key invariants must stay explicit across docs and pre-LLM hook.
-if ! grep -Fq 'No verify digest' "$AGENTS"; then
-  errors+=("AGENTS.md missing 'No verify digest' invariant")
-fi
-if ! grep -Fq 'No verify digest' "$INIT_SKILL"; then
-  errors+=("skills/loom-init/SKILL.md missing 'No verify digest' invariant")
+# Enforcement hooks retain fail-closed invariants; Loom invocations load canonical contracts.
+if ! grep -Fq 'CONSTITUTION.md' "$ROOT/skills/loom/SKILL.md" || ! grep -Fq 'AUTHORITY.md' "$ROOT/skills/loom/SKILL.md"; then
+  errors+=("dispatcher must load canonical constitution and authority model")
 fi
 if ! grep -Fq 'No verify digest' "$INVARIANTS_SRC"; then
   errors+=("hooks/invariants.cjs missing 'No verify digest' invariant")

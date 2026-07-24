@@ -7,56 +7,37 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFileSync(resolve(root, path), "utf8");
 const require = createRequire(import.meta.url);
-const { planActionableResume, planOmpBoundary, planReviewEvent } = require(resolve(root, "hooks/story.cjs"));
+const { collectLaneEvidenceReceipt, planOmpBoundary, planReviewEvent, planSemanticResume } = require(resolve(root, "hooks/story.cjs"));
 const orca = read("skills/loom/ORCA.md");
 const omp = read("skills/loom/OMP.md");
 
-const story = {
-  lifecycle: "open",
-  goal: "Ship resumable stories",
-  completed: ["schema", "lanes"],
-  openQuestions: ["review wording"],
-  staleVerify: ["03"],
-  nextAction: "Dispatch issue 04",
-  lanes: [{ repository: "api", repositoryId: "repo-api", laneId: "lane-api", taskId: "task-04", terminalId: "term-api", cardStatus: "open", assignment: "issue 04" }],
+const checkpoint = { storyId: "resume-contract", decisions: ["Use semantic resume"], scope: ["api"], blockers: [], evidence: ["checkpoint"], handoff: null, delegation: null, staleEvidence: [] };
+const touched = [{ repository: "api", repositoryId: "repo-api" }];
+const laneInput = {
+  storyIntent: { storyId: "resume-contract", touchedRepositories: touched },
+  registeredRepositories: touched,
+  nativeRuntime: [{ repository: "api", repositoryId: "repo-api", laneId: "lane-api", selector: "lane-api", cardId: "card-api", taskId: "task-api", terminalId: "term-api", owner: "orca", status: "active", observedHead: "abc", worktreePath: "/tmp/api" }],
+  gitState: [{ repository: "api", repositoryId: "repo-api", head: "abc", branch: "story-resume", status: " M src/api.js", diffSummary: "1 file changed", worktreePath: "/tmp/api" }],
+  observedAt: "2026-07-24T20:00:30.000Z",
 };
-const gitLanes = [{ repository: "api", repositoryId: "repo-api", head: "abc", status: " M src/api.js", diffSummary: "1 file changed", materialChanges: ["contract changed"] }];
-const orcaLanes = [{ repository: "api", repositoryId: "repo-api", observedHead: "abc", laneId: "lane-api", taskId: "task-04", terminalId: "term-api", cardStatus: "open", assignment: "issue 04" }];
+const receipt = collectLaneEvidenceReceipt(laneInput, { now: "2026-07-24T20:01:00.000Z", maxAgeMs: 60000 });
+const resume = planSemanticResume({ checkpoint, laneEvidenceReceipt: receipt, now: "2026-07-24T20:01:00.000Z", maxAgeMs: 60000 });
+deepStrictEqual(resume, { action: "RESUME", authorityInherited: false, checkpoint, touchedRepositories: touched, observedAt: laneInput.observedAt });
+const changed = structuredClone(laneInput); changed.gitState[0].head = changed.nativeRuntime[0].observedHead = "def";
+const changedReceipt = collectLaneEvidenceReceipt(changed, { now: "2026-07-24T20:01:00.000Z", maxAgeMs: 60000 });
+const changedResume = planSemanticResume({ checkpoint, laneEvidenceReceipt: changedReceipt, now: "2026-07-24T20:01:00.000Z", maxAgeMs: 60000 });
+equal(changedResume.action, "RESUME", "fresh native/Git lane state is recollected rather than inherited");
+equal(changedResume.authorityInherited, false);
+for (const bad of [
+  { ...receipt, terminalId: "ephemeral" },
+  { ...receipt, observedAt: "2026-07-24T19:00:00.000Z" },
+]) {
+  let stopped = false;
+  try { planSemanticResume({ checkpoint, laneEvidenceReceipt: bad, now: "2026-07-24T20:01:00.000Z", maxAgeMs: 60000 }); } catch { stopped = true; }
+  equal(stopped, true, "ephemeral or stale resume evidence must stop");
+}
 
-const resume = planActionableResume({ story, registeredRepositories: [{ repository: "api", repositoryId: "repo-api" }], gitLanes, orcaLanes });
-equal(resume.action, "RESUME");
-deepStrictEqual(resume.currentDiff, [{ repository: "api", repositoryId: "repo-api", status: " M src/api.js", diffSummary: "1 file changed" }]);
-deepStrictEqual(resume.materialChanges, [{ repository: "api", repositoryId: "repo-api", change: "contract changed" }]);
-equal(resume.lanes[0].terminalId, "term-api");
-equal(resume.nextAction, "Dispatch issue 04");
-
-const dirtyApproved = planActionableResume({ story: { ...story, completed: [...story.completed, "approved issue"] }, registeredRepositories: [{ repository: "api", repositoryId: "repo-api" }], gitLanes, orcaLanes });
-equal(dirtyApproved.action, "RESUME", "coherent dirty uncommitted work must resume");
-const duplicate = planActionableResume({ story, registeredRepositories: [{ repository: "api", repositoryId: "repo-api" }], gitLanes, orcaLanes: [...orcaLanes, orcaLanes[0]] });
-equal(duplicate.action, "STOP");
-ok(duplicate.mismatches.includes("Orca duplicates repository api"));
-const stop = (input, token) => {
-  const before = structuredClone(input);
-  const result = planActionableResume(input);
-  equal(result.action, "STOP");
-  ok(result.mismatches.some((line) => line.includes(token)), `${token}: ${result.mismatches.join("; ")}`);
-  deepStrictEqual(input, before, "planner mutated input");
-};
-const base = () => structuredClone({ story, registeredRepositories: [{ repository: "api", repositoryId: "repo-api" }], gitLanes, orcaLanes });
-for (const [mutate, token] of [
-  [(x) => delete x.story.nextAction, "STORY missing nextAction"], [(x) => { x.story.extra = true; }, "STORY has unknown key extra"],
-  [(x) => { x.story.completed = [1]; }, "STORY completed[0]"], [(x) => delete x.story.lanes[0].terminalId, "STORY lanes[0] missing terminalId"],
-  [(x) => { x.story.lanes[0] = []; }, "STORY lanes[0] must be an exact plain object"], [(x) => delete x.gitLanes[0].materialChanges, "Git lanes[0] missing materialChanges"],
-  [(x) => { x.gitLanes[0].status = null; }, "Git lanes[0] status"], [(x) => { x.orcaLanes[0].assignment = ""; }, "Orca lanes[0] assignment"],
-  [(x) => x.orcaLanes.push({ ...x.orcaLanes[0] }), "Orca duplicates repository api"], [(x) => { x.orcaLanes[0].repository = "web"; }, "Orca alias mismatch"],
-  [(x) => { x.orcaLanes[0].terminalId = "other"; }, "terminalId differs"], [(x) => { x.orcaLanes[0].observedHead = "def"; }, "HEAD differs"],
-]) { const input = base(); mutate(input); stop(input, token); }
-const alias = base(); alias.orcaLanes[0].repository = "api-alias"; stop(alias, "alias mismatch");
-const inherited = base(); inherited.story.lanes[0] = Object.create({ repository: "api" }); stop(inherited, "exact plain object");
-const symbolic = base(); symbolic.gitLanes[0][Symbol("extra")] = true;
-const symbolicResult = planActionableResume(symbolic); equal(symbolicResult.action, "STOP"); ok(symbolicResult.mismatches.includes("Git lanes[0] has symbol key"));
-
-const delta = { goal: resume.goal, nextAction: resume.nextAction, lanes: resume.lanes };
+const delta = { goal: "Resume semantic Story", nextAction: "Recollect touched lane", lanes: [{ repository: "api", repositoryId: "repo-api", laneId: "lane-api", taskId: "task-api", terminalId: "term-api", cardStatus: "open", assignment: "read-only handoff" }] };
 const offer = planOmpBoundary({ contextPressure: true, decisionLoss: false, handoffOffered: false, handoffConfirmed: false, actionableDelta: null });
 deepStrictEqual(offer, { action: "OFFER_HANDOFF", offerHandoff: true, handoff: null });
 const handoff = planOmpBoundary({ contextPressure: true, decisionLoss: false, handoffOffered: true, handoffConfirmed: true, actionableDelta: delta });
@@ -102,4 +83,4 @@ for (const token of ["source-owned resume and one-offer handoff contract", "rema
 for (const stalePhrase of ["Issue 04 owns actionable STORY/Git/Orca reconciliation. Until", "Orca visible OMP workers are fresh per issue"]) {
   ok(!orca.includes(stalePhrase) && !omp.includes(stalePhrase), `active contract retains stale issue 03 assumption: ${stalePhrase}`);
 }
-console.log("Actionable resume, OMP, and reopen contract tests passed");
+console.log("Semantic resume, OMP, and reopen contract tests passed");

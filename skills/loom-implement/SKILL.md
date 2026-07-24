@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 **Ship one slice, leave one check. No verify → no done.**
 
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+
 ## Goal
 
 Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh issue attempts, with minimal diffs and independent Verify.
@@ -20,7 +22,7 @@ Ship one vertical slice in a maker, or coordinate a confirmed pack from fresh is
 ## Workspace ownership
 
 With a valid active workspace profile, resolve issue/PRD paths, `## Log`/`## Verify` write-back, and warp reads from the workspace owner (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Never create `.loom/`, ADRs, or managed blocks inside registered service repositories.
-Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes.
+Load and follow [`../loom/STORY.md`](../loom/STORY.md) when a durable semantic event occurs; ordinary project edits alone do not create a Story.
 For any follow-up to active story work, apply its canonical **Adaptive continuation** section before the ordinary issue process; do not duplicate or broaden its classifiers here.
 Invalid `.loom/config.json` stops before config-dependent or Git actions with repair guidance. When project config resolves to `worktrees: "orca"`, lazy-load [`../loom/ORCA.md`](../loom/ORCA.md): run only in the Orca-reported worktree and leave issue/PRD/`.loom` writes and final Verify to the root coordinator.
 
@@ -63,7 +65,7 @@ Publish is never inferred from finish, APPROVE, or review readiness. Only an exp
 
 The root coordinator may run the confirmed pack until complete, blocked, or stopped after two Verify REJECTs with overlapping blockers. It stays thin: scheduling and durable evidence come from existing source owners rather than retained chat memory. When the Orca adapter is active, resume delegates exclusively to [`../loom/ORCA.md`](../loom/ORCA.md) § Resume; Implement does not duplicate that algorithm. The coordinator exclusively writes `.loom`, dispatches bounded one-issue assignments under the selected runner's worker policy, and runs independent Verify after `worker_done`.
 
-Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that bounded assignment and returns control; it never marks the issue complete or closes a terminal. Verify APPROVE permits the coordinator to mark the issue done and unblock its dependents, but grants no commit or host mutation and leaves STORY `open`. With Orca, Verify REJECT keeps the lane and re-dispatches its healthy idle maker with the compact delta defined by the adapter; other runners start a fresh maker for rework. The coordinator, not a maker, may then dispatch another ready issue.
+Every maker still obeys the one-issue Process and Hard stops below. `worker_done` ends that bounded assignment and returns control; it never marks the issue complete or closes a terminal. Verify APPROVE permits the coordinator to mark the issue done and unblock its dependents, but grants no commit or host mutation and leaves STORY `open`. With Orca, Verify REJECT keeps the lane and re-dispatches its healthy idle maker with one compact batch of all current findings, affected boundaries, and prior evidence; other runners start a fresh maker for that batched rework. Recheck only the evidence affected by the resulting changes. The coordinator, not a maker, may then dispatch another ready issue.
 
 ## Batch mode ("do all the issues", host goal/loop features)
 
@@ -75,7 +77,7 @@ Lazy-load and follow [`../loom/UNATTENDED.md`](../loom/UNATTENDED.md) completely
 
 ## Direct small-fix route
 
-Without a named issue or pack, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or issue. Full `loom-verify` remains mandatory. Work directly in the target checkout unless it is dirty, on a non-default branch, occupied by other work, or the user explicitly requests isolation. Only those conflicts authorize requesting Orca isolation; do not create isolation merely because Orca is available.
+Without a named issue or pack, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or issue. Independent Verify remains mandatory, but its depth is proportional to risk: focused checks plus targeted user-contract/Standards review for a low-risk fix; broader touched-surface or full-issue review only when risk requires it. Work directly in the target checkout unless it is dirty, on a non-default branch, occupied by other work, or the user explicitly requests isolation. Only those conflicts authorize requesting Orca isolation; do not create isolation merely because Orca is available.
 
 ## Execution consent
 
@@ -92,7 +94,7 @@ Selecting a named issue explicitly authorizes issue-scoped project changes, `## 
 
 1. Apply **Selection and whole-pack intent** first. A confirmed pack target enters the coordinator path above; each maker receives only its PRD and issue. For one-issue work, read issue + PRD — **one batch of parallel reads, not one file per turn**: PRD, your issue card, and your blockers' status lines. For bare Implement when no issue was named, the session-start snapshot's `next up:` pointer names it — trust it and check only its `Blocked by` line; no snapshot → grep `Status:` across the pack's cards and take the lowest-numbered unblocked `ready-for-agent`. Never read sibling issue cards in full in a maker — the fresh-context contract is PRD + this issue. **Stop** if any `Blocked by` is unresolved — resolved means the blocker is `Status: done`. A `wontfix` blocker does NOT unblock: stop and ask the user (the dependent issue may need re-scoping). Issue marked `ready-for-human` → not yours; stop.
 2. **Pre-flight baseline:** run the project's existing checks (test/lint commands from conventions) BEFORE touching code. A red baseline makes "tests pass" unattributable — note pre-existing failures in `## Log`; if the issue's own verification path is already red, stop and report instead of building on it.
-3. **Never invent a load-bearing decision silently.** Issue silent on output format, interface names, error contracts, edge behavior? The PRD's Implementation Decisions and Assumptions answer first; if the PRD is silent too, ask the user (attended) or flip to `needs-info` (unattended). An issue deliberately carries no file paths — interpreting it against the PRD is your job; inventing what the PRD never decided is not.
+3. **Evidence-first understanding checkpoint.** Before changing code, state the observed flow, root-cause hypothesis, and smallest fail-capable check. Then **Never invent a load-bearing decision silently.** Issue silent on output format, interface names, error contracts, edge behavior? The PRD's Implementation Decisions and Assumptions answer first; if the PRD is silent too and the choice is genuinely user-owned, ask the single best question; otherwise make a bounded explicit revisable assumption (attended) or flip to `needs-info` (unattended). An issue deliberately carries no file paths — interpreting it against the PRD is your job; inventing what the PRD never decided is not.
    **Surface the assumptions you do make.** The gap this guards: the PRD answered, but your reading of it isn't the only possible one. Before writing non-trivial code, print the numbered list — `Assumptions: 1. … — correct me now or I proceed with these` — to the chat (attended) or into `## Log` (unattended). An assumption surfaced costs one line; the same assumption discovered by a checker costs a REJECT lap. Trivial issues skip the block — an empty ritual is noise.
 4. Climb the **discipline ladder** — first rung that holds (below).
 5. Prefer deletion over addition.

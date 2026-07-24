@@ -7,9 +7,9 @@ import { createRequire } from "node:module";
 const { readWorkspaceProfile, validateWorkspaceProfile, validateWorkspaceRepositories, serializeWorkspaceProfile } = createRequire(import.meta.url)("../hooks/workspace.cjs");
 
 function loadManagedBlock() {
-  const initSkill = readFileSync(resolve(import.meta.dirname, "../skills/loom-init/SKILL.md"), "utf8");
-  const match = initSkill.match(/```markdown\n(<!-- loom:begin[\s\S]*?<!-- loom:end -->)\n```/);
-  if (!match) throw new Error("managed block template missing from skills/loom-init/SKILL.md");
+  const agents = readFileSync(resolve(import.meta.dirname, "../AGENTS.md"), "utf8");
+  const match = agents.match(/(<!-- loom:begin[\s\S]*?<!-- loom:end -->)/);
+  if (!match) throw new Error("managed block template missing from AGENTS.md");
   return match[1];
 }
 
@@ -137,7 +137,7 @@ function prevalidateCanonical(root, profile, agents) {
     const service = resolve(root, repo.path);
     if (service === root || !service.startsWith(`${root}/`)) throw new Error(`registered service escapes owner: ${repo.path}`);
   }
-  const worktrees = ownerWorktrees(root, openStories(root));
+  const worktrees = orcaMode ? [] : ownerWorktrees(root, openStories(root));
   for (const item of worktrees) {
     if (existsSync(item.path)) throw new Error(`owner Story worktree target already exists: ${item.path}`);
     if (execFileSync("git", ["check-ref-format", "--branch", item.branch], { encoding: "utf8" }).trim() !== item.branch) throw new Error(`invalid owner Story branch: ${item.branch}`);
@@ -251,6 +251,14 @@ if (usageError || (initOwnerGit && !confirm) || (baseline !== null && !["canonic
 
 const root = resolve(rootArg);
 const agents = managedAgents(root);
+const projectConfigPath = join(root, ".loom", "config.json");
+let orcaMode = false;
+if (existsSync(projectConfigPath)) {
+  const config = JSON.parse(readFileSync(projectConfigPath, "utf8"));
+  if (config === null || typeof config !== "object" || Array.isArray(config) || Reflect.ownKeys(config).some((key) => key !== "worktrees") || config.worktrees !== "orca") throw new Error('invalid .loom/config.json; worktrees must be "orca"');
+  orcaMode = true;
+}
+// Orca mode validates owner isolation but provisions no owner Story worktree; non-Orca mode retains ordinary Git owner isolation.
 const canonical = (path) => path.replaceAll("\\", "/").toLowerCase();
 const stableName = (path) => basename(path).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64).replace(/-$/, "") || "repository";
 function repositoriesFromInventory(items) {
@@ -329,6 +337,8 @@ try {
     symlinked_git_roots: inventory.symlinked_git_roots,
     errors: inventory.errors,
     root_write: { agents: agents.status, profile: existingProfile && JSON.stringify(profile) === JSON.stringify(existingProfile) ? "preserve-valid" : existingProfile ? "will-refresh" : "will-create" },
+    runtime_owner: orcaMode ? "orca" : "git",
+    owner_worktrees: orcaMode ? [] : ownerWorktrees(root, openStories(root)),
   };
   if (!inventory.root_is_git && baseline === null) proposal.warnings.push("Artifact owner baseline is ambiguous: choose canonical (initialize owner Git before Loom writes) or completed (keep artifacts unversioned).");
   if (!confirm) {

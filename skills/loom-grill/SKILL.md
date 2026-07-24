@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 **Explore with discipline. Act with confirmation. Leave a trace.**
 
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+
 ## Goal
 
 Investigate a question, resolve it through disciplined interview, then materialize findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues). Covers both "think this through" and "debug/fix this" when the user has no pre-defined scope.

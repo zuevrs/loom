@@ -1,6 +1,7 @@
 "use strict";
 
 const { exactSchemaMismatches, fail, hashValue, strictStringArrayMismatches, trimmedString } = require("./planner-utils.cjs");
+const { validateLaneEvidenceReceipt } = require("./lane-evidence.cjs");
 
 const FINISH_PROSE_LEAKS = [
   /\b(?:loom|orca|omp)\b/i,
@@ -129,10 +130,12 @@ function planFinishInventory(input) {
 }
 
 function planFinishResult(input) {
-  const keys = ["inventory", "confirmedDigest", "currentInventory", "checksPassed", "finalVerify", "boundaryRecheck", "ownerResult", "commitResults"];
+  const keys = ["inventory", "confirmedDigest", "currentInventory", "checksPassed", "finalVerify", "boundaryRecheck", "ownerResult", "commitResults", "laneEvidenceReceipt", "now", "maxAgeMs"];
   const shape = exactSchemaMismatches(input, keys, "finish result");
   if (shape.length) return { action: "STOP", lifecycle: "open", mutation: false, reason: shape.join("; ") };
   const mismatches = [];
+  const laneEvidence=validateLaneEvidenceReceipt(input.laneEvidenceReceipt,{now:input.now,maxAgeMs:input.maxAgeMs});
+  if(laneEvidence.action==="STOP") mismatches.push(`fresh LaneEvidenceReceipt required: ${laneEvidence.reason}`);
   if (!trimmedString(input.confirmedDigest)) mismatches.push("confirmedDigest must be nonempty");
   if (typeof input.checksPassed !== "boolean") mismatches.push("checksPassed must be boolean");
   const verifyShape = exactSchemaMismatches(input.finalVerify, ["spec", "standards", "independent", "sameBoundary"], "finalVerify"); mismatches.push(...verifyShape);
@@ -163,9 +166,9 @@ function planFinishResult(input) {
   const ownerActual = (records) => Array.isArray(records) ? [...records].sort((a,b)=>String(a.path).localeCompare(String(b.path))) : [];
   const ownerIntegrated = input.ownerResult.status === "integrated" && JSON.stringify(ownerActual(input.ownerResult.writtenFiles)) === JSON.stringify(ownerActual(ownerExpected)) && JSON.stringify(ownerActual(input.ownerResult.readBackFiles)) === JSON.stringify(ownerActual(ownerExpected));
   if (input.ownerResult.status === "failed" || (input.ownerResult.status === "integrated" && !ownerIntegrated)) return { action: "STOP", lifecycle: "open", mutation: false, owner: input.ownerResult, reason: "owner integration failed or exact write/readback inventory differs; preserve retryable local state" };
-  if (input.commitResults.length === 0 && input.ownerResult.status === "pending") return { action: "INTEGRATION_ALLOWED", lifecycle: "open", owner: preview.inventory.owner, servicesRemaining: repositories };
+  if (input.commitResults.length === 0 && input.ownerResult.status === "pending") return { action: "GUARD_REQUIRED", operation: "finish-owner-integration", lifecycle: "open", owner: preview.inventory.owner, servicesRemaining: repositories, request: { operation:"finish-owner-integration", targets:[preview.inventory.owner.ownerId], scope:{storyId:preview.inventory.story.id,inventoryDigest:preview.digest} }, evidenceRequirement:{laneReceiptDigest:input.laneEvidenceReceipt.digest,inventoryDigest:preview.digest} };
   if (input.ownerResult.status !== "integrated") return { action: "STOP", lifecycle: "open", mutation: false, reason: "owner integration is not complete" };
-  if (input.commitResults.length === 0) return { action: "COMMIT_ALLOWED", lifecycle: "open", owner: { commit: input.ownerResult.commit, tree: input.ownerResult.tree }, commitsRemaining: repositories };
+  if (input.commitResults.length === 0) return { action: "GUARD_REQUIRED", operation: "finish-service-commit", lifecycle: "open", owner: { commit: input.ownerResult.commit, tree: input.ownerResult.tree }, commitsRemaining: repositories, request:{operation:"finish-service-commit",targets:repositories,scope:{storyId:preview.inventory.story.id,inventoryDigest:preview.digest}}, evidenceRequirement:{laneReceiptDigest:input.laneEvidenceReceipt.digest,inventoryDigest:preview.digest} };
   const resultKeys = ["repository", "status", "commit", "hookPassed", "verifiedTreeMatches"];
   for (const [index, result] of input.commitResults.entries()) {
     const resultShape = exactSchemaMismatches(result, resultKeys, `commitResults[${index}]`); mismatches.push(...resultShape); if (resultShape.length) continue;

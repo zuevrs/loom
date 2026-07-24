@@ -23,7 +23,6 @@ const CARRIERS = [
   ["hooks/loom-session-start.cjs", `const MANAGED_BLOCK_VERSION = "v${V}";`],
   ["opencode-plugin.mjs", `Version: ${V}`],
   ["AGENTS.md", `<!-- loom:begin version=v${V} -->`],
-  ["skills/loom-init/SKILL.md", `<!-- loom:begin version=v${V} -->`],
   // The [Unreleased] compare link must chase the newest tag, or the
   // doc-consistency canary fails on the push AFTER tagging — bump it upfront.
   ["CHANGELOG.md", `\\[Unreleased\\]: https://github.com/zuevrs/loom/compare/v${V}\\.\\.\\.HEAD`],

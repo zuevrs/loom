@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { laneReceipt, now } from "./v6-safety-fixture.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -42,9 +43,9 @@ for (const leak of ["Loom issue 05", "maker update", "model: fast", "orchestrati
 
 const ownerPending = { status: "pending", commit: null, tree: null, writtenFiles: [], readBackFiles: [] };
 const ownerIntegrated = { status: "integrated", commit: "owner456", tree: "owner-tree", writtenFiles: owner.files.map(({path,contentDigest})=>({path,contentDigest})), readBackFiles: owner.files.map(({path,contentDigest})=>({path,contentDigest})) };
-const execution = { inventory: inventoryInput, confirmedDigest: preview.digest, currentInventory: inventoryInput, checksPassed: true, finalVerify: { spec: "APPROVE", standards: "APPROVE", independent: true, sameBoundary: true }, boundaryRecheck: { headAndDiffMatch: true, indexSafe: true }, ownerResult: ownerIntegrated, commitResults: [] };
-deepStrictEqual(story.planFinishResult({ ...execution, ownerResult: ownerPending }), { action: "INTEGRATION_ALLOWED", lifecycle: "open", owner: preview.inventory.owner, servicesRemaining: ["catalog"] });
-deepStrictEqual(story.planFinishResult(execution), { action: "COMMIT_ALLOWED", lifecycle: "open", owner: { commit: "owner456", tree: "owner-tree" }, commitsRemaining: ["catalog"] });
+const execution = { laneEvidenceReceipt:laneReceipt({storyId:"catalog-reliability",repository:"catalog",repositoryId:"repo-1",branch:"feature/catalog",head:"abc123"}),now,maxAgeMs:60000, inventory: inventoryInput, confirmedDigest: preview.digest, currentInventory: inventoryInput, checksPassed: true, finalVerify: { spec: "APPROVE", standards: "APPROVE", independent: true, sameBoundary: true }, boundaryRecheck: { headAndDiffMatch: true, indexSafe: true }, ownerResult: ownerIntegrated, commitResults: [] };
+{const guarded=story.planFinishResult({ ...execution, ownerResult: ownerPending }); equal(guarded.action,"GUARD_REQUIRED"); equal(guarded.request.operation,"finish-owner-integration"); equal(guarded.evidenceRequirement.laneReceiptDigest,execution.laneEvidenceReceipt.digest);}
+{const guarded=story.planFinishResult(execution); equal(guarded.action,"GUARD_REQUIRED"); equal(guarded.request.operation,"finish-service-commit"); deepStrictEqual(guarded.request.targets,["catalog"]);}
 for (const patch of [
   { confirmedDigest: changed.digest }, { currentInventory: changed.inventory }, { checksPassed: false },
   { finalVerify: { ...execution.finalVerify, spec: "REJECT" } },
@@ -70,7 +71,7 @@ for (const currentInventory of [
   { ...multiPreview.inventory, lanes: [...multiPreview.inventory.lanes, { ...secondLane, repository: "billing", repositoryId: "repo-3", nativeId: "lane-3" }], commitPlan: [...multiPreview.inventory.commitPlan, { repository: "billing", messages: ["Improve billing"], independentSplit: false }] },
   { ...multiPreview.inventory, lanes: multiPreview.inventory.lanes.map((item) => item.repository === "catalog" ? { ...item, head: "substituted" } : item) },
 ]) { const result = story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory, commitResults: [] }); equal(result.action, "STOP"); equal(result.lifecycle, "open"); }
-deepStrictEqual(story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory: reorderedInventory, commitResults: [] }), { action: "COMMIT_ALLOWED", lifecycle: "open", owner: { commit: "owner456", tree: "owner-tree" }, commitsRemaining: ["catalog", "notifications"] });
+{const guarded=story.planFinishResult({ ...execution, inventory: multiPreview.inventory, confirmedDigest: multiPreview.digest, currentInventory: reorderedInventory, commitResults: [] });equal(guarded.action,"GUARD_REQUIRED");deepStrictEqual(guarded.request.targets,["catalog","notifications"]);}
 const substitutedInventory = { ...inventoryInput, story: { ...inventoryInput.story, id: "reviewer-substitution" } };
 for (const attack of [
   { ...execution, inventory: substitutedInventory, currentInventory: substitutedInventory },
