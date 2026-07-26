@@ -1,0 +1,40 @@
+import assert from "node:assert/strict";
+import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync} from "node:fs";
+import {tmpdir} from "node:os";
+import {join} from "node:path";
+import {createRequire} from "node:module";
+import test from "node:test";
+const require=createRequire(import.meta.url),a=require("../hooks/artifacts.cjs");
+const story=(id="alpha")=>`---\nid: ${id}\ntitle: Alpha story\nstatus: active\n---\n\n## Intent\nRich **intent**.\n\n## Success\n- measurable\n\n## Decisions\nKeep it small.\n`;
+const ticket=(id="01-first",storyId="alpha",status="ready-for-agent",blockedBy="[]")=>`---\nid: ${id}\nstoryId: ${storyId}\nstatus: ${status}\nblockedBy: ${blockedBy}\n---\n\n## What to build\nRich prose.\n\n## Acceptance criteria\n- [ ] Works\n\n## Verification\nHuman approval: not-required\nnode --test\n\n## Verify\n`;
+function fixture(){const root=mkdtempSync(join(tmpdir(),"loom-artifacts-"));mkdirSync(join(root,".loom","alpha","tickets"),{recursive:true});writeFileSync(join(root,".loom","version"),"7\n");writeFileSync(join(root,".loom","alpha","STORY.md"),story());writeFileSync(join(root,".loom","alpha","tickets","01-first.md"),ticket());return root}
+test("loads strict current v7 artifacts",()=>{const root=fixture();try{const graph=a.loadLoom(root);assert.deepEqual(graph.readyTickets,[{storyId:"alpha",id:"01-first"}]);assert.deepEqual(a.loadStoryGraph(root,"alpha").readyTicketIds,["01-first"]);assert.equal(graph.stories[0].sections.Intent,"Rich **intent**.");assert.equal(a.parseTicket(a.renderTicket(graph.tickets[0]),graph.tickets[0].filePath).sections["What to build"],"Rich prose.")}finally{rmSync(root,{recursive:true,force:true})}});
+test("rejects malformed root story types and sections",()=>{for(const mutate of [
+ root=>writeFileSync(join(root,".loom","workspace.json"),"{}"),
+ root=>mkdirSync(join(root,".loom","Bad")),
+ root=>writeFileSync(join(root,".loom","alpha","rogue"),"x"),
+ root=>{rmSync(join(root,".loom","alpha","STORY.md"));mkdirSync(join(root,".loom","alpha","STORY.md"))},
+ root=>writeFileSync(join(root,".loom","alpha","tickets","02-bad.md"),ticket("02-bad").replace("## Verification\nHuman approval: not-required\nnode --test\n\n", "")),
+ root=>writeFileSync(join(root,".loom","alpha","tickets","02-bad.md"),ticket("02-bad").replace("## Verification", "## Log\nlog\n\n## Verification")),
+ root=>writeFileSync(join(root,".loom","alpha","tickets","02-bad.md"),ticket("02-bad")+"\n## Surprise\nno\n"),
+]){const root=fixture();try{mutate(root);assert.throws(()=>a.loadLoom(root),/invalid/)}finally{rmSync(root,{recursive:true,force:true})}}});
+test("rejects identity duplicates dangling blockers and cycles",()=>{for(const files of [
+ [["02-second.md",ticket("01-first")]],
+ [["02-second.md",ticket("02-second","alpha","ready-for-agent","[99-missing]")]],
+ [["02-second.md",ticket("02-second","alpha","ready-for-agent","[03-third]")],["03-third.md",ticket("03-third","alpha","ready-for-agent","[02-second]")]],
+]){const root=fixture();try{for(const [name,text] of files)writeFileSync(join(root,".loom","alpha","tickets",name),text);assert.throws(()=>a.loadLoom(root),/invalid/)}finally{rmSync(root,{recursive:true,force:true})}}});
+test("requires exact v7 version",()=>{for(const version of ["v7","6","8","7 garbage"]){const root=fixture();try{writeFileSync(join(root,".loom","version"),version);assert.throws(()=>a.loadLoom(root),/version/)}finally{rmSync(root,{recursive:true,force:true})}}});
+
+test("Ticket IDs and blocker graphs are Story-scoped",()=>{const root=fixture();try{mkdirSync(join(root,".loom","beta","tickets"),{recursive:true});writeFileSync(join(root,".loom","beta","STORY.md"),story("beta"));writeFileSync(join(root,".loom","beta","tickets","01-first.md"),ticket("01-first","beta"));const loom=a.loadLoom(root);assert.deepEqual(loom.readyTickets,[{storyId:"alpha",id:"01-first"},{storyId:"beta",id:"01-first"}]);assert.deepEqual(a.loadStoryGraph(root,"alpha").readyTicketIds,["01-first"]);assert.deepEqual(a.loadStoryGraph(root,"beta").readyTicketIds,["01-first"]);writeFileSync(join(root,".loom","beta","tickets","02-cross.md"),ticket("02-cross","beta","ready-for-agent","[03-alpha-only]") );writeFileSync(join(root,".loom","alpha","tickets","03-alpha-only.md"),ticket("03-alpha-only","alpha"));assert.throws(()=>a.loadLoom(root),/cross-Story|dangling/)}finally{rmSync(root,{recursive:true,force:true})}});
+test("requires canonical Human policy and status compatibility",()=>{const root=fixture();try{const file=join(root,".loom","alpha","tickets","01-first.md");assert.throws(()=>a.parseTicket(ticket().replace("Human approval: not-required\n",""),file),/Human approval/);assert.throws(()=>a.parseTicket(ticket("01-first","alpha","ready-for-human"),file),/requires Human approval/)}finally{rmSync(root,{recursive:true,force:true})}});
+
+test("rejects symlinks and wrong types across artifact boundary",()=>{const outside=fixture();for(const mutate of [
+ root=>{rmSync(join(root,".loom"),{recursive:true});symlinkSync(join(outside,".loom"),join(root,".loom"),"dir")},
+ root=>{rmSync(join(root,".loom","version"));symlinkSync(join(outside,".loom","version"),join(root,".loom","version"))},
+ root=>{rmSync(join(root,".loom","alpha"),{recursive:true});symlinkSync(join(outside,".loom","alpha"),join(root,".loom","alpha"),"dir")},
+ root=>{rmSync(join(root,".loom","alpha","tickets","01-first.md"));symlinkSync(join(outside,".loom","alpha","tickets","01-first.md"),join(root,".loom","alpha","tickets","01-first.md"))},
+ root=>{rmSync(join(root,".loom","alpha","tickets"),{recursive:true});writeFileSync(join(root,".loom","alpha","tickets"),"wrong")},
+]){const root=fixture();try{mutate(root);assert.throws(()=>a.loadLoom(root),/invalid/)}finally{rmSync(root,{recursive:true,force:true})}}rmSync(outside,{recursive:true,force:true})});
+test("requires substantive artifact section bodies",()=>{const root=fixture(),storyFile=join(root,".loom","alpha","STORY.md"),ticketFile=join(root,".loom","alpha","tickets","01-first.md");try{for(const [name,body] of [["Intent","Rich **intent**."],["Success","- measurable"],["Decisions","Keep it small."]])assert.throws(()=>a.parseStory(story().replace(body,""),storyFile),new RegExp(`empty section ${name}`));for(const [name,body] of [["What to build","Rich prose."],["Acceptance criteria","- [ ] Works"],["Verification","Human approval: not-required\nnode --test"]])assert.throws(()=>a.parseTicket(ticket().replace(body,""),ticketFile),new RegExp(`empty section ${name}`));assert.doesNotThrow(()=>a.parseTicket(ticket(),ticketFile))}finally{rmSync(root,{recursive:true,force:true})}});
+test("readiness requires active Story status",()=>{for(const status of ["active","blocked","done"]){const root=fixture();try{writeFileSync(join(root,".loom","alpha","STORY.md"),story().replace("status: active",`status: ${status}`));assert.deepEqual(a.loadLoom(root).readyTickets,status==="active"?[{storyId:"alpha",id:"01-first"}]:[]);assert.deepEqual(a.loadStoryGraph(root,"alpha").readyTicketIds,status==="active"?["01-first"]:[])}finally{rmSync(root,{recursive:true,force:true})}}});
+test("accepts canonical Orca repository keys",()=>{const root=fixture(),file=join(root,".loom","alpha","tickets","01-first.md");try{for(const keys of ["[api]","[services/api]","[.]"])assert.doesNotThrow(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file));for(const keys of ["[/api]","[services/../api]","[Services/api]","[services//api]"])assert.throws(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file),/repositoryKeys/)}finally{rmSync(root,{recursive:true,force:true})}});

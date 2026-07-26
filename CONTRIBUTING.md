@@ -4,80 +4,70 @@
 
 ```bash
 git clone https://github.com/zuevrs/loom.git && cd loom
-node --version  # requires Node 20+
-bash scripts/smoke  # verify green
+node --version  # Node 20+
+npm test
+bash scripts/smoke
 ```
 
-## The Discipline
+Do not assume the working tree is clean or rewrite another contributor's files. Keep changes scoped and preserve current operator depth when changing public docs.
 
-Before writing code, stop at the first rung that holds:
+## Engineering discipline
 
-1. Does this need to be built at all? (YAGNI)
-2. Does it already exist in this repo? Reuse it.
-3. Does the standard library cover it? Use it.
-4. Can this be one line? Make it one line.
-5. Only then: write the minimum code that works.
+Before writing code, understand the real flow and stop at the first rung that holds: YAGNI → reuse in repo → standard library → native platform → installed dependency → one line → minimum code. Keep input validation, security, privacy, data-loss handling, accessibility, and explicit verification intact.
 
-## Structure
+## v7 public architecture
 
-```
-skills/          ← canonical ritual skills (SKILL.md each)
-  loom-plan/     ← includes PRD, ISSUE, PRODUCT, DESIGN templates
-hooks/           ← lifecycle hooks (CJS, plugin-tier hosts)
-rules/           ← OMP TTSR rules (plugin root convention)
-agents/          ← OMP custom verify agents (plugin root convention)
-scripts/         ← install scripts for script-tier hosts
-commands/        ← slash command definitions
-tests/           ← hook tests and canaries
+- Exactly seven rituals: Setup, Grill, Plan, Implement, Verify, Finish, Publish.
+- Canonical skill prose is single-source; carrier dialects stay thin.
+- Runtime has exactly three seams: `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`.
+- `omp-extension.mjs` is the sole runtime/enforcement integration: router injection, fail-closed active artifact, and Verify-before-done `session_stop`.
+- OpenCode registers skills and injects compact truthful prose only.
+- Claude Code and Codex package prose-compatible skills and checker metadata only; do not add hooks or enforcement claims.
+- Orca is the sole orchestration adapter.
+- Finish and Publish are manual command boundaries, never implicit Git/GitHub authority.
+
+## Repository structure
+
+```text
+skills/             canonical dispatcher and ritual skills
+hooks/              the three v7 runtime seams
+omp-extension.mjs   OMP adapter
+agents/              canonical OMP checker agents
+.claude-plugin/     Claude prose/checker packaging
+.codex-plugin/      Codex prose packaging
+opencode-plugin.mjs thin OpenCode prose adapter
+scripts/            deterministic maintainer checks
+docs/               operator and maintainer reference
 ```
 
 ## Making changes
 
 1. Fork and branch from `main`.
-2. Keep commits atomic — one logical change per commit.
-3. Run checks before pushing:
-   ```bash
-   bash scripts/smoke
-   ```
-   Or individually:
-   ```bash
-   npm test
-   bash scripts/check-drift
-   bash scripts/check-doc-consistency
-   bash scripts/check-installers
-   bash scripts/check-skill-template-contract
-   bash scripts/check-template-sections
-   ```
-4. Open a PR with a clear description of what and why.
+2. Keep commits atomic and product-facing.
+3. Update canonical prose first, then only the host dialects that genuinely require adaptation.
+4. Run the exact checks below before pushing.
+5. Inspect package contents and stale references for any carrier change.
+6. Open a PR describing the user-visible reason and verification evidence.
 
-## Commit messages
+```bash
+npm test
+bash scripts/check-drift
+bash scripts/check-skill-template-contract
+bash scripts/check-template-sections
+bash scripts/smoke
+npm pack --dry-run
+```
 
-Follow conventional commits: `feat(scope):`, `fix(scope):`, `docs:`, `chore:`, `ci:`, `refactor(scope):`.
+Tests and canaries may lag while the v7 integration owner is landing runtime seams. Do not weaken or rewrite them merely to make an incomplete integration green; report the precise mismatch.
 
-Keep messages product-facing. Describe what changed for users, not internal mechanics.
+## Authoring rituals and carriers
 
-## Changelog discipline
+Read [`docs/authoring.md`](docs/authoring.md). Every ritual keeps the required Goal, Inputs, Outputs, Process, Hard stops, Failure modes, and Done when sections. Positive prompting is the default; hard stops and anti-rationalization pairs remain explicit. Keep checker semantics aligned between canonical OMP and host checker dialects.
 
-- Add new release notes under `## [Unreleased]` only.
-- During release cut: move curated bullets from `Unreleased` into a new `## [X.Y.Z] - YYYY-MM-DD` section and tag in the same batch.
-- Keep `Unreleased` placeholders after each release.
-- Follow [`RELEASE.md`](RELEASE.md) for the end-to-end release checklist.
+When changing the public ritual set, update the managed block, dispatcher/router, carrier metadata, package allowlist, README, host reference, and drift scans together. Do not register removed historical surfaces as current.
 
-## Adding a ritual
+## Commit and changelog discipline
 
-- [`docs/authoring.md`](docs/authoring.md) — maintainer skill/hook authoring guide.
-- One `SKILL.md` under `skills/<slug>/`.
-- Register in `AGENTS.md` managed block.
-- Register in `hermes-plugin/`, `kiro-agent.json`, and `scripts/check-drift`.
-- Add to install scripts if user-facing.
+Use conventional commits (`feat(scope):`, `fix(scope):`, `docs:`, `chore:`, `ci:`, `refactor(scope):`) and describe outcomes rather than internal mechanics.
 
-## Tests
-
-- `tests/hooks.test.mjs` — hook contract tests (node:test, no deps).
-- `scripts/check-drift` — adapter drift canary.
-- `scripts/check-doc-consistency` — user-facing docs drift canary (README/install facts, changelog links, command-set parity, template inventory + references).
-- `scripts/check-installers` — installer script canary (syntax + key target contracts).
-- `scripts/check-skill-template-contract` — skill section contract canary.
-- `scripts/check-template-sections` — user-artifact template section contract canary.
-- `scripts/smoke` — runs all structural checks.
-- CI runs these checks on every push.
+Add release notes under `## [Unreleased]`. During a release cut, move curated bullets into `## [X.Y.Z] - YYYY-MM-DD`, retain the Unreleased placeholders, update compare links, and follow [`RELEASE.md`](RELEASE.md). Never rewrite old tagged sections as current evidence.

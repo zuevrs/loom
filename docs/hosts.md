@@ -1,115 +1,100 @@
-# Hosts — the full per-host reference
+# Hosts — v7 capability and operations
 
-The [README](../README.md) carries the quick path: install, upgrade, uninstall, and the one-paragraph enforcement story. This file is the depth — what each host actually gets, how enforcement is wired per host, and the full Loom + OMP workflow. Install **status** (verified vs implemented) lives only in the README install tables; this file never restates it.
+The [README](../README.md) is the quick operator path. This document distinguishes distribution, prose compatibility, runtime injection, enforcement, checker packaging, and orchestration authority. A plugin being installed does not prove enforcement.
 
-## What each host gets
+## Capability matrix
 
-| Feature | Claude Code | Codex | Pi | OMP | OpenCode | Cursor | Windsurf | Kiro | Hermes | Cline | Droid | OpenClaw |
-|---------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Skills | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes |
-| Commands | yes | yes | — | `/loom` | auto | `/loom-*` | `@skill` | agent | `/cmd` | — | yes | — |
-| Hooks | 3 | 3 | — | 3 | — | 3 | — | config | 2 | — | yes | — |
-| Enforcement | Hard | Hard (Unverified) | Convention-only | Hard (Unverified) | Soft | Hard | Convention-only | Convention-only | Soft | Convention-only | Hard (Unverified) | Convention-only |
-| Discipline | hook | hook | body | ext | transform | hook+rule | AGENTS.md | prompt | hook | AGENTS.md | AGENTS.md | AGENTS.md |
+| Capability | OMP | OpenCode | Claude Code | Codex |
+|---|:-:|:-:|:-:|:-:|
+| Canonical ritual skills | yes | yes | yes | yes |
+| Seven-ritual routing prose | injected | injected | skill prose | skill prose |
+| Canonical checker agents | yes | host-configurable | packaged | where supported |
+| Fail-closed active artifact | yes | no | no | no |
+| Verify-before-done stop gate | `session_stop` | no | no | no |
+| Loom lifecycle hook parity | OMP only | no | no | no |
+| Orchestration adapter | Orca | — | — | — |
 
-`Hooks` counts callbacks that perform observable work, not registered names. OMP's three are `session_start`, `before_agent_start`, and `session_stop`. Hermes has two working callbacks (`on_session_start` and `pre_llm_call`); its registered no-op `subagent_start` callback is not counted. OpenClaw has no shipped extension.
+“Prose-compatible” means a host can load and follow ritual skills. It does not mean Loom can prevent a stop, prove checker execution, or provide runtime enforcement on that host.
 
-`Enforcement` is independent of integration and distribution tier:
+## OMP
 
-- **Hard** — a runtime mechanism can prevent the action, and that blocking contract has direct evidence.
-- **Soft** — runtime context or warnings shape behavior but cannot prevent the action.
-- **Convention-only** — skills and managed instructions carry the discipline with no lifecycle enforcement.
-- **Unverified** — a qualifier on an implemented tier whose live host contract has not been evidenced; it is not a fourth tier.
+OMP is the supported enforcement host. `omp-extension.mjs`:
 
-Plugin presence, integration tier, and hook count describe delivery and wiring. None of them proves Hard enforcement.
+- injects compact discipline and exactly-seven router guidance;
+- injects no current project, Story, Ticket, or repository pointer at `before_agent_start`;
+- at `session_stop`, resolves and validates active Loom artifacts through `hooks/artifacts.cjs` and `hooks/boundary.cjs`;
+- invokes `hooks/verify-gate.cjs` in that same `session_stop` callback so unresolved or unverified done state cannot silently complete;
+- exposes canonical checker agents in `agents/` where OMP discovery supports them.
 
-### Convention-only hosts
+The stream rule in `rules/loom-verify-before-done.md` is a soft reminder and liveness clue. It is not an enforcement seam. If the rule appears but the session prompt lacks Loom's injected router/discipline, restart OMP; a plugin updated beneath a running process can leave extension code stale.
 
-Pi, Windsurf, Kiro, Cline, and OpenClaw carry Loom through skills and managed instructions without a runtime gate. OpenClaw remains Convention-only until Loom ships and verifies an extension. Add the [CI gate](unattended.md#the-verify-gate-as-a-ci-check) when done-without-APPROVE must block at PR level regardless of host.
-
-## Host-native enforcement
-
-| Host | Tier | Mechanism | Evidence-backed claim |
-|------|------|-----------|----------------------|
-| **OMP** | Hard (Unverified) | `session_stop` + TTSR (`rules/`) + custom agents (`agents/`) + `tool_execution_start` witness | Bridge and stop-gate logic are unit-tested; live OMP stop blocking and native verify batch are not yet evidenced in CI |
-| **Claude Code** | Hard | `Stop` hook (`node hooks/stop-gate-logic.cjs --hook`, exit 2 = block) | Live stop contract prevents done-without-APPROVE once, then permits the repeated state |
-| **Codex** | Hard (Unverified) | Same shipped `Stop` hook | Plugin-root expansion and stop blocking still need live-host evidence |
-| **Cursor** | Hard | Generated `Stop` hook invokes `node hooks/stop-gate-logic.cjs --hook` | Installed-command regression exercises exit 2 for unresolved state and exit 0 for verified state |
-| **Droid (Factory)** | Hard (Unverified) | Shipped `Stop` hook via `.claude-plugin` format | Plugin-root expansion and stop blocking still need live-host evidence |
-| **OpenCode / Hermes** | Soft | System transform / two working lifecycle callbacks | Runtime context is injected, but no stop primitive prevents completion |
-| **Pi / Windsurf / Kiro / Cline / OpenClaw** | Convention-only | Skills and managed instructions | No shipped lifecycle stop gate; OpenClaw has no extension |
-
-**OMP:** the extension implements the intended first-stop contract for done-without-APPROVE (unit-tested bridge logic; live OMP blocking not yet evidenced in CI). A repeated stop with the same unresolved issue set is permitted with an explicit warning; resolution or any change to that set resets the forced lap. TTSR remains the stream reminder, and custom agents provide structured verify when OMP discovers them.
-
-**Known OMP limitation:** some OMP versions do not discover plugin custom agents in `agents/` via the `task` tool. Until fixed upstream, `loom-verify` falls back to sequential Spec then Standards checks (or the host `reviewer` agent). TTSR and `session_stop` gates still work.
-
-**Claude Code / Cursor:** the `Stop` hook runs before the agent ends its turn. If any `.loom/` issue file has `Status: done` without an APPROVE line in its `## Verify` section, the hook blocks the first stop (exit 2) and feeds the correction reason back to the model. A repeated stop is allowed so a headless run cannot loop forever. Codex and Droid ship the same intended hard path, but remain Unverified until their plugin-root and stop contracts pass a live check. The shared hook also carries the [verify witness](#the-verify-witness) warning and [`.loom` lint](#the-loom-linter) output.
-
-### The `.loom` linter
-
-State-machine corruption is silent: a typo'd `Status: redy-for-agent` hides an issue from every scan, a dangling `Blocked by` never unblocks, a cycle deadlocks a pack. The gate script lints for all of it — unknown/missing statuses, dangling and cyclic blockers, `done` with an unfinished blocker — and the warnings surface in the session-start snapshot, the pre-LLM alert, and CI gate stderr. Warn-only by design: the only thing that ever blocks is done-without-APPROVE.
+Exact operator cycle:
 
 ```bash
-node ~/.loom/hooks/stop-gate-logic.cjs --lint .   # explicit lint run, always exit 0
+omp plugin install git:github.com/zuevrs/loom --force
+# restart OMP
+omp plugin doctor loom
 ```
 
-### Sessions die; the snapshot resumes
+In a disposable project, run Setup, confirm the managed write, select a Ticket, and verify that a `Status: done` Ticket without a current APPROVE digest is refused at session stop. If active identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch; fail-closed is intentional.
 
-A session killed mid-implement changes no status and files no report — the only traces are uncommitted changes and whatever `## Log` bullets were written in the moment (which is why the implement ritual logs as it goes, not at the end). The session-start snapshot turns those traces into a resume point: each pack line names the **next up** issue (lowest-numbered unblocked `ready-for-agent`), issues whose last verify verdict was REJECT are flagged as rework pending, and a dirty working tree gets a "possibly interrupted work" breadcrumb. A fresh session reads the snapshot and knows whether it is starting clean or picking up a corpse.
+## OpenCode
 
-### The verify witness
+`opencode-plugin.mjs` is a thin adapter. It registers the installed `skills/` path and injects compact truthful discipline/router prose. It has no workspace/config discovery, old lifecycle hooks, stop gate, witness, or blocking claim.
 
-An APPROVE line the agent wrote without actually running checkers is the one lie the gate couldn't catch. Now sub-agent spawn hooks record every checker spawn to a temp-dir marker, and the Stop gate **warns** when an issue was approved recently with no witnessed checker run. On OMP the extension witnesses checker spawns made through the `task` tool (named `loom-verify-*` agents or generic spawns carrying the checker role). Its default witness mode writes a visible warning and permits the stop; `LOOM_WITNESS=strict` requests one corrective lap for an unchanged unwitnessed issue set, then permits a repeated stop with a warning. Stop-hook hosts likewise make `strict` blocking, while `LOOM_WITNESS=off` disables witness output. CI runs never witness-check (a fresh runner has no marker by definition), and hosts whose spawn hooks don't fire get the warning text explaining exactly that — warn-first, no false blocks.
+```bash
+opencode plugin -g github:zuevrs/loom
+```
 
-**Known limitation (Codex):** the witness recorder rides the `SubagentStart` hook; on Codex versions that don't fire it, checker spawns go unwitnessed and the warning appears even though verify genuinely ran. It is warn-only — read it as "confirm checkers ran", or set `LOOM_WITNESS=off` for that host. Keep `strict` to hosts whose spawn hooks are confirmed firing (Claude Code, Cursor).
+After update, restart OpenCode and confirm all seven rituals are discoverable. If they are not, inspect the configured plugin path/package ref; do not diagnose absence of a stop gate as failure because v7 does not provide one here.
 
-## Checker models
+## Claude Code
 
-Verify's two checkers default to the host's **fast/cheap tier** — judging is cheaper than making. Loom never hardcodes a model name; it declares the tier in the host's own language, and **your host config always wins**. The tier actually used is recorded in the verify digest (Sub-agent evidence).
+The Claude plugin manifest packages canonical skills and Claude-dialect Spec/Standards checker agents. It intentionally has no hooks field. Claude follows ritual authority in prose; Loom does not claim a hard stop, active-artifact enforcement, or lifecycle parity.
 
-| Host | How the tier is set | How you override |
-|------|--------------------|------------------|
-| OMP | plugin agents carry `model: pi/smol` (the fast-tier model role) | your OMP `modelRoles: smol:` entry defines the tier; unset smol inherits the session model |
-| Claude Code / Droid | plugin agents carry `model: haiku` | redefine the agent in `.claude/agents/` (project level wins) or set `model: inherit` |
-| Cursor | skill rule — spawn picks a fast/cheap slug via the Task `model` param | a user rule pinning sub-agent models wins |
-| OpenCode | inherit by default | define checker agents with models in `opencode.json` |
-| Codex and others | inherit the session model (no per-sub-agent model API today) | switch the session model before verify |
+```bash
+claude plugin marketplace add zuevrs/loom
+claude plugin install loom@loom
+```
 
-For scheduled/CI work, use the host-native runner and compose the executable `skills/loom/UNATTENDED.md` contract with the recipe. Loom 3.2 adds no public schedule route or scheduler state. Attended multi-issue packs use OMP TUI Goal or Orca, never both.
+Update through the plugin manager, restart, and inspect plugin discovery. Ritual commands may be plugin-namespaced according to Claude's current plugin behavior.
 
-## Loom + OMP quick workflow
+## Codex
 
-| Need | Loom entry | Native OMP/Orca carrier |
-|---|---|---|
-| Plan/explore | `/loom plan …` / `/loom` | Loom ritual; stock OMP `/plan` remains unchanged |
-| Implement one issue | `/loom implement …` | fresh `task` worker; Implement owns Verify |
-| Verify | `loom-verify` | isolated Spec + Standards agents when discovered; sequential fallback otherwise |
-| Multi-issue pack | explicit pack request | configured Orca, otherwise confirmed `/goal set` + finite `/goal budget` |
-| Maintain | `loom-tend` | Loom status/warp/debt audit |
+The Codex manifest packages prose-compatible skills and commands according to Codex plugin conventions. It intentionally has no Loom hooks field or hard-enforcement claim. Checker execution inherits available host facilities; preserve separate Spec and Standards roles even when sequential.
 
-The user manually creates the top-level Orca story card at the validated owner; `/loom` in a service card returns coordinator guidance without mutation. Plan records repository ownership; after Implement's adaptive repository preview is confirmed, Orca creates service lanes just in time with native identity/settings. One active writer serializes a repository while explicitly independent repositories may run in parallel through Orca's native DAG. A healthy prewalk OMP terminal remains idle per service lane and receives compact issue deltas; `worker_done` ends only the bounded assignment. The current root Advisor preference is respected, but workers and checkers never use Advisor. Verify REJECT reuses the idle lane worker; APPROVE completes and unblocks the issue without committing or publishing and leaves STORY `open`. Card updates occur only at durable boundaries, and no terminal closes after issue Verify. Actionable resume currently reconciles validated STORY, authoritative Git status/diff, and native Orca identities; coherent dirty work resumes and exact evidence mismatches stop before dispatch. Finish and publish are separately explicit attended boundaries. Publish confirms exact current lanes, proceeds sequentially with retained partial success, and leaves `awaiting-review`; Tend archives after durable merge evidence before separately confirmed cleanup.
+```bash
+codex plugin marketplace add zuevrs/loom
+codex plugin add loom@loom
+```
 
-Historical v3.3 evidence: a live OMP + Orca pilot validated the then-current multi-repository path and coherent resume; it is not current v4 capability. Its ambiguity helper timed out at 180 seconds; no live `STOP` verdict was observed. The pilot led to a fail-closed host-contract correction that sequences existing workspace, issue, Git, and native Orca source owners before dispatch; the root coordinator performs the decision directly with no helper, subagent, or worker path. No custom executable validator or runtime manifest is shipped. Selected policy and observed runtime evidence remain distinct; unsupported hosts remain unverified. Details: [Orca evidence and correction](orca.md).
+Update through Codex's plugin manager and restart. Verify discovery and prose behavior; do not advertise stop-hook parity.
 
-Key OMP contracts:
+## Checker semantics
 
-- **Context and workers:** the optional project preset keeps native auto-shake and global `task.prewalk`; no verified relative 60% key exists, so the live-validated `idleThresholdTokens: 80000` remains. Fresh maker workers switch at first edit/write; discovery makes no code edit and needs no prewalk override.
-- **Runner exclusivity:** `.loom/config.json` with `worktrees: "orca"` selects Orca; otherwise an explicit pack can use `/goal set` and a total `/goal budget` above already-consumed root-session tokens. Orca reuses one healthy service-lane terminal with compact issue deltas; Goal gives each issue a fresh sub-agent with the PRD and that single issue. Both paths receive coordinator Verify. After Goal completion/cancel/budget stop, trust `/goal show` status.
-- **Advisor and TTSR:** Advisor is an optional disabled-by-default behavior linter, never a checker. Tend may propose a tested TTSR rule only after a second deterministic local failure.
-- **Evidence and limits:** OMP 17.0.6 accepted shake/80k/prewalk/Advisor config; the lifecycle pilot observed completed auto-shake and overlapping independent Orca lanes with same-repository serialization. Prewalk was selected but no visible switch was captured; Goal-off and Advisor-disabled were selected/configured but not queried live. Live OMP stop blocking and native verify batch remain unevidenced. Some OMP versions do not discover plugin checker agents, so Verify uses its documented fallback.
-- **Headless and human gate:** checker roles remain available as `LOOM_ROLE=spec-checker omp -p --auto-approve "…"`. No native runner may auto-merge or publish; automation run history and Verify evidence support the human decision.
+Verify consists of independent Spec and Standards judgment. Both receive the same intended current diff/base, acceptance criteria, and check evidence. Neither checker edits code. A current APPROVE record carries both verdicts; its one-line Standards evidence summarizes exact objective commands/results, while detailed durable output may live in Ticket `## Log` or referenced check output. Stale evidence cannot authorize done.
 
-Setup: `omp plugin install git:github.com/zuevrs/loom --force`, then run `loom-init` in the project. Full contracts: [`skills/loom/OMP.md`](../skills/loom/OMP.md), [`skills/loom/ORCA.md`](../skills/loom/ORCA.md), [Advisor profile](omp-advisor.md), and [unattended lane](unattended.md).
+Host-specific model tiers are delivery hints, not product semantics. OMP and Claude checker metadata may select their host's cheap/fast role. User host configuration wins. OpenCode/Codex may inherit the session model. Never convert lack of a dedicated subagent API into maker self-approval.
 
-## Templates
+## Orca: sole orchestration adapter
 
-Templates are co-located with the skills that use them:
+Orca is the only Loom orchestration adapter in v7. Loom does not route packs through host goals, recipes, unattended lanes, custom schedulers, or a second worktree system. Orca owns repository/worktree/card/task/dispatch/terminal identity and liveness; Loom owns PRDs, Tickets, ritual meaning, and Verify records.
 
-| Template | Location | Creates |
-|----------|----------|---------|
-| PRD | `skills/loom-plan/PRD-TEMPLATE.md` | `.loom/<feature>/PRD.md` |
-| Issue | `skills/loom-plan/ISSUE-TEMPLATE.md` | `.loom/<feature>/issues/*.md` |
-| PRODUCT | `skills/loom-plan/PRODUCT-TEMPLATE.md` | `PRODUCT.md` at project root |
-| DESIGN | `skills/loom-plan/DESIGN-TEMPLATE.md` | `DESIGN.md` (user-facing UI projects) |
-| CONTEXT | `skills/loom-plan/CONTEXT-FORMAT.md` | `CONTEXT.md` glossary |
-| ADR | `skills/loom-plan/ADR-FORMAT.md` | `docs/adr/*.md` |
+The user creates the coordinator worktree/card. Plan records repository scope without creating lanes. Implement may request exact current Orca identities as work becomes runnable. Same-repository writers serialize; explicitly independent repositories may run in parallel. Worker completion ends a bounded assignment, not the story or its terminal. The coordinator independently verifies the intended diff.
+
+Finish and Publish remain manual command boundaries. They do not become automatic because Orca can operate Git or hosted reviews. See [`orca.md`](orca.md) for authority and partial-success handling.
+
+## Native automation
+
+Loom v7 ships no unattended route or recipes. Use each host's native automation documentation and keep runs budgeted, deterministic, minimally credentialed, and report-only. [`unattended.md`](unattended.md) is retained only as a relocation/safety notice.
+
+## Template inventory
+
+| Artifact | Canonical template |
+|---|---|
+| PRD | `skills/loom-plan/PRD-TEMPLATE.md` |
+| Ticket | `skills/loom-plan/TICKET-TEMPLATE.md` |
+| Product context | `skills/loom-plan/PRODUCT-TEMPLATE.md` |
+| UI design context | `skills/loom-plan/DESIGN-TEMPLATE.md` |
+| Domain context | `skills/loom-plan/CONTEXT-FORMAT.md` |
+| Architecture decision | `skills/loom-plan/ADR-FORMAT.md` |

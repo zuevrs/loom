@@ -1,6 +1,6 @@
 # Diagnose — the feedback-loop-first debugging discipline
 
-Read this when the issue is a bug or a performance regression (routed from the TDD step of loom-implement §Process). Building a feature? Skip this file — TDD.md is yours.
+Read this when the ticket is a bug or a performance regression (routed from the TDD step of loom-implement §Process). Building a feature? Skip this file — TDD.md is yours.
 
 **The loop IS the skill.** A tight pass/fail signal that goes red on THIS bug finds the cause; bisection, hypotheses, and probes merely consume it. Reading code to build a theory before that signal exists is the exact failure this file prevents.
 

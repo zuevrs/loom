@@ -1,92 +1,92 @@
-# Progressive STORY contract
+# Story contract
 
-This file is the canonical runtime contract for durable story state. Rituals reference it; distribution `docs/` never override it.
+This file is the canonical contract for Loom v7 durable planning state. Durable state is local and small: `.loom/version`, a Story, and only when material an attached PRD and Tickets.
 
-## Creation and ownership
+## Version boundary
 
-Create `<artifactRoot>/.loom/<story>/STORY.md` only when work first produces a confirmed durable semantic event: a decision, scope change, issue completion, blocker, handoff, bounded delegation, or pre-shake checkpoint. A project-file edit by itself is not a creation trigger; a compressed small fix with no durable semantic event remains Story-free. Read-only questions create nothing. Before creation, preview the exact seed path and content and obtain bounded confirmation. After confirmation, call the coordinator-owned `writeSemanticCheckpoint` seam with the validated owner root, current bytes, exact target content, and semantic trigger; never write STORY into a registered service root. Its contained atomic write and exact readback must succeed, then run `node hooks/story.cjs <path>`. If validation fails, delete the newly created invalid file and report the failure. Evaluate this boundary with `storyCreationDecision({ durableEvent })`, where `durableEvent` is one supported event or `null`; the planner returns only `none` or `create`.
+`.loom/version` contains the supported Loom major only. Artifacts have no `schemaVersion` or per-artifact version. Loom v7 is current-only: when the version is missing, Setup may initialize it after preview and confirmation; when it names another major or legacy state requires interpretation, stop read-only with upgrade guidance. Never migrate or rewrite compatibility state in place.
 
-The existing workspace root is `artifactRoot` and owns STORY plus any progressively added PRD, issues, or ADRs. Registered `workspace.json` repositories are execution/service lanes only; never create Loom artifacts in them and never introduce `coordinatorRepository` or roles. If `artifactRoot` is not a Git root, emit the single canonical `nonGitOwnerWarning(projectContext)` from `hooks/workspace.cjs`; do not duplicate or paraphrase its string here.
+## Location and identity
 
-## Exact schema
+A Story lives at `.loom/<story-id>/STORY.md`; optional material detail lives beside it as `PRD.md` and `tickets/<ticket-id>.md`. The project root owns these artifacts. In a single repository, omitted repository scope means the current root. Stable Story/Ticket identity belongs in files; Orca cards, tasks, lanes, terminals, coordinators, worktrees, and local paths never do.
 
-Validate the compact structured core and containing path before relying on or updating STORY: `node hooks/story.cjs <artifactRoot>/.loom/<story>/STORY.md` (or call exported `validateStory(content, path)`). Render every new deterministic seed with `renderStoryV2Seed`; `renderStorySeed` remains a v1 migration compatibility helper only; the host performs the confirmed ordinary write and immediate validation described above. Fail closed on invalid frontmatter, required core headings, or missing required core content. Section bodies are ordinary Markdown: freeform prose, lists, links, nested headings, and fenced examples are supported. Read v5/version-1 STORY files tolerantly as migration input; do not rewrite archived evidence.
+## Story schema
 
-- Frontmatter is bounded by exactly one opening and one closing `---` delimiter. Extra or malformed delimiters are invalid.
-- It contains exactly four scalar keys, once each, with no unknown key: `story`, `lifecycle`, `updated`, `version`.
-- `story` is ASCII lowercase kebab-case matching `[a-z0-9]+(?:-[a-z0-9]+)*` and exactly equals the containing `.loom/<story>/` directory basename.
-- `lifecycle` is exactly one of `open`, `awaiting-review`, or `done`.
-- `updated` is a valid `YYYY-MM-DD` calendar date.
-- `version` is integer `2` for active writable stories. Version `1` is accepted only as read-only active migration input or archived historical evidence.
-- Missing, duplicate, unknown, non-scalar, nested, or YAML-list values are invalid.
-- Version 2 body headings are exactly, in order: `## Goal`, `## Current State`, `## Decisions`, `## Open Questions`, `## Checks`, `## Handoff`, `## Verify`. Version 1 uses `## Outcome` in the same position. No other level-two heading is valid.
-- Goal, Current State/legacy Outcome, and Checks contain nonempty content. Decisions, Open Questions, Handoff, and Verify may initially be empty. Markdown bullets, not frontmatter collections, carry structured content.
-
-Minimal valid shape:
+Frontmatter contains exactly:
 
 ```markdown
 ---
-story: example-story
-lifecycle: open
-updated: 2026-07-23
-version: 2
+id: example-story
+title: Example story
+status: active
 ---
-## Goal
-Nonempty goal.
-## Current State
-Nonempty current state.
-## Decisions
-## Open Questions
-## Checks
-Nonempty checks.
-## Handoff
-## Verify
 ```
 
-## STORY v2 current index
+- `id`: lowercase kebab-case and equal to the containing directory name
+- `title`: nonempty scalar
+- `status`: exactly `active`, `blocked`, or `done`
+- no unknown frontmatter keys
 
-New stories use `version: 2` and replace `## Outcome` with `## Current State`. Render seeds with `renderStoryV2Seed` and validate with `parseStory` before use. `Goal` is the destination; Current State records only what is true now, including completed/verified work and what remains. Decisions contain named links plus a one-line gist, never bare IDs; Open Questions, Checks, Handoff, and Verify stay current. STORY is an index, not an event store: persist stable Story identity and touched-repository intent only; store no Orca card, task, terminal, coordinator, lane, worktree ID, or local worktree path. Keep no transcript or per-edit delta, load linked PRD/issues/ADRs only when zooming into that concern, and exit without a write when continuation finds no durable or factual delta.
+Required level-two sections are `## Intent`, `## Success`, and `## Decisions`. Optional sections are `## Scope` and `## Notes`; add them only when useful. Section bodies are ordinary Markdown. Intent and Success are nonempty; Decisions records confirmed decisions and may say `None yet` initially.
 
-Active version-1 stories are read-only. `planStoryMigration` returns the bounded proposal to change `version: 1` to `version: 2` and rename `## Outcome` to `## Current State` without rewriting its content; any active write waits for that migration confirmation. Version-1 stories under `.loom/archive/<story>/STORY.md` remain readable historical evidence and are never migrated in place.
-
-## Semantic checkpoints and recovery
-
-Checkpoint only confirmed decisions, scope changes, issue completion, blockers, handoff, bounded delegation, and pre-shake state. Keep the core compact: scope, decisions, blockers, evidence, stale evidence, and the next handoff; never copy a transcript or every edit. Before shake, write any pending semantic delta, then reconstruct with `planSemanticResume` from that checkpoint plus fresh evidence for touched repositories. Recovery inherits no mutation authority and treats session, terminal, task, card, and worktree identifiers as live evidence only.
+A small Story is deliberately compact—usually **2–4 lines of body content** across its required sections. It states destination and success, not Ticket details, acceptance checklists, implementation logs, or a transcript. Do not duplicate a Ticket in Story.
 
 ## Progressive disclosure
 
-Small work may remain STORY-only when it preserves the outcome, acceptance, and public/inter-service contracts, adds no repository, and introduces no data or security risk. Material work progressively adds the smallest artifact that owns the added detail: PRD for product scope/requirements, issues for slices/acceptance/blockers, and ADRs for hard-to-reverse architecture tradeoffs. Ambiguous classification stops for clarification without mutation.
+A direct concrete small fix may remain Story-free and route straight to Implement. When Plan is invoked, it creates or amends a Story and every planned implementation has at least one Ticket. Add a PRD only when material: multiple Tickets or repositories, product decisions, an external/public/inter-service contract, or multi-session work. Preserve full PRD depth when that threshold is crossed; do not use a thin PRD as ceremony.
+
+## Creation and exact-write discipline
+
+Read-only questions and direct small fixes create nothing. Plan creates a Story only after Gate 1 previews its exact path and complete bytes with any material PRD/domain delta and receives bounded confirmation. Write atomically, read back exactly, and validate frontmatter, path identity, headings, and required content before relying on it. Changed path, content, scope, repository key, action, or base requires renewed confirmation. If a newly created artifact fails validation, remove only that invalid new artifact and report the failure; never "repair" an older-major artifact in place.
+
+## Semantic checkpoints and recovery
+
+A semantic checkpoint is a current projection, not an event log. Update the smallest owner only: Story for destination/success/current confirmed decisions and scope; PRD for material product contract; Ticket for one slice's acceptance, blockers, Log, Human policy and Verify; CONTEXT for durable vocabulary/contracts; ADR for a hard-to-reverse surprising trade-off. Workers report a decision need; the coordinator or current attended interaction owns durable writes.
+
+Keep Story current only at durable semantic boundaries: confirmed intent/decision/scope change, blocker, completed verified Ticket, or handoff. Store detailed acceptance and Verify evidence in the Ticket; store product requirements in PRD; use ADRs for hard-to-reverse architecture tradeoffs. Keep the index compact and current, never a transcript or per-edit delta. Empty factual delta means no write.
+
+Before interruption or context compaction, first classify whether any confirmed semantic delta is still only in conversation. If none exists, write nothing. If one exists, show its smallest owner and exact content delta through that interaction's existing gate; compaction itself creates no write authority. Capture blockers, evidence fixed points, stale evidence and one actionable handoff only when they materially change what a future session must do. On resume, validate `.loom/version` and closed artifact shapes first, then reconstruct from current Story/PRD/Tickets, current CONTEXT/ADRs when relevant, and fresh repository evidence for exactly the touched repositories. Identify the last unresolved question or confirmation gate from durable state; do not replay already confirmed questions or infer an answer from a recommendation. An empty semantic/factual delta returns `NO_DELTA` behavior: no write, no synthetic checkpoint. Session, terminal, card, task, lane, and worktree identifiers are live evidence only, never durable authority.
 
 ## Adaptive continuation
 
-This section is the canonical continuation contract. Rituals reference it rather than restating its classifiers. `planFollowUp(input)` in `hooks/story.cjs` is the pure, fail-closed planning seam: it validates closed inputs and returns a deterministic proposal only; it performs no writes, tool calls, lane operations, or input mutation.
+A unique relevant active Story continues by default. Multiple active Stories without coherent Orca context require exactly one recommended question. Unrelated explicit intent follows ordinary routing. A done Story is history; a new destination becomes a linked new Story rather than reopening it.
 
-### Active-story continuation
+First separate facts, recommendations, and decisions. A durable decision is the user's explicit choice of intent, success, requirement, acceptance condition, architecture, constraint, repository scope, or verification approach that a future session must know. A question, an agent recommendation, enthusiasm, or a recommendation awaiting choice writes nothing.
 
-Before ordinary Grill, Plan, Implement, or Verify routing, call `planActiveContinuation` for in-story discussion, “grill then finish/change” (`dodelat`), and recheck intent. A unique active owner context or explicit story selection continues that open story by default; multiple plausible open stories ask once, unrelated intent follows ordinary routing, and a done story becomes a linked story rather than reopening history.
+For a requested change, state every classifier explicitly rather than inheriting defaults: Story Intent/Success, Ticket acceptance, public/inter-service contract, repository scope, architecture, data path, security/privacy risk, and verification approach. A **small edit** preserves Story Intent/Success, acceptance, public/inter-service contracts, repository scope, architecture, and data/security risk; it may route directly to Implement with proportional checks and no new ceremony. A **material change** alters any of those boundaries. Route it to Plan's isolated amendment flow: preview the smallest owning Story/PRD/Ticket/ADR delta, affected Verify evidence, and checks, then obtain bounded confirmation. Missing or uncertain boundary is ambiguity, not permission.
 
-Collect related decisions and their factual bookkeeping into one `planSemanticBundle` boundary. Preview and confirm the whole semantic bundle once, then let the coordinator write its canonical owners; factual Current State/Checks/Handoff updates already named by confirmed execution need no second confirmation. An empty bundle returns `NO_DELTA` and writes nothing. After a confirmed amendment, preserve the original user intent: discussion-only stops; “discuss then change” continues through implementation and Verify. Workers report `decision-needed`; only the root coordinator writes STORY, PRD/issues, ADR, or CONTEXT.
+After the confirmed amendment, update exactly the smallest owners and leave unaffected files byte-for-byte unchanged. A changed repository set is always material and requires Ticket `repositoryKeys` plus Story/PRD scope review; Plan may inspect Orca read-only but creates no runtime state.
 
-First classify authority. A durable decision is only the user's explicit choice of a requirement, acceptance condition, architecture, constraint, or verification approach that a future session must know; a question, agent recommendation, or recommendation awaiting explicit user choice writes nothing. Exact `/loom finish` and explicit finalize-or-close-and-commit wording route to [`FINISH.md`](FINISH.md) and grant no adaptive-continuation authority. Explicit publish/host requests route to [`PUBLISH.md`](PUBLISH.md); release publication remains separately gated. If classification is ambiguous, ask one clarifying question and perform no mutation. Unknown choice or decision kinds fail closed. Runtime checks use the closed classifier and artifact enums exported from `hooks/story.cjs`.
+After a material semantic change invalidates evidence for acceptance, a public/inter-service contract, data path, or security path, the affected Ticket's current canonical `## Verify` is invalid. Because runtime accepts only the canonical current Verify record, do not write an ad hoc non-canonical `STALE` block. Remove the obsolete approval content or leave the section empty while the Ticket is returned to `ready-for-agent`, and record the exact invalidated boundaries in `## Log`; the next independent Verify replaces it with a canonical current result. do not append history or retain a second current verdict. Return an affected `done` Ticket to `ready-for-agent` until independent Verify replaces the invalid block with a current verdict. Unrelated Tickets and unrelated Verify evidence remain unchanged. Evidence invalidation is never a Ticket status.
 
-For an explicitly requested edit, classify it with every boundary stated. A **small edit** preserves the existing outcome, acceptance, and public/inter-service contract, adds no repository, and introduces no data or security risk. Run only relevant focused checks and return their compact result; do not add durable ceremony merely because code changed. A **material change** alters outcome, acceptance, a public/inter-service contract, repository scope, architecture, or a data/security risk. Before mutation, show a compact preview naming affected scope, classifier/verdict, smallest owning artifact, stale Verify effects, checks, and any independent intermediate Verify; obtain one bounded confirmation. A missing or uncertain boundary is ambiguity, not `false`. The planner requires every classifier boundary explicitly; missing, inherited, extra, non-boolean, array, and non-plain-object inputs fail closed.
-
-After confirmation, update exactly the smallest owner: STORY for a story goal or current decision; PRD for product scope or requirements; the affected issue for one slice's acceptance or blocker; ADR for a hard-to-reverse architecture tradeoff. `smallestArtifact` exposes this closed mapping; unsupported input stops rather than inventing another artifact.
-
-When completed material work changed acceptance, a public/inter-service contract, a data path, or a security path, append `STALE — YYYY-MM-DD — affected: <comma-separated changed boundaries>` after the affected issue's prior verdict in its existing `## Verify`. Do this only to issues whose evidence covered a changed boundary; preserve every unrelated issue's APPROVE. If an affected issue was `done`, return it to existing `ready-for-agent` status so blocker behavior remains honest. `STALE` is Verify evidence state, not a new issue status or lifecycle. It is the latest effective non-approval until an independent intermediate Spec+Standards Verify appends APPROVE or REJECT. That Verify runs after completion of the changed boundary, has no commit authority, and is required only for changed acceptance, public/inter-service contract, data path, or security path, not for every edit. The completed-boundary enum is `acceptance`, `publicOrInterserviceContract`, `dataPath`, or `securityPath`; the planner uses it for the exact trigger.
-
-A proposed new repository lane stops at a preview naming scope, lane/repository, single writer, worktree action/state, and STORY effects. This contract performs no lane mutation; Orca mechanics belong to the later lane implementation.
+A proposed new repository key is planning scope: Plan may query Orca read-only and preview the Story/PRD/Ticket delta, but creates no branch, lane, task, terminal, or worktree. Execution state belongs to later interactions.
 
 ## State and authority
 
-Issue status uses the existing vocabulary and blocker behavior. STORY lifecycle is separate and exactly `open`, `awaiting-review`, or `done`.
+Ticket completion may update that Ticket to `done` after independent Verify and may update Story facts; it does not itself make the Story `done` or authorize commit, push, publication, hosted review, merge, or cleanup. Finish and Publish are separate explicit interactions with separate bounded authority.
 
-Verify `APPROVE` may set the verified issue to `Status: done` and thereby unblock dependent issues. It leaves STORY lifecycle `open` and authorizes no commit, push, publication, hosted review, merge, or other Git/host mutation. Whole-story or whole-pack confirmation likewise authorizes execution only, never a commit or publication.
+## Failure modes
 
-## Lazy lifecycle contracts
+| Symptom | Response |
+|---|---|
+| Story path and `id` disagree | Stop; do not rely on or update the artifact |
+| Required content is empty or status unknown | Stop read-only and report the exact invalid boundary |
+| Different `.loom/version` major | Read-only hard stop with upgrade guidance; no migration |
+| Multiple active Stories lack coherent Orca context | Ask one question and recommend the strongest candidate |
+| Follow-up changes a material boundary | Route to Plan amendment; preview exact smallest-owner deltas and stale only affected Verify evidence |
+| Recommendation was not explicitly chosen | Persist nothing; ask the unresolved question when it is load-bearing |
+| Resume evidence conflicts across artifacts and Git/Orca | Stop and name exact sources/fields; never repair by inference |
+| Proposed checkpoint repeats current bytes | `NO_DELTA`; write nothing |
+| No durable factual delta | Write nothing |
 
-The continuation core grants no finish, publish, archive, or cleanup authority. Only an explicit route lazy-loads the matching canonical fragment:
+## Anti-rationalization
 
-- explicit finish → [`FINISH.md`](FINISH.md)
-- explicit publish → [`PUBLISH.md`](PUBLISH.md)
-- exact story Tend → [`TEND.md`](TEND.md)
+| Excuse | Reality |
+|---|---|
+| "Put the Ticket checklist in Story for convenience" | Story is the compact destination index; Ticket owns slice detail. |
+| "This is small, so Plan can skip Tickets" | Direct Implement may skip ceremony; invoked Plan produces at least one Ticket. |
+| "Rewrite the old artifact into v7 while here" | v7 is current-only. Stop read-only; migration is not compatibility. |
+| "The user liked the recommendation" | Enthusiasm is not a confirmed durable decision. |
+| "Only one acceptance line changed; prior Verify is close enough" | Invalidate only affected evidence and re-Verify that boundary. |
+| "Compaction is coming; rewrite the Story just in case" | Context pressure is not a semantic delta or write authority. |
+| "The worker made the decision while implementing" | Worker evidence informs the user/coordinator; it does not own durable product truth. |

@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# loom: install agent + skills for Kiro CLI (thin wrapper — logic lives in install.mjs)
-exec node "$(cd "$(dirname "$0")" && pwd)/install.mjs" --kiro

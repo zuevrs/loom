@@ -6,162 +6,80 @@
 
 [![checks](https://github.com/zuevrs/loom/actions/workflows/checks.yml/badge.svg)](https://github.com/zuevrs/loom/actions/workflows/checks.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A skills-first harness that makes coding agents work like disciplined senior developers — across hosts.
+A skills-first harness that makes coding agents work like disciplined senior developers across hosts.
 
-The lazy kind of senior. The one who deletes your fifty lines, ships one, and never — ever — marks a ticket done without a review. Loom installs him into Claude Code, Codex, Cursor, OMP, and friends: a discipline ladder, six ritual skills, lifecycle guidance, and evidence-backed enforcement where the host can block.
+Loom combines a lazy engineering ladder, exactly seven rituals, independent verification, and narrow authority boundaries. It is not a workflow engine, scheduler, auto-merge bot, hosted service, or substitute for your issue tracker.
 
-## Sixty seconds of Loom
+## Loom is / Loom is not
 
-Your agent finishes a feature and marks the issue done. Nobody reviewed anything. On a Loom host, the turn doesn't end:
+**Loom is:** a markdown-native discipline and ritual harness with independent verification and narrow authority.
 
-```
-$ .loom/auth/issues/01-jwt.md → Status: done      (## Verify section: empty)
-$ agent tries to stop
-⛔ BLOCKED: 01-jwt.md marked done without an APPROVE verify digest.
-   Run loom-verify — or, if the done status itself is wrong, set the issue
-   back to ready-for-agent / needs-triage / wontfix. Do not fabricate an APPROVE.
-```
+**Loom is not:** a runtime engine, scheduler, unattended runner, auto-merge bot, hosted service, or issue-tracker replacement. Terms are defined in [`docs/glossary.md`](docs/glossary.md).
 
-So the agent runs `loom-verify`: two fresh-context checker sub-agents (Spec and Standards, on the host's cheap tier) read the diff and write their verdict into the issue file:
+## The Loom loop
 
-```
-APPROVE — 2026-07-05 — spec pass, standards pass
-```
+A selected Ticket is implemented by a maker. Before `Status: done`, fresh Spec and Standards judgment must produce a current APPROVE digest and the Ticket's exact verification commands must run. APPROVE completes the Ticket; it does not commit or publish anything.
 
-Now `done` means reviewed-and-done. APPROVE completes the issue and unblocks dependent issues without creating a commit; STORY remains open until a separately explicit, confirmed finish. That loop — plan in issues, implement one slice, verify before done — is the whole product:
+The seven rituals are:
 
-<p align="center">
-  <img src="assets/pipeline.png" width="720" alt="The Loom pipeline: grill, prd·adr, slices, implement, verify, done — rejected work loops back to implement, tend arcs back over the whole run">
-</p>
+| Ritual | Entry | Outcome |
+|---|---|---|
+| Setup | `loom-init` / `/loom setup` | Confirmed project wiring and managed guidance |
+| Grill | `loom-grill` / `/loom grill` | Freeform design pressure-test without creating durable artifacts |
+| Plan | `loom-plan` / `/loom plan` | Story, optional material PRD, vertically sliced Tickets |
+| Implement | `loom-implement` / `/loom implement` | One selected Ticket, minimal diff, runnable checks |
+| Verify | `loom-verify` / `/loom verify` | Independent Spec + Standards verdict and digest |
+| Finish | `/loom finish` | Explicit manual local handoff boundary |
+| Publish | `/loom publish` | Separately explicit manual remote-effect boundary |
 
-**Loom is:** a markdown-native harness — discipline ladder, six rituals, verify-before-done, and host-native enforcement hooks that leverage each agent's own capabilities.
-
-**Loom is not:** a runtime engine, an auto-merge bot, a replacement for your issue tracker, or a hosted agent service. Cold agents guess intent, over-engineer, skip verification, and lose context between sessions; Loom closes these gaps with on-disk conventions — no lock-in.
-
-Terms live in [`docs/glossary.md`](docs/glossary.md); per-host depth in [`docs/hosts.md`](docs/hosts.md).
+Rituals are not a mandatory sequence. A small selected fix can go directly to Implement. Work needing a PRD, multiple Tickets, or multiple sessions goes to Plan. Finish and Publish never authorize one another, and neither is machine enforcement or implicit Git/GitHub consent.
 
 ## Install
 
-<p align="center">
-  <img src="assets/hosts.png" width="560" alt="One Loom spool in the center, threads running out to claude code, codex, cursor, omp, pi, opencode and six more hosts — one harness, any host">
-</p>
+The package stays at `6.0.0` during v7 development; use the released ref you intend to install. Loom v7 supports four public carriers:
 
-Script-based hosts need a clone first (`git clone https://github.com/zuevrs/loom ~/.loom`); the installer is pure Node, no bash required. Plugin-native hosts need nothing.
+| Host | Install | Update | Uninstall | v7 capability |
+|---|---|---|---|---|
+| OMP | `omp plugin install git:github.com/zuevrs/loom` | same command with `--force`, then restart OMP | `omp plugin uninstall loom` | Skills, static seven-ritual router/discipline injection, active-artifact and Verify-before-done validation at `session_stop`; canonical checker agents |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` | update the configured package/ref, then restart OpenCode | remove `github:zuevrs/loom` from `opencode.json` | Skills plus compact prose injection; no Loom hook/enforcement parity |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
 
-**Status legend** (kept honest, see [`docs/evidence/HOST-INSTALL.md`](docs/evidence/HOST-INSTALL.md)): **verified** = exercised in live sessions or CI; *implemented* = built against the host's official plugin/skill docs, not yet verified end-to-end — reports welcome.
-
-| Host | Install | Uninstall | Status |
-|------|---------|-----------|--------|
-| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` — rituals are plugin-namespaced: `/loom:loom-init` | `/remove-plugin loom` | **verified** (live full cycle: init → implement → checkers → stop gate) |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | **verified** (install/discovery/uninstall; live model run blocked upstream — Codex ≥0.142 speaks only the Responses API, which z.ai does not serve) |
-| OMP (Oh My Pi) | `omp plugin install git:github.com/zuevrs/loom` — updates need `--force` (see [Upgrade](#upgrade)) | `omp plugin uninstall loom` | **verified** (live OMP + Orca visible-TUI implement/rework/verify cycle; stop-gate logic unit-tested) |
-| Cursor | `node ~/.loom/scripts/install.mjs --cursor` (skills + hooks) | `node ~/.loom/scripts/install.mjs --uninstall --cursor` | **verified** (live sessions) |
-| Pi | `pi install git:github.com/zuevrs/loom` | `pi uninstall git:github.com/zuevrs/loom` | **verified** (live smoke: managed block + skills visible, clean uninstall) |
-| OpenCode | `opencode plugin -g github:zuevrs/loom` (`-g` = global; without it the plugin lands in the current project's `.opencode/`) | remove `"github:zuevrs/loom"` from `opencode.json` | **verified** (live smoke: managed block + 6 skills in context) |
-| Droid (Factory) | `droid plugin install zuevrs/loom` (reads `.claude-plugin/` format) | `droid plugin uninstall loom` | implemented |
-| Windsurf | `node ~/.loom/scripts/install.mjs --windsurf` | `node ~/.loom/scripts/install.mjs --uninstall --windsurf` | implemented |
-| Kiro | `node ~/.loom/scripts/install.mjs --kiro` | `node ~/.loom/scripts/install.mjs --uninstall --kiro` | implemented |
-| Hermes | `ln -s ~/.loom/hermes-plugin ~/.hermes/plugins/loom && hermes plugins enable loom` | `rm -rf ~/.hermes/plugins/loom` | implemented |
-| Cline | `~/.loom/scripts/install-agents-skills` (skills only; also reads `AGENTS.md`) | `node ~/.loom/scripts/install.mjs --uninstall --agents` | implemented |
-| OpenClaw | `~/.loom/scripts/install-agents-skills`; or `clawhub install zuevrs/loom` | If installed via `clawhub`: remove via the clawhub plugin manager. If installed via `install-agents-skills`: `node ~/.loom/scripts/install.mjs --uninstall --agents` | implemented |
-
-Uninstall removes what Loom owns and leaves foreign files untouched. Project files are yours either way: remove `<!-- loom:begin -->…<!-- loom:end -->` from `AGENTS.md` and delete `.loom/` per project if wanted.
-
-## Quickstart
-
-1. **Install** Loom for your host (above).
-2. In your project, invoke **`/loom setup workspace`** or **`loom-init`** — confirm the write plan.
-3. **`/loom <intent>`** — the only OMP command; routes to the right ritual (plan, grill, implement, verify, tend), including direct small fixes.
-4. Ensure a **`loom-verify`** digest exists before marking done (auto-invoked after implement on most paths).
+After install or update, restart the host and confirm all seven rituals are discoverable. On OMP, run `omp plugin doctor loom` and verify a disposable done-without-APPROVE state is refused by `session_stop` before relying on enforcement.
 
 ## Upgrade
 
-**v4 migration:** v4 is breaking and has no compatibility mode. APPROVE no longer commits, unattended runs are report-only, and old resume manifests/transcript authority are invalid. Existing stories must adopt validated STORY state; use explicit `/loom finish` for confirmed local commits, separate `/loom publish` for external effects, and post-merge `/loom tend` for archive and eligible cleanup.
-
-1. **Global install** — plugin-native hosts: re-run the install command (**OMP:** `omp plugin install git:github.com/zuevrs/loom --force` — without `--force` the cached tarball is reused), then **restart the host process** (a plugin hot-swapped under a running host keeps serving stale code — observed live on OMP; `omp plugin doctor loom` confirms health). Script-based hosts: `git -C ~/.loom pull --ff-only`, then re-run the installer — it repairs its own stale entries and never touches foreign config. If your clone is pinned to a tag (detached HEAD), use `git -C ~/.loom fetch --tags && git -C ~/.loom checkout <new-tag>` instead of pull.
-2. **Per project** — run `loom-init` in active repos to refresh the managed block when prompted.
-3. **Verify** — `node ~/.loom/scripts/install.mjs --doctor`: checks hook entries point at existing files, skill links aren't broken, **all surfaces resolve into one Loom tree of one version** (hooks from one clone + skills from another upgrade apart silently), and the current project's managed block matches the installed version. Prints the exact fix for anything wrong, changes nothing. Exit 0 = healthy.
-
-A dead hook is silent — the session just runs without enforcement. Run `--doctor` after every upgrade; it exists because a renamed hook file once left the Stop gate dead for two releases before anyone noticed.
+Update through the same plugin carrier used to install, restart the host, and rerun Setup for stale managed blocks. OMP updates require `omp plugin install git:github.com/zuevrs/loom --force`; without `--force`, cached code may remain active. There is no migration mode in v7: current artifacts and current carrier contracts must validate as-is.
 
 ## Prerequisites & Troubleshooting
 
-- **Prerequisites:** Git (script-tier clone + upgrades) and Node.js on `PATH` — the only runtime for hooks and installer.
-- **Windows:** plugin hosts work out of the box (hooks are plain Node, CI-verified on `windows-latest`); script hosts run `node ~/.loom/scripts/install.mjs --cursor` (or `--windsurf` / `--kiro` / `--agents`) from any shell — skills link as directory junctions, no admin rights needed; where linking is unavailable the installer copies and tells you to re-run after updates.
-- **`path exists (skipping)` during install:** a foreign path squats on a loom skill name — move it, re-run.
-- **Hooks not taking effect:** confirm entries in host config, restart the host session, then `--doctor`.
-- **Managed block version mismatch:** re-run `loom-init` in the affected project.
+Git and Node.js 20+ are needed for local development. Public carriers require their own current plugin CLI. Use the troubleshooting list above, preserve exact Doctor output, and restart before concluding an updated adapter is broken.
 
-## Skills
+## Host authority and enforcement
 
-| Skill | Purpose |
-|---|---|
-| `loom` | Dispatcher — routes `/loom` to the right ritual by intent |
-| `loom-init` | Project setup: managed block, `.loom/` |
-| `loom-plan` | Scope interview → PRD + issue pack |
-| `loom-grill` | Investigate, decide, act — disciplined exploration with confirmation gates; ADR + CONTEXT.md + verified code changes, no PRD/issues |
-| `loom-implement` | Ship one issue with minimal diff |
-| `loom-verify` | Fresh checker: Spec + Standards in parallel. Auto-invoked by `loom-implement` — you rarely call it; invoke directly only for ad-hoc review of an arbitrary diff |
-| `loom-tend` | Warp maintenance, stale issues, capture learning |
+OMP is the only v7 enforcement host. Its extension injects only the static seven-ritual router/discipline at `before_agent_start`; at `session_stop` it validates active artifacts fail-closed and calls the shared Verify gate. The runtime is exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, connected by `omp-extension.mjs`.
 
-## Hooks & enforcement
+OpenCode registers the canonical skill path and injects truthful compact prose. It does not read workspace/config runtime modules or register old lifecycle hooks. Claude Code and Codex plugin metadata expose prose skills and checker surfaces only. No public carrier claims OMP hook parity.
 
-Where the host supports them, Loom uses up to three light lifecycle hooks — non-mutating, no auto-run: **session-start** (context pointers + `.loom` state snapshot with a *next up* resume pointer), **pre-LLM** (invariant guard + anomaly alert, one extra block only when something is wrong), and **sub-agent-spawn** (role manifests + verify witness). Hooks inject guidance; they never edit files.
-
-Hard enforcement is directly evidenced on Claude Code and Cursor: done-without-APPROVE blocks the first stop (exit 2 on Stop-hook hosts), forcing one forced lap, then a repeated unresolved stop is allowed with a warning so headless runs cannot loop forever. OMP ships the same intended hard path via `session_stop`, but remains **Hard (Unverified)** pending live-host evidence in CI. Codex and Droid ship the intended hard path but remain **Hard (Unverified)** pending live plugin-root and stop-contract evidence. OpenCode and Hermes are **Soft** runtime guidance; Pi, Windsurf, Kiro, Cline, and OpenClaw are **Convention-only**. The shared gate also lints `.loom/` state (warn-only), carries the verify-witness warning, and runs as a [CI gate](docs/unattended.md#the-verify-gate-as-a-ci-check). Definitions and per-host evidence live in [`docs/hosts.md`](docs/hosts.md).
-
-Checkers default to the host's **fast/cheap tier** — judging is cheaper than making — and your host config always wins.
-
-Per-host wiring, the full feature matrix, checker-model overrides, linter/witness details, and known host limitations: [`docs/hosts.md`](docs/hosts.md).
-
-## Unattended lane
-
-Loom ships no runner — your host already has one (background agents, cron + headless CLI, goal loops). Loom adds a report-only unattended contract plus a recipe catalog. Current v4 unattended setup/launch and APPROVE authorize no commit, push, hosted review, or other Git/host mutation; runs Verify, leave STORY open, and return a private report. Explicit attended finish may create only confirmed local commits after final Verify; publish is available only through a separately explicit attended invocation and digest-bound confirmation. Runners compose the installed [`skills/loom/UNATTENDED.md`](skills/loom/UNATTENDED.md) with a recipe; human wiring lives in [`docs/unattended.md`](docs/unattended.md).
-
-## Daily workspace lifecycle
-
-For an explicit workspace pack, the user first creates the top-level Orca story card at the workspace owner; Loom creates no coordinator. Plan records registered repository ownership but creates no lanes. After Implement's adaptive repository preview is confirmed, Orca creates service worktrees just in time using native bases, branches, IDs, and settings. One active writer serializes a repository while explicitly independent repositories may run in parallel. A healthy prewalk OMP terminal stays idle per service lane and is reused with compact issue deltas; `worker_done` ends only its bounded assignment, and issue Verify never closes it. APPROVE completes and unblocks an issue without committing, publishing, or changing STORY from `open`. Native card comments/status change only at durable boundaries.
-
-Actionable resume currently reconciles validated STORY, authoritative Git status/diff, and native Orca identities; coherent dirty work resumes and exact evidence mismatches stop before dispatch. Explicit finish inventories, verifies, and creates confirmed local commits plus a sanitized review bundle with no push; publish is available only through a separately explicit attended invocation and digest-bound confirmation. Explicit attended publish inventories the exact finished lanes, separately confirms a digest, pushes/creates hosted reviews sequentially, protects partial successes, and leaves `awaiting-review`. After durable merge evidence, exact `/loom tend` archives sanitized durable artifacts/public refs before `done`, then separately inventories exact lanes and removes only confirmed merged, clean, inactive lanes; unsafe or ambiguous lanes stay.
-
-A v3.3 live disposable two-repository pilot historically validated scheduling, REJECT/rework, verified commits, coherent resume, manual-only review preparation, and selective native cleanup; those commit/resume results are historical evidence, not current v4 capability. Its ambiguity helper timed out after 180 seconds, so ambiguity `STOP` was not live-observed; that pilot led to a fail-closed contract correction which sequences the existing workspace, issue, Git, and native Orca source owners before dispatch. No custom executable reference validator or runtime manifest is shipped. Unsupported hosts remain unverified. See the detailed [Orca evidence and correction](docs/orca.md), [workspaces](docs/workspaces.md), and [host details](docs/hosts.md).
-
-## Loom + OMP
-
-OMP is the maximum-synergy host. Optional OMP + Orca worktrees were verified through a committed tree in a live visible-TUI E2E on 2026-07-21: a clean-base story worktree while main retained paused work, visible OMP TUI, `dispatch --inject`, task-and-dispatch-scoped `worker_done`, and independent coordinator Spec/Standards Verify with one REJECT/rework lap through APPROVE. Loom owns **what** to build (PRD, issues, verify contract), OMP owns **how** the agent runs (enforcement, orchestration, review).
-
-```bash
-omp plugin install git:github.com/zuevrs/loom
-cd your-project && omp        # in session: run loom-init
-
-# Update to latest:
-omp plugin install git:github.com/zuevrs/loom --force
-```
-
-```
-> /loom plan JWT auth feature              # → loom-plan (grill → PRD → issues)
-> /loom implement issue 01                # → issue from snapshot / named target
-> Verify                                   # → task: loom-verify-spec + loom-verify-standards
-> (agent writes ## Verify, sets Status: done — session_stop gate checks it)
-```
-
-OMP-native integration adds an optional project context/worker preset, fresh prewalk workers, disabled-by-default cheap Advisor setup, and exclusive runner routing: Orca when configured, otherwise confirmed TUI `/goal set` + a finite total `/goal budget` above already-consumed root-session tokens. After a Goal ends, drop it as appropriate and verify status with `/goal show`. The full contract is in [`docs/hosts.md`](docs/hosts.md#loom--omp-quick-workflow).
+Orca is Loom's sole orchestration adapter. Loom owns planning artifacts and verification semantics; Orca owns worktrees, branches, cards, tasks, dispatches, terminals, and liveness. See [`docs/orca.md`](docs/orca.md) and [`docs/hosts.md`](docs/hosts.md).
 
 ## Safety
 
-- Hooks are non-mutating — they never edit files; enforcement blocks only at the Stop gate.
-- Work needing human judgement (auth, payments, secrets) is routed `ready-for-human` at planning time.
-- No auto-merge, no auto-publish, no silent self-rewrite.
-- Contracts evolve with SemVer; follow [`CHANGELOG.md`](CHANGELOG.md) and [`RELEASE.md`](RELEASE.md) for upgrades.
+- Lazy means efficient, not careless: understand the flow, then YAGNI → reuse → stdlib/platform/dependency → minimum code.
+- Trust-boundary validation, security, privacy, data-loss prevention, accessibility, and explicit checks are never optional.
+- Implement never self-approves; checker context remains independent.
+- OMP boundaries inspect and block; they do not edit project files or run Git/GitHub mutations.
+- Finish and Publish are explicit attended command boundaries. Agents never infer commit, push, PR, merge, tag, release, archive, or cleanup authority.
+- No runtime network calls and no telemetry.
 
-## Contributing
+## Native automation
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local setup, checks, and PR process.
+Loom v7 ships no unattended ritual, recipe catalog, scheduler, or runner. Use native host automation with explicit budgets, deterministic checks, minimal credentials, and report-only outcomes. The retained [`docs/unattended.md`](docs/unattended.md) is a relocation notice and general safety guidance, not a shipped route.
+
+## Contributing and release
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for authoring and deterministic checks. [`RELEASE.md`](RELEASE.md) preserves the complete package/unpack/import/version/changelog/tag/ref/GitHub verification and requires a separate hard confirmation before any remote effect.
 
 ## License
 
 [MIT](LICENSE)
-
-## Loom v6 contract
-
-Loom v6 keeps v5 data readable while making workflow proportional: compact fixes need no mandatory Story, Verify remains independent and risk-scaled, mutation authority stays narrow and expiring, and Orca solely owns runtime resources in Orca mode. Start with [the v6 migration guide](docs/migration-v6.md) and use the [attended OMP + Orca pilot](docs/evidence/V6-ATTENDED-PILOT.md) for release evidence; inherited v5 receipts do not prove v6 behavior.

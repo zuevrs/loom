@@ -1,45 +1,44 @@
 ---
 name: loom-grill
-description: Investigate, decide, act — disciplined exploration that materializes its findings. Not for planning buildable work with defined scope (that is loom-plan).
+description: Investigate and discuss with disciplined freeform exploration. Materialization is available only when explicitly requested, and planning artifacts remain Plan-only.
 disable-model-invocation: true
 ---
 
-**Explore with discipline. Act with confirmation. Leave a trace.**
+**Explore freely with discipline. Materialize only on explicit request.**
 
 Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
 
 ## Goal
 
-Investigate a question, resolve it through disciplined interview, then materialize findings inline — code changes verified by gates, decisions captured in lightweight ADRs — without the ceremony of Plan (no PRD, no issues). Covers both "think this through" and "debug/fix this" when the user has no pre-defined scope.
+Investigate, stress-test, debug, or think through a question in freeform discussion by default. Conversation may be the whole outcome. Preserve the proven action-gate capability only when the user explicitly asks to materialize code or non-planning documentation. Story, PRD, and Ticket writes always belong to Plan.
 
 ## Inputs
 
 - The question or topic (explicit or inferred from the user's trigger)
 - Repo context if the topic touches it (explore before asking)
 
-## Workspace ownership
+## Ownership
 
-With a valid active workspace profile, write `CONTEXT.md`, ADRs, and `.loom/research/` notes only under the workspace owner root (`node hooks/workspace.cjs --project-context` → `artifactRoot`). Run reads, diffs, and gates in the relevant registered service repository. Loom artifacts belong at the workspace owner, not inside registered service repositories.
-Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes.
+Use current project evidence read-only during ordinary discussion. Do not create or update Story, PRD, or Tickets. If the user asks to capture planning state or a decision whose proper owner is a Story/PRD/Ticket, recommend Plan. Confirmed non-planning CONTEXT/ADR/code materialization uses the current project root and the explicit action gate below.
 
 ## Outputs
 
 - Decisions → lightweight ADR (`docs/adr/NNNN-<slug>.md`: Question / Decision / Why) — only when all three hold: hard to reverse + surprising without context + result of a real trade-off
 - Domain knowledge → pending `CONTEXT.md` delta (maintained inline as terms resolve; flushed at action gate)
 - Code changes → verified by objective gates (confirmation required)
-- No PRD, no issues, no digest file
+- No Story, PRD, or Tickets; no digest file
 
 ## Process
 
-When an open story owns the topic, enter STORY Adaptive continuation first. Grill may then amend the current PRD/issues and scoped knowledge through one confirmed semantic bundle despite the ordinary no-PRD/no-issues output below; this is continuation, not a new Plan. Preserve initial intent after the bundle: pure discussion stops, while discuss-and-change continues to Implement/Verify.
+When an active Story owns the topic, use it as read-only context. A request to capture or amend Story/PRD/Ticket state routes to Plan; Grill never writes planning artifacts. Preserve discussion-only intent rather than manufacturing an action.
 
 
-1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a PRD and issue pack.
-2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, pending domain delta, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and PRD/issue exit gate in Plan; return here when the interview crystallises into an action or the user stops.
-3. **Resolve the thread** — follow the canon until the load-bearing branches are explicit. End naturally when investigation finds nothing actionable. When something becomes actionable, continue through Grill's gate below.
-4. **Action gate** — state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
+1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a Story, optional material PRD, and Tickets.
+2. **Load the shared interview canon** — before the first interview question, read and apply [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md). It is the sole source for shared interview discipline: exploration and primary-source research, facts owned by evidence versus decisions owned by the user, one-question cadence, dependency ordering, recommendations, domain probes, pending domain delta, ADR offers, language, interruption recovery, and shared anti-rationalization. Apply its `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` sections as one body. Keep Plan's inbound triage and Story/PRD/Ticket exit gate in Plan; return here when the interview crystallises into an action or the user stops.
+3. **Resolve the thread** — follow the canon until the load-bearing branches are explicit. End naturally when investigation finds nothing actionable. When something becomes actionable, keep discussing unless the user explicitly requests materialization; only then continue through Grill's gate below.
+4. **Explicit materialization gate** — only after the user explicitly asks to act, state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
    - **Pre-materialize edge-case checkpoint (code changes only).** Before the first code materialization in this thread, ask one adversarial edge-case question with a recommendation. Resolve it through the shared canon before proposing materialization.
-   - Wait for explicit user confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", and "love it" resolve a branch, not an action gate.
+   - The request to materialize activates the capability but does not replace the exact gate. Wait for explicit confirmation before any code write or ADR. **Enthusiasm is not a go** — "interesting", "sounds right", and "love it" resolve a branch, not an action gate.
    - Treat a refusal as a leaning and resume the canonical interview.
    - Continue maintaining resolved glossary terms in the pending domain delta inline; the delta flushes to `CONTEXT.md` as part of the action gate's bounded apply.
    - Preview exact files and actions in the bounded apply proposal; changed target, action, scope, or base requires renewed confirmation.
@@ -55,7 +54,7 @@ When an open story owns the topic, enter STORY Adaptive continuation first. Gril
      <1-2 sentences>
      ```
    - Return to the canonical interview while questions remain.
-6. **Semantic boundary** — recommend Plan when the work no longer fits a coherent local, single-session resolution or needs load-bearing decisions or issue slicing. File and commit counts are not scope proxies. Before compaction/interruption, offer a checkpoint; keep pending changes in conversation until the checkpoint confirms.
+6. **Semantic boundary** — recommend Plan when the work no longer fits a coherent local, single-session resolution or needs load-bearing decisions or Ticket slicing. File and commit counts are not scope proxies. Before compaction/interruption, offer a checkpoint; keep pending changes in conversation until the checkpoint confirms.
 
 ## The distinct cadence, worked
 
@@ -77,12 +76,26 @@ This exchange begins after the canonical interview has resolved the shared decis
 - After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical checker tiers in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md): mechanical typo/format → objective checks; semantic docs/config/code → fresh Standards checker; behavioral/risk or explicit contract → Spec + Standards; ambiguity escalates.
 - Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior requires a risk note and full Spec + Standards Verify even for a small fix.
 - Full `loom-verify` (spec + standards checkers) → use when the semantic boundary fires and the user chooses to continue in Grill, or when a risk trigger appears.
-- Small fixes without an issue file: the verify digest lives in **chat** (attended) or the **PR description** (unattended); no issue write-back or status change.
+- Small fixes without a Ticket file: the verify digest lives in **chat** (or the explicitly requested review description); no Ticket write-back or status change.
+
+## Evidence-backed maintenance discussions
+
+With Tend removed, a user may still ask Grill to investigate drift, debt, stale knowledge, or repeated failure. Treat this as one bounded question, not a hidden maintenance sweep:
+
+- compare CONTEXT/ADRs/PRODUCT/DESIGN with current code and name exact contradictory sources;
+- inspect `loom:` debt without deleting or rewriting the marker unless a confirmed implementation actually pays it down;
+- treat stale Ticket state as a Verify/Plan question: an existing APPROVE is insufficient unless its exact Boundary still covers current semantics and repository state; Grill never creates or extends a verdict;
+- surface `needs-info` as one recommended user question; only a confirmed Plan amendment changes its contract/status;
+- recommend Setup when the managed block or `.loom/version` is stale; do not repair installation state from Grill;
+- treat orphaned research or discussion notes as evidence to cite or discard conversationally, not as a reason to invent archive state; and
+- when the same evidence-backed audit need recurs, recommend the host's native automation guidance in `docs/unattended.md`; do not recreate a Loom recipe runner.
+
+Present one strongest finding and its evidence. If correction is requested, route by owner: project knowledge/ADR capture through Grill's explicit materialization gate, contract/Ticket changes through Plan, code/debt work through Implement, verdict freshness through Verify, setup through Setup, and proven merged Orca cleanup through Orca. Never batch unrelated maintenance because the old Tend ritual no longer exists.
 
 ## Hard stops
 
 - **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing. Enthusiasm resolves a branch, not an action gate.
-- Never write PRD or issue cards — that is Plan territory.
+- Never write Story, PRD, or Ticket artifacts — that is Plan territory.
 - Never publish, deploy, or perform another irreversible action without explicit confirmation that names the action.
 - Never expand scope or auto-upgrade to Plan — signal the semantic boundary and let the user choose.
 - Complete the pre-materialize edge-case checkpoint before the first code write.
@@ -107,7 +120,7 @@ Shared interview excuses and responses live only in Plan's canonical [`GRILL.md`
 
 | Excuse | Reality |
 |---|---|
-| "This feels like Plan, I'll write a PRD" | Keep this ritual inline. Signal Plan and let the user choose the route. |
+| "This feels like Plan, I'll write a PRD" | Keep this ritual inline. Route to Plan only when the user requests planning materialization; otherwise keep discussion freeform. |
 | "User seemed to agree, I'll just do it" | Agreement is a decision signal, not action confirmation. State the concrete action and wait for explicit go. |
 | "I'll skip gates, it's a tiny change" | Run the objective gates; they define whether the materialized change is verified. |
 | "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |

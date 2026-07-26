@@ -1,71 +1,79 @@
-# Authoring guide (maintainers)
+# Authoring guide for maintainers
 
-Standards for writing Loom skills, hooks, and templates. End users invoke rituals — they do not read this file.
+Loom skills are executable prose. Canonical behavior belongs in the canonical skill; host carriers translate only syntax or metadata their host requires.
 
 ## Skill contract
 
-Every `skills/<name>/SKILL.md` must include:
+Every ritual `SKILL.md` includes:
 
 | Section | Purpose |
-|---------|---------|
-| `## Goal` | One outcome sentence |
-| `## Inputs` | What the ritual needs |
-| `## Outputs` | Artifacts produced |
-| `## Process` | Numbered steps |
-| `## Hard stops` | Non-negotiable blocks |
-| `## Failure modes` | Symptom → response table |
-| `## Done when` | Verifiable completion (maps to ADR "Verification") |
+|---|---|
+| `## Goal` | One concrete outcome sentence |
+| `## Inputs` | Required artifacts, identity, and authority |
+| `## Outputs` | Files, evidence, or report produced |
+| `## Process` | Ordered, executable steps |
+| `## Hard stops` | Conditions that halt rather than degrade |
+| `## Failure modes` | Symptom → honest response |
+| `## Done when` | Observable completion and checks |
 
-### Frontmatter
+Frontmatter should make user-invoked rituals explicit. Verify may be model-invoked after Implement, but its checker context remains independent. The public router contains exactly Setup, Grill, Plan, Implement, Verify, Finish, and Publish. Do not expose maintenance, unattended, recipes, migration, or historical internals as current rituals.
 
-- **Rituals** (user-invoked): `disable-model-invocation: true`
-- **`loom-verify`**: model-invoked (exception — post-Implement trigger)
+## Positive prompting and anti-rationalization
 
-## Templates
+Prompt the desired action directly: “write the smallest working diff and run the named check” is stronger than a list of vague prohibitions. A prohibition earns space when it protects a hard boundary; pair it with the positive action that resolves it.
 
-Co-locate with the skill that materializes them:
+Hard stops must resist predictable rationalizations. Use an excuse/reality pairing where a model might otherwise proceed:
 
-- Plan → PRD, Issue, PRODUCT, DESIGN
+| Rationalization | Required reality |
+|---|---|
+| “The artifact is probably the active one.” | Resolve one current artifact from authoritative identity evidence or stop. |
+| “The maker already reviewed it.” | Run independent Spec and Standards judgment. |
+| “Finish implies they want a PR.” | Finish is local handoff only; Publish requires a separate explicit invocation and current confirmation. |
+| “The prior digest is close enough.” | Recompute against the current intended diff and checks. |
 
-Follow ADR contracts (Matt core + Addy guards for PRD; vertical slice for issues).
+Do not pad ordinary instructions with defensive prose. Reserve anti-rationalization for authority, identity, verification, destructive effects, and data-loss boundaries.
 
-## Prose discipline
+## Templates and artifacts
 
-**Prompt the positive.** Naming a forbidden behaviour drags it into context and makes it *more* available ("don't think of an elephant"). State the target behaviour instead ("write one-line comments", not "never write verbose comments"). A prohibition earns its place only as a hard guardrail you cannot phrase positively — and even then, pair it with the positive target. Hard stops and anti-rationalization tables are that guardrail case: each row pairs the excuse with the reality to land on.
+Co-locate templates with the ritual that materializes them. Plan owns PRD, Ticket, PRODUCT, DESIGN, CONTEXT, and ADR formats. Templates state required sections and validation rules; ritual prose owns when and why they are created.
 
-## Hooks
+Current artifacts are authoritative only when their identity and state validate now. Historical pilots, migration ledgers, transcripts, and prior digests may explain decisions but never prove present behavior or grant authority.
 
-Author invariants once in `hooks/invariants.cjs`. Adapters inject — they do not fork behavior.
+## The three runtime seams
 
-Three plugin-tier hooks:
+Runtime behavior is single-source in exactly three CommonJS modules:
 
-1. `session-start` — context pointers + managed-block version check
-2. `pre-LLM` — invariant guard only
-3. `sub-agent-spawn` — role manifest; checker no-auto-fix
+1. `hooks/artifacts.cjs` — locate and validate the active artifact from current evidence.
+2. `hooks/boundary.cjs` — decide whether a requested action crosses an authorized boundary; fail closed on missing, stale, duplicate, or contradictory identity/state.
+3. `hooks/verify-gate.cjs` — decide Verify-before-done from the active Ticket and current digest/check evidence.
 
-Sub-agent role field: **`loomRole`** (`maker`, `spec-checker`, `standards-checker`, `researcher`).
+`omp-extension.mjs` adapts these seams to OMP router injection and `session_stop`. Do not duplicate their decisions in adapter prose, rules, checker prompts, or carrier metadata. The OMP stream rule is a reminder, not a fourth seam.
 
-## Enforcement
+OpenCode's adapter may register the skill directory and inject compact discipline/router prose only. It must not import workspace/config modules, register old lifecycle hooks, or imply blocking. Claude Code and Codex plugin manifests carry prose-compatible skills and checker metadata their packaging supports; they have no Loom hooks field or enforcement parity claim.
 
-Verify-before-done logic lives in `hooks/stop-gate-logic.cjs` (single source):
+## Single source and host dialects
 
-- **Stop-hook hosts** — `stop-gate-logic.cjs` is invoked in hook mode (`node hooks/stop-gate-logic.cjs --hook`: exit 2 = block per the Claude/Codex hook contract, one forced lap via `stop_hook_active`); bare/`--ci` invocations keep exit 1
-- **OMP** — `omp-extension.mjs` `session_stop` handler uses the same module
-- **OMP TTSR** — `rules/` stream reminder (soft layer)
-- **OMP agents** — `agents/` custom verify checkers (invoke via `task` tool)
+Canonical semantic owner → derived dialect:
 
-Do not duplicate gate logic elsewhere.
+- ritual behavior → `skills/**`;
+- active identity/boundary/gate decisions → the three runtime seams;
+- OMP checker intent → `agents/loom-verify-*.md`;
+- Claude checker dialect → `.claude-plugin/agents/loom-verify-*.md`;
+- compact carrier summary → managed block and OpenCode injection.
 
-After changing canonical behavior:
+Dialect files may change frontmatter, tool names, or model-tier syntax. They may not change acceptance semantics, maker/checker separation, stale-digest rules, or authority boundaries.
 
-1. Update `hooks/invariants.cjs` if load-bearing phrases change
-2. Run `bash scripts/smoke`
-3. Bump managed-block version on release (`RELEASE.md`)
+Checker drift rules:
 
-## References distilled
+1. Spec and Standards remain separate judgments, even if a host executes them sequentially.
+2. Both inspect the same current base/diff/evidence payload.
+3. Standards smell baselines stay semantically identical across packaged checker dialects.
+4. A checker reports; it does not fix, approve its own edits, or inherit maker authority.
+5. Model tiers use host-native roles/configuration; user configuration wins. Do not hardcode a provider model as product semantics.
+6. Drift checks compare load-bearing phrases and outcomes, not incidental formatting.
 
-- **ponytail** — lazy ladder, thin adapters, drift canary
-- **mattpocock** — user-invoked implement/plan skills, model-invoked verify, facts-vs-decisions grill split, prompt-the-positive prose
-- **addyosmani** — PRD scope/quality gates
-- **host-native enforcement** — delegate runtime enforcement to host hooks/TTSR/session_stop rather than prompt injection
-- **checker model tiers** — semantic tier per host dialect, never a hardcoded model name: root `agents/` is OMP format (`model: pi/smol` — the `pi/` prefix targets a model *role*; a bare name like `fast` is a raw pattern that silently falls back to the session model when nothing matches), `.claude-plugin/agents/` is Claude format (`model: haiku`). The explicit `agents` key in `.claude-plugin/plugin.json` keeps Claude Code away from the OMP-format files. Keep the standards checker's smell baseline identical in both files (drift canary compares them)
+After canonical behavior changes, update only affected dialects, run all drift/doc/package checks, and scan public surfaces for removed ritual and runtime names. Never “fix” drift by weakening the canonical contract.
+
+## Authoring Finish and Publish
+
+Finish and Publish are explicit attended commands, not background phases and not machine gates. Their prose should inventory current effects, distinguish local from remote authority, require current confirmation, and return an honest manual handoff where the host cannot perform an effect. No ritual may infer commit, push, hosted review, merge, tag, release, archive, or cleanup consent from APPROVE, continuation, recovery, prior Story confirmation, or another ritual.

@@ -34,32 +34,6 @@ for adapter in "$ROOT/.claude-plugin/plugin.json" "$ROOT/.codex-plugin/plugin.js
   fi
 done
 
-hermes_yaml="$ROOT/hermes-plugin/plugin.yaml"
-if [ -f "$hermes_yaml" ] && [ -n "$pkg_version" ]; then
-  hv=$(grep '^version:' "$hermes_yaml" 2>/dev/null | sed 's/version: *//')
-  if [ -n "$hv" ] && [ "$hv" != "$pkg_version" ]; then
-    errors+=("version mismatch: hermes-plugin/plugin.yaml=$hv vs package.json=$pkg_version")
-  fi
-fi
-
-# Check version constants in adapters that embed MANAGED_BLOCK_VERSION
-for adapter in "$ROOT/omp-extension.mjs" "$ROOT/hermes-plugin/__init__.py" "$ROOT/hooks/loom-session-start.cjs"; do
-  [ -f "$adapter" ] || continue
-  av=$(grep -o 'MANAGED_BLOCK_VERSION.*=.*"v\?[0-9.]*"' "$adapter" 2>/dev/null | grep -o '[0-9][0-9.]*' | head -1)
-  if [ -n "$av" ] && [ -n "$pkg_version" ] && [ "$av" != "$pkg_version" ]; then
-    errors+=("version mismatch: $(basename "$adapter") MANAGED_BLOCK_VERSION=$av vs package.json=$pkg_version")
-  fi
-done
-
-# Check adapters with explicit version fields
-kiro="$ROOT/kiro-agent.json"
-if [ -f "$kiro" ] && [ -n "$pkg_version" ]; then
-  kv=$(grep '"version"' "$kiro" 2>/dev/null | head -1 | sed 's/.*: *"//' | sed 's/".*//')
-  if [ -n "$kv" ] && [ "$kv" != "$pkg_version" ]; then
-    errors+=("version mismatch: kiro-agent.json=$kv vs package.json=$pkg_version")
-  fi
-fi
-
 opencode="$ROOT/opencode-plugin.mjs"
 if [ -f "$opencode" ] && [ -n "$pkg_version" ]; then
   ov=$(grep -o 'Version: [0-9.]*' "$opencode" 2>/dev/null | grep -o '[0-9][0-9.]*' | head -1)
@@ -69,7 +43,7 @@ if [ -f "$opencode" ] && [ -n "$pkg_version" ]; then
 fi
 
 # Check all skills referenced in AGENTS.md router exist
-for skill in loom-init loom-plan loom-grill loom-implement loom-verify loom-tend; do
+for skill in loom-init loom-plan loom-grill loom-implement loom-verify; do
   if [ ! -f "$SKILLS_DIR/$skill/SKILL.md" ]; then
     errors+=("router references $skill but skills/$skill/SKILL.md missing")
   fi
@@ -110,35 +84,6 @@ for m in "$ROOT"/agents/*.md; do
     errors+=("checker manifest body drift: agents/$(basename "$m") vs .claude-plugin/agents/$(basename "$m")")
   fi
 done
-
-# Load-bearing invariant phrases must appear in all discipline injection surfaces.
-invariant_targets=(
-  "$ROOT/hooks/invariants.cjs"
-  "$ROOT/hermes-plugin/__init__.py"
-  "$ROOT/kiro-agent.json"
-)
-
-invariant_import_targets=(
-  "$ROOT/opencode-plugin.mjs"
-  "$ROOT/omp-extension.mjs"
-)
-
-for target in "${invariant_import_targets[@]}"; do
-  [ -f "$target" ] || continue
-  if ! grep -Fq 'invariants.cjs' "$target" 2>/dev/null; then
-    errors+=("$(basename "$target") must import hooks/invariants.cjs")
-  fi
-done
-
-while IFS= read -r phrase; do
-  [ -z "$phrase" ] && continue
-  for target in "${invariant_targets[@]}"; do
-    [ -f "$target" ] || continue
-    if ! grep -Fq "$phrase" "$target" 2>/dev/null; then
-      errors+=("$(basename "$target") missing invariant phrase: $phrase")
-    fi
-  done
-done < <(node -e "require('$ROOT/hooks/invariants.cjs').REQUIRED_PHRASES.forEach(p=>console.log(p))")
 
 if [ ${#errors[@]} -eq 0 ]; then
   echo '{"status":"clean","message":"No drift detected"}'

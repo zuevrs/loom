@@ -1,6 +1,6 @@
 # TDD — the red → green loop
 
-Read this when the issue involves non-trivial logic (the TDD step of loom-implement §Process). Skip for trivial/doc edits — the one-runnable-check rule still applies either way.
+Read this when the ticket involves non-trivial logic (the TDD step of loom-implement §Process). Skip for trivial/doc edits — the one-runnable-check rule still applies either way.
 
 ## What a good test is
 

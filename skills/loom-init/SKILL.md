@@ -1,86 +1,73 @@
 ---
 name: loom-init
-description: Configure a project for Loom after global install. Use when Loom is installed on host but the current repo is not initialized. One-time setup only — not for planning features (loom-plan) or refreshing project docs (loom-tend).
+description: Set up Loom v7 durable project state after installation. One-time setup only; not planning or maintenance.
 disable-model-invocation: true
 ---
 
 **Confirm before every write.**
 
-Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md).
 
 ## Goal
 
-One safe, idempotent project setup: managed block, `.loom/` — then hand off to `loom-plan`.
-
-A **workspace setup** is an explicit opt-in branch for a folder containing independent Git repositories. It never changes the canonical one-Git-repo/one-Loom default and never writes Loom artifacts into registered service repositories.
+Perform one safe, idempotent Setup: install/refresh the managed Loom block and create `.loom/version`. Do not create a Story, PRD, Ticket, domain document, ADR, runtime configuration, registry, task, lane, or worktree.
 
 ## Inputs
 
-- Global Loom install on host (skills already available via plugin or host-native install)
-- Current repo state (`AGENTS.md`, `.loom/`)
-- For workspace setup: the user's explicit request, workspace root, and JSON from `scripts/inspect-workspace <root> --json`
+- Installed Loom skill tree
+- Current project root, `AGENTS.md`, and `.loom/version`
 
 ## Outputs
 
-- Managed Loom block in `AGENTS.md` (`<!-- loom:begin version=vX.Y.Z -->` … `<!-- loom:end -->`)
-- Empty `.loom/` directory
-- Completion summary
+- Managed Loom block in `AGENTS.md`
+- `.loom/version` containing the installed supported major
+- Exact completion summary
 
-### Workspace profile
+## Setup ownership and transaction
 
-Use `.loom/workspace.json` only after explicit workspace setup. It is generated and validated by Loom; it is not required in a canonical repo-only project. Registered service repos are context/execution targets, not additional Loom roots.
-Load and follow [`../loom/STORY.md`](../loom/STORY.md) before durable decisions or project writes. Use the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`; do not paraphrase it.
+Setup owns only the managed `AGENTS.md` block and `.loom/version`. The installed Loom tree's root `AGENTS.md` is the single template source: copy its delimited block byte-for-byte; never maintain a second embedded copy or reconstruct it from memory. Existing project content outside the delimiters is user-owned.
+
+Treat the two files as one bounded setup transaction. Before writing, validate every proposed target and complete resulting byte sequence, plus whether each path is absent, unchanged, or replaced. Write through same-directory temporary files and atomic replacement where the platform supports it, then reread exact bytes. If a later write or readback fails, restore only bytes written by this invocation when that restoration can itself be proven; otherwise stop and report every completed write and exact residual repair. Never claim rollback merely because it was attempted.
 
 ## Process
 
-1. Inspect: `AGENTS.md`, `.loom/`, managed block version vs installed Loom.
-2. Prepare write plan — show exactly what will change.
-3. Ask explicit confirmation before any write.
-4. Apply idempotently:
-   - Write/refresh managed block only inside delimiters (content below)
-   - Create `.loom/` if missing (no PRD/issues yet)
-5. On an OMP host/project only, lazy-load [`../loom/OMP.md`](../loom/OMP.md) and make its two independent optional offers: (1) the recommended context+worker preset and (2) the exact current smol model copied to the disabled Advisor role. Each has its own exact preview and bounded confirmation; target `<artifactRoot>/.omp/config.yml`, never blindly rewrite existing YAML, never enable Advisor, and leave memory off.
-6. Detect Orca project registration project-nonmutatingly. When the CLI and registration are available, offer exactly once: `Use Orca worktrees for parallel stories?` Preview the exact write `{ "worktrees": "orca" }` to `<artifactRoot>/.loom/config.json`; write only after confirmation. Never enable automatically.
-7. When `.loom` and/or `AGENTS.md` control-plane files are untracked in a Git root, Init is not complete until the user explicitly chooses **commit now** or **later**. For commit now, show the exact paths and command and require a bounded confirmation; never auto-commit. For later, finish with a named `Uncommitted control plane` warning in the summary.
-8. **Do not** scaffold CONTEXT, PRODUCT, ADRs, or PRD — that is `loom-plan`. In workspace mode, durable docs belong in the workspace root; do not create them in a registered service repo.
-9. Print summary: changed / checked-not-changed / warnings / next step: `loom-plan`. Mention the maintenance pair once: `loom-tend` for interactive upkeep, scheduled recipes for recurring audits (human wiring is optional in `docs/unattended.md`).
-10. If nothing needed: `No changes needed` + what was checked.
-
-## Workspace setup branch
-
-When the user explicitly asks to set up a multi-repo workspace:
-
-1. Treat the current workspace root as the scan root. If launched from a service Git-root, identify the intended parent only from explicit user context; do not silently create a local profile.
-2. Run the shared read-only inventory: `node scripts/inspect-workspace <root> --json`.
-3. Show a compact summary and exact v5 proposed profile (`schema_version`, stable workspace/repository `name`, `artifact_owner.versioning`, `path`, optional `remote`/`context_paths`) plus setup-only `canonical_path` evidence. Do not read service source or run service tests during setup.
-4. For an old schema, show a guided v5 replacement; never accept aliases. Derive repository-name candidates from basenames and stop on collisions for explicit names. For a non-Git owner, stop until the user chooses the canonical baseline (confirmed owner Git initialization and exact service-path ignores) or completed unversioned baseline. Never configure a remote.
-5. Ask for one bounded confirmation before writing. Delegate to `node scripts/setup-workspace <root> --confirm --profile <profile.json>`; the script prevalidates the resulting profile, privacy/structure rules, Git identity, and owner-worktree targets before mutation. Canonical setup stages a newly created owner Git operation, commits only owner memory, creates one `story/<name>` worktree per open Story, and attempts to roll back that new Git state and owner writes on failure, reporting exact residual actions if any cleanup fails; completed unversioned setup retains the atomic owner transaction. It never writes into registered service repositories.
-6. A valid workspace profile owns the workspace Loom context. If the workspace root is not Git, emit the canonical `nonGitOwnerWarning` from `hooks/workspace.cjs`. If a registered service repo contains Loom artifacts, report it and offer a separate migration plan; never delete or silently merge it.
-7. In workspace mode, a service-root invocation must hand off to the workspace profile instead of running local Init.
-
-### Managed block to write
-
-Copy the delimited managed block verbatim from the installed Loom tree’s root `AGENTS.md`; that block is the single template source. Do not reconstruct or paraphrase it inside Init. Merge it between the user file’s delimiters while preserving all content outside them.
+1. Inspect `AGENTS.md`, `.loom/`, `.loom/version`, the installed package version, and the managed block version read-only. Detect drift in either direction; a stale installed carrier is not repaired by merely rewriting the project block. Also inspect path types and reject symlinks or non-file/non-directory entries at these trust boundaries.
+2. If existing state names another major or contains legacy state requiring interpretation, stop read-only with upgrade guidance. v7 provides no migration or compatibility rewrite.
+3. Prepare an exact write preview: every target path, action, and resulting managed-block/version content.
+4. Obtain bounded explicit confirmation. Changed target, action, or content requires renewed confirmation.
+5. Apply the validated setup transaction idempotently: merge only between exactly one well-formed managed delimiter pair, preserving all user bytes outside it; create a real non-symlink `.loom/` directory as needed; atomically write the supported major to a regular non-symlink `.loom/version`; reread and compare every resulting byte.
+6. Copy the managed block verbatim from the installed Loom tree's root `AGENTS.md`; never reconstruct it here or accept the project's stale block as the template.
+7. Do not scaffold Story, PRD, Tickets, CONTEXT, PRODUCT, DESIGN, or ADRs. Plan owns materialization.
+8. If control-plane files are untracked, present the exact paths and current Git evidence and ask the user to choose **leave uncommitted** or **handle them later through an explicit Finish**. Setup never runs the commit. A declined or deferred choice finishes with a named `Uncommitted control plane` warning; do not hide it in generic warnings.
+9. Print changed / checked-not-changed / warnings / next step. If nothing changed, say `No changes needed` and what was checked.
 
 ## Hard stops
 
-- Never write without explicit confirmation.
-- Malformed/unpaired `loom:begin/end` → fail safely with repair guidance; do not write.
-- Never overwrite user content outside managed block.
-- Block version lags global Loom → warn + suggest refresh (no silent auto-update).
+- Never write without exact preview and explicit confirmation.
+- Malformed/unpaired managed delimiters: fail safely with repair guidance.
+- Never overwrite user content outside the managed block.
+- Never create configuration profiles, execution registries, lanes, tasks, or worktrees; never migrate legacy state.
+- Never commit, push, tag, publish, or release.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
-| Skills not discoverable | Verify global install (plugin for host, or host-native install) |
-| User declines confirm | No writes; report what would have changed |
-| Major version mismatch | Warn-and-continue with explicit refresh guidance |
+| Skills not discoverable | Verify installation for the current host |
+| User declines confirmation | No writes; report the proposed changes |
+| Existing major is not current | Read-only hard stop with upgrade guidance; no migration |
+| Managed block is newer than installed carrier | Stop and name the host-native update/restart action; do not downgrade project guidance |
+| Installed carrier is newer than managed block | Preview the exact current installed block through ordinary Setup confirmation |
+| Managed block is malformed, duplicated, nested, or unpaired | Show the exact delimiter problem and repair guidance; do not write |
+| Target is a symlink or wrong filesystem type | Stop before mutation; name the path and observed type |
+| Second write or readback fails | Preserve proven completed state; restore only invocation-owned bytes when exact restoration is provable; report residual repair |
+| Control-plane files are untracked | Require an explicit leave-uncommitted or later-Finish choice; Setup never commits |
 
 ## Done when
 
-- Managed block present and well-formed
-- `.loom/` exists
-- User content outside delimiters untouched
-- Summary printed (or `No changes needed`)
-- In a Git root, untracked control-plane files have an explicit commit-now choice or an `Uncommitted control plane` warning
+- Managed block is present and well formed
+- `.loom/version` contains the supported major
+- User content outside delimiters is untouched
+- Exact post-write readback matches the preview
+- Summary separates changed / checked-not-changed / warnings / residual repair
+- Untracked control-plane state has an explicit user choice and, when retained, a named `Uncommitted control plane` warning

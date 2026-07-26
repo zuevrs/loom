@@ -1,6 +1,6 @@
 # Brownfield boot — mine before you interview
 
-Trigger: mature repo, no `CONTEXT.md`/`PRODUCT.md`, first `.loom` pack. Skip on greenfield or when `CONTEXT.md`/`PRODUCT.md` already exist — a README or scattered docs do NOT skip the boot; they are inputs to it.
+Trigger: mature repo, no `CONTEXT.md`/`PRODUCT.md`, first Loom plan. Skip on greenfield or when `CONTEXT.md`/`PRODUCT.md` already exist — a README or scattered docs do NOT skip the boot; they are inputs to it.
 
 The grill's explore-don't-ask rule, applied wholesale: on an existing codebase most "questions" are already answered in the code, and a user asked what their own repo could tell you loses trust in the whole interview. Mine first; interview only the remainder.
 
@@ -18,7 +18,7 @@ Sample, don't exhaust — entry points and configs over full reads; a big repo g
 
 Write a **draft** `CONTEXT.md` per [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md) from mined facts only — each non-obvious claim names its source file. Unknowns stay unknown: an empty section is honest, an invented convention poisons every later session.
 
-Present the draft to the user for correction **before the grill starts** (confirm-before-write discipline applies — this is a project write). The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
+Present the draft to the user for correction **as a pending Gate 1 delta **before the grill starts**. Do not write it yet; Gate 1 must preview its exact path and complete content with Story/optional PRD before confirmation. The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
 
 Then proceed to the [`GRILL.md`](GRILL.md) interview, asking only what mining could not answer: intent, priorities, scope edges, trade-offs.
 

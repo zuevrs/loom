@@ -16,11 +16,6 @@ const CARRIERS = [
   ["package.json", `"version": "${V}"`],
   [".claude-plugin/plugin.json", `"version": "${V}"`],
   [".codex-plugin/plugin.json", `"version": "${V}"`],
-  ["kiro-agent.json", `"version": "${V}"`],
-  ["hermes-plugin/plugin.yaml", `version: ${V}`],
-  ["hermes-plugin/__init__.py", `MANAGED_BLOCK_VERSION = "v${V}"`],
-  ["omp-extension.mjs", `const MANAGED_BLOCK_VERSION = "v${V}";`],
-  ["hooks/loom-session-start.cjs", `const MANAGED_BLOCK_VERSION = "v${V}";`],
   ["opencode-plugin.mjs", `Version: ${V}`],
   ["AGENTS.md", `<!-- loom:begin version=v${V} -->`],
   // The [Unreleased] compare link must chase the newest tag, or the

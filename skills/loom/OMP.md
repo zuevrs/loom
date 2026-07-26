@@ -1,54 +1,60 @@
 # OMP native adapter
 
-Load this adapter only in an OMP project session. Loom supplies issue and Verify policy; OMP supplies context management, workers, Goal, Advisor, and TTSR. Loom never invokes compaction itself. Keep `memory.backend` off: Loom files are project truth; personal preferences belong in explicit rules/config.
+Load this adapter only in an OMP project session. Loom supplies routing, durable project context, and Verify policy. OMP supplies the current session and native worker facilities. Loom never invokes compaction itself and never describes host behavior that has not been observed or documented. Keep durable project truth in Loom files and project docs; personal preferences belong in explicit host rules or configuration, not in Story state.
 
-## Project preset
+## Supported extension surface
 
-Init may offer these two independent project-local changes at `<artifactRoot>/.omp/config.yml`:
+The final Loom OMP extension demonstrates only two callbacks:
 
-1. Recommended context and worker preset:
+1. `before_agent_start` appends only static discipline and the exactly-seven-ritual router before an agent turn. It injects no current project, Story, Ticket, repository, checker, or worker pointers. Treat this as context guidance, not proof that the host will obey it and not mutation authority.
+2. `session_stop` runs the fail-closed artifact and Verify validation. Current Loom artifacts that are invalid, or a Ticket marked done without the required independent APPROVE evidence, block every stop attempt until the persisted artifact state is repaired. Chat text and a claimed checker run are not authoritative. Repeated unchanged `session_stop` calls remain blocked and request human repair; they never turn invalid state into a permitted exit.
 
-```yaml
-compaction:
-  strategy: shake
-  midTurnEnabled: true
-  idleEnabled: true
-  idleThresholdTokens: 80000
-  idleTimeoutSeconds: 60
-task:
-  prewalk: true
-```
+Do not claim or configure `session_start`, `tool_call`, or `tool_execution` enforcement. OMP provides no Loom mutation-enforcement callback and no machine proof of attended confirmation. The extension does not own Git, hosted review, release, repository, worktree, lane, card, task, terminal, liveness, or cleanup operations.
 
-No verified OMP contract in this repository or retained pilot evidence exposes a relative 60% idle-threshold config key, so retain the live-validated absolute `idleThresholdTokens: 80000` rather than inventing syntax. Native auto-shake is conservative: it protects the recent 16k tokens and skill reads and requires at least a 4k saving. Manual `/shake` remains the aggressive rescue. Outside Orca prefer a fresh worker and use native `/handoff` only at phase or issue boundaries when one cannot be created. With Orca, follow `ORCA.md`'s source-owned resume and one-offer handoff contract. `/compact soft <phase-specific focus>` is manual rescue only when the phase cannot safely change. Loom itself never invokes `/shake` or `/compact` automatically.
-The packaged OMP extension exposes no executable attended-confirmation event, so its code adapter always returns `DENY`; native host action approval around a fixed execution closure is a convention-only gate, not proof of human attendance.
+## Context lifecycle and recovery
 
-2. Cheap Advisor role, disabled. Read `omp config get modelRoles --json`, copy the exact current `modelRoles.smol` model ID, and preview:
+Let OMP manage its own context window. Loom never invokes compaction, assumes a specific token threshold, patches native context policy, or turns context pressure into mutation authority. Native context signals are observations; they do not prove that durable state is current.
 
-```yaml
-modelRoles:
-  advisor: <exact-current-smol-model-id>
-advisor:
-  enabled: false
-```
+Before expected context loss, identify the smallest owning artifacts for every pending confirmed semantic delta. Preview and confirm only writes that their selected interaction already owns. Record no transcript, token counter, model switch, session ID, or compaction event as project truth. An unchanged Story/Ticket is not rewritten merely to announce that context may shrink.
 
-If the config is absent, preview the exact complete YAML and create it only after confirmation. If it exists, do not parse or regex-rewrite it and do not add a YAML dependency. Show the exact missing keys/snippet and request a separate bounded confirmation for a careful agent/manual merge preserving existing content. If structural safety cannot be proven, stop with the snippet; never overwrite. Never enable Advisor automatically.
+After compaction, handoff, or worker replacement, reconstruct in this order: validate `.loom/version`; read the selected Story, optional PRD, one Ticket and its blocker statuses; inspect fresh repository HEAD/status/diff for the exact repository set; then recover the last unresolved question, confirmation gate, maker assignment, or Verify boundary. If chat memory conflicts with files or repository evidence, current validated artifacts and live repository state win. Missing attribution or multiple plausible Stories gets one recommended human question, not inference.
 
 ## Workers and decisions
 
-Generic OMP task workers use `task.prewalk`: the strong/current model plans the concrete issue and begins implementation, then hands off at the first edit/write to the current smol role. Coordinator, Grill/Plan, Verify/checkers never prewalk. Orca visible OMP makers launch with `--prewalk --config <artifactRoot>/.omp/config.yml` and remain reusable in their service lane, because service worktrees cannot discover the workspace-root project config. Discovery workers may keep this global prewalk enabled: because discovery makes no code edit, no first-edit switch occurs. If a load-bearing decision appears after the switch, raise a decision gate/`needs-info`; never guess.
+Let OMP manage its own context window. Before expected context loss, checkpoint only newly confirmed durable decisions, scope, blockers, completed Verify cycles, and a compact handoff in their smallest owning artifacts. Do not rewrite unchanged state merely because compaction may occur. After context loss, reconstruct from the current Story/Tickets and fresh repository evidence; a transcript is optional context only.
 
-## Advisor
+Outside Orca, prefer one fresh independent worker per Ticket or checker assignment when the host can supply it. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared evidence packet plus exactly one independent axis. The coordinator retains selection, user-owned decisions, durable write-back, and final disposition. If worker discovery is unavailable, use the host's independent reviewer/worker fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and that limitation must be reported. Implement never self-approves. Do not claim that a named custom agent exists until the host actually resolves it, and never fabricate worker output.
 
-Fast Advisor is a behavior linter for confirmation gates, one-question cadence, pre-flight baseline, scope, and Verify. It is not architecture, specification, security, or code review and never replaces checkers. Recommend manual `/advisor on` only for a long attended coordinator/Grill/Plan session or a complex attended coordinator Implement session. Never use Advisor in Orca/task workers or Verify.
+Workers receive a bounded assignment containing: role; Story/PRD/Ticket or explicit user contract; current confirmed decisions and assumptions; acceptance and exclusions; exact repository/base/fixed point; current diff or initial state; required red-capable checks; allowed writes; forbidden effects; question/escalation path; and stop conditions. Never send only a title or transcript.
 
-## Multi-issue runner routing
+A maker report names changed files and repositories, actual base/HEAD/diff, checks with pass/fail, decisions made, assumptions used, blockers/open questions, and whether work is complete or partial. A checker report uses the canonical APPROVE/REJECT evidence contract. Empty, malformed, or fabricated output is not completion. A worker completion is evidence only: the coordinator rereads the artifacts and live repository state, attributes the result to the bounded assignment, and runs independent Verify before any Ticket disposition.
 
-If `.loom/config.json` resolves to `worktrees: "orca"`, native Orca orchestration is the only runner; Goal is off and must not appear as an alternative in the preview; never run OMP Goal simultaneously.
+A load-bearing decision discovered inside a worker returns as `decision-needed` with one recommended question and consequences. The worker does not silently decide it or write Story/PRD/ADR truth. Pause only dependent work; unrelated independent work may continue when the native host can prove that independence.
 
-Without Orca, Goal fallback is available only for an explicit multi-issue pack in a canonical single repository. Never offer Goal for a workspace, including a workspace that currently plans only one repository. Before previewing, inspect `/goal show` for tokens already consumed by the root session. Show current consumed tokens, an issue-derived remaining-work allowance/reserve, and a suggested finite total budget greater than their sum; never suggest or set a budget at or below current usage. After confirmation run `/goal set <generated objective>` then `/goal budget <confirmed tokens>`. Never use the old `omp goal` CLI or `/guided-goal`. After completion, cancellation, or a budget-limited stop, use `/goal drop` as appropriate, then inspect `/goal show` and trust its reported status rather than a stale statusline. Dropping the active goal does not promise removal of historical goal output from the terminal.
+## Bounded execution guidance
 
-The objective must require blocker order, one fresh task worker per issue, coordinator Verify after each issue, no issue chaining in Goal context, and no merge/publish. If fresh workers are unavailable, stop the batch and offer attended `/loom implement <issue>`; do not hand off or chain issues inside Goal.
+Core Loom has no OMP Goal, Advisor, watchdog, TTSR preset, recipe runner, or unattended mode. Do not install or propose project presets for them as part of Loom.
 
-## TTSR evidence
+Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts, not to the `session_stop` enforcement callback. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
 
-Implement and Advisor only record evidence. After the second observed occurrence of the same deterministic local failure, Tend may offer one maintenance outcome: a project `.omp/rules/<slug>.md` rule, but only if it is not semantic architecture judgment and is not already covered by a Loom hook or skill. Tend must show the exact proposed rule and run `omp ttsr test` against positive and negative snippets before the bounded write confirmation. Never auto-run `/omfg` or auto-create a rule.
+
+## Capability and failure matrix
+
+| Condition | Required response |
+|---|---|
+| Named maker/checker resolves | Use it with the explicit bounded role; never infer extra capabilities from its name |
+| Named worker is not found | Record one real failed discovery attempt, then use a generic independent worker/reviewer with the role prose inlined |
+| Parallel checkers unavailable | Run Spec then Standards in independent sequential contexts and record the limitation |
+| No independent context exists | `ESCALATE_HUMAN`; maker never simulates its own checker |
+| Context was compacted or replaced | Reconstruct from artifacts and live repository evidence before continuing |
+| Worker yields empty/malformed output | Retry that worker once only when the host failure is transient; second identical failure stops with evidence |
+| Worker state conflicts with repository/artifacts | Stop and report exact source, field, expected and observed values; never repair by inference |
+| Required command, tool, or data unavailable | Route to attended work or blocker; do not claim verification |
+
+## Hard stops
+
+- Static router injection is guidance, not proof of compliance or authority.
+- `session_stop` remains fail-closed on every unchanged invalid state; automation retry budgets never weaken it.
+- No Goal, Advisor, watchdog, TTSR, recipe, permit, witness, or mutation-enforcement claim.
+- No worker chaining across Tickets; no maker self-approval; no fabricated custom-agent availability.
+- No project or external write follows merely from compaction, worker completion, APPROVE, or a host notification.

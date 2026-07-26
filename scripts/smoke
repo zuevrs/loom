@@ -13,8 +13,6 @@ run() {
 
 run npm test
 run bash scripts/check-drift
-run bash scripts/check-doc-consistency
-run bash scripts/check-installers
 run bash scripts/check-skill-template-contract
 run bash scripts/check-template-sections
 

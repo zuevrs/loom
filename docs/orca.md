@@ -1,28 +1,54 @@
 # Loom with Orca worktrees
 
-Orca worktrees are an explicit project capability, not the default. Loom keeps the PRD, issues, and Verify records at the project/workspace root; Orca owns worktree paths, branches, IDs, and visible worker terminals.
+Orca is Loom v7's sole orchestration adapter. Loom owns planning artifacts, Ticket state, ritual semantics, and Verify records. Orca owns repositories, worktree paths, branches, cards, tasks, dispatches, terminals, and liveness. Loom adds no shadow registry or orchestration engine.
 
-## User flow
+## Attended flow
 
-1. In Orca UI, manually create the top-level story worktree/card at the validated project or workspace owner, start its main OMP session, and run `/loom`. Loom has no `/loom new` and never creates this coordinator. Running `/loom` from a service card warns with coordinator guidance and creates no STORY or lane.
-2. During Init, accept the optional Orca offer only if you want isolated worktrees for parallel stories. The confirmed write is `.loom/config.json` containing `{ "worktrees": "orca" }`.
-3. Confirm the PRD and issue pack. Plan records and validates logical repository scope only; it creates or previews no worktree lanes.
-4. Run explicit `/loom implement <pack>` to review the compact whole-pack preview. After the adaptive repository preview is confirmed, Implement creates each story-service lane just in time when its first issue becomes runnable, using Orca's native repository, base, branch, IDs, lineage, and settings. One healthy OMP maker terminal remains with each service lane: same-repository assignments serialize, while explicitly independent repositories may proceed in parallel.
-5. `worker_done` ends only its bounded assignment. The root session independently verifies the current intended diff; APPROVE may mark the issue done and unblock dependents, but creates no commit or host mutation and leaves STORY `open`. The healthy maker returns idle and is reused with a compact delta of confirmed decisions, current acceptance, authoritative diff/base, and next task. It is not closed after issue Verify.
-6. Explicit finish is a separate exact inventory and confirmation boundary; pack confirmation and APPROVE do not enter it. It can create verified local commits and a sanitized review bundle, but no push. Publish is available only through a separately explicit attended invocation and digest-bound confirmation.
+1. In Orca, the user manually creates the top-level coordinator story worktree/card at the validated owner and starts its session. Loom does not create a coordinator.
+2. Setup may offer Orca project wiring. It shows the exact project write and waits for confirmation.
+3. Plan records and validates logical repository scope. It does not create lanes merely because a repository appears in a PRD.
+4. Implement works from one selected Ticket. When a runnable Ticket needs a service lane, the coordinator resolves current native repository/base/card/worktree identity and requests the minimum Orca operation. Same-repository writers serialize; explicitly independent repositories may proceed in parallel.
+5. A worker completion ends only that bounded assignment. It does not mark the Ticket done, close the terminal, commit, push, or publish. The coordinator runs independent Spec and Standards Verify against the intended current diff.
+6. APPROVE may complete and unblock the Ticket after exact checks are recorded. It grants no Git/GitHub authority and leaves higher-level work open.
+7. Finish and Publish are separate explicit manual boundaries. Neither is entered by APPROVE, prior confirmation, recovery, continuation, worker completion, or the other boundary.
 
-7. Explicit attended publish requires `awaiting-review`, an exact digest-bound current finished-lane inventory, and separate confirmation. It publishes lanes sequentially with at most one push/review per lane, records successes immediately, stops on first failure, protects prior successes on refreshed retry, retains worktrees/sessions, and leaves cards `in-review` plus lifecycle `awaiting-review`. Unsupported hosted remotes produce an honest manual outcome.
-8. Resume reconciles the validated current STORY with authoritative current Git status/diff in every registered lane and native Orca repository/worktree/card, task/dispatch, and terminal/liveness inventory. A coherent dirty uncommitted diff is resumable. Missing, duplicate, stale, unknown, or contradictory evidence stops before dispatch and names the exact mismatch; coherent evidence yields Goal, completed work, current diff, open questions, lanes, stale Verify, material changes since the durable boundary, and the next bounded action. Transcripts are optional and Loom adds no registry.
-9. Exact `/loom tend` requires durable merged evidence for every published service, archives sanitized durable artifacts/public refs in the workspace owner before `done`, then separately confirms cleanup. After archive, explicit cleanup, explicit cleanup or merged-worktree intent routes to Tend. Tend first inventories the exact hosted review merge record, repository, branch/HEAD, worktree/card, cleanliness, and active terminal/task/rework state. It asks for confirmation only for uniquely matched, proven merged, clean, inactive local lanes; closed-unmerged, dirty, active, rework, ambiguous, and orphaned lanes stay with a reason. Confirmed cleanup removes the exact Orca-managed worktree only through native exact-selector `orca worktree rm` and verifies its absence from Orca and Git before safely deleting an exact still-eligible local branch. If Orca removal fails or either state cannot be verified, the lane and branch stay; Tend never falls back to raw `git worktree remove` or filesystem deletion. It never broadly resets orchestration, touches unlisted lanes, force-deletes, or deletes remote branches by default. Partial failures are reported per lane and require a fresh inventory before retry.
+## Identity and resume
 
-If Orca is unavailable or a touched repository is unregistered, Loom stops before Git changes and gives registration/config remediation. Technical commands and lifecycle constraints are lazy-loaded from [`skills/loom/ORCA.md`](../skills/loom/ORCA.md).
+Resume reconciles validated current Loom artifacts with authoritative Git state and native Orca repository/worktree/card/task/dispatch/terminal state. A coherent dirty diff may resume. Missing, duplicate, stale, unknown, or contradictory identity stops before dispatch and names the mismatch. Transcripts are optional context, never authority.
 
-Native Orca task/dispatch state supplies the DAG, writer ownership, liveness, and assignment provenance; Loom adds no registry or orchestration engine. Card comments/status change only for durable decisions or lane additions, accepted/blocked assignments, captured checks, Verify verdicts, and explicit handoffs. Heartbeats, waits, and background completion stay quiet.
+A useful resume report states the selected Ticket, completed work, current base/diff, open questions, live lanes, stale Verify evidence, material changes since the last durable boundary, and the next bounded action. Native Orca remains authoritative for resource identity and liveness.
 
-Historical v3.3 evidence: OMP + Orca visible-TUI worker flow was verified live on 2026-07-21. The commit and resume behavior below does not describe current v4 capability. Story C started from clean base `bbc007d` while main retained paused Story A changes; an ordinary visible OMP TUI completed injected task `task_28eee6d56c64`, then rework task `task_cde0cb9448ca`. The coordinator accepted only `worker_done` matching both task and dispatch IDs, ran independent Spec and Standards checks, and sent the first Standards REJECT (missing POST negative assertion) through rework. Both checks then APPROVED service commit `e81ef4db0d10bc574b46af59193200a59d770850` (tree `9662a2e8272ac822d52e32b5b79fd1ec931a1575`). Story A remained untouched; nothing was pushed, merged, or cleaned up.
+## Finish boundary
 
-Historical v3.3 evidence: a second live disposable two-repository pilot on 2026-07-22 validated the then-current workspace lifecycle. Orca created exactly two just-in-time product-named lanes; the first catalog issue overlapped the independent notifications issue, while the second catalog issue waited. Missing zero-stock coverage produced the intended first Verify REJECT, then a fresh OMP worker reused the catalog lane and reached APPROVE. Three issues produced exactly three verified product-facing commits with sanitized branch, commit, and proposed-review prose passing marker scans. A fresh coordinator reconstructed `CONTINUE` from issue, Git, and Orca state. The first ambiguity probe was canceled; a second bounded probe supplied an unknown commit/tree and duplicate lane, but its helper timed out after 180 seconds without a verdict. Therefore ambiguity `STOP` is **not live-observed**.
+Finish is an explicit attended command boundary for a local handoff. The ritual inventories exact current lanes and effects, reruns final independent Verify where required, presents the local action plan, and obtains current narrow confirmation. Finish is not machine enforcement and never implies Publish.
 
-Historical v3.3 lesson: that timeout showed that a stop decision could disappear inside a helper wait. That pilot-specific correction is not the active v4 resume contract. The current actionable resume contract reconciles validated STORY, authoritative Git status/diff, and native Orca identities, allowing coherent dirty work and stopping exact mismatches before dispatch. Native Orca remains authoritative for identities, liveness, tasks, and dispatches; Loom defines no interim resume algorithm.
+An agent must not infer permission to commit or mutate Git from implementation completion or APPROVE. If the current Finish contract or host cannot perform a requested local effect under explicit authority, return an exact manual handoff instead of improvising.
 
-Prepare review returned manual-only outcomes for repositories without hosted remotes, moved exact cards to native in-review, closed exact completed terminals, and retained worktrees. After local fixture-only fast-forward merges, Tend natively removed only the merged clean inactive catalog lane and retained notifications in-review, with zero live terminals and no remote deletion or broad reset. Auto-shake completion was observed. Prewalk was selected but no visible switch was captured; Goal-off and Advisor-disabled were selected/configured but not queried live. The unrelated protected repository and prior E2E worktree remained unchanged. Unsupported hosts remain unverified.
+## Publish boundary and partial recovery
+
+Publish is a separately explicit attended command for remote effects. Before any push, hosted review, tag, release, or equivalent effect, inventory each exact repository/ref/remote/action and obtain hard confirmation for that digest-bound current inventory.
+
+Execute confirmed lanes sequentially. Record each remote success immediately. On the first failure:
+
+- stop new remote effects;
+- preserve earlier successes;
+- report the exact successful and failed effects;
+- refresh authoritative Git, remote, hosted-review, and Orca state before retry;
+- exclude already-completed effects from a new inventory;
+- require new confirmation for the refreshed remaining inventory.
+
+Never repeat a successful push or hosted-review creation merely because a later lane failed. Unsupported remotes or missing host capability produce an honest manual outcome. Human merge remains universal; Loom never auto-merges.
+
+## Resource safety
+
+Orca resources are changed only through exact native selectors after current identity and authority validation. Loom never falls back to raw worktree deletion, filesystem removal, broad orchestration reset, force deletion, remote branch deletion, or cleanup inferred from a completed Ticket. Dirty, active, ambiguous, unmatched, or unmerged resources stay in place with a reason.
+
+Post-merge archival or cleanup is not a core ritual in v7. Use explicit native Orca/Git operations outside Loom after independently confirming merged, clean, inactive identity. Finish and Publish do not silently perform that maintenance.
+
+## Card and terminal hygiene
+
+Card comments/status changes occur only at durable boundaries: accepted scope, lane creation, accepted/blocked assignment, captured checks, Verify verdict, and explicit handoff. Heartbeats and waits stay quiet. A healthy lane terminal may remain available for bounded rework; Ticket Verify alone does not close it.
+
+## Current-proof rule
+
+Historical pilots and prior receipts explain design choices but are not current evidence. Current capability is established by current package contents, deterministic checks, and a release-cycle host verification ledger. Do not cite an old commit, transcript, or pilot as proof that v7 identity, enforcement, Finish, or Publish behavior works now.

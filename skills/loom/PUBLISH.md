@@ -1,16 +1,36 @@
 # Explicit publish contract
 
-Lazy-load this fragment only for an explicit story publish. Load and follow [`STORY.md`](STORY.md) first.
+Lazy-load this fragment only for an explicit Story publish. Load and follow [`STORY.md`](STORY.md) and [`FINISH.md`](FINISH.md) first.
 
-## Explicit publish boundary
+## Exact intent and prerequisite
 
-Run `classifyPublishIntent` before ordinary routing. Only exact `/loom publish` or a narrow positive request to push/publish this/current story or create/open its PR/hosted review returns `PUBLISH`; negative, question, conditional, ambiguous, altered slash, or other-story wording returns `ASK`; casual completion/card wording returns `NOOP`. Publish requires lifecycle `awaiting-review`; prior issue, pack, APPROVE, or finish consent grants no authority.
+Classify before remote instructions or state changes. Only exact `/loom publish` or a narrow positive imperative to push/publish **this/current Story**, create/open its hosted review, or perform its explicitly named release effect is `PUBLISH`. Negation, a question, conditional wording, altered slash syntax, another Story, or ambiguity is `ASK`; ask one focused question and perform no effect. Casual completion, card, review, merge, or release wording is `NOOP` unless it names the exact current-Story remote effect.
 
-Collect and validate the shared read-only `LaneEvidenceReceipt` for touched repositories only. Call `planPublishInventory` with the exact complete current finished lane inventory derived from local commits and the sanitized review bundle: native/repository identity, remote/host target, branch/base, commit/tree, checks, draft/ordinary state, conservative public title/body, GitHub `gh` availability/support, and durable per-lane push/review status. Show its digest and obtain separate bounded confirmation. Any change renews confirmation. Immediately before each push or hosted-review mutation, recollect live Orca/Git evidence, require the matching `LaneEvidenceReceipt`, and separately guard Publish authority; the receipt itself is never authority. Then process the canonical lane order sequentially: at most one ordinary push and one hosted review creation per pending lane. Use GitHub `gh` only when available and the remote is supported; otherwise record the honest manual review-bundle outcome. Never merge, rebase, amend, squash, force, delete remote state, or rewrite a prior success.
+Publish requires a current verified local Finish result that the operator explicitly accepted. Story may be `done`; Story has no publish-specific status. Ticket APPROVE, prior Story/Finish confirmation, Finish confirmation, local commits, a prior publish effect, or a review state grants no authority for another remote effect. Human merge and release remain separate explicit gates.
 
-Pass the previewed and freshly derived current inventories plus exact results to `planPublishResult`. Record each success immediately and move the exact native card to `in-review`; retain worktrees, sessions, and lifecycle `awaiting-review`. Stop on the first failure, never rollback a created review, and rerun a refreshed inventory plus separate confirmation before retrying only failed/unpublished lanes. Prior `push: succeeded` and `review: created`/`manual` lanes are protected from duplicate effects.
+## Separate remote inventory
 
+Reread the finished local result, sanitized review bundle, current Git state, native Orca context when active, and current host/remote state. Build one exact remote-effect inventory containing:
 
-## Executable mutation boundary
+- Story identity and verified local Finish fixed point;
+- each repository/native key, local branch/base, current local and remote refs, commit/tree, checks, and clean or explained local state;
+- exact remote/host/account/namespace and target branch for each ordinary push;
+- exact hosted-review target, head/base, draft/ordinary state, conservative public title/body/check summary, and whether a matching review already exists;
+- each explicitly requested release target, immutable artifact/version/tag/ref and release notes, only when release is separately named and gated;
+- exact manual command or host instruction for each effect in canonical sequential order;
+- durable observed result for every prior effect (`pending`, `succeeded`, `review-created`, `manual-review-required`, `released`, or exact failure), derived from current Git/host evidence rather than chat memory; and
+- explicit exclusions: no merge, rebase, amend, squash, force, remote deletion, cleanup, or rewriting/repeating a prior success.
 
-Planning never authorizes execution by itself. Before every actual lifecycle mutation, pass the exact operation-specific `MutationRequest`, process-minted authority, and newly collected structured `LiveEvidence` through `guardLifecycleAction`; execute only its returned operation-specific fixed action after `ALLOW`. Missing, copied, stale, mismatched, or over-broad authority returns `DENY` before any executable action.
+Show this inventory separately from Finish and obtain explicit bounded confirmation. A changed repository/key, branch/base/ref, commit/tree, check, remote/host/account, review/release target, public prose, command, existing-effect state, or requested effect renews confirmation.
+
+## Sequential operator execution
+
+Loom does not push, create or update a hosted review, publish a release, merge, or delete remote state. Immediately before each pending effect, reread local Git, native Orca, and remote/host state and revalidate the complete pending inventory. Then supply exactly one manual command or host instruction for the next effect. The operator executes it and reports the result; Loom independently verifies the resulting local remote-tracking refs and host state before recording success or offering the next effect. Never infer success from exit text, a card status, or the operator report alone.
+
+Process effects sequentially in the confirmed canonical order. Stop on the first failure or unverifiable result. Preserve and report successful prior effects; never roll back a push, close/recreate a review, delete a release, or repeat an effect already proven successful. Refresh the complete inventory and obtain separate confirmation before retrying only pending or failed effects. Idempotence is evidence-based: if a push, hosted review, tag, artifact, or release already matches the confirmed target, classify it as succeeded/no-op and do not recreate it.
+
+If the preferred host CLI is unavailable or unsupported, provide an honest manual review/release bundle and exact UI instructions; do not claim creation. Public title, body, commit/release notes, and summaries must remain sanitized of Loom/Orca/OMP and agent/control-plane terms, private Story/Ticket paths or IDs, Logs/Verify prose, model markers, local paths, terminal/task/card/worktree mechanics, and secrets.
+
+A hosted review being closed is not merge proof. Only a durable host merge record that matches repository, review, head, target base, and merge commit proves merge; accepted local merge additionally needs exact matching refs, observed ancestry, and explicit operator acceptance. Unknown, missing, duplicate, or mismatched proof stops. Humans merge and release through their explicit host gates.
+
+After Publish, retain Story, worktrees, lanes, cards, and terminals. Cleanup is a separate explicit operator action owned by `ORCA.md`, with a fresh exact inventory and confirmation. Publish neither performs nor implies archive or cleanup and does not change Story lifecycle.

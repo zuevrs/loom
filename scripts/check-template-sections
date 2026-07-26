@@ -31,15 +31,14 @@ prd="$ROOT/skills/loom-plan/PRD-TEMPLATE.md"
   "## Quality Gates" \
   "## Risks / Rollout"
 
-# Issue (vertical slice contract)
-issue="$ROOT/skills/loom-plan/ISSUE-TEMPLATE.md"
+# Ticket (vertical slice contract)
+issue="$ROOT/skills/loom-plan/TICKET-TEMPLATE.md"
 [ -f "$issue" ] && check_sections "$issue" \
   "## What to build" \
   "## Acceptance criteria" \
-  "## Verification command" \
-  "## Blocked by" \
+  "## Verification" \
   "## Out of scope" \
-  "## Status"
+  "## Verify"
 
 
 # PRODUCT

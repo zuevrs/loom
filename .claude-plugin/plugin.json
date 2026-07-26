@@ -1,7 +1,7 @@
 {
   "name": "loom",
   "version": "6.0.0",
-  "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
+  "description": "Seven prose-compatible Loom rituals with independent checker agents.",
   "author": {
     "name": "zuevrs",
     "url": "https://github.com/zuevrs"
@@ -14,6 +14,5 @@
   "agents": [
     "./.claude-plugin/agents/loom-verify-spec.md",
     "./.claude-plugin/agents/loom-verify-standards.md"
-  ],
-  "hooks": "./hooks/claude-codex-hooks.json"
+  ]
 }

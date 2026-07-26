@@ -1,6 +1,6 @@
 ---
 name: loom
-description: Enter Loom by outcome. Dispatch once to Resolve locally, Plan work, Review ready work, or Maintain project; not a ritual and never an orchestrator.
+description: Enter Loom by outcome. Route once to Setup, Grill, Plan, Implement, Verify, Finish, or Publish; never orchestrate a lifecycle.
 disable-model-invocation: true
 slash: true
 ---
@@ -9,54 +9,56 @@ slash: true
 
 ## Goal
 
-Route an explicit Loom entry to exactly one ritual without duplicating or paraphrasing the target.
+Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, Verify, Finish, Publish** without duplicating or paraphrasing the target.
 
 ## Inputs
 
 - The user's explicit outcome or target, if any
-- Read-only project evidence: canonical [`STORY.md`](STORY.md), `.loom/` packs/issues, PRDs, issue verdicts/logs, project docs, and `git status`/`git diff`
-- If a parent `.loom/workspace.json` exists: workspace profile, registered repositories, and service-root location
-- For explicit `/loom setup workspace`: the explicitly intended workspace root
+- Read-only project evidence: `.loom/version`, active Story/optional PRD/Tickets, project docs and ADRs, and `git status`/`git diff`
+- Read-only coherent Orca project/repository context when available
 
 ## Outputs
 
-- One selected public outcome and one loaded ritual, or exactly one routing question
-- No dispatcher-owned project artifact or hidden lifecycle
+- One selected interaction and one loaded skill, or exactly one routing question
+- No dispatcher-owned project artifact, mutation, or hidden lifecycle
 
 ## Process
 
-1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) before routing. They are the complete always-loaded Loom contract; do not restate them. Then resolve workspace ownership and valid project config project-nonmutatingly before STORY reconstruction. When config selects Orca, load [`ORCA.md`](ORCA.md) only for its coordinator/service-lane entry guard: compare the validated `artifactRoot` with native Orca context. A service lane warns with coordinator guidance and stops with no STORY or other mutation. Only a validated coordinator continues to load and follow the canonical [`STORY.md`](STORY.md) contract, then reconstruct relevant state project-nonmutatingly. Inspect a dirty tree with `git status` and diff before associating it with any issue; never assign it blindly.
-2. Handle explicit `/loom setup workspace` and an explicit natural-language request to set up the workspace before ordinary routing: load `loom-init` with the explicit setup intent and workspace-root evidence, then disappear. Use the current root when it is unambiguous; ask exactly one root question when ambiguous. Never infer setup from bare `/loom`.
-3. Before ordinary outcome routing, call `planActiveContinuation` for in-story grill/discuss-and-change/recheck intent. Continue the uniquely selected open story by default; ask once on multiple candidates, preserve unrelated explicit intent, and require the canonical v1 migration proposal before an active story write. Then run `classifyPublishIntent` and `classifyTendIntent` before completion routing. `PUBLISH` loads `loom-implement` with explicit story-publish intent, which lazy-loads [`PUBLISH.md`](PUBLISH.md); exact `TEND` loads `loom-tend` with explicit story Tend intent, which lazy-loads [`TEND.md`](TEND.md); `NOOP` performs no mutation; publish `ASK` asks one bounded question and stops. Then run `classifyFinishIntent` for any completion/commit wording before ordinary outcomes. `FINISH` loads `loom-implement` with explicit story-finish intent, which lazy-loads [`FINISH.md`](FINISH.md); `NOOP` performs no mutation; `ASK` asks one bounded question and stops.
-4. Classify exactly one ordinary outcome:
-   - **Explore locally** — investigate, why/how, decide, debug, or unclear intent → load `loom-grill`.
-   - **Plan work** — work explicitly needing a PRD/issues or multiple sessions → load `loom-plan`.
-   - **Build** — concrete build/fix/add request, including an obvious small fix without an issue, or an explicit/resumed issue → load `loom-implement`; Implement owns its Verify completion.
-   - **Review ready work** — judge a diff/branch/ready issue → load `loom-verify`.
-   - **Maintain project** — audit status, warp, debt, stale packs, or explicit merged-worktree/local-lane cleanup → load `loom-tend`.
-5. Resolve workspace ownership from the nearest valid `.loom/workspace.json`: workspace behavior activates only at its root or inside a registered repository; invalid workspace state warns and disables workspace behavior outside explicit Loom work.
-6. Obvious explicit intent routes immediately into project-nonmutating analysis. An explicit natural-language target wins over persisted work and keyword heuristics. When intent is genuinely ambiguous, ask one question with the recommended route.
-7. For Implement, preserve the target exactly: an issue card selects that one issue, a pack directory/slug selects that whole pack, and no target selects the next single issue by Implement's blocker-aware ordering. Never reinterpret a pack target as its first issue or a bare target as whole-pack consent. For other bare Loom entry, recommend one deterministic resume candidate in this order: relevant rework or interrupted-work evidence; then exactly one actionable pack, next-up issue, or confirmed PRD awaiting slicing. A named issue/pack is an explicit target from the user's request, not a bare-entry candidate. Multiple candidates or unresolved dirty-tree attribution require exactly one question with a recommended route.
-8. **Execute the one-hop handoff.** If the host skill mechanism permits invoking the explicitly selected user-invoked ritual, invoke that skill. Otherwise locate and read the selected sibling `skills/<ritual>/SKILL.md` from the same installed Loom tree as this dispatcher and follow it in the current context. Transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This fallback is direct instruction loading, not spawning, recursive dispatch, or lifecycle orchestration.
-9. If persistent `.loom` pack/enforcement capability becomes necessary and is absent, the chosen ritual offers `loom-init` just in time with an exact setup preview. Invoke Init through the same skill-or-sibling-file handoff; after Init completes, return directly to the calling ritual without re-entering the dispatcher or requiring a nested slash command.
+1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md), then reconstruct relevant current v7 state read-only under the current project root. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
+2. Validate `.loom/version` before relying on durable state. It contains the supported major only. Missing state may route to Setup when persistence is required. Any non-current major or legacy state that needs interpretation is a **read-only hard stop** with upgrade guidance: do not migrate, rewrite, or apply compatibility behavior.
+3. Handle explicit setup intent before ordinary routing: load `loom-init`, preserving the intended root. Bare `/loom` never implies Setup.
+4. Classify exactly one interaction:
+   - **Setup** — initialize Loom's durable project state → `loom-init`.
+   - **Grill** — investigate, discuss, stress-test, decide, debug, or unclear intent without requested planning artifacts → `loom-grill`.
+   - **Plan** — create or amend a Story, material PRD, or Tickets → `loom-plan`.
+   - **Implement** — concrete build/fix/add request, including a direct small fix without ceremony, or a selected/resumed Ticket → `loom-implement`.
+   - **Verify** — independently judge a diff, branch, or ready Ticket → `loom-verify`.
+   - **Finish** — explicit local completion/finalization intent → the Finish interaction owned by `loom-implement` and [`FINISH.md`](FINISH.md).
+   - **Publish** — explicit push/hosted-review/release intent → the Publish interaction owned by `loom-implement` and [`PUBLISH.md`](PUBLISH.md).
+5. Explicit natural-language intent wins over persisted work and keyword heuristics. For a bare entry, recommend the strongest coherent continuation: relevant rework/interruption evidence; then the uniquely active Story and its next unblocked Ticket. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
+6. If multiple active Stories exist and no coherent Orca context selects one, ask exactly one question and recommend the strongest candidate. Dirty-tree attribution or any other genuine ambiguity likewise gets one recommended question, never a menu.
+7. **Execute the one-hop handoff.** Invoke the selected skill when the host supports it; otherwise read its sibling `skills/<skill>/SKILL.md`, transfer the outcome/target and gathered evidence, and stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
+8. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
 
 ## Hard stops
 
 - Do not orchestrate Plan → Implement → Verify or remain as controller.
-- Do not copy ritual bodies, paraphrase ritual results, create `.loom/active`, or add a status.
-- Do not mutate project files or external state while dispatching. Workspace setup is owned by `loom-init`; the dispatcher only routes there.
-- Ambiguity gets exactly one question, not a menu of ritual internals.
+- Do not create a hidden lifecycle, runtime registry, task, worktree, lane, or dispatcher artifact.
+- Do not mutate project files or external state while dispatching.
+- No compatibility migration. Unsupported durable state is read-only.
+- Ambiguity gets exactly one recommended question.
 
 ## Failure modes
 
 | Symptom | Response |
 |---|---|
 | Dirty tree appears related | Inspect status/diff; ask one attribution question if evidence is inconclusive |
-| More than one resume candidate | Ask one question and recommend the strongest candidate |
-| Explicit request conflicts with snapshot | Honor the explicit outcome/target |
-| Selected work needs `.loom` persistence | The selected ritual offers bounded Init and uses the same portable handoff, then resumes directly |
+| Multiple active Stories lack coherent Orca context | Ask one question and recommend the strongest candidate |
+| Explicit request conflicts with persisted state | Honor the explicit outcome/target, subject to safety and version validation |
+| Selected work needs persistence | Offer bounded Setup, then resume the selected ritual |
+| `.loom/version` is absent or not the supported major | Missing: Setup if needed. Different major: read-only hard stop; no migration |
 
 ## Done when
 
-- Exactly one outcome is selected and exactly one ritual is loaded, or one routing question is waiting
-- The dispatcher has made no project/external mutation and performs no later orchestration
+- Exactly one of the seven interactions is selected and loaded, or one routing question is waiting
+- The dispatcher made no project/external mutation and performs no later orchestration

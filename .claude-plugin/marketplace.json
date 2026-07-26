@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "loom",
-  "description": "Skills-first harness for agent workflows. Lazy senior dev discipline + rituals.",
+  "description": "Seven disciplined engineering rituals for prose-compatible hosts.",
   "owner": {
     "name": "zuevrs",
     "url": "https://github.com/zuevrs"
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "loom",
-      "description": "Plan, implement, verify, tend — with enforcement hooks and discipline.",
+      "description": "Setup, Grill, Plan, Implement, Verify, Finish, and Publish \u2014 skills plus independent checker agents.",
       "source": "./",
       "category": "productivity"
     }

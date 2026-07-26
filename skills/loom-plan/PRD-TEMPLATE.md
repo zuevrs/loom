@@ -1,5 +1,9 @@
 # PRD: {Feature name}
 
+**Story:** `STORY.md` (same Story directory)
+
+{Use this full template only for material work: multiple Tickets/repositories, product decisions, an external/public/inter-service contract, or multi-session work. Preserve depth; do not compress it into ceremony.}
+
 ## Problem
 
 {What's broken or missing — from the user's perspective.}
@@ -58,4 +62,4 @@
 
 ## Amendments
 
-{Material changes only. One concise dated pointer per semantic amendment: `- YYYY-MM-DD — <what changed and why; affected issue names>`. Keep the sections above current; do not duplicate their content here. This section may remain empty until the first amendment.}
+{Material changes only. One concise dated pointer per semantic amendment: `- YYYY-MM-DD — <what changed and why; affected ticket names>`. Keep the sections above current; do not duplicate their content here. This section may remain empty until the first amendment.}

@@ -1,79 +1,81 @@
 # Loom Glossary
 
-User-facing terms for Loom. Project-specific vocabulary lives in your repo's `CONTEXT.md`.
+User-facing terms for Loom v7. Project-specific vocabulary belongs in the repository's `CONTEXT.md`.
 
-## Core
+## Core discipline and authority
 
-**Harness** — The operating setup for one agent session: rules, skills, warp, and dispatch.
+**Loom** — A skills-first, Markdown-native discipline and ritual harness. It is not a workflow engine, scheduler, issue-tracker replacement, unattended mode, or source of Git/host authority.
 
-**Enforcement tier** — Evidence-based capability, independent of install or integration tier. Plugin presence and hook count do not establish enforcement.
+**The Discipline** — Understand the real flow, then climb YAGNI → reuse in repository → standard library → native platform → installed dependency → one line → minimum code. Trust-boundary validation, security, accessibility, data-loss handling, and explicit checks are never shortcuts.
 
-**Hard** — A runtime mechanism can prevent the action, and its blocking contract has direct evidence.
+**`loom:` marker** — A source comment for a deliberate simplification that cuts a real corner. It names both the known ceiling and the upgrade path.
 
-**Soft** — Runtime context or warnings shape behavior without preventing the action.
+**Dispatcher** — The non-ritual `loom` skill. It reconstructs current durable state, maps intent to exactly one ritual, loads that ritual, and disappears.
 
-**Convention-only** — Skills and managed instructions carry the discipline without lifecycle enforcement.
+**Bounded confirmation** — Current human consent for the exact previewed target, action, scope, base, files, commands, and effects. A changed inventory expires it. A digest identifies an inventory but never grants authority.
 
-**Unverified** — Qualifier for an implemented capability whose live host contract has not been evidenced; not a fourth enforcement tier.
+**Evidence** — An observable fact supporting a decision: current files, Git state, checks, independent verdicts, or host-native state. Evidence is not permission to mutate.
 
-**TTSR rule** — Time-Traveling Stream Rule (OMP-specific). Regex condition on the agent's output stream that injects corrective guidance at zero upfront token cost. Loom uses TTSR as a reminder layer; the hard gate is `session_stop`.
+**Project-nonmutating** — Reads and commands reasonably expected not to change tracked/generated project content or external state.
 
-**Verify signal** — The `## Verify` section written into an issue file by `loom-verify` (every verdict — REJECT lines included). Stop hooks and OMP `session_stop` require a line starting with `APPROVE` in it before allowing `Status: done`.
+## Seven rituals
 
-**Objective gate** — Automated pass/fail command (test, build, linter) that stops bad iterations without human judgment.
+**Ritual** — One of exactly seven named v7 flows: Setup, Grill, Plan, Implement, Verify, Finish, and Publish.
 
-**Runnable check** — One minimal proof Implement leaves behind (test, linter, self-check).
+**Setup** — Idempotent, confirmation-gated project wiring: current `.loom/version` and the managed Loom block. Older-major or legacy state is a read-only hard stop, not an in-place conversion.
 
-**The Discipline** — YAGNI → reuse → stdlib → platform → installed dep → one line → minimum code, with carve-outs for security, validation, and accessibility.
+**Grill** — A freeform design pressure-test and evidence-led interview. It creates no PRD or Tickets unless the user explicitly routes to Plan and confirms materialization.
 
-**`loom:`** — Marker used only for deliberate simplifications that cut a real corner; must name the ceiling and upgrade path.
+**Plan** — Resolves scope and decisions, then creates or amends a compact Story, a material PRD when earned, and vertically sliced Tickets after exact previews and bounded confirmation.
 
-**Loom lane** — Opt-in ritual discipline activated by explicit `/loom`, a `loom-*` shortcut, or selected Loom issue work. Ordinary prompts stay normal agent mode.
+**Implement** — One selected Ticket in one fresh maker context, or one direct concrete small fix. It leaves a proportional runnable check and never self-approves.
 
-**Dispatcher** — The non-ritual `loom` skill. Reconstructs state, selects one public outcome, loads exactly one ritual, and disappears.
+**Verify** — Independent Spec and Standards judgment over the same exact current boundary. It replaces one current canonical `## Verify` block and never fixes the maker's work.
 
-**Project-nonmutating** — Reads and commands reasonably expected not to modify tracked/generated project content or external state.
+**Finish** — Separately explicit attended boundary for integration checks, final independent Verify, manual local owner/repository integration, exact readback, historical-preservation proof, and Story transition to `done`. It never pushes or creates hosted review effects.
 
-**Apply gate** — Explicit consent bound to exact targets/actions and current base; changed scope or base renews the gate.
+**Publish** — Separately explicit attended boundary for exact remote push and hosted-review effects. It never merges, releases, or cleans up, and it does not introduce another Story status.
 
-## Rituals
+## Durable artifacts
 
-**Ritual** — Named flow: Init, Plan, Grill, Implement, Verify, Tend.
+**Story** — Compact destination and lifecycle index at `.loom/<story-id>/STORY.md`. Required sections are Intent, Success, and Decisions; optional Scope and Notes appear only when useful.
 
-**Plan** — Scope interview (one question at a time) → PRD + issues + warp updates.
+**Story status** — Exactly `active`, `blocked`, or `done`. `blocked` carries the truthful external reason. Ticket statuses are never assigned to Story.
 
-**Grill** — Investigate/explore/debug/decide flow for undefined scope: disciplined interview with confirmation-gated materialization. No PRD/issues and no digest file.
+**PRD** — Optional material product/build contract at `.loom/<story-id>/PRD.md`. It is earned by multiple Tickets or repositories, product decisions, public/inter-service contracts, or multi-session work; it is not ceremonial.
 
-**Implement** — Ship one issue with minimal diff; leave one runnable check.
+**Ticket** — One grabbable vertical slice at `.loom/<story-id>/tickets/<ticket-id>.md`. It owns acceptance, verification commands, blocker edges, maker Log, status, and the current canonical Verify result.
 
-**Verify** — Fresh checker: parallel Spec + Standards sub-agents; structured digest; never fixes.
+**Ticket status** — Exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`. `ready-for-human` is used only when the stable Human requirement applies; it is not a Story status.
 
-**Tend** — Maintain warp and issue state; pay down `loom:` debt; no feature scope.
+**`## Log`** — The maker's concise current record of key decisions, deviations, and open questions. It is not a transcript or diff narration.
 
-**Init** — Idempotent project setup: managed block, `.loom/`.
+**Current canonical `## Verify`** — The Ticket's single current verification block. Fresh Verify replaces it; it does not append verdict history. It binds Maker identity, a self-excluding Ticket digest, ordered repository states, a Boundary digest, independent Spec and Standards verdict/evidence, and exactly one selected Human policy line. Objective command/result summaries live in the one-line Standards evidence; detailed durable output may live in `## Log` or referenced check output.
 
-## Work artifacts
+**Material semantic change** — A change to Story intent/success, acceptance, public/inter-service contract, repository scope, architecture, or data/security boundary. It invalidates only affected current Verify evidence; affected `done` Tickets return to `ready-for-agent`, while unrelated Tickets and evidence remain unchanged.
 
-**STORY** — Canonical compact current state under `.loom/<story>/STORY.md`. It is created after the first confirmed durable decision or immediately before the first project write; read-only questions create nothing.
+**Runnable check** — The smallest proportional command or self-check that can fail when Implement's non-trivial behavior regresses.
 
-**Finish** — Separately explicit, confirmed final Verify and local-commit boundary. It never pushes and moves a successful story to `awaiting-review`.
+**Owner historical-preservation proof** — The owner Git commit/tree whose exact traversal-safe Story/optional PRD/Ticket/relevant CONTEXT+ADR inventory has internally derived SHA-256 digests, semantic conflicts resolved, durable pointers updated, and exact post-operator bytes/tree reread successfully. No extra archive manifest or lifecycle state is created.
 
-**Publish** — Separately explicit, confirmed external-effect boundary for sequential push/hosted review. It never merges and leaves the story `awaiting-review`.
+## Verification and host capability
 
-**Post-merge Tend** — Exact `/loom tend` after durable merge evidence: archive durable artifacts/public refs before `done`, then separately confirm eligible local cleanup. It is never automatic.
+**Maker** — The context that changes project content. It cannot approve its own work.
 
-**PRD** — Progressive build plan under `.loom/<story>/PRD.md` when material scope earns it.
+**Spec checker** — An independent context judging the current change against Story/PRD/Ticket acceptance and explicit user contract.
 
-**Issue** — One grabbable slice under `.loom/<feature>/issues/`.
+**Standards checker** — An independent context judging the same current change against repository standards and scoped quality rules.
 
-**Managed block** — Delimited section (`<!-- loom:begin -->…<!-- loom:end -->`) injected into `AGENTS.md` for host-agnostic discipline delivery.
+**APPROVE / REJECT** — Checker verdicts. Both Spec and Standards must APPROVE the same current boundary before a Ticket can become `done`; verdicts grant no commit, publish, merge, release, or cleanup authority.
 
-## Workspace
+**Boundary** — The exact current Ticket digest plus ordered repository/base/HEAD/diff state reviewed by the checkers. Material change makes a prior result stale.
 
-**Workspace mode** — Explicit opt-in profile (`.loom/workspace.json`) for a directory containing independent Git repositories. The workspace root owns Loom artifacts; registered repositories are execution targets. Does not change canonical single-repository mode.
+**Enforcement tier** — Evidence-based capability, independent of install presence or hook count: **hard** can prevent the claimed completion; **soft** provides runtime guidance or warnings; **convention-only** relies on prose. **Unverified** qualifies a capability lacking live evidence and is not a fourth tier.
 
-## Status vocabulary
+**OMP enforcement** — The only hard v7 enforcement claim. `before_agent_start` injects only static seven-ritual router/discipline prose. `session_stop` alone resolves and validates active artifacts and the full current Verify-before-done relationship fail-closed.
 
-`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `done`, `wontfix`
+**Prose-compatible host** — A host that can load and follow Loom skills without any claim that Loom can block stopping, prove checker execution, or enforce lifecycle state there.
 
-After Verify APPROVE → write `## Verify`, then an issue may become `done` and unblock dependents. APPROVE creates no commit or publication and leaves STORY `open`. Work needing human judgement → `ready-for-human`.
+**Orca adapter** — Loom's sole multi-repository orchestration adapter. Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, liveness, and cleanup; Loom owns durable Story/PRD/Ticket semantics and independent Verify boundaries.
+
+**Native host automation guidance** — Cross-host safety advice for single-pass finite bounded, report-only attempts with structured results, no silent death, a two-identical-error stop, no project write on zero findings, no Git/host authority, and independent Verify where changes occur. It is not a shipped Loom ritual or mode.

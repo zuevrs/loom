@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# loom: install skills for AGENTS.md-tier hosts — Cline/OpenClaw (thin wrapper — logic lives in install.mjs)
-exec node "$(cd "$(dirname "$0")" && pwd)/install.mjs" --agents
