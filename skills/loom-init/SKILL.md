@@ -10,7 +10,7 @@ Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../lo
 
 ## Goal
 
-Perform one safe, idempotent Setup: install/refresh the managed Loom block and create `.loom/version`. Do not create a Story, PRD, Ticket, domain document, ADR, runtime configuration, registry, task, lane, or worktree.
+Perform one safe, idempotent Setup: install/refresh the managed Loom block and create `.loom/version`. For a multi-repository Workspace, also wire `.loom/local/workspace.json` and the owner `.gitignore` entry for `/.loom/local/`. Do not create a Story, PRD, Ticket, domain document, ADR, runtime configuration, committed repository registry, task, lane, or worktree.
 
 ## Inputs
 
@@ -40,6 +40,18 @@ Treat the two files as one bounded setup transaction. Before writing, validate e
 7. Do not scaffold Story, PRD, Tickets, CONTEXT, PRODUCT, DESIGN, or ADRs. Plan owns materialization.
 8. If control-plane files are untracked, present the exact paths and current Git evidence and ask the user to choose **leave uncommitted** or **handle them later through an explicit Finish**. Setup never runs the commit. A declined or deferred choice finishes with a named `Uncommitted control plane` warning; do not hide it in generic warnings.
 9. Print changed / checked-not-changed / warnings / next step. If nothing changed, say `No changes needed` and what was checked.
+
+## Workspace Setup and rebind
+
+When the user sets up or repairs a multi-repository Workspace:
+
+1. Confirm the **dedicated owner Git root** explicitly. Service repositories remain outside the owner checkout.
+2. Query Orca repositories read-only. Present path/remote evidence and let the user select repositories and assign stable logical keys. Never infer identity from display name, basename, or path alone.
+3. Preview exact bytes for `.loom/local/workspace.json`, the `/.loom/local/` `.gitignore` delta, managed block, and `.loom/version`.
+4. Write only after confirmation. Rebind replaces local bindings only; committed Story/Ticket/CONTEXT/ADR memory stays unchanged unless Plan amends it separately.
+5. For v6 guided import, read the old owner source without mutation, preview the complete v7 destination and bindings, create only the new owner repository after confirmation, and leave the source untouched. Old Verify records remain historical evidence, not current authority.
+
+Malformed local binding JSON/schema is a global stop. A missing or stale individual binding blocks only Tickets referencing that key and their dependents.
 
 ## Hard stops
 

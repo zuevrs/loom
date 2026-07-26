@@ -72,10 +72,18 @@ User-facing terms for Loom v7. Project-specific vocabulary belongs in the reposi
 
 **Enforcement tier** — Evidence-based capability, independent of install presence or hook count: **hard** can prevent the claimed completion; **soft** provides runtime guidance or warnings; **convention-only** relies on prose. **Unverified** qualifies a capability lacking live evidence and is not a fourth tier.
 
-**OMP enforcement** — The only hard v7 enforcement claim. `before_agent_start` injects only static seven-ritual router/discipline prose. `session_stop` alone resolves and validates active artifacts and the full current Verify-before-done relationship fail-closed.
+**OMP enforcement** — The only hard v7 enforcement claim. `before_agent_start` injects only static seven-ritual router/discipline prose. `session_stop` validates active artifact shape, canonical Verify evidence on `done` Tickets, and stale Workspace bindings for affected Tickets. Live Git freshness for the active Ticket is enforced during Verify/Finish, not retroactively for every historical `done` Ticket.
 
 **Prose-compatible host** — A host that can load and follow Loom skills without any claim that Loom can block stopping, prove checker execution, or enforce lifecycle state there.
 
 **Orca adapter** — Loom's sole multi-repository orchestration adapter. Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, liveness, and cleanup; Loom owns durable Story/PRD/Ticket semantics and independent Verify boundaries.
+
+## Workspace
+
+**Workspace** — A dedicated Git owner/control repository plus locally bound service repositories. Committed memory lives in the owner repo; machine-local Orca bindings live in ignored `.loom/local/workspace.json`.
+
+**Repository key** — Stable logical service identity used in Ticket frontmatter and `CONTEXT.md`, such as `catalog` or `notifications`. It is not a filesystem path, display name, or Orca ID.
+
+**Workspace dashboard** — A read-only on-demand projection of active Story/Ticket state, binding health, blockers, recoverable work, and one recommended next ritual. It is not persisted.
 
 **Native host automation guidance** — Cross-host safety advice for single-pass finite bounded, report-only attempts with structured results, no silent death, a two-identical-error stop, no project write on zero findings, no Git/host authority, and independent Verify where changes occur. It is not a shipped Loom ritual or mode.

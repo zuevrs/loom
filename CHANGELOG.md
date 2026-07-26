@@ -6,6 +6,42 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.0.0] - 2026-07-26
+
+### Highlights
+
+- **Prose-first v7** — seven rituals preserved; runtime enforcement reduced to three demonstrated seams: `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, wired through `omp-extension.mjs`.
+- **Workspace contour restored** — dedicated Git owner/control repository for committed Story/PRD/Ticket memory; machine-local Orca bindings in gitignored `.loom/local/workspace.json`; logical `repositoryKeys` on Tickets; computed dashboard; affected-only stale-binding diagnostics.
+- **Verify contract sharpened** — canonical `## Verify` record; `session_stop` checks structural artifact validity and canonical evidence on `done` Tickets without retroactively re-proving every historical boundary against today's checkout.
+
+### Breaking changes
+
+- Schema version **7** replaces v6 workspace registries, lane receipts, attended-mutation hooks, and legacy Issue vocabulary.
+- No committed `.loom/workspace.json`; membership is local-only via `.loom/local/workspace.json`.
+- Removed v6 runtime modules, maintenance/unattended recipes, migration doc surfaces shipped as current, and historical evidence folders from the package allowlist.
+- OMP is the only host with hard enforcement; other carriers remain prose-compatible adapters.
+
+### Migration steps
+
+- For multi-repository work: run Workspace Setup (`loom-init`) on a dedicated owner repo, assign logical repository keys explicitly, gitignore `/.loom/local/`, and re-materialize Story/Tickets through Plan.
+- v6 `workspace.json` and runtime registries are not loaded automatically; guided import is an explicit Setup branch (see `docs/workspaces.md`).
+- Single-repository projects omit `repositoryKeys`; runtime treats the current root as `"."`.
+
+### Adapter impacts
+
+- **OMP** — `before_agent_start` injects static router/discipline; `session_stop` validates active artifacts, canonical Verify on `done` Tickets, and stale Workspace bindings for affected Tickets only.
+- **OpenCode / Claude / Codex** — skills, checker agents, and prose routing unchanged in role; no hook parity claims.
+
+### Safety changes
+
+- Stale or missing individual Workspace bindings block only Tickets referencing that key and their dependents; malformed binding JSON/schema is a global stop.
+- Live Git freshness for the active Ticket remains enforced during Verify/Finish, not on every historical `done` Ticket at `session_stop`.
+
+### Known limitations
+
+- Deterministic release gate: **49/49** tests, drift/template/smoke checks clean, tarball import smoke passed at cut time.
+- Live OMP+Orca pilot verified Setup → Plan → multi-repo dispatch → T1 full maker/checker loop to `done`; T2 implementation and rework passed locally but formal Verify was not closed in the pilot run; cold resume and rebind were not exercised live before this cut.
+
 ## [6.0.0] - 2026-07-25
 
 ### Highlights
@@ -1243,7 +1279,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/zuevrs/loom/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/zuevrs/loom/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/zuevrs/loom/compare/v4.0.0...v5.0.0
 [4.0.0]: https://github.com/zuevrs/loom/compare/v3.3.0...v4.0.0

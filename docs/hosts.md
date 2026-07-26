@@ -22,8 +22,8 @@ OMP is the supported enforcement host. `omp-extension.mjs`:
 
 - injects compact discipline and exactly-seven router guidance;
 - injects no current project, Story, Ticket, or repository pointer at `before_agent_start`;
-- at `session_stop`, resolves and validates active Loom artifacts through `hooks/artifacts.cjs` and `hooks/boundary.cjs`;
-- invokes `hooks/verify-gate.cjs` in that same `session_stop` callback so unresolved or unverified done state cannot silently complete;
+- at `session_stop`, validates active artifact shape through `hooks/artifacts.cjs`, checks canonical Verify evidence on `done` Tickets through `hooks/verify-gate.cjs`, and reports stale Workspace bindings for affected Tickets only;
+- does not re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket;
 - exposes canonical checker agents in `agents/` where OMP discovery supports them.
 
 The stream rule in `rules/loom-verify-before-done.md` is a soft reminder and liveness clue. It is not an enforcement seam. If the rule appears but the session prompt lacks Loom's injected router/discipline, restart OMP; a plugin updated beneath a running process can leave extension code stale.

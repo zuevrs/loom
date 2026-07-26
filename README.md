@@ -36,7 +36,7 @@ Rituals are not a mandatory sequence. A small selected fix can go directly to Im
 
 ## Install
 
-The package stays at `6.0.0` during v7 development; use the released ref you intend to install. Loom v7 supports four public carriers:
+Loom v7 supports four public carriers:
 
 | Host | Install | Update | Uninstall | v7 capability |
 |---|---|---|---|---|
@@ -57,7 +57,7 @@ Git and Node.js 20+ are needed for local development. Public carriers require th
 
 ## Host authority and enforcement
 
-OMP is the only v7 enforcement host. Its extension injects only the static seven-ritual router/discipline at `before_agent_start`; at `session_stop` it validates active artifacts fail-closed and calls the shared Verify gate. The runtime is exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, connected by `omp-extension.mjs`.
+OMP is the only v7 enforcement host. Its extension injects only the static seven-ritual router/discipline at `before_agent_start`; at `session_stop` it validates active artifacts fail-closed, checks canonical Verify evidence on `done` Tickets, and reports stale Workspace bindings for affected Tickets only. Live Git freshness for the active Ticket is enforced during Verify/Finish, not retroactively for every historical `done` Ticket. The runtime is exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, connected by `omp-extension.mjs`.
 
 OpenCode registers the canonical skill path and injects truthful compact prose. It does not read workspace/config runtime modules or register old lifecycle hooks. Claude Code and Codex plugin metadata expose prose skills and checker surfaces only. No public carrier claims OMP hook parity.
 
