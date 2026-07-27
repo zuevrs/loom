@@ -2,7 +2,7 @@
 
 This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It is a pointer into canonical skills and runtime contracts, not a second copy of them.
 
-<!-- loom:begin version=v7.0.0 -->
+<!-- loom:begin version=v7.1.0 -->
 ## Loom Strong Partner
 
 Always apply the minimum engineering floor: evidence before claims; understand the real flow; YAGNI → reuse → stdlib/platform/dependency → minimum code; fail-capable checks; never trade away trust-boundary validation, security, privacy, data-loss prevention, or accessibility.

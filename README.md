@@ -57,7 +57,7 @@ Git and Node.js 20+ are needed for local development. Public carriers require th
 
 ## Host authority and enforcement
 
-OMP is the only v7 enforcement host. Its extension injects only the static seven-ritual router/discipline at `before_agent_start`; at `session_stop` it validates active artifacts fail-closed, checks canonical Verify evidence on `done` Tickets, and reports stale Workspace bindings for affected Tickets only. Live Git freshness for the active Ticket is enforced during Verify/Finish, not retroactively for every historical `done` Ticket. The runtime is exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, connected by `omp-extension.mjs`.
+No v7 host prevents a stop. OMP is the only host that reports one: its extension injects the static seven-ritual router/discipline at `before_agent_start`, and at `session_stop` it validates active artifacts, checks canonical Verify evidence on `done` Tickets, reports stale Workspace bindings for affected Tickets only, and returns a forced continuation carrying the diagnostics — capped at 8 per session, and never fired for subagents. Live Git freshness for the active Ticket is enforced during Verify/Finish, not retroactively for every historical `done` Ticket. The runtime is exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`, connected by `omp-extension.mjs`.
 
 OpenCode registers the canonical skill path and injects truthful compact prose. It does not read workspace/config runtime modules or register old lifecycle hooks. Claude Code and Codex plugin metadata expose prose skills and checker surfaces only. No public carrier claims OMP hook parity.
 

@@ -35,9 +35,33 @@ Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, 
    - **Verify** — independently judge a diff, branch, or ready Ticket → `loom-verify`.
    - **Finish** — explicit local completion/finalization intent → the Finish interaction owned by `loom-implement` and [`FINISH.md`](FINISH.md).
    - **Publish** — explicit push/hosted-review/release intent → the Publish interaction owned by `loom-implement` and [`PUBLISH.md`](PUBLISH.md).
-5. Explicit natural-language intent wins over persisted work and keyword heuristics. For a bare entry, render the read-only **Workspace dashboard** when `.loom/local/workspace.json` exists or any Ticket uses logical `repositoryKeys`: active Story, binding health, blockers, recoverable work, and one recommended next ritual — then wait. Otherwise recommend the strongest coherent continuation: relevant rework/interruption evidence; then the uniquely active Story and its next unblocked Ticket. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
-6. If multiple active Stories exist and no coherent Orca context selects one, ask exactly one question and recommend the strongest candidate. Dirty-tree attribution or any other genuine ambiguity likewise gets one recommended question, never a menu.
-7. **Execute the one-hop handoff.** Invoke the selected skill when the host supports it; otherwise read its sibling `skills/<skill>/SKILL.md`, transfer the outcome/target and gathered evidence, and stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
+5. Explicit natural-language intent wins over persisted work and keyword heuristics.
+
+   **Bare entry with a Workspace** (`.loom/local/workspace.json` exists, or any Ticket uses logical `repositoryKeys`): render this exact read-only dashboard, then wait. Do not route, do not act.
+
+   ```
+   Story  csv-export — Add CSV export to reports        active
+
+   repo   lane    branch            state
+   api    ok      feat/csv-export   clean @ a1b2c3d
+   web    STALE   feat/csv-export   lane says 9f8e7d6, git says 4c5d6e7
+
+   tickets  T1 done · T2 done · T3 ready · T4 blockedBy T3
+   blocked  T4 — waits on T3
+   recover  api has an uncommitted diff in src/export.ts, matches T3
+
+   next  Implement T3 in api  →  /loom implement
+   ```
+
+   `STALE` means the two owners disagree: name both observations on the same line and never pick one. Copy the columns literally — two agents rendering the same state must produce the same screen, or the operator relearns the interface on every call.
+
+   **Bare entry without a Workspace:** recommend the strongest coherent continuation, ranked in this order — rework or interruption evidence for a Ticket; then the uniquely active Story's next unblocked Ticket; then nothing, ask. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
+6. Genuine ambiguity gets one recommended question, never a menu. Recommendation first, so the operator can answer in one word:
+
+   > Two active Stories touch `api`. I'd take **csv-export** — its T3 matches the uncommitted diff in `src/export.ts`. The other, `auth-refresh`, has no dirty state. Go with csv-export?
+
+   A numbered menu hands back the ranking work you already did; you read the evidence, so you rank.
+7. **Execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
 8. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
 
 ## Hard stops

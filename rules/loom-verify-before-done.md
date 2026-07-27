@@ -18,4 +18,4 @@ A REJECT-only, stale, missing, or maker-authored digest does not allow `done`. K
 
 No Verify digest → no done.
 
-This rule is OMP's stream reminder. Only OMP provides hard enforcement, in the separate `session_stop` path through `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`; it fails closed when active artifacts or the full canonical Verify relationship cannot be identified or validated. `before_agent_start` supplies only static router/discipline prose. OpenCode, Claude Code, and Codex receive prose-compatible guidance only and do not have equivalent Loom enforcement.
+This rule is OMP's stream reminder. It is the only runtime diagnostic Loom has, and it is a diagnostic, not a gate: the `session_stop` path through `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs` reports what is wrong and forces one more turn, but no host in v7 prevents a stop. The difference between OMP and the others is that OMP tells you. `before_agent_start` supplies only static router/discipline prose. OpenCode, Claude Code, and Codex receive prose-compatible guidance and no runtime diagnostic at all.

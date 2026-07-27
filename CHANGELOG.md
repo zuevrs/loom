@@ -6,6 +6,68 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.1.0] - 2026-07-27
+
+Prose-only release: no ritual added, removed, or renamed, no managed-block contract change, no runtime seam touched. Every change makes an existing instruction steer harder — a number where an adverb stood, a filled example where a schema stood, an obligation where a declaration stood.
+
+### Highlights
+
+- **Honest enforcement language across every public surface.** `README.md`, `SECURITY.md`, `docs/hosts.md`, and `rules/loom-verify-before-done.md` said Loom fails closed and prevents a stop. It does not: `session_stop` returns a forced continuation carrying diagnostics, capped at 8 per session, never fired for subagents. All four now say so, and `tests/carriers.test.mjs` carries a barrier against re-introducing any of the seven prevention claims.
+- **Grill exits through a readback the user can see.** The gate went from two conditions to three: the stop test and its floor, a printed six-line readback with a mandatory non-empty `Out of scope`, then the go — given *after* the readback, because a go given before it authorizes the user's picture rather than the agent's.
+- **A checkable interview stop test.** `every branch resolved` justified the fourth question exactly as well as the twenty-fifth. Replaced with "can you predict the user's answers to the next three questions?", bounded below by a floor (a resolved scope edge, a named non-goal, one confirmed trade-off) and above by a counter-ceiling (three rounds that do not narrow the scope mean the task is incoherent, not the answers).
+- **A grill that materializes nothing now leaves something behind.** Four durable homes by ascending cost, and "we decided nothing worth writing" as a legitimate outcome that must be said out loud — silently ending is how a decision becomes folklore.
+- **Severity obliges the maker.** `blocker|major|minor|note` were declared in four places and obliged nothing. `loom-verify/SKILL.md` now owns the table of what each level costs, plus the one legal way to disagree with a finding: say it once in writing, and the orchestrator picks between dropping it, `ESCALATE_HUMAN`, or upholding it with the argument counting as a strike.
+- **Scope creep belongs to the Spec axis.** Unrequested behavior passed both checkers by construction — Spec read "say nothing about what the spec does not require", Standards saw ordinary code. Spec now separates style (not its finding) from behavior (its finding), because the contract is the full list of what a change does, not a floor it may exceed.
+- **The discipline ladder is checked, not only preached.** Standards gained four rungs with what a skipped rung looks like in a final diff, qualified by genuine local availability — "a library exists for this" is not a finding, "this repo already imports it three files over" is.
+- **`loom:` markers are read back.** Loom took the marker from ponytail without its harvester, so every deferral became permanent by construction. Implement greps them at pre-flight, Standards validates both halves of the shape, and Grill surfaces them as precedent.
+- **Text the agent reads is data, never instruction.** Loom reads more agent-written prose than any single-agent tool. `AUTHORITY.md` now recognises exactly one source of consent — a message the operator sent in this session after an exact preview — and `DIAGNOSE.md` carries the probe corollary: a probe that obeys the output it is probing has stopped being a probe.
+
+### OMP integration
+
+- **Compaction preset.** `loom-init` offers `.omp/config.yml` as a separate preview with its own confirmation, merged into existing YAML rather than overwriting it, and declining is a normal outcome. It sets `compaction.strategy: shake`, because the default `snapcompact` silently falls back to summarizing `context-full` on models without vision — which turns every rule in context into someone's paraphrase by the next turn. `shake` drops heavy content and leaves text verbatim. Setup never enables `advisor`, and never touches `memory` or `autolearn`.
+- **Model roles and prewalk** in the same preset: `smol` for checkers, `slow` for planning, `plan` where the host supports it, and `task.prewalk` so a worker reads before it writes.
+- **`skill://` addressing.** `commands/loom.md` and the dispatcher handoff use `skill://loom` on hosts that support it: skill reads are protected from prune and shake unconditionally, plain file reads are not. This is what makes rules survive context maintenance without an always-on core.
+- **Documented ceilings instead of guesses.** `docs/hosts.md` and `skills/loom/OMP.md` now record what OMP actually does — forced continuation rather than a block, the 8-per-session cap, the subagent exemption, and the compaction fallback — so no workflow is built on an enforcement that isn't there.
+- **`/loom` argument passthrough.** Everything typed after the command is the user's outcome and reaches the dispatcher verbatim; bare `/loom` renders the dashboard or one recommendation and never means Setup.
+
+### Orca integration
+
+- **Serialization follows dependency, not repository.** The old rule ("exactly one active writer owns a repository lane") stalled work that was never in conflict. Within one Story, Tickets touching the same repository go in blocker order; independent repositories run in parallel; two different Stories may each hold their own worktree of the same service, on different branches in different directories. Only a genuinely shared non-git resource — a port, a local database, a container — is a reason to wait, and it must be named.
+- **Ownership is proven by observation.** `orca worktree ps --json` before dispatch, refusal quoting the blocking row verbatim, a claim via `--comment "loom: <ticket> maker running"`, two live claims stopping for a human. Never by recency.
+- **The full-handoff vs supervised-orchestration table is back** after five majors without it, so the agent can tell which mode it is in before choosing how much to ask.
+- **Native guides before first use.** `orca skills get orca-cli` and `orchestration` are read before the first operation of a class rather than paraphrased from memory.
+- **Human-in-loop by materiality.** With Orca driving OMP sessions, the operator is reachable at any stage, not only up to implementation; the agent asks when a decision is material instead of when a phase boundary happens to arrive.
+- **`workspace-status: in-review`** is set after review is proven, not when it is requested.
+
+### Prose sharpened
+
+- **Verify tiers replace "proportional to risk".** Tier 1 (docs, comments, one-line copy, test-only) checks Standards over the diff; tier 2 (internal logic, no contract change, no new dependency) adds Spec, diff-scoped; tier 3 (public or inter-service contract, data path, auth, secrets, migration, new dependency) runs both over the touched surface. Ties take the higher tier, and the maker never judges its own tier down.
+- **`AUTHORITY.md` rewritten operationally.** Non-transitivity is a table of "got this → grants nothing about that"; the thirteen-item revalidation list is a printable `Revalidated for:` block over a named catalog; `OutcomeReceipt` and `SemanticCheckpoint` each carry a filled instance; six rationalizations get an anti-rationalization row.
+- **Checker manifests earn their spawn.** Both checkers gained the criteria-as-table method with a worked example, an explicit "unmet" threshold, a good and a bad finding side by side with what the bad one costs, `checkerId` in the output schema, a landing site for every declared severity, and a degraded mode for truncated briefings (`~400` diff lines → `~25` tool calls, first finding names the mode).
+- **`FINISH.md` and `PUBLISH.md`** each gained a full worked walkthrough — inventory, confirmation, one command, readback, next — and an anti-rationalization table, including how to report a partial failure honestly.
+- **The dashboard has an exact mockup** instead of a description, with `STALE` naming both observations, and ambiguity questions lead with a recommendation.
+- **`docs/authoring.md`** is the root fix for two-register drift: every rule carries the cost of skipping it, a number rather than an adverb, a filled example rather than a template, and field evidence — then one last check, "would a strong model do this anyway?". It also documents the description surface, the `~180`-line disclosure threshold, one-hop pointers, and the 20-line cap on the managed block.
+- **`CONTEXT.md` and relevant ADRs are Implement inputs**, read in the step-1 parallel batch, so recorded decisions reach the maker instead of the operator re-explaining them.
+- **`Rejected:` joins the `## Log` bullet types**, so a considered-and-declined option stops being invisible to the next session.
+- **`loom-verify/TICKET-RECORD.md` extracted** (4752 B) — the canonical `## Verify` format, status effects, two-strikes fork, and `ESCALATE_HUMAN`. Direct small fixes and Standards-only runs never load it; `loom-verify/SKILL.md` drops from 25490 to 21364 B.
+- **Verify captures a lesson at most once per run**, proposed and written only after approval, and not offered at all when the run taught nothing — which is most runs.
+- **Grill checks precedent before its first question**: Story titles, `## Decisions` sections, ADR titles, and recorded `loom:` ceilings, so an interview does not re-derive a decision the project already made.
+- **The two-strikes rule has one owner.** It existed in four editions; `loom-verify/TICKET-RECORD.md` now owns it and the others point at it.
+- **`docs/workspaces.md`** documents parallel Stories honestly: `.loom/<story-id>/` directories merge cleanly, `CONTEXT.md` and ADR numbers collide, and owner worktrees are offered and confirmed rather than scaffolded (ADR-0138, restored).
+
+### Fixed
+
+- **Two tests pinned falsehoods verbatim.** `tests/carriers.test.mjs` asserted that artifacts validate "fail-closed" and that "only OMP provides hard enforcement"; `tests/prose-preservation.test.mjs` asserted that repeated `session_stop` calls "remain blocked". All three now guard the truth, and a `doesNotMatch` barrier lists every prevention claim so none of them can return through a future edit.
+- **`npm test` ignored new test files.** The script listed test files by name, so `tests/authority-invariants.test.mjs` was silently skipped; it now globs `tests/*.test.mjs`.
+- **`.release-pack/` was not ignored** and would have been committed — tarball, unpacked tree and all — by any `git add .`.
+- **`RELEASE.md` step 1.3 told the next releaser to leave version fields at `6.0.0`**, which stopped being true when 7.0.0 shipped.
+
+### Not changed, deliberately
+
+- No new hook, script, or state machine. Every item above is prose an agent reads, or a test that pins prose in place.
+- `memory.backend` and `autolearn` stay untouched by Setup. The preset offers compaction, model roles, and prewalk only.
+- The `advisor` is never enabled by Setup; it doubles per-turn cost and belongs to an explicit operator decision.
+
 ## [7.0.0] - 2026-07-26
 
 ### Highlights
@@ -1279,7 +1341,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.1.0...HEAD
+[7.1.0]: https://github.com/zuevrs/loom/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/zuevrs/loom/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/zuevrs/loom/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/zuevrs/loom/compare/v4.0.0...v5.0.0

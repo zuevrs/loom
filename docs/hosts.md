@@ -9,8 +9,8 @@ The [README](../README.md) is the quick operator path. This document distinguish
 | Canonical ritual skills | yes | yes | yes | yes |
 | Seven-ritual routing prose | injected | injected | skill prose | skill prose |
 | Canonical checker agents | yes | host-configurable | packaged | where supported |
-| Fail-closed active artifact | yes | no | no | no |
-| Verify-before-done stop gate | `session_stop` | no | no | no |
+| Active-artifact validation | yes | no | no | no |
+| Verify-before-done diagnostic | `session_stop` (advisory, forced continuation, capped at 8, never for subagents) | no | no | no |
 | Loom lifecycle hook parity | OMP only | no | no | no |
 | Orchestration adapter | Orca | — | — | — |
 
@@ -18,7 +18,7 @@ The [README](../README.md) is the quick operator path. This document distinguish
 
 ## OMP
 
-OMP is the supported enforcement host. `omp-extension.mjs`:
+OMP is the only host where Loom has a runtime diagnostic. It is not enforcement: nothing here prevents an action. `omp-extension.mjs`:
 
 - injects compact discipline and exactly-seven router guidance;
 - injects no current project, Story, Ticket, or repository pointer at `before_agent_start`;
@@ -36,7 +36,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 omp plugin doctor loom
 ```
 
-In a disposable project, run Setup, confirm the managed write, select a Ticket, and verify that a `Status: done` Ticket without a current APPROVE digest is refused at session stop. If active identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch; fail-closed is intentional.
+In a disposable project, run Setup, confirm the managed write, select a Ticket, and verify that a `Status: done` Ticket without a current APPROVE digest is **reported** at session stop — the session continues carrying the diagnostic, it does not halt. If active identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch. Reporting-not-preventing is the honest ceiling of this host; do not build a workflow that assumes the stop was blocked.
 
 ## OpenCode
 

@@ -53,6 +53,31 @@ When the user sets up or repairs a multi-repository Workspace:
 
 Malformed local binding JSON/schema is a global stop. A missing or stale individual binding blocks only Tickets referencing that key and their dependents.
 
+## Host preset (OMP)
+
+On OMP, offer a project preset once, as its own preview and its own confirmation, separate from the managed-block transaction. Setup writes host configuration only when the operator accepts it; declining is a normal outcome and changes nothing else. Preserve existing YAML — merge these keys, never rewrite the file.
+
+```yaml
+compaction:
+  strategy: shake
+modelRoles:
+  plan: <the strong model>
+  smol: <the cheap model>
+  slow: <the reasoning model>
+task:
+  prewalk: true
+```
+
+Say why, because the operator is being asked to change a host default:
+
+- **`compaction.strategy: shake`** is the one strategy that leaves surviving text verbatim — it drops heavy tool results and large blocks and rewrites nothing. `context-full` summarizes in place, so your rules reach the next turn as a paraphrase. The host default `snapcompact` archives history onto images and **falls back to `context-full` on a model without vision** — on a non-vision model the default silently becomes the one strategy that rewrites the discipline. If the operator runs vision models exclusively, `snapcompact` is a defensible choice and you say so; otherwise recommend `shake`.
+- **Model roles** let one Story use a strong model for Grill and Plan and a cheap one for mechanical work, with no change to any Loom prose. Do not invent model identifiers — read the operator's configured models and let them assign. If the `plan` role is left unset, the host performs no model transition, which is a safe default, not a failure.
+- **`task.prewalk`** switches to the cheap model at the first edit after a todo list exists — the strong model plans, the cheap one types. It is event-driven, not timed.
+
+Never enable `advisor` here. A second model that can interrupt every turn is a change to how work feels, not a setup detail: name it as available, and let the operator turn it on deliberately when they want it.
+
+Never write memory or learning settings on the operator's behalf. Those decide what leaves the machine.
+
 ## Hard stops
 
 - Never write without exact preview and explicit confirmation.

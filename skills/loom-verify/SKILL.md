@@ -5,6 +5,8 @@ description: Fresh checker — Spec + Standards, preferably in parallel. Use aft
 
 **Judge only. Never fix.**
 
+Where the host lets a spawned agent declare its own tool set, give each checker read-only tools and nothing else — the packaged manifests already do (`read`, `grep`, `find`). Then "never fix" stops being a promise the checker has to keep and becomes a thing it cannot do, which is strictly better: a checker that physically cannot edit also cannot be talked into a "tiny obvious correction" by its own reasoning. Hosts without per-agent tool sets keep the prose contract and the weaker guarantee; say which one you got when it matters.
+
 Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
 
 ## Goal
@@ -40,7 +42,7 @@ For multi-repository Story work, Orca is the sole coordinator and supplies the o
 ## Process
 
 1. Pin the **Boundary** before judging: Maker identity; Ticket digest; ordered repositories with identity, HEAD, fixed point, and diff digest; and the exact included semantics. Confirm at least one repository diff is non-empty. The Boundary excludes only Ticket lifecycle frontmatter `status` and the entire current `## Verify` block, and includes every other Ticket semantic byte plus exact repository state. This exact self-exclusion prevents writing Verify or changing status from invalidating its own digest; any other Ticket or repository change makes the result stale and requires fresh Verify.
-2. **Run the objective gates before spawning anyone**: the risk-proportional tier selected from the Ticket/user contract and repository conventions: Ticket-required checks plus focused, touched-surface, or full relevant repository gates as justified by the changed boundary (package scripts, Makefile, CI configuration, and other existing repository commands — discover, don't invent). A repo with a lint script that Verify never ran is an unearned APPROVE.
+2. **Run the objective gates before spawning anyone.** Take the Verify tier from `CONSTITUTION.md` (tier 1 docs/tests-only, tier 2 internal logic, tier 3 contract/data/auth/migration/new dependency; ties take the higher tier). Tier 1 runs the Ticket-required checks; tier 2 adds the focused gates for the changed files; tier 3 adds the full relevant repository gates. Discover the commands from package scripts, Makefile, and CI configuration — never invent one. A repo with a lint script that Verify never ran is an unearned APPROVE.
 
    Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), while a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. A cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence.
 
@@ -129,40 +131,36 @@ Return both cited findings to the same maker as one rework batch, then run fresh
 
 A finding without a quoted contract line or named standards source is opinion, not evidence. The worked REJECT includes both review axes and the exact commands that earned the gate evidence; remaining digests must be equally concrete.
 
-## Canonical Ticket `## Verify` format
+## What each severity obliges
 
-For a Ticket, its `## Verify` write-back is exactly the compact current record rendered by `hooks/verify-gate.cjs`:
+Severity is declared four ways and, until this table, obliged nothing. That is why the same digest produces two opposite failures: a maker who fixes ten `minor` notes and burns a lap on taste, or a maker who argues with a `blocker` as though it were a preference. This is the canonical owner of what a severity *costs*:
 
-```text
-Maker: {stable maker identity}
-Ticket digest: sha256:{64-hex digest excluding lifecycle frontmatter status and ## Verify}
-Repositories:
-- {repository key} | head {40-64 hex oid} | diff sha256:{64-hex digest}
-Boundary: sha256:{64-hex boundary digest}
-Spec: APPROVE|REJECT | {distinct checker identity} | {one-line contract-cited evidence}
-Standards: APPROVE|REJECT | {distinct checker identity} | {one-line named-source evidence including objective command/result summaries}
-Human: NOT REQUIRED
-```
+| Severity | The maker must | Before `done`? |
+|---|---|---|
+| `blocker` | Fix it, or escalate the disagreement below. No third option. | Yes — a `blocker` and `done` cannot both be true |
+| `major` | Fix it, or record a `loom:` marker with its ceiling and upgrade trigger and say so in `## Log`. | Yes, in one of those two forms |
+| `minor` | Decide, one line in `## Log`: fixed, or deferred and why. | No — deferral is legitimate and recorded |
+| `note` | Read it. Nothing else. | No |
 
-When Ticket policy requires Human approval, replace only the last line with `Human: APPROVE | {distinct identity} | {one-line evidence}`. There are no separate canonical checks, findings, execution, or checker-provenance fields. Keep detailed findings and red output in the chat digest; durable details may live in Ticket `## Log` or referenced check output. Spec and Standards evidence must each remain one line with no `|`; Standards includes every objective gate summary, or `no runnable checks — {why}`. Checker verdicts remain `APPROVE|REJECT`; `NOT REQUIRED` is only the Human policy sentinel.
+`note` obliging nothing is deliberate: it is the slot a checker uses for context the maker should have (`briefing truncated`, `this file has a second caller`), and giving it weight would make checkers stop sending it.
 
-Status effects for a Spec-backed Loom Ticket: **APPROVE** → replace the current `## Verify`, then set lowercase frontmatter `status: ready-for-human` when Human is required or `status: done` otherwise. **REJECT** → replace the current result; no automatic `status` change. Standards-only output stays in chat and never mutates a Ticket.
+**A finding the maker disagrees with is not a finding the maker may skip.** Silent non-compliance is the failure this row exists for — the digest says `blocker`, the diff says nothing, and the next Verify re-derives it. Instead say it out loud, once, in the rework batch: quote the finding, state why the code is right, and name the evidence the checker did not have. Then the orchestrator decides between three outcomes and records which one it chose:
 
-**APPROVE vouches only for the exact Boundary it judged.** Any included Ticket semantic or repository-state change after the verdict makes the current Verify stale and requires a full fresh Verify. There is no post-Verify delta exception. Changes to only the self-excluded lifecycle frontmatter `status` or replacement current `## Verify` block do not stale it.
+- The checker was wrong on evidence the briefing did not carry → the finding is dropped, and the missing context goes into the next briefing so the same spawn does not rediscover it.
+- The disagreement is a real trade-off nobody has decided → `ESCALATE_HUMAN`. Two agents disagreeing about a contract is exactly the case the human gate exists for.
+- The maker is rationalising → the finding stands unchanged, and the argument counts as one of the two strikes.
 
-**No delta is not a pass.** An empty repository diff stops Verify until the fixed point and intended scope are corrected. Boundary freshness is checked once before review and again immediately before write-back; a result over stale bytes is discarded, never patched with a note.
+One round of this per finding. A maker that re-argues a finding already upheld is on strike two.
 
-**Two strikes rule** (Spec-backed Loom Ticket): a second REJECT on the same Ticket whose blockers overlap the first is a stop signal, not a third lap. Re-implementing against an unchanged misunderstanding spends checkers to stand still. Present the user the fork explicitly: Plan re-entry (amend Story/PRD/Ticket — see `loom-plan` § Route scope), accept the finding as explicit `loom:` debt, or drop the Ticket. The current canonical `## Verify` block holds only the latest result; compare it with the immediately prior rework result retained in the active maker handoff, without creating append-only history.
+## Ticket record
 
-**ESCALATE_HUMAN is a deliverable, not a shrug.** It carries: what needs the human in one sentence, the exact decision or evidence missing, and what happens if nobody acts. For a Spec-backed Ticket, deliver the escalation digest in chat without writing a non-canonical Ticket record; no commit, push, hosted review, or status change. Current `## Verify` stays untouched until independent `APPROVE|REJECT` evidence exists. Standards-only/no Ticket delivers chat only.
+When the result is a Spec-backed Loom Ticket, load [`TICKET-RECORD.md`](TICKET-RECORD.md) and follow it for the canonical `## Verify` block, its status effects, staleness, the two-strikes rule, and `ESCALATE_HUMAN`. Standards-only and direct-fix results stop at the chat digest — do not load it, and never write a Ticket record for them.
 
-## Ticket file write-back (current-result contract)
+## Capture the lesson, once
 
-For every Spec-backed result, replace the Ticket's existing `## Verify` section, the last canonical section (create it once if absent), with the current canonical human-readable block. Never append verdict history or auxiliary provenance records. The block carries Maker, self-excluding Ticket digest, ordered repository HEAD/diff digests, Boundary, Spec identity/evidence, Standards identity/evidence, and exactly one stable Human policy line selected before completion.
+A run that surfaced a durable pattern — a convention the checkers keep rediscovering, a trap this codebase sets, a decision the team keeps relitigating — is the only moment the project can learn cheaply. Offer to record it, name the smallest owner, and **write only after the operator approves**: a vocabulary or contract fact goes to `CONTEXT.md`; a hard-to-reverse trade-off goes to an ADR; a recurring procedure goes to a repository-local `skills/<slug>/SKILL.md`. One offer, one line, no ceremony — and no offer at all when the run taught nothing, which is most runs.
 
-Ticket self-exclusion is exact: digest all Ticket semantics except the complete current `## Verify` section and lifecycle frontmatter `status` field. Those two lifecycle values may change after approval without invalidating judgment. Editing acceptance criteria, `## Log`, dependencies, or any other Ticket semantics changes the digest and makes Verify stale. Any repository HEAD/diff change likewise requires fresh Verify.
-
-OMP `session_stop` enforces only the **current** Ticket artifact/current Verify relationship. Other hosts follow the prose contract but claim no hook or enforcement parity.
+Without this the project pays for the same discovery every time: findings live in a verdict, verdicts are replaced by the next one, and nothing accumulates. Do not write durable knowledge unasked; an unapproved lesson is one agent's opinion promoted to project truth.
 
 ## Hard stops
 

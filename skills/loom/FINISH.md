@@ -6,6 +6,55 @@ Lazy-load this fragment only for an explicit Story finish. Load and follow [`STO
 
 Classify before checks, instructions, or lifecycle writes. Only exact `/loom finish` or a narrow positive imperative that asks to finalize or close **this/current Story** and explicitly includes its local integration/commit outcome is `FINISH`. Negation, a question mark, a conditional or question prefix, altered slash syntax, another Story, or incomplete wording is `ASK`: ask one focused question and perform no effect. Casual phrases such as `looks good`, `done for now`, `ship it`, or card switching are `NOOP`.
 
+## One full pass
+
+Everything below is the reference. This is the shape. A Story touching one service and the owner:
+
+```
+Finish — csv-export
+
+api        feat/csv-export @ a1b2c3d, base 4c5d6e7, index clean
+           4 files, +118 −12 · src/export/stream.ts, src/export/index.ts, tests/export/stream.test.ts, package.json
+owner      feat/csv-export @ 9f8e7d6 · .loom/csv-export/{STORY.md,PRD.md,tickets/01..04}, docs/adr/0007-stream-export.md
+
+tickets    01 done · 02 done · 03 done · 04 done — all Spec+Standards APPROVE at a1b2c3d
+checks     npm test -- export · npm run lint  (will run now, then final Spec+Standards over the integration boundary)
+
+commits    api:   feat: stream CSV export instead of buffering
+           owner: docs: record csv-export story and ADR-0007
+excluded   no push, no PR, no merge, no tag, no rebase/amend/squash/force, no cleanup
+
+Confirm this inventory?
+```
+
+Operator confirms. Checks run, final Spec + Standards APPROVE. Then **one command at a time**:
+
+```
+Run this in api, then paste the result:
+
+    git -C ~/orca/workspaces/svc-api/csv-export commit -am "feat: stream CSV export instead of buffering"
+```
+
+Operator reports success. You **reread** before offering anything else — parent, HEAD, committed tree, intended-file boundary, hook outcome, remaining diff:
+
+```
+Read back api: HEAD 7b2e1a9, parent a1b2c3d, tree matches the 4 intended files, pre-commit hook passed, working tree clean.
+
+Next, in the owner repo:
+
+    git -C ~/orca/workspaces/idea/csv-export commit -am "docs: record csv-export story and ADR-0007"
+```
+
+After the last readback proves every inventoried result, and only then:
+
+```
+Both commits proven. Story csv-export → done.
+done means: verified local result accepted. Not pushed, not reviewed, not merged, not released, not cleaned up.
+Publish is a separate explicit command.
+```
+
+Three things the example is showing you. The inventory is one screen, not nine paragraphs. Commands go out **one at a time** with a readback between them — never a script the operator pastes in bulk, because a bulk paste hides which command failed. And the closing line says what `done` does *not* mean, every time.
+
 ## Fixed local inventory
 
 Finish starts only from Story `active`, or `blocked` when the exact external blocker is part of the finish inventory and the remaining local result can still be proven. Reread Story, PRD, every Ticket, relevant ADR/CONTEXT, current Git state for every touched repository, and native Orca context when active. Every required Ticket must be current, `done`, and covered by a current independent Spec + Standards APPROVE at the exact relevant fixed point. A non-`done` Ticket, stale, missing, self-approved, unexplained, or post-verdict change stops Finish.
@@ -46,3 +95,17 @@ Integrate semantic project knowledge before historical proof. Compare relevant C
 Preview the exact owner files and intended tree, obtain bounded confirmation, and give one manual owner Git integration command at a time under the ordinary Finish rules. After the operator reports success, reread every inventoried path from the owner checkout, recompute the internally derived SHA-256 digests, and compare the exact post-operator bytes, paths, mode/type, and committed owner tree to the confirmed inventory and expected commit tree. Also verify parent and HEAD. For service repositories, verify the relevant merge commit/tree or other documented service merge ref where the project policy uses one, and ensure the owner artifact pointers name those proven refs. Any mismatch, conflict, missing ref, or partial owner tree stops; no historical-preservation claim is made until exact readback and commit-tree equality hold.
 
 The proven owner commit/tree is the durable historical-preservation evidence. Record no extra durable manifest. Preservation is separate from cleanup: Finish never removes Story files, branches, worktrees, lanes, cards, tasks, or terminals. Cleanup requires its own fresh exact inventory and confirmation after Publish and proven merge. Cleanup failure or partial cleanup never rolls back, weakens, or erases the already proven `done` Story and owner commit/tree evidence.
+
+## Anti-rationalization
+
+This boundary is where an agent talks itself past a gate, because the work feels over and one more step looks harmless. Each excuse below is one you will actually produce:
+
+| Excuse | Reality |
+|---|---|
+| "They said finish, and a push is obviously next." | Finish is local only. Publish is a separate command with its own inventory and its own confirmation. Wanting the next step is not being given it. |
+| "The operator pasted the commit output, so it worked." | A transcript is a claim. Reread parent, HEAD, committed tree, and remaining diff from Git before offering the next command. |
+| "Both commits are basically identical work — I'll give them together." | One command, one readback. A bulk paste hides which command failed, and local effects do not roll back. |
+| "The first repo committed fine, so the second will too — I'll call it done." | `done` requires every inventoried result reread and proven. A partial pass reports exactly what succeeded and stops. |
+| "The base moved a little; I'll rebase quietly to keep it clean." | Loom runs no history command. A stale base becomes a separate exact proposal using documented project policy only. |
+| "The verdicts were APPROVE an hour ago." | Any changed HEAD, diff, file set, check, or message renews the inventory and the confirmation. Recompute; do not reuse. |
+| "The Story is done, so I may as well clean up the worktree." | Cleanup is its own action, after Publish and proven merge, with its own inventory. `done` grants it nothing. |

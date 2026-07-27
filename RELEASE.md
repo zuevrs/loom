@@ -6,7 +6,7 @@ Use this checklist for every release. A prepared or locally approved candidate d
 
 1. Start from the intended release branch with an understood worktree: `git status --short --branch`.
 2. Choose `MAJOR.MINOR.PATCH` with SemVer. Removed/renamed rituals, incompatible managed-block contracts, or dropped carrier behavior are major changes.
-3. During v7 development leave all version fields at `6.0.0`; bump only when the release owner explicitly cuts the release.
+3. Leave every version field at the last released value while work accumulates; bump only when the release owner explicitly cuts the release. Never name a specific in-development version here — a hardcoded number outlives its cycle and instructs the next release owner to ship the wrong one.
 4. Keep pending notes under `CHANGELOG.md` → `## [Unreleased]` until the cut.
 
 ## 2. Cut changelog notes

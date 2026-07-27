@@ -66,6 +66,16 @@ The dashboard is computed on demand from committed artifacts, local bindings, an
 - cross-service behavior that cannot be proven per service gets an explicit integration Ticket
 - Verify and Finish prove the **selected active Ticket** against live Git; historical `done` Tickets keep their canonical Verify evidence without falsely comparing every old boundary to today's checkout
 
+## Parallel Stories
+
+Two Stories may be open at once, and each writes durable memory into the same owner repository. **They must not write it from the same checkout.**
+
+Before the first durable write of a second concurrent Story, offer that Story its own owner worktree — `orca worktree create --repo id:<ownerRepoId> --name story-<id>` — and state the exact resulting path. The operator confirms; Setup never creates one silently. Different Stories add different `.loom/<story-id>/` directories, so the branches merge without conflict; what does conflict is two sessions rewriting `CONTEXT.md` or claiming the same ADR number from one working tree, and that is what the isolation prevents.
+
+Integration back into the canonical owner branch is a separate serialized step under Finish: one writer at a time, the exact semantic `CONTEXT`/ADR delta previewed and confirmed, and a conflict stops for human reconciliation rather than being auto-merged. Resolve ADR number collisions under the owner's existing convention and preserve both decisions when they are genuinely distinct.
+
+Service repositories follow the ordinary rule: dependency order within a Story, free between Stories, and a stop only for a named shared non-git resource.
+
 ## Migration from v6
 
 v6 `workspace.json` and runtime registries are not loaded automatically. Guided import is an explicit Setup branch:
@@ -81,6 +91,7 @@ v7 Workspaces do **not** restore:
 
 - committed `.loom/workspace.json` profiles
 - ancestor-scanning project discovery
-- setup-created owner worktrees or automatic `git init`
+- automatic `git init`
+- owner worktrees created by Setup without asking (they are offered and confirmed, never scaffolded — see below)
 - runtime mutation permits through OMP
 - automatic repo enrollment by display name or path heuristic

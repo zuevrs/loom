@@ -12,6 +12,16 @@ Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-pa
 
 Ticket state is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`. Inbound reports without a durable Ticket remain conversational facts until Gate 2; unresolved user-owned decisions become `needs-info`. One category (bug/chore/feature/refactor/docs) may be recorded in prose, not as another status.
 
+## Check for precedent first
+
+Before the first question, scan `.loom/` for Story titles and their `## Decisions` sections, plus ADR titles. Both are guaranteed to exist by the Story schema, so this is a cheap directory walk and two greps — not a load of every artifact. Name any match and what it decided, or state plainly that none exists.
+
+Then one grep for the ceilings the project recorded in its own source: `grep -rnE '(#|//|--|;) ?loom:' .`, skipping `node_modules`, `.git`, and build output. Each hit is a decision already made, carrying its ceiling and its upgrade trigger right next to the code it constrains. Name the ones inside the area under discussion.
+
+This runs first because the worst grill is the one that re-derives a decision the project already made. The operator answers from memory, the memory is stale, and the new decision quietly contradicts an ADR nobody reread. Two lines of scanning prevent a whole interview.
+
+The markers matter for the same reason and are read even less: Loom writes them at every Implement and, until now, no ritual ever read one back. An unread marker is how `upgrade: when we add a second worker` quietly becomes a permanent single-process assumption that the next PRD designs around.
+
 ## Explore before asking
 
 Research is local-first, including facts **outside the repo**. Read the relevant code, tests, types, installed dependency versions, project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` Stories), and existing patterns before leaving the repo; ask the user only for what exploration cannot establish. **Facts vs decisions**: establish facts from evidence, then ask the user to decide only user-owned intent, preferences, scope edges, and trade-offs. Evidence informs the recommendation, while the user owns the decision.
@@ -37,6 +47,18 @@ Interview the user **relentlessly** about every aspect of the plan until **every
 - **Seams.** Propose where the feature will be tested. Prefer existing seams, use the highest seam, the fewer the better (ideal: one). Confirm the seams with the user.
 - **Resume after interruptions.** After a dropped connection, an error, or the user saying "continue", re-read this file, restate the last unanswered question, and resume. Preserve the full interview rather than treating the interruption as a shortcut.
 - **The interview runs in the user's language** — questions, options, recommendations, all of it, with no English duplicates in parentheses. Technical terms and ritual names stay as-is.
+
+## When you have grilled enough
+
+`Every branch resolved` is a judgement only you can see, and it justifies the fourth question exactly as well as the twenty-fifth. Replace it with a test that has an observable answer, run before each new question:
+
+**Can you predict the user's answers to the next three questions you would ask?** Predict them silently. If all three predictions feel forced, the branches are open — keep going. If you can state all three answers and would bet the diff on them, the interview is done: read the predictions back at the gate as assumptions instead of asking them.
+
+That test is a ceiling, not a licence to stop early. Below it sits a floor: **an interview that has not produced a resolved scope edge, a named non-goal, and one confirmed trade-off is not finished**, however confident the predictions feel. Three questions with three agreeable answers is a briefing, not a grill.
+
+And a counter-ceiling in the other direction: **three consecutive rounds where the answers do not narrow the scope mean the problem is the task, not the answers.** Say so and change the object — "we've circled this three times; I think the request itself holds two features. Split it, or pick which one ships first?" Continuing to ask about an incoherent task produces a coherent PRD for the wrong thing, which is the expensive failure, not the slow interview.
+
+Watch for answers that only sound thoughtful. "Yeah, that makes sense", "good point, let's do that", "whatever you recommend" resolve nothing — they return your own proposal to you with the user's name on it. An answer counts when it adds a fact you did not have: a rejected option, a number, a constraint, a name. When three answers in a row add nothing, ask the one question the user cannot answer from your framing: "what would make this the wrong thing to build?"
 
 ## Model the domain as you grill
 
@@ -67,12 +89,45 @@ Ten flat multiple-choice questions in a row with no evolving domain delta is the
 This is the canonical owner of proportional review: a mechanical typo or formatting-only change needs objective checks; semantic docs/config/code needs a fresh Standards checker; behavioral/risk-bearing work or an explicit contract needs Spec + Standards. Ambiguity escalates to the higher tier.
 
 
+## Read the grill back before the gate
+
+The exit gate asks the user to confirm shared understanding — of an object they cannot see. They confirm their picture, you confirm yours, and the two diverge silently until Verify. Before asking for the go, print what you understood, in the user's language, in this shape:
+
+> **Objective:** the CSV export mirrors the filtered ledger view, so a shared export matches the screen it came from.
+> **In scope:** export button on the ledger view; filter state passed through to the query; UTF-8 with BOM for Excel.
+> **Out of scope:** scheduled/emailed exports; XLSX; exporting from the summary dashboard; more than 50k rows (we agreed to fail loudly instead of paginating).
+> **Decided:** filtered view over full dataset — predictability over completeness (ADR offered, declined: reversible until users share files).
+> **Assumed, correct me:** existing `LedgerQuery` is the seam; nobody depends on today's unfiltered CSV.
+> **Open, you own it:** what the 50k-row failure says to the user.
+
+`Out of scope` is not optional and is never empty. Half of all misalignment is silent disagreement about what is *not* being built — the user assumed scheduled exports were included, you assumed they were obviously a later Story, and neither assumption was ever spoken. Name at least the things a reasonable person would have expected here and you are deliberately leaving out. If you cannot name one, you have not pushed a boundary yet; go back to the interview.
+
+`Assumed, correct me` is where the predictions from the stop test go. An assumption read back and left uncorrected is confirmed. An assumption never spoken is a guess wearing a plan's clothes.
+
+Keep it to that block — six lines, no headings, no recap of the reasoning. The user has been in the conversation; this is a diff against their memory, not a summary of it.
+
+## When the grill stops short of an artifact
+
+An interview can resolve six branches and still produce nothing: the ADR triple (hard to reverse **+** surprising **+** real trade-off) fails, no term changed, and the user does not give the go. Every fact then lives in the transcript and dies with the session — and the next session re-derives it, which is the exact cost the precedent scan at the top of this file exists to avoid.
+
+So when the interview ends without materializing, offer the cheapest durable home for what it produced, and write only what the user approves:
+
+- A resolved term or a domain fact → `CONTEXT.md`, one line.
+- A decision that failed the ADR triple but would surprise the next reader → the `## Decisions` section of the active Story, or a new `## Decisions` line on the Story the discussion belongs to.
+- A ceiling that now constrains code → a `loom:` marker next to the code, with its upgrade trigger.
+- Nothing above fits → say plainly that the grill produced no durable artifact and name the one fact worth remembering, so the user can decide. Do not invent a file to hold it.
+
+"We talked and decided nothing worth writing" is a legitimate outcome and should be said out loud. Silently ending is not — that is how a decision becomes folklore.
+
 ## Exit gate
 
-Exit only when BOTH hold (and the Story destination plus PRD-materiality decision are explicit):
+Exit only when ALL THREE hold (and the Story destination plus PRD-materiality decision are explicit):
 
-1. The user confirms shared understanding — every load-bearing branch resolved.
-2. The user gives an explicit go ("write the PRD", "materialize", or equivalent).
+1. The stop test passes and its floor is met — a resolved scope edge, a named non-goal, one confirmed trade-off.
+2. You have printed the readback block above, `Out of scope` included, and the user has seen it.
+3. The user gives an explicit go ("write the PRD", "materialize", or equivalent) — given *after* the readback, not before it.
+
+The order is load-bearing: a go given before the readback authorizes the user's picture, not yours. If the go arrives first, print the block anyway and ask them to confirm it stands.
 
 Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Slicing into tickets happens in Phase 3, not here.
 
@@ -107,3 +162,10 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 | "User seems impatient / said 'continue', wrap up" | Resume the grill where it stopped. One more question now saves a bad PRD later. |
 | "I already know what they want" | You know what YOU would build — ask what THEY need |
 | "User said ok, that's their decision" | An accepted recommendation is not a stated preference. Name the proposal's origin in the PRD. |
+| "They've been in the whole conversation — a readback is redundant" | They were in *their* conversation. The readback is a diff against their memory; redundant is the point. |
+| "Nothing is out of scope here, it's a small change" | Then you never pushed a boundary. `Out of scope` is never empty — name what a reasonable person would have expected and you are leaving out. |
+| "They said go, I'll skip the block" | A go before the readback authorizes their picture, not yours. Print it and ask if it stands. |
+| "I can predict every answer — done after two questions" | The stop test is a ceiling with a floor under it: scope edge, non-goal, confirmed trade-off. Three agreeable answers is a briefing. |
+| "They keep agreeing, so we're aligned" | "Makes sense" returns your proposal to you with their name on it. An answer counts when it adds a fact you did not have. |
+| "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers. Say so and change the object. |
+| "No ADR triggered, so there's nothing to write" | The ADR triple is one home, not the only one. Offer `CONTEXT.md`, a Story `## Decisions` line, or a `loom:` marker — or say out loud that nothing durable came of it. |

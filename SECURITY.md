@@ -9,7 +9,7 @@ Only the latest release line receives security fixes. Loom is pre-1.0 and its co
 Loom's v7 runtime is local and offline. It has exactly three seams:
 
 1. `hooks/artifacts.cjs` reads and validates active Loom artifacts.
-2. `hooks/boundary.cjs` applies fail-closed action-boundary decisions.
+2. `hooks/boundary.cjs` computes the content-addressed boundary: a digest over the Ticket (excluding its own `## Verify`) and over each repository's HEAD, staged diff, unstaged diff, and untracked entries. It observes and hashes; it authorizes nothing.
 3. `hooks/verify-gate.cjs` enforces Verify-before-done; OMP connects it to `session_stop`.
 
 OMP additionally injects the router through `omp-extension.mjs`. OpenCode injects compact prose and registers skills. Claude Code and Codex consume prose-compatible skills and checker metadata only; Loom does not claim hook or enforcement parity on those carriers.

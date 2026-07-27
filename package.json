@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Skills-first harness with seven disciplined engineering rituals",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -25,7 +25,7 @@
     "discipline"
   ],
   "scripts": {
-    "test": "node --test tests/artifacts.test.mjs tests/runtime-contracts.test.mjs tests/omp-extension.test.mjs tests/carriers.test.mjs tests/prose-preservation.test.mjs tests/workspace-contour.test.mjs tests/workspace-e2e.test.mjs"
+    "test": "node --test tests/*.test.mjs"
   },
   "files": [
     "AGENTS.md",
