@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "description": "Skills-first harness with seven disciplined engineering rituals",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -43,6 +43,7 @@
     "skills/loom/PUBLISH.md",
     "skills/loom/OMP.md",
     "skills/loom/ORCA.md",
+    "skills/loom/CODEGRAPH.md",
     "skills/loom-init/**",
     "skills/loom-grill/**",
     "skills/loom-plan/**",

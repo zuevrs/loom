@@ -6,6 +6,33 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.2.0] - 2026-07-27
+
+Optional CodeGraph integration guidance for architecture exploration, impact analysis, and graph-backed Verify evidence. The backend remains external, read-only, per-worktree, and optional.
+
+### Highlights
+
+- **Optional CodeGraph capability.** Added a canonical contract covering MCP-only setup, explicit preview/confirmation, worktree isolation, index freshness, ownership, and visible fallback.
+- **Process-wide guidance.** Setup can offer CodeGraph separately; Plan, Implement, and Verify can use fresh graph evidence without treating it as Loom authority or a replacement for independent checkers.
+- **Safe packaging.** The new capability is included in the package allowlist without adding runtime hooks, vendor skills, or a database dependency.
+
+### Breaking changes
+
+- None. CodeGraph is optional and existing Loom workflows remain available without it.
+
+### Migration steps
+
+- None required. Existing installations may update normally; configure CodeGraph only through the separate optional Setup transaction.
+
+### Adapter impacts
+
+- No host adapter changes. CodeGraph setup must remain a separately confirmed native MCP configuration.
+
+### Safety changes
+
+- Loom refuses to silently accept vendor installers, hooks, skills, Git hooks, or `.loom` state ownership from CodeGraph.
+- Stale, unavailable, contradictory, or cross-worktree graph evidence falls back visibly to direct repository inspection.
+
 ## [7.1.0] - 2026-07-27
 
 Prose-only release: no ritual added, removed, or renamed, no managed-block contract change, no runtime seam touched. Every change makes an existing instruction steer harder — a number where an adverb stood, a filled example where a schema stood, an obligation where a declaration stood.
@@ -1341,7 +1368,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.1.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.2.0...HEAD
+[7.2.0]: https://github.com/zuevrs/loom/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/zuevrs/loom/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/zuevrs/loom/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/zuevrs/loom/compare/v5.0.0...v6.0.0

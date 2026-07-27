@@ -12,6 +12,8 @@ Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../lo
 
 Perform one safe, idempotent Setup: install/refresh the managed Loom block and create `.loom/version`. For a multi-repository Workspace, also wire `.loom/local/workspace.json` and the owner `.gitignore` entry for `/.loom/local/`. Do not create a Story, PRD, Ticket, domain document, ADR, runtime configuration, committed repository registry, task, lane, or worktree.
 
+After ordinary Setup, offer the optional CodeGraph capability described in [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) as a separate transaction. It is never required for Loom startup or any ritual. It must have its own exact preview and confirmation; it must not be folded into the managed-block transaction.
+
 ## Inputs
 
 - Installed Loom skill tree
@@ -85,6 +87,7 @@ Never write memory or learning settings on the operator's behalf. Those decide w
 - Never overwrite user content outside the managed block.
 - Never create configuration profiles, execution registries, lanes, tasks, or worktrees; never migrate legacy state.
 - Never commit, push, tag, publish, or release.
+- Do not silently run a broad CodeGraph installer or accept vendor skills, hooks, instructions, Git hooks, or `.loom` state. Preview those mutations separately and stop if ownership cannot remain clear.
 
 ## Failure modes
 

@@ -17,6 +17,7 @@ Produce the smallest durable v7 plan under `.loom/<story-id>/` without implement
 - User intent (greenfield, extension, inbound bug/report, or amendment)
 - Local code, tests, types, dependencies, project docs, ADRs, `CONTEXT.md`, and existing `.loom/` state
 - Read-only Orca repository keys/context when available
+- Optional CodeGraph evidence, when configured and fresh; load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) before relying on it
 
 ## Outputs
 
@@ -53,7 +54,7 @@ Brownfield CONTEXT boot is part of Gate 1: draft first, but do not write before 
 
 Run phases in order. Read only the current phase file; interruption never advances a phase or shrinks its discipline.
 
-1. **Grill and classify destination.** On mature brownfield with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan, read [`BROWNFIELD.md`](BROWNFIELD.md). Then read [`GRILL.md`](GRILL.md). Explore local-first; separate facts from decisions; ask exactly one recommended question at a time; maintain pending domain delta inline; apply ADR triple gate. Resolve whether PRD is material. Exit only after shared understanding and explicit materialization go.
+1. **Grill and classify destination.** On mature brownfield with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan, read [`BROWNFIELD.md`](BROWNFIELD.md). Then read [`GRILL.md`](GRILL.md). Explore local-first; separate facts from decisions; ask exactly one recommended question at a time; maintain pending domain delta inline; apply ADR triple gate. Resolve whether PRD is material. Exit only after shared understanding and explicit materialization go. When CodeGraph is available, use it for a bounded architecture/dependency pass before fixing repository scope. Treat its output as evidence with explicit worktree and freshness metadata, never as durable truth.
 2. **Story / optional PRD.** Read [`TO-PRD.md`](TO-PRD.md). Synthesize; do not re-interview. Draft the compact Story and, if material, the full [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md), plus applicable templates. **Gate 1** previews exact complete content/actions. Write only after confirmation and exact readback. User confirms the destination artifact(s) before slicing.
 3. **Tickets.** Only then read [`TO-TICKETS.md`](TO-TICKETS.md). Use vertical/risky slicing and quiz granularity, blockers, and repository scope. **Gate 2** previews every complete Ticket and path. Write through [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md) only after confirmation.
 
