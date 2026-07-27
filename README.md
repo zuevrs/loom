@@ -45,7 +45,7 @@ Loom v7 supports four public carriers:
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
 
-After install or update, restart the host and confirm all seven rituals are discoverable. On OMP, run `omp plugin doctor loom` and verify a disposable done-without-APPROVE state is refused by `session_stop` before relying on enforcement.
+After install or update, restart the host and confirm all seven rituals are discoverable. On OMP, run `omp plugin doctor loom` and, in a disposable project, mark a Ticket `done` without an APPROVE digest: `session_stop` should **report** the missing evidence and force one more turn. That is the whole runtime signal — it does not halt the session, so do not build a workflow that assumes it did.
 
 ## Upgrade
 
