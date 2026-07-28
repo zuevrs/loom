@@ -73,7 +73,7 @@ This exchange begins after the canonical interview has resolved the shared decis
 ## Verification
 
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
-- After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical checker tiers in [`../loom-plan/GRILL.md`](../loom-plan/GRILL.md): mechanical typo/format → objective checks; semantic docs/config/code → fresh Standards checker; behavioral/risk or explicit contract → Spec + Standards; ambiguity escalates.
+- After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical Quick check, Behavior check, and Full review selection in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md); Grill does not redefine verification depth.
 - Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior requires a risk note and full Spec + Standards Verify even for a small fix.
 - Full `loom-verify` (spec + standards checkers) → use when the semantic boundary fires and the user chooses to continue in Grill, or when a risk trigger appears.
 - Small fixes without a Ticket file: the verify digest lives in **chat** (or the explicitly requested review description); no Ticket write-back or status change.
@@ -81,6 +81,23 @@ This exchange begins after the canonical interview has resolved the shared decis
 ## Evidence-backed maintenance discussions
 
 With Tend removed, a user may still ask Grill to investigate drift, debt, stale knowledge, or repeated failure. Treat this as one bounded question, not a hidden maintenance sweep:
+
+When user experience shows Loom itself caused a repeatable or costly problem—lost context, excess ceremony, wrong route, missed check, or failed resume—do not put it in the current project's `CONTEXT.md`, Story, or ADR. Offer a maintainer report at the existing owner, a `zuevrs/loom` GitHub Issue. Show the exact destination and complete content, using exactly these five concise fields:
+
+```markdown
+## Situation
+<what was happening>
+## Observation
+<what Loom did>
+## Expected
+<what should have happened>
+## Cost
+<impact or wasted effort>
+## Reproduction/Context
+<repeatable steps or relevant context>
+```
+
+Capture observation only: no `Solution`, no `Architecture`, no `implementation plan`, and no `code`. Write only after the operator's explicit approval. After capture, stop with `capture_only`; do not auto-start Grill, Plan, or Implement or fix the problem. A one-off cheap preference stays ordinary conversation and creates nothing.
 
 - compare CONTEXT/ADRs/PRODUCT/DESIGN with current code and name exact contradictory sources;
 - inspect `loom:` debt without deleting or rewriting the marker unless a confirmed implementation actually pays it down;

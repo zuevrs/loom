@@ -18,7 +18,7 @@ Sample, don't exhaust — entry points and configs over full reads; a big repo g
 
 Write a **draft** `CONTEXT.md` per [CONTEXT-FORMAT.md](CONTEXT-FORMAT.md) from mined facts only — each non-obvious claim names its source file. Unknowns stay unknown: an empty section is honest, an invented convention poisons every later session.
 
-Present the draft to the user for correction **as a pending Gate 1 delta **before the grill starts**. Do not write it yet; Gate 1 must preview its exact path and complete content with Story/optional PRD before confirmation. The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
+Present the draft to the user for correction **as a pending materialization-bundle delta **before the grill starts**. Do not write it yet; the one materialization gate must preview its exact path and complete content with Story/optional PRD before confirmation. The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
 
 Then proceed to the [`GRILL.md`](GRILL.md) interview, asking only what mining could not answer: intent, priorities, scope edges, trade-offs.
 

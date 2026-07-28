@@ -1,16 +1,16 @@
 # Native host automation guidance
 
-> Relocation notice: Loom v7 does not ship an unattended ritual, mode, runtime contract, scheduler, runner, or recipe catalog. This page is general guidance for every host's native automation; it is not a public Loom route.
+> Relocation notice: Loom does not ship an unattended action, mode, runtime contract, scheduler, runner, or recipe catalog. Use the chosen host's native automation documentation. This page is safety guidance, not a public Loom route.
 
-Use the chosen host's native automation documentation for scheduling, isolation, credentials, timeout, budget, and report delivery. Loom adds no scheduler or runner. The same safety contract applies across OMP, OpenCode, Claude Code, Codex, Orca-backed work, and any other prose-compatible host:
+For every host, keep native automation:
 
-- one run is a single-pass, finite, bounded attempt with an explicit native timeout or budget;
-- the outcome is report-only: no commit, push, hosted review, merge, tag, release, cleanup, publication, or other Git/host authority;
-- return structured result fields for `state`, `summary`, `findings`, `changes`, `checks`, `verify`, `blockers`, `errors`, and `ending`, using an explicit empty value when a field has no entries;
-- silent death is forbidden: timeout, budget exhaustion, missing tools/data, authentication failure, blocker, or crash still produces the structured result with preserved work and the exact stopping reason;
-- the same unchanged error twice stops and reports the blocker; there is no third identical attempt;
-- zero findings means report `no findings` and make no project write;
-- automate only repeatable work with deterministic checks, minimal report credentials, and no work requiring attended judgment such as payments, secrets, destructive migrations, or ambiguous product decisions;
-- when a run changes project content, an independent checker verifies the current bounded change where the host can provide one; lack of independent checking is reported and never converted into self-approval.
+- a **single-pass, finite, bounded attempt** with an explicit native timeout or budget;
+- **report-only**: no commit, push, hosted review, merge, tag, release, cleanup, publication, or other Git/host authority;
+- structured result fields, with explicit values for `state`, `summary`, `findings`, `changes`, `checks`, `verify`, `blockers`, `errors`, and `ending`;
+- honest on failure: silent death is forbidden, so timeout, exhausted budget, missing tools/data, authentication failure, blocker, or crash still returns preserved work and the exact stopping reason;
+- stopped after the same unchanged error twice, with no third identical attempt;
+- read-only when there are zero findings: report `no findings` and make no project write;
+- limited to repeatable work with deterministic checks and minimal report credentials, never attended judgment such as payments, secrets, destructive migrations, or ambiguous product decisions;
+- independently checked when project content changes and the host can provide an independent checker; otherwise report the limitation and never convert it into self-approval.
 
-Finish and Publish remain explicit attended command boundaries. A schedule, completed automation, Verify APPROVE, or Finish never authorizes Git or host mutation. Consult current native host documentation; do not compose removed Loom routes or pretend this guidance is a shipped Loom automation mode.
+Finish and Publish remain explicit attended commands. A schedule, completed run, Verify APPROVE, or Finish never authorizes Git or hosted-service mutation.

@@ -1,97 +1,71 @@
 # Workspaces
 
-A **Workspace** is a dedicated Git **owner/control repository** that holds durable Loom memory for one product or initiative. Service repositories stay independent: they contain product code only, not shared `.loom` state.
+A **Workspace** is a dedicated Git owner/control repository that keeps Loom's durable memory for one product or initiative. Service repositories remain independent and contain product code, not shared `.loom` state.
 
 ## What belongs where
 
-**Owner repository (committed, portable):**
-- `AGENTS.md` managed block
-- `.loom/version`
-- `.loom/<story-id>/STORY.md`, optional `PRD.md`, and `tickets/*.md`
-- `CONTEXT.md` and workspace-level ADRs
-- service catalog prose in `CONTEXT.md` (human-readable boundaries, not machine paths)
+The committed owner repository contains:
 
-**Owner repository (local, ignored):**
-- `.loom/local/workspace.json` — machine-local `repositoryKey → orcaRepositoryId` bindings
+- the managed block in `AGENTS.md` and `.loom/version`;
+- `.loom/<story-id>/STORY.md`, an optional `PRD.md`, and `tickets/*.md`;
+- `CONTEXT.md`, Workspace-level ADRs, and human-readable service boundaries.
 
-Add `/.loom/local/` to the owner `.gitignore` during Workspace Setup. Never commit Orca IDs, worktree paths, task IDs, terminal IDs, or local filesystem paths.
+The owner repository also contains this local, ignored file:
 
-**Service repositories:**
-- product code and service-local docs only
-- no `.loom/`, no shared Story/Tickets, no Workspace bindings
+- `.loom/local/workspace.json` — machine-local `repositoryKey → orcaRepositoryId` bindings; ignored lookup input, not durable meaning, runtime authority, or lifecycle state.
 
-## Repository keys
+Setup adds `/.loom/local/` to the owner's `.gitignore`. Never commit Orca IDs, worktree paths, task IDs, terminal IDs, or local filesystem paths.
 
-Tickets name affected services with stable **logical** `repositoryKeys` such as `catalog` or `notifications`.
+Service repositories contain product code and service-local documentation only: no `.loom/`, shared Story/Tickets, or Workspace bindings.
 
-- logical keys live in Ticket frontmatter and `CONTEXT.md`
-- local bindings map each key to a native Orca repository identity on this machine
-- live Git observation resolves each key to the current Ticket worktree through fresh Orca evidence at execution time
-- display names, basenames, remotes, and paths are evidence only — never identity
+## Repository keys and bindings
 
-Single-repository projects omit `repositoryKeys`; runtime treats the current root as `"."`.
+Tickets identify services with stable logical `repositoryKeys`, such as `catalog` or `notifications`. The same keys appear in `CONTEXT.md`; the local binding maps each key to a native Orca repository on this machine. At execution time, fresh Orca evidence resolves that repository to the current Ticket worktree. Display names, basenames, remotes, and paths are evidence, never identity.
 
-## Setup and rebind
+Single-repository projects omit `repositoryKeys`; Loom treats the current root as `"."`.
 
-Workspace Setup is an explicit branch of `loom-init`:
+Workspace Setup is an explicit Setup branch:
 
-1. confirm the dedicated owner Git root
-2. inventory available Orca repositories read-only
-3. let the user select repositories and assign logical keys explicitly
-4. preview exact bytes for `.loom/local/workspace.json`, `.gitignore` delta, managed block, and `.loom/version`
-5. write only after confirmation
+1. confirm the dedicated owner Git root;
+2. inventory available Orca repositories without changing them;
+3. let the user select repositories and assign logical keys;
+4. preview exact bytes for `.loom/local/workspace.json`, the `.gitignore` change, managed block, and `.loom/version`;
+5. write only after confirmation.
 
-**Rebind** replaces only `.loom/local/workspace.json` after the same explicit preview. Committed Story/Ticket/CONTEXT memory stays byte-for-byte unchanged unless the user separately amends it through Plan.
+**Rebind** replaces only `.loom/local/workspace.json` after the same preview. Committed Story, Ticket, and `CONTEXT.md` content remains byte-for-byte unchanged unless the user separately amends it through Plan.
 
-Malformed binding JSON/schema is a global Workspace stop. A missing or stale individual binding blocks only Tickets that reference that key and their dependents.
+Malformed binding JSON or schema stops the whole Workspace. One missing or stale binding blocks only Tickets that use that key and their dependents.
 
-## Dashboard
+## `/loom` dashboard
 
-`/loom` from the owner root renders a read-only **Workspace dashboard** projection:
+Run `/loom` from the owner root with no further request to render a read-only dashboard:
 
-- active Story and recommended next ritual
-- Ticket statuses, blockers, and repository keys
-- binding health per key (`bound`, `missing`, `stale`)
-- recoverable Orca worktrees/tasks when unambiguous
-- pending human decisions
+- active Story and recommended next action;
+- Ticket status, blockers, and repository keys;
+- binding health per key (`bound`, `missing`, `stale`);
+- recoverable Orca worktrees/tasks when unambiguous;
+- pending human decisions.
 
-The dashboard is computed on demand from committed artifacts, local bindings, and fresh Orca/Git evidence. It is not persisted as a file.
+The dashboard is computed on demand from committed artifacts, local bindings, and fresh Orca/Git evidence. It is never persisted.
 
-## Execution model
+## Execution and concurrent Stories
 
-- one Story may span multiple services
-- default slicing: one Ticket per service, sequential by default
-- each Ticket gets an isolated Orca worktree and fresh maker / Spec / Standards sessions
-- Loom previews execution; Orca owns runtime IDs and lifecycle
-- cross-service behavior that cannot be proven per service gets an explicit integration Ticket
-- Verify and Finish prove the **selected active Ticket** against live Git; historical `done` Tickets keep their canonical Verify evidence without falsely comparing every old boundary to today's checkout
+One Story may span services. Default slicing is one Ticket per service, ordered by blockers. Each Ticket uses an isolated Orca worktree and fresh maker, Spec, and Standards contexts. Cross-service behavior that cannot be verified per service gets an explicit integration Ticket. Verify and Finish prove the selected active Ticket against live Git; historical `done` Tickets retain their recorded evidence instead of being compared with today's checkout.
 
-## Parallel Stories
+Two Stories may be open at once, but they must not write owner memory from the same checkout. Before the second Story's first durable write, offer a separate owner worktree and show its resulting path:
 
-Two Stories may be open at once, and each writes durable memory into the same owner repository. **They must not write it from the same checkout.**
+```bash
+orca worktree create --repo id:<ownerRepoId> --name story-<id>
+```
 
-Before the first durable write of a second concurrent Story, offer that Story its own owner worktree — `orca worktree create --repo id:<ownerRepoId> --name story-<id>` — and state the exact resulting path. The operator confirms; Setup never creates one silently. Different Stories add different `.loom/<story-id>/` directories, so the branches merge without conflict; what does conflict is two sessions rewriting `CONTEXT.md` or claiming the same ADR number from one working tree, and that is what the isolation prevents.
+The operator confirms; Setup never creates it silently. Separate Story directories usually merge cleanly, while concurrent edits to `CONTEXT.md` or the same ADR number do not.
 
-Integration back into the canonical owner branch is a separate serialized step under Finish: one writer at a time, the exact semantic `CONTEXT`/ADR delta previewed and confirmed, and a conflict stops for human reconciliation rather than being auto-merged. Resolve ADR number collisions under the owner's existing convention and preserve both decisions when they are genuinely distinct.
+Integrating a Story back into the canonical owner branch is a separate serialized Finish step: one writer at a time, with the exact semantic `CONTEXT.md`/ADR change previewed and confirmed. A conflict stops for human reconciliation. Resolve ADR number collisions using the owner's convention and preserve both genuinely distinct decisions.
 
-Service repositories follow the ordinary rule: dependency order within a Story, free between Stories, and a stop only for a named shared non-git resource.
+Service repositories follow dependency order within a Story and may proceed independently between Stories, unless a named shared non-Git resource requires serialization.
 
-## Migration from v6
+## Migration and limits
 
-v6 `workspace.json` and runtime registries are not loaded automatically. Guided import is an explicit Setup branch:
+v6 `workspace.json` and runtime registries are not loaded automatically. Guided import is an explicit Setup branch: read the old owner without mutation, preview complete v7 destination bytes and proposed bindings, create the new owner only after confirmation, and leave the v6 source untouched.
 
-- read the old owner source without mutation
-- preview the complete v7 destination bytes and proposed bindings
-- create only the new owner repository after confirmation
-- leave the v6 source untouched
-
-## Non-goals
-
-v7 Workspaces do **not** restore:
-
-- committed `.loom/workspace.json` profiles
-- ancestor-scanning project discovery
-- automatic `git init`
-- owner worktrees created by Setup without asking (they are offered and confirmed, never scaffolded — see below)
-- runtime mutation permits through OMP
-- automatic repo enrollment by display name or path heuristic
+v7 Workspaces do not restore committed `.loom/workspace.json` profiles, ancestor-scanning project discovery, automatic `git init`, unconfirmed owner-worktree creation, runtime mutation permission through OMP, or repository enrollment guessed from display names or paths.

@@ -4,7 +4,7 @@ Load this adapter only in an OMP project session. Loom supplies routing, durable
 
 ## Supported extension surface
 
-The final Loom OMP extension demonstrates only two callbacks:
+The final Loom OMP extension demonstrates only two callbacks. Both callbacks produce diagnostic evidence only and cannot mutate Story or Ticket disposition, canonical Verify evidence, repository state, or native worker state.
 
 1. `before_agent_start` appends only static discipline and the exactly-seven-ritual router before an agent turn. It injects no current project, Story, Ticket, repository, checker, or worker pointers. Treat this as context guidance, not proof that the host will obey it and not mutation authority.
 2. `session_stop` validates current artifact shape and canonical Verify evidence, then returns a **forced continuation** carrying the diagnostics. It **cannot prevent a stop**: OMP maps both `continue: true` and `decision: "block"` to a continuation, capped at 8 per session (`SESSION_STOP_CONTINUATION_CAP`), and it never fires for subagents (`#agentKind === "sub"` returns early) — **checkers are outside this path entirely**. It does **not** re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket. Stale Workspace bindings are reported for affected Tickets only. Chat text and a claimed checker run are not authoritative. Treat this as the loudest reminder available on this host, not a gate.
@@ -19,7 +19,7 @@ Which strategy matters more than it looks. `context-full` summarizes in place, s
 
 Before expected context loss, identify the smallest owning artifacts for every pending confirmed semantic delta. Preview and confirm only writes that their selected interaction already owns. Record no transcript, token counter, model switch, session ID, or compaction event as project truth. An unchanged Story/Ticket is not rewritten merely to announce that context may shrink.
 
-After compaction, handoff, or worker replacement, reconstruct in this order: validate `.loom/version`; read the selected Story, optional PRD, one Ticket and its blocker statuses; inspect fresh repository HEAD/status/diff for the exact repository set; then recover the last unresolved question, confirmation gate, maker assignment, or Verify boundary. If chat memory conflicts with files or repository evidence, current validated artifacts and live repository state win. Missing attribution or multiple plausible Stories gets one recommended human question, not inference.
+After compaction, handoff, or worker replacement, reconstruct from artifacts, Git, and native host evidence in this order: validate `.loom/version`; read the selected Story, optional PRD, one Ticket and its blocker statuses; inspect fresh repository HEAD/status/diff for the exact repository set; then recover the last unresolved question, confirmation gate, maker assignment, or Verify boundary. The current Verify boundary belongs to the selected active Ticket and the exact Git fixed point it judged; host callbacks and worker completion cannot advance it. If chat memory conflicts with files or repository evidence, current validated artifacts and live repository state win. Missing attribution or multiple plausible Stories gets one recommended human question, not inference.
 
 ## Workers and decisions
 

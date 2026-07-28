@@ -159,7 +159,11 @@ When the result is a Spec-backed Loom Ticket, load [`TICKET-RECORD.md`](TICKET-R
 
 ## Capture the lesson, once
 
-A run that surfaced a durable pattern — a convention the checkers keep rediscovering, a trap this codebase sets, a decision the team keeps relitigating — is the only moment the project can learn cheaply. Offer to record it, name the smallest owner, and **write only after the operator approves**: a vocabulary or contract fact goes to `CONTEXT.md`; a hard-to-reverse trade-off goes to an ADR; a recurring procedure goes to a repository-local `skills/<slug>/SKILL.md`. One offer, one line, no ceremony — and no offer at all when the run taught nothing, which is most runs.
+A run that surfaced durable knowledge a future agent would otherwise re-derive is the only moment the project can learn cheaply. Offer the smallest existing owner, never a new task log: a resolved term, durable fact, or stable project boundary goes to `CONTEXT.md`; a hard-to-reverse, surprising decision produced by a real trade-off goes to an ADR; a deliberate implementation shortcut with a known ceiling goes to a `loom:` marker beside the code; a recurring project procedure goes to a repository-local `skills/<slug>/SKILL.md`.
+
+Show the exact owner and content in one compact capture preview, then **write only after the operator approves**. Capture only the confirmed delta and do not start Plan or another implementation automatically. No durable knowledge means no offer and no write; the ordinary result already lives in the diff and Git history.
+
+A capture approved after the verdict is a separate small change. It never inherits the verdict that preceded it: run its proportional objective checks and fresh independent Verify before calling that capture verified. This applies to every owner inside a judged repository, especially a code-adjacent `loom:` marker. If the operator declines the extra change, preserve the completed result and leave the capture unwritten.
 
 Without this the project pays for the same discovery every time: findings live in a verdict, verdicts are replaced by the next one, and nothing accumulates. Do not write durable knowledge unasked; an unapproved lesson is one agent's opinion promoted to project truth.
 

@@ -1,32 +1,28 @@
-# Hosts — v7 capability and operations
+# Hosts and operations
 
-The [README](../README.md) is the quick operator path. This document distinguishes distribution, prose compatibility, runtime injection, enforcement, checker packaging, and orchestration authority. A plugin being installed does not prove enforcement.
+Loom is an engineering partner reached through `/loom`. All four public hosts can load its guidance, but their runtime support differs. Installation alone does not prove that a host can enforce anything.
 
 ## Capability matrix
 
 | Capability | OMP | OpenCode | Claude Code | Codex |
 |---|:-:|:-:|:-:|:-:|
-| Canonical ritual skills | yes | yes | yes | yes |
-| Seven-ritual routing prose | injected | injected | skill prose | skill prose |
-| Canonical checker agents | yes | host-configurable | packaged | where supported |
+| Loom skills | yes | yes | yes | yes |
+| `/loom` routing guidance | injected | injected | skill prose | skill prose |
+| Independent review helpers | yes | host-configurable | packaged | where supported |
 | Active-artifact validation | yes | no | no | no |
-| Verify-before-done diagnostic | `session_stop` (advisory, forced continuation, capped at 8, never for subagents) | no | no | no |
-| Loom lifecycle hook parity | OMP only | no | no | no |
-| Orchestration adapter | Orca | — | — | — |
+| Verify-before-done diagnostic | `session_stop` (advisory, capped at 8, never for subagents) | no | no | no |
+| Loom lifecycle hook support | OMP only | no | no | no |
+| Multi-repository execution | Orca | — | — | — |
 
-“Prose-compatible” means a host can load and follow ritual skills. It does not mean Loom can prevent a stop, prove checker execution, or provide runtime enforcement on that host.
+A host marked “yes” for skills can load and follow Loom's Markdown instructions. It does not mean Loom can prevent a stop, prove that independent review ran, or enforce project state. **No host prevents stop.**
 
 ## OMP
 
-OMP is the only host where Loom has a runtime diagnostic. It is not enforcement: nothing here prevents an action. `omp-extension.mjs`:
+OMP is the only host with a Loom runtime diagnostic. It is advisory: `session_stop` may force another turn carrying findings, but it cannot prevent a stop. It is capped at 8 continuations and never runs for subagents.
 
-- injects compact discipline and exactly-seven router guidance;
-- injects no current project, Story, Ticket, or repository pointer at `before_agent_start`;
-- at `session_stop`, validates active artifact shape through `hooks/artifacts.cjs`, checks canonical Verify evidence on `done` Tickets through `hooks/verify-gate.cjs`, and reports stale Workspace bindings for affected Tickets only;
-- does not re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket;
-- exposes canonical checker agents in `agents/` where OMP discovery supports them.
+The adapter injects compact `/loom` guidance, validates the currently selected artifact, checks Verify evidence when a Ticket is marked `done`, and reports stale Workspace bindings for affected Tickets only. It does not inject a current project or Ticket pointer when a session starts, and it does not compare every historical completed Ticket with today's checkout. Verify and Finish establish freshness for the selected active Ticket. The exact implementation remains in `omp-extension.mjs` and `hooks/`; this page does not redefine it.
 
-The stream rule in `rules/loom-verify-before-done.md` is a soft reminder and liveness clue. It is not an enforcement seam. If the rule appears but the session prompt lacks Loom's injected router/discipline, restart OMP; a plugin updated beneath a running process can leave extension code stale.
+The stream rule in `rules/loom-verify-before-done.md` is a reminder and liveness clue, not enforcement. If the rule appears but `/loom` guidance does not, restart OMP; updating a plugin under a running process can leave old adapter code active.
 
 Exact operator cycle:
 
@@ -36,65 +32,40 @@ omp plugin install git:github.com/zuevrs/loom --force
 omp plugin doctor loom
 ```
 
-In a disposable project, run Setup, confirm the managed write, select a Ticket, and verify that a `Status: done` Ticket without a current APPROVE digest is **reported** at session stop — the session continues carrying the diagnostic, it does not halt. If active identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch. Reporting-not-preventing is the honest ceiling of this host; do not build a workflow that assumes the stop was blocked.
+In a disposable project, run Setup, confirm the managed write, select a Ticket, and mark it `Status: done` without a current APPROVE digest. Session stop should **report** the missing evidence and continue with the diagnostic; it does not halt. If identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch. Do not build a workflow that assumes OMP blocked stopping.
 
 ## OpenCode
-
-`opencode-plugin.mjs` is a thin adapter. It registers the installed `skills/` path and injects compact truthful discipline/router prose. It has no workspace/config discovery, old lifecycle hooks, stop gate, witness, or blocking claim.
 
 ```bash
 opencode plugin -g github:zuevrs/loom
 ```
 
-After update, restart OpenCode and confirm all seven rituals are discoverable. If they are not, inspect the configured plugin path/package ref; do not diagnose absence of a stop gate as failure because v7 does not provide one here.
+`opencode-plugin.mjs` registers the installed skills and injects compact `/loom` guidance. It has no Workspace discovery, lifecycle hooks, stop gate, witness, or blocking claim. After an update, restart OpenCode and confirm all Loom actions are discoverable. If they are not, inspect the configured plugin path or package reference; absence of a stop gate is expected.
 
 ## Claude Code
-
-The Claude plugin manifest packages canonical skills and Claude-dialect Spec/Standards checker agents. It intentionally has no hooks field. Claude follows ritual authority in prose; Loom does not claim a hard stop, active-artifact enforcement, or lifecycle parity.
 
 ```bash
 claude plugin marketplace add zuevrs/loom
 claude plugin install loom@loom
 ```
 
-Update through the plugin manager, restart, and inspect plugin discovery. Ritual commands may be plugin-namespaced according to Claude's current plugin behavior.
+The plugin packages Loom skills and separate Spec and Standards review helpers. It intentionally has no Loom hooks field and claims no hard stop or active-artifact enforcement. Update through the plugin manager, restart, and inspect plugin discovery. Commands may be plugin-namespaced according to Claude's current behavior.
 
 ## Codex
-
-The Codex manifest packages prose-compatible skills and commands according to Codex plugin conventions. It intentionally has no Loom hooks field or hard-enforcement claim. Checker execution inherits available host facilities; preserve separate Spec and Standards roles even when sequential.
 
 ```bash
 codex plugin marketplace add zuevrs/loom
 codex plugin add loom@loom
 ```
 
-Update through Codex's plugin manager and restart. Verify discovery and prose behavior; do not advertise stop-hook parity.
+The plugin packages Loom skills and review prompts where Codex supports them. It has no Loom hooks field or hard-enforcement claim. Update through the plugin manager, restart, and verify discovery. Keep Spec and Standards as separate judgments even when the host runs them sequentially.
 
-## Checker semantics
+## Shared guarantees
 
-Verify consists of independent Spec and Standards judgment. Both receive the same intended current diff/base, acceptance criteria, and check evidence. Neither checker edits code. A current APPROVE record carries both verdicts; its one-line Standards evidence summarizes exact objective commands/results, while detailed durable output may live in Ticket `## Log` or referenced check output. Stale evidence cannot authorize done.
+Verification uses independent Spec and Standards judgment over the same current diff, base, acceptance criteria, and check evidence. Reviewers report; they do not edit or approve their own work. Both verdicts must be current before `done`. Host-specific model choices are delivery hints, and user configuration wins.
 
-Host-specific model tiers are delivery hints, not product semantics. OMP and Claude checker metadata may select their host's cheap/fast role. User host configuration wins. OpenCode/Codex may inherit the session model. Never convert lack of a dedicated subagent API into maker self-approval.
+**Orca runs execution; Loom keeps meaning.** Orca owns repositories, worktrees, cards, tasks, dispatches, terminals, and their liveness. Loom keeps the Story, PRD, Tickets, and current Verify record. The user creates the coordinator worktree/card; work sharing respects blockers and shared resources; worker completion never marks the Story or Ticket done. Finish and Publish stay explicit attended boundaries. See [`orca.md`](orca.md).
 
-## Orca: sole orchestration adapter
+Loom ships no unattended route, scheduler, runner, or recipes. Use the host's native automation and keep it finite, budgeted, minimally credentialed, and report-only. See [`unattended.md`](unattended.md).
 
-Orca is the only Loom orchestration adapter in v7. Loom does not route packs through host goals, recipes, unattended lanes, custom schedulers, or a second worktree system. Orca owns repository/worktree/card/task/dispatch/terminal identity and liveness; Loom owns PRDs, Tickets, ritual meaning, and Verify records.
-
-The user creates the coordinator worktree/card. Plan records repository scope without creating lanes. Implement may request exact current Orca identities as work becomes runnable. Same-repository writers serialize; explicitly independent repositories may run in parallel. Worker completion ends a bounded assignment, not the story or its terminal. The coordinator independently verifies the intended diff.
-
-Finish and Publish remain manual command boundaries. They do not become automatic because Orca can operate Git or hosted reviews. See [`orca.md`](orca.md) for authority and partial-success handling.
-
-## Native automation
-
-Loom v7 ships no unattended route or recipes. Use each host's native automation documentation and keep runs budgeted, deterministic, minimally credentialed, and report-only. [`unattended.md`](unattended.md) is retained only as a relocation/safety notice.
-
-## Template inventory
-
-| Artifact | Canonical template |
-|---|---|
-| PRD | `skills/loom-plan/PRD-TEMPLATE.md` |
-| Ticket | `skills/loom-plan/TICKET-TEMPLATE.md` |
-| Product context | `skills/loom-plan/PRODUCT-TEMPLATE.md` |
-| UI design context | `skills/loom-plan/DESIGN-TEMPLATE.md` |
-| Domain context | `skills/loom-plan/CONTEXT-FORMAT.md` |
-| Architecture decision | `skills/loom-plan/ADR-FORMAT.md` |
+Canonical artifact templates remain beside Plan in `skills/loom-plan/` (`PRD-TEMPLATE.md`, `TICKET-TEMPLATE.md`, `PRODUCT-TEMPLATE.md`, `DESIGN-TEMPLATE.md`, `CONTEXT-FORMAT.md`, and `ADR-FORMAT.md`).

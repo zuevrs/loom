@@ -72,7 +72,20 @@ Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` ret
 
 ## Direct small-fix route
 
-Without a named Ticket, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a PRD or Ticket. Independent Verify remains mandatory — a direct fix skips ceremony, never the checker. Its depth is the tier from `CONSTITUTION.md`, and a fix with no Ticket is usually tier 1 or 2; the moment it touches a public contract, a data path, authorization, a migration, or a new dependency it is tier 3 and stops being a direct small fix at all. Work directly in the target checkout unless it is dirty, on a non-default branch, occupied by other work, or the user explicitly requests isolation. Only those conflicts authorize requesting Orca isolation; do not create isolation merely because Orca is available.
+Without a named Ticket, treat the user's concrete build/fix/add request as the complete local contract. Make the smallest verified change in this session; do not create a Story, PRD, or Ticket.
+
+Before editing, give one compact alignment block in the user's language:
+
+```text
+Objective: <the result>
+Out of scope: <the nearest plausible change deliberately excluded>
+Check: <the smallest fail-capable proof>
+Verification: <Quick check | Behavior check | Full review> — <checks and independent feedback>
+```
+
+Derive the block from evidence. Ask only when a different answer would change the result, its boundary, or its proof; a clear direct fix needs no confirmation ceremony for the block. Independent Verify remains mandatory — a direct fix skips planning artifacts, never the checker. Select its user-facing verification name and internal tier from `CONSTITUTION.md`: Quick check for tier 1, Behavior check for tier 2, Full review for tier 3. A fix with no Ticket is usually tier 1 or 2; the moment it touches a public contract, a data path, authorization, a migration, or a new dependency it is tier 3 and stops being a direct small fix at all. Work directly in the target checkout unless it is dirty, on a non-default branch, occupied by other work, or the user explicitly requests isolation. Only those conflicts authorize requesting Orca isolation; do not create isolation merely because Orca is available.
+
+After independent feedback, apply `loom-verify`'s canonical **Capture the lesson, once** contract. Implement adds no second capture classifier or write path. If durable knowledge appeared, offer that one bounded follow-up; if none appeared, write nothing. A confirmed capture after the verdict is a separate small change and never inherits the verdict that preceded it.
 
 ## Execution consent
 

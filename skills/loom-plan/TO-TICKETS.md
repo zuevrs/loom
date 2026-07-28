@@ -1,6 +1,6 @@
 # Phase 3 — Tickets (vertical slices)
 
-Entry condition: the user confirmed the Story and any material PRD at Gate 1. If not, stop and return to [`TO-PRD.md`](TO-PRD.md).
+Entry condition: the Story and optional material PRD drafts are complete and still pending. If destination semantics are unresolved, stop and return to [`TO-PRD.md`](TO-PRD.md) or Grill; no planning artifact has been written yet.
 
 ## Repository scope
 
@@ -18,13 +18,13 @@ Break the destination into **tracer-bullet Tickets**. Each is a thin, complete, 
 
 - Every planned implementation has at least one Ticket.
 - Each Ticket delivers a narrow but complete path through every necessary integration layer and is demoable/verifiable alone. Horizontal "database first, UI later" slicing is not a tracer bullet.
-- For each Ticket name the user stories, external contracts, or Story success clauses it covers. Every material clause must map to at least one Ticket; unexplained overlap or uncovered acceptance stops Gate 2.
+- For each Ticket name the user stories, external contracts, or Story success clauses it covers. Every material clause must map to at least one Ticket; unexplained overlap or uncovered acceptance stops the materialization gate.
 - Put necessary prefactoring first only when it is independently verifiable and truly required: make the change easy, then make the easy change. Do not disguise speculative cleanup as Ticket 1.
 - The first real Ticket crosses the riskiest seam. Learn whether the architecture works in Ticket 1, not Ticket 5.
 - `blockedBy` is intra-Story only and contains Ticket IDs. Blockers get lower numbers. Cross-Story ordering is discussed explicitly, not encoded as a hidden edge.
 - Do not include likely files, estimates, or implementation checklists. The implementer traces the real flow against Story/PRD.
 
-## Gate 2 quiz
+## Materialization quiz
 
 Present the complete proposed breakdown as a numbered list. For each Ticket show title, `blockedBy`, user stories/contracts/Story success covered, end-to-end behavior and acceptance summary, verification, Human policy, and repository scope. Ask exactly one recommended question at a time until these are settled:
 
@@ -33,11 +33,11 @@ Present the complete proposed breakdown as a numbered list. For each Ticket show
 - Should any Tickets merge or split?
 - Does each repository scope match ownership and atomicity?
 
-Then preview every exact path and complete Ticket content. Changed granularity, blocker, content, scope, key, or path requires renewed confirmation. Write no Ticket before approval.
+Run the quiz before the exact bundle preview. Then preview every exact path and complete byte of the Story, optional PRD, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and every Ticket. Changed granularity, blocker, content, scope, key, verification, or path requires a fresh complete preview and renewed confirmation. Write nothing before approval.
 
-## Write
+## Write the confirmed bundle
 
-Each approved slice becomes `.loom/<story-id>/tickets/<NN>-<slug>.md` via [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md).
+After one explicit confirmation, write the complete approved bundle as one exact transaction. Each approved slice becomes `.loom/<story-id>/tickets/<NN>-<slug>.md` via [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md).
 
 - Frontmatter: `id`, `storyId`, `status`, `blockedBy`, optional `repositoryKeys`.
 - Status is one of `needs-info`, `ready-for-agent`, `ready-for-human`, `done`; Plan never creates `done`.
@@ -85,16 +85,16 @@ Recommend host-native skills when scope touches security, performance, or CI; do
 - Every Ticket is vertical, independently verifiable, and has complete required fields/sections
 - Blocker graph is consistent and acyclic; repository scope is valid
 - At least one Ticket exists; none is `done`
-- User approved Gate 2 after seeing exact complete content and paths
-- Gate 1 artifacts and Ticket vocabulary agree
+- User approved the one materialization gate after seeing exact complete content and paths for the whole bundle
+- Story/PRD drafts and Ticket vocabulary agree
 - Any amendment changed only approved affected Tickets; unaffected Tickets remain byte-for-byte identical
 
 ## Anti-rationalization
 
 | Excuse | Reality |
 |---|---|
-| "Slices are obvious, skip the quiz" | Granularity, blockers, and repository scope are Gate 2. |
-| "Write Tickets first, quiz after" | No Ticket write before exact preview and confirmation. |
+| "Slices are obvious, skip the quiz" | Granularity, blockers, and repository scope must settle before the one bundle preview. |
+| "Write Tickets first, quiz after" | No planning write before the quiz, exact whole-bundle preview, and confirmation. |
 | "One big Ticket is simpler" | Use thin end-to-end tracer bullets unless one Ticket is genuinely the whole small plan. |
 | "Database Ticket now, UI Ticket later" | Horizontal layers postpone integration risk; each real Ticket crosses the needed path. |
 | "Rewrite all Tickets so formatting matches" | Amendment isolation is load-bearing; unaffected Tickets stay byte-for-byte unchanged. |

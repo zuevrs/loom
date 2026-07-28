@@ -8,9 +8,9 @@ Stay in the interview phase until its decision branches are resolved; leave `TO-
 
 ## Inbound triage (when applicable)
 
-Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-paragraph brief before the interview. Inbound includes unresolved `needs-info` Tickets and scope observations left by Implement. An answered question may return a Ticket to `ready-for-agent` only through a confirmed amendment; an observation without a Ticket remains a brief until Gate 2.
+Classify inbound work first: bug, chore, feature, refactor, docs. Write a one-paragraph brief before the interview. Inbound includes unresolved `needs-info` Tickets and scope observations left by Implement. An answered question may return a Ticket to `ready-for-agent` only through a confirmed amendment; an observation without a Ticket remains a brief until the materialization gate.
 
-Ticket state is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`. Inbound reports without a durable Ticket remain conversational facts until Gate 2; unresolved user-owned decisions become `needs-info`. One category (bug/chore/feature/refactor/docs) may be recorded in prose, not as another status.
+Ticket state is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`. Inbound reports without a durable Ticket remain conversational facts until the materialization gate; unresolved user-owned decisions become `needs-info`. One category (bug/chore/feature/refactor/docs) may be recorded in prose, not as another status.
 
 ## Check for precedent first
 
@@ -36,7 +36,7 @@ Apply this contract proportionally: Plan and Grill research decisions; Implement
 
 ## Interview rules
 
-Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Continue beyond a merely coherent PRD; end the interview when the user signals shared understanding and gives an explicit go.
+Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Continue beyond a merely coherent PRD; end the interview when the mandatory readback has exposed shared understanding, corrections are integrated, and no user-owned decision remains open.
 
 - **One `ask` call = exactly ONE question.** Put one question object in each call and keep prose to that question. Each answer branches the next question; a single-question cadence preserves that context.
 - **Resolve decision dependencies in order.** When one open decision depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the interview will have to re-litigate.
@@ -52,7 +52,7 @@ Interview the user **relentlessly** about every aspect of the plan until **every
 
 `Every branch resolved` is a judgement only you can see, and it justifies the fourth question exactly as well as the twenty-fifth. Replace it with a test that has an observable answer, run before each new question:
 
-**Can you predict the user's answers to the next three questions you would ask?** Predict them silently. If all three predictions feel forced, the branches are open — keep going. If you can state all three answers and would bet the diff on them, the interview is done: read the predictions back at the gate as assumptions instead of asking them.
+**Can you predict the user's answers to the next three questions you would ask?** Predict them silently. If all three predictions feel forced, the branches are open — keep going. If you can state all three answers and would bet the diff on them, the interview is done: read the predictions back at the correction checkpoint as assumptions instead of asking them.
 
 That test is a ceiling, not a licence to stop early. Below it sits a floor: **an interview that has not produced a resolved scope edge, a named non-goal, and one confirmed trade-off is not finished**, however confident the predictions feel. Three questions with three agreeable answers is a briefing, not a grill.
 
@@ -84,14 +84,14 @@ One exchange showing the moves — one question, recommendation first, inline CO
 
 Ten flat multiple-choice questions in a row with no evolving domain delta is the anti-pattern this file exists to prevent.
 
-## Small-fix checker tiers
+## Verification depth
 
-This is the canonical owner of proportional review: a mechanical typo or formatting-only change needs objective checks; semantic docs/config/code needs a fresh Standards checker; behavioral/risk-bearing work or an explicit contract needs Spec + Standards. Ambiguity escalates to the higher tier.
+Use the canonical Quick check, Behavior check, and Full review selection in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md). Grill identifies changed boundaries and consequences; it does not redefine the tiers.
 
 
-## Read the grill back before the gate
+## Readback correction checkpoint
 
-The exit gate asks the user to confirm shared understanding — of an object they cannot see. They confirm their picture, you confirm yours, and the two diverge silently until Verify. Before asking for the go, print what you understood, in the user's language, in this shape:
+Shared understanding cannot be inferred from an object the user cannot see: their picture and yours may diverge silently until Verify. Before leaving the interview, print what you understood, in the user's language, in this shape. This is a mandatory attention and correction checkpoint, not a request for permission to draft:
 
 > **Objective:** the CSV export mirrors the filtered ledger view, so a shared export matches the screen it came from.
 > **In scope:** export button on the ledger view; filter state passed through to the query; UTF-8 with BOM for Excel.
@@ -108,35 +108,35 @@ Keep it to that block — six lines, no headings, no recap of the reasoning. The
 
 ## When the grill stops short of an artifact
 
-An interview can resolve six branches and still produce nothing: the ADR triple (hard to reverse **+** surprising **+** real trade-off) fails, no term changed, and the user does not give the go. Every fact then lives in the transcript and dies with the session — and the next session re-derives it, which is the exact cost the precedent scan at the top of this file exists to avoid.
+An interview can resolve six branches and still produce no standalone Grill artifact: the ADR triple (hard to reverse **+** surprising **+** real trade-off) fails, no term changed, and the user approves no durable action. Every fact then lives in the transcript and dies with the session — and the next session re-derives it, which is the exact cost the precedent scan at the top of this file exists to avoid. Inside Plan, this does not stop pending Story/optional PRD/Ticket drafting; those drafts write nothing and grant no authority.
 
-So when the interview ends without materializing, offer the cheapest durable home for what it produced, and write only what the user approves:
+When this canon runs inside **Plan**, every such capture stays pending and joins Plan's one materialization bundle; Plan writes no `CONTEXT.md`, Story decision, ADR, or code-adjacent `loom:` marker from inside the interview. A code marker is implementation and routes separately after planning.
+
+When this canon runs inside standalone **Grill** and the interview ends without planning materialization, offer the cheapest durable home for what it produced, and write only what the user approves through Grill's own action gate:
 
 - A resolved term or a domain fact → `CONTEXT.md`, one line.
 - A decision that failed the ADR triple but would surprise the next reader → the `## Decisions` section of the active Story, or a new `## Decisions` line on the Story the discussion belongs to.
-- A ceiling that now constrains code → a `loom:` marker next to the code, with its upgrade trigger.
+- A ceiling that now constrains code → a `loom:` marker next to the code, with its upgrade trigger and Grill's verified code-materialization path.
 - Nothing above fits → say plainly that the grill produced no durable artifact and name the one fact worth remembering, so the user can decide. Do not invent a file to hold it.
 
 "We talked and decided nothing worth writing" is a legitimate outcome and should be said out loud. Silently ending is not — that is how a decision becomes folklore.
 
-## Exit gate
+## Exit criteria
 
 Exit only when ALL THREE hold (and the Story destination plus PRD-materiality decision are explicit):
 
 1. The stop test passes and its floor is met — a resolved scope edge, a named non-goal, one confirmed trade-off.
-2. You have printed the readback block above, `Out of scope` included, and the user has seen it.
-3. The user gives an explicit go ("write the PRD", "materialize", or equivalent) — given *after* the readback, not before it.
+2. You have printed the full readback block above, `Objective`, `In scope`, `Out of scope`, `Decided`, `Assumed`, and `Open` included, and the user has seen it; integrate corrections, while assumptions left uncorrected retain the existing confirmed semantics.
+3. No `Open` item owned by the user remains unresolved.
 
-The order is load-bearing: a go given before the readback authorizes the user's picture, not yours. If the go arrives first, print the block anyway and ask them to confirm it stands.
-
-Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Slicing into tickets happens in Phase 3, not here.
+Once these criteria hold, read [`TO-PRD.md`](TO-PRD.md) and move automatically to Phase 2 without asking for drafting permission. The pending drafts write nothing and grant no authority. Slicing into tickets happens in Phase 3, not here.
 
 ## Hard stops
 
 - Fuzzy objective — keep grilling; no PRD, no tickets.
 - Unresolved ADR conflict in project warp — surface it; ask one resolving question.
 - Keep every `ask` call to exactly one question.
-- **Enthusiasm is not a go.** "Interesting", "good idea", "love it" resolve a branch — they do not authorize materialization. No PRD, no tickets, no code until the explicit go at the exit gate.
+- **Enthusiasm is not resolution.** "Interesting", "good idea", and "love it" do not by themselves settle a user-owned decision. Keep grilling until shared understanding is resolved; then pending drafting proceeds automatically, while writes still wait for Plan's final exact complete bundle confirmation.
 
 ## Failure modes
 
@@ -156,15 +156,15 @@ Then — and only then — read [`TO-PRD.md`](TO-PRD.md) and move to Phase 2. Sl
 | "The ask tool accepts an array — one call, many questions" | That is batching. One question object per call. |
 | "Enough for a coherent PRD — stop asking" | The bar is every decision-tree branch resolved, not minimum-viable PRD. Keep grilling. |
 | "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it, or record it as an assumption to confirm. |
-| "Just ask the questions, skip writing CONTEXT/ADR" | The inline docs ARE the discipline — challenge, sharpen, write `CONTEXT.md` inline, offer ADRs. A flat multiple-choice quiz is not a grill. |
-| "I'll write all the CONTEXT terms at the gate" | Batching at the gate is the deviation this rule exists for. Term resolved → written before the next question. |
-| "The brownfield boot already wrote CONTEXT.md — I'll true it up at the gate" | The draft is the floor, not the final. The inline cadence is unchanged by a pre-existing file. |
+| "Just ask the questions, skip maintaining the CONTEXT/ADR delta" | The inline delta IS the discipline — challenge, sharpen, update the pending `CONTEXT.md` draft, offer ADRs. A flat multiple-choice quiz is not a grill. Plan keeps that delta pending for its bundle; standalone Grill uses its action gate. |
+| "I'll reconstruct all the CONTEXT terms at the gate" | Reconstruction at the gate is the deviation this rule exists for. Term resolved → pending draft updated before the next question; mutation still waits for the owning gate. |
+| "The brownfield boot draft is enough — I'll true it up at the gate" | The draft is the floor, not the final. Keep the pending delta current after every resolved term; mutation still waits for the owning gate. |
 | "User seems impatient / said 'continue', wrap up" | Resume the grill where it stopped. One more question now saves a bad PRD later. |
 | "I already know what they want" | You know what YOU would build — ask what THEY need |
 | "User said ok, that's their decision" | An accepted recommendation is not a stated preference. Name the proposal's origin in the PRD. |
 | "They've been in the whole conversation — a readback is redundant" | They were in *their* conversation. The readback is a diff against their memory; redundant is the point. |
 | "Nothing is out of scope here, it's a small change" | Then you never pushed a boundary. `Out of scope` is never empty — name what a reasonable person would have expected and you are leaving out. |
-| "They said go, I'll skip the block" | A go before the readback authorizes their picture, not yours. Print it and ask if it stands. |
+| "They seem aligned, so I'll skip the block" | Alignment is untested until the mandatory readback is seen. Print it, integrate corrections, and resolve every user-owned `Open` item before drafting. |
 | "I can predict every answer — done after two questions" | The stop test is a ceiling with a floor under it: scope edge, non-goal, confirmed trade-off. Three agreeable answers is a briefing. |
 | "They keep agreeing, so we're aligned" | "Makes sense" returns your proposal to you with their name on it. An answer counts when it adds a fact you did not have. |
 | "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers. Say so and change the object. |

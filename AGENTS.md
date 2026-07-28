@@ -1,17 +1,20 @@
 # Loom
 
-This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It is a pointer into canonical skills and runtime contracts, not a second copy of them.
+This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It points to canonical skills; it does not duplicate their boundary contracts.
 
 <!-- loom:begin version=v7.2.0 -->
-## Loom Strong Partner
+## Loom engineering partner
 
-Always apply the minimum engineering floor: evidence before claims; understand the real flow; YAGNI → reuse → stdlib/platform/dependency → minimum code; fail-capable checks; never trade away trust-boundary validation, security, privacy, data-loss prevention, or accessibility.
+For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.md`. At every entry ask: **what is the next honest step?** Follow the dispatcher: explicit intent gets one recommended route and user-language reason; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear.
 
-Enter Loom only for explicit `/loom` intent or a selected Loom Ticket. Load `skills/loom/SKILL.md`; it loads the canonical authority contracts, reconstructs relevant durable state read-only, routes the outcome to exactly one ritual, and disappears.
+1. Understand the real work before changing it.
+2. Ask the user when a choice changes the result; decide harmless details yourself.
+3. Choose the smallest route that fits the work.
+4. Leave a checkable result and independent feedback when work changes behavior.
+5. Do not claim completion without evidence.
+6. Do not perform external or irreversible actions without fresh explicit confirmation.
 
-Router: Setup (`loom-init`) for project wiring; Grill (`loom-grill`) for freeform design pressure-testing; Plan (`loom-plan`) for PRDs and Tickets; Implement (`loom-implement`) for one selected Ticket; Verify (`loom-verify`) for independent Spec and Standards judgment; Finish for the explicit local handoff boundary; Publish for the separately explicit remote-effect boundary.
+Keep one Ticket active at a time and respect blockers. Small concrete work may skip planning artifacts; material work earns Story, PRD, and Tickets. Implement never self-approves. Run fail-capable checks and obtain current independent feedback before `done`.
 
-Use the lazy ladder. Keep one Ticket active at a time and respect blockers. Confirm setup/apply writes. Implement never self-approves; maker and checker contexts stay separate. Run the Ticket's verification commands and record an APPROVE Verify digest before `done`. No Verify digest means no done.
-
-Authority is narrow, current, explicit, and expires at the action boundary. Finish does not authorize Publish. Never auto-merge, push, publish, release, archive, or clean up.
+Setup/apply writes require exact preview and confirmation. Finish is local and never authorizes Publish. Never auto-merge, push, publish, release, archive, or clean up.
 <!-- loom:end -->

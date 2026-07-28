@@ -37,7 +37,7 @@ A direct concrete small fix may remain Story-free and route straight to Implemen
 
 ## Creation and exact-write discipline
 
-Read-only questions and direct small fixes create nothing. Plan creates a Story only after Gate 1 previews its exact path and complete bytes with any material PRD/domain delta and receives bounded confirmation. Write atomically, read back exactly, and validate frontmatter, path identity, headings, and required content before relying on it. Changed path, content, scope, repository key, action, or base requires renewed confirmation. If a newly created artifact fails validation, remove only that invalid new artifact and report the failure; never "repair" an older-major artifact in place.
+Read-only questions and direct small fixes create nothing. Plan creates a Story only after its one materialization gate previews the exact paths and complete bytes for the coherent Story, optional material PRD, every Ticket, and pending domain/product/design delta, then receives bounded confirmation. Apply the confirmed bundle as one exact write transaction, read back exactly, and validate frontmatter, path identity, headings, cross-artifact references, and required content before relying on it. Changed path, content, scope, repository key, action, or base requires renewed confirmation. If a newly created artifact fails validation, remove only that invalid new artifact and report the failure; never "repair" an older-major artifact in place.
 
 ## Semantic checkpoints and recovery
 
@@ -49,7 +49,20 @@ Before interruption or context compaction, first classify whether any confirmed 
 
 ## Adaptive continuation
 
-A unique relevant active Story continues by default. Multiple active Stories without coherent Orca context require exactly one recommended question. Unrelated explicit intent follows ordinary routing. A done Story is history; a new destination becomes a linked new Story rather than reopening it.
+A unique relevant active Story continues by default. Multiple active Stories without coherent Orca context require exactly one recommended question. Unrelated explicit intent follows ordinary routing. A done Story is immutable historical result: never reopen, amend, or add Tickets to it. Follow-up work becomes a linked continuation in a new Story while the original Story, PRD, Tickets, and Verify evidence remain byte-for-byte unchanged.
+
+A linked continuation uses the ordinary Story schema and Plan materialization gate; add no frontmatter or registry. `## Notes` is optional and freeform for an ordinary Story, except that first-line `Continues:` is reserved as the linked-continuation discriminator. A linked continuation uses that discriminator, and its `## Notes` consists of exactly four nonempty ordered lines, with no additional lines:
+
+- `Continues:` canonical sibling path `../<original-story-id>/STORY.md`
+- `Inherits:` only the original context and decisions that still apply
+- `Changes:` a short pointer to the new or changed boundary owned by this Story's Intent/Success/Decisions and optional PRD
+- `Reason:` why this is new work rather than a rewrite of the accepted result
+
+`Continues` is POSIX syntax relative to the new Story directory and accepts exactly one parent step, a valid Story ID, and `STORY.md`; it cannot name the current Story. Resolve it under the same real non-symlink `.loom` directory and require an existing regular non-symlink Story file whose parsed status is `done`. Absolute paths, backslashes, extra traversal, symlink components, missing targets, non-Story files, and active/blocked targets are invalid.
+
+The linked continuation has its own new `## Intent` and new `## Success`. It does not copy the original PRD, Tickets, Log, Verify evidence, runtime receipts, or full history. Create only the earned PRD and independently verifiable Tickets for the delta. Intent, Success, Decisions, and optional PRD remain the semantic owners; the four Notes lines summarize linkage and delta only. If Notes contradict an owner, stop and correct the bundle before confirmation. The original link is context, never authority or inherited acceptance.
+
+Route follow-up by the state and event, not by conversational proximity. In an active Story, a blocking user-owned question updates the affected Ticket to `needs-info`; an accepted-result defect returns only the affected Ticket to `ready-for-agent`, invalidates only its stale Verify evidence, and requires fresh independent Verify; new scope uses the active Story amendment flow. For a done Story, a question alone writes nothing, while any requested correction, extension, or changed boundary uses a linked continuation. Do not reopen the done Story even when the follow-up looks small.
 
 First separate facts, recommendations, and decisions. A durable decision is the user's explicit choice of intent, success, requirement, acceptance condition, architecture, constraint, repository scope, or verification approach that a future session must know. A question, an agent recommendation, enthusiasm, or a recommendation awaiting choice writes nothing.
 
@@ -73,7 +86,8 @@ Ticket completion may update that Ticket to `done` after independent Verify and 
 | Required content is empty or status unknown | Stop read-only and report the exact invalid boundary |
 | Different `.loom/version` major | Read-only hard stop with upgrade guidance; no migration |
 | Multiple active Stories lack coherent Orca context | Ask one question and recommend the strongest candidate |
-| Follow-up changes a material boundary | Route to Plan amendment; preview exact smallest-owner deltas and stale only affected Verify evidence |
+| Follow-up affects active work | Blocking question → affected Ticket `needs-info`; accepted-result defect → affected Ticket `ready-for-agent` with stale Verify invalidated; new scope → amendment. |
+| Follow-up requests work after Story `done` | Preserve the original byte-for-byte and Plan a linked continuation with its own intent, success, delta, PRD threshold, and Tickets. |
 | Recommendation was not explicitly chosen | Persist nothing; ask the unresolved question when it is load-bearing |
 | Resume evidence conflicts across artifacts and Git/Orca | Stop and name exact sources/fields; never repair by inference |
 | Proposed checkpoint repeats current bytes | `NO_DELTA`; write nothing |
@@ -87,6 +101,6 @@ Ticket completion may update that Ticket to `done` after independent Verify and 
 | "This is small, so Plan can skip Tickets" | Direct Implement may skip ceremony; invoked Plan produces at least one Ticket. |
 | "Rewrite the old artifact into v7 while here" | v7 is current-only. Stop read-only; migration is not compatibility. |
 | "The user liked the recommendation" | Enthusiasm is not a confirmed durable decision. |
-| "Only one acceptance line changed; prior Verify is close enough" | Invalidate only affected evidence and re-Verify that boundary. |
+| "Only one acceptance line changed; prior Verify is close enough" | In an active Story, invalidate only affected evidence and re-Verify that boundary. After `done`, preserve history and create a linked continuation. |
 | "Compaction is coming; rewrite the Story just in case" | Context pressure is not a semantic delta or write authority. |
 | "The worker made the decision while implementing" | Worker evidence informs the user/coordinator; it does not own durable product truth. |

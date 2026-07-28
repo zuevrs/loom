@@ -5,11 +5,11 @@ disable-model-invocation: true
 slash: true
 ---
 
-**Choose one outcome, load one ritual, disappear.**
+**Choose the next honest step, explain it, load one action, disappear.**
 
 ## Goal
 
-Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, Verify, Finish, Publish** without duplicating or paraphrasing the target.
+Act as the engineering partner at Loom entry: determine the next honest step, say the selected route and reason in the user's language, then hand off exactly once to **Setup, Grill, Plan, Implement, Verify, Finish, or Publish** without paraphrasing the target contract.
 
 ## Inputs
 
@@ -19,7 +19,7 @@ Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, 
 
 ## Outputs
 
-- One selected interaction and one loaded skill, or exactly one routing question
+- One selected interaction, one short route reason in the user's language, and one loaded skill—or exactly one routing question
 - No dispatcher-owned project artifact, mutation, or hidden lifecycle
 
 ## Process
@@ -61,7 +61,7 @@ Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, 
    > Two active Stories touch `api`. I'd take **csv-export** — its T3 matches the uncommitted diff in `src/export.ts`. The other, `auth-refresh`, has no dirty state. Go with csv-export?
 
    A numbered menu hands back the ranking work you already did; you read the evidence, so you rank.
-7. **Execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
+7. State one line before transfer: `Next honest step: <action> — <reason in the user's language>.` Then **execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
 8. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
 
 ## Hard stops
@@ -84,5 +84,5 @@ Route an explicit Loom entry to exactly one of **Setup, Grill, Plan, Implement, 
 
 ## Done when
 
-- Exactly one of the seven interactions is selected and loaded, or one routing question is waiting
+- Exactly one of the seven interactions is selected with a short user-language reason and loaded, or one routing question is waiting
 - The dispatcher made no project/external mutation and performs no later orchestration

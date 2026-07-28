@@ -138,21 +138,21 @@ test("the grill has an observable stop test and a floor under it",()=>{
     "the agreeable-answer detector disappeared; a returned proposal counts as an answer again");
 });
 
-test("the grill is read back before the gate, with a non-optional Out of scope",()=>{
-  // The gate asks the operator to confirm an object they cannot see. Half of misalignment is
-  // silent disagreement about what is NOT being built, so that line is the load-bearing one.
+test("the grill readback is a correction checkpoint with non-optional Out of scope",()=>{
+  // The checkpoint shows the operator an object they otherwise cannot see. Half of misalignment
+  // is silent disagreement about what is NOT being built, so that line is the load-bearing one.
   const grill=read("skills/loom-plan/GRILL.md");
-  assert.match(grill,/read the grill back before the gate/,"the readback section disappeared");
+  assert.match(grill,/## readback correction checkpoint/,"the readback section disappeared");
   assert.match(grill,/`out of scope` is not optional and is never empty/,
     "Out of scope became optional again — the most common silent divergence");
   assert.match(grill,/assumed, correct me/,
     "the readback lost the slot the stop-test predictions land in");
   assert.match(grill,/an assumption read back and left uncorrected is confirmed/,
     "the readback stopped saying what silence means");
-  // The gate must require the block, or the block is optional reading.
-  assert.match(grill,/exit only when (?:all three|BOTH)/i,"the exit gate lost its condition count");
-  assert.ok(/readback/.test(grill.split("## exit gate")[1]??""),
-    "the exit gate stopped requiring the readback block");
+  // Exit criteria must require the block, or the block is optional reading.
+  assert.match(grill,/exit only when (?:all three|BOTH)/i,"the exit criteria lost their condition count");
+  assert.ok(/readback/.test(grill.split("## exit criteria")[1]??""),
+    "the exit criteria stopped requiring the readback block");
 });
 
 test("a grill that materializes nothing still offers a durable home",()=>{
