@@ -4,7 +4,7 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-- No changes yet.
+- **OMP diagnostic hotfix.** `session_stop` now reports valid findings and malformed or uninitialized `.loom` state as warnings without forcing another model turn.
 
 ## [7.3.0] - 2026-07-28
 

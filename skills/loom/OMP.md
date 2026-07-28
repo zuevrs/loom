@@ -7,7 +7,7 @@ Load this adapter only in an OMP project session. Loom supplies routing, durable
 The final Loom OMP extension demonstrates only two callbacks. Both callbacks produce diagnostic evidence only and cannot mutate Story or Ticket disposition, canonical Verify evidence, repository state, or native worker state.
 
 1. `before_agent_start` appends only static discipline and the exactly-seven-ritual router before an agent turn. It injects no current project, Story, Ticket, repository, checker, or worker pointers. Treat this as context guidance, not proof that the host will obey it and not mutation authority.
-2. `session_stop` validates current artifact shape and canonical Verify evidence, then returns a **forced continuation** carrying the diagnostics. It **cannot prevent a stop**: OMP maps both `continue: true` and `decision: "block"` to a continuation, capped at 8 per session (`SESSION_STOP_CONTINUATION_CAP`), and it never fires for subagents (`#agentKind === "sub"` returns early) — **checkers are outside this path entirely**. It does **not** re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket. Stale Workspace bindings are reported for affected Tickets only. Chat text and a claimed checker run are not authoritative. Treat this as the loudest reminder available on this host, not a gate.
+2. `session_stop` validates current artifact shape and canonical Verify evidence, then returns report-only warnings when it finds a problem. It never returns `continue: true`, never forces another model turn, and never prevents a stop. It does **not** re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket. Stale Workspace bindings are reported for affected Tickets only; the callback never fires for subagents. Chat text and a claimed checker run are not authoritative. Treat this as a reminder, not a gate.
 
 OMP's `tool_call` event returns `{ block, reason }` and genuinely prevents a tool from executing — `ExtensionToolWrapper.execute` calls it before running and throws with your reason. Loom does not currently configure it; that is a product decision, not a host limitation. Never write that the callback does not exist. The extension owns no Git, hosted review, release, repository, worktree, lane, card, task, terminal, liveness, or cleanup operation, and no machine proof of attended confirmation exists on any host.
 
@@ -74,7 +74,7 @@ Bounded retry and the no-third-identical-attempt rule apply to native automation
 ## Hard stops
 
 - Static router injection is guidance, not proof of compliance or authority.
-- `session_stop` returns a capped forced continuation, never a prevented stop; do not describe it as a gate or as fail-closed.
+- `session_stop` is report-only: valid findings and invalid or uninitialized Loom state return warnings without continuing. Do not describe it as a gate, fail-closed path, or automatic retry.
 - No Goal, Advisor, watchdog, TTSR, recipe, permit, witness, or mutation-enforcement claim.
 - No worker chaining across Tickets; no maker self-approval; no fabricated custom-agent availability.
 - No project or external write follows merely from compaction, worker completion, APPROVE, or a host notification.

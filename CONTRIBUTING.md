@@ -20,7 +20,7 @@ Before writing code, understand the real flow and stop at the first rung that ho
 - Exactly seven rituals: Setup, Grill, Plan, Implement, Verify, Finish, Publish.
 - Canonical skill prose is single-source; carrier dialects stay thin.
 - Runtime has exactly three seams: `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`.
-- `omp-extension.mjs` is the sole runtime/enforcement integration: router injection, fail-closed active artifact, and Verify-before-done `session_stop`.
+- `omp-extension.mjs` is the sole runtime/diagnostic integration: router injection and report-only Verify-before-done `session_stop` diagnostics.
 - OpenCode registers skills and injects compact truthful prose only.
 - Claude Code and Codex package prose-compatible skills and checker metadata only; do not add hooks or enforcement claims.
 - Orca is the sole orchestration adapter.

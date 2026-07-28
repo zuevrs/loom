@@ -18,7 +18,7 @@ A host marked “yes” for skills can load and follow Loom's Markdown instructi
 
 ## OMP
 
-OMP is the only host with a Loom runtime diagnostic. It is advisory: `session_stop` may force another turn carrying findings, but it cannot prevent a stop. It is capped at 8 continuations and never runs for subagents.
+OMP is the only host with a Loom runtime diagnostic. It is report-only: `session_stop` returns warnings for findings but never forces another turn or prevents a stop. It never runs for subagents.
 
 The adapter injects compact `/loom` guidance, validates the currently selected artifact, checks Verify evidence when a Ticket is marked `done`, and reports stale Workspace bindings for affected Tickets only. It does not inject a current project or Ticket pointer when a session starts, and it does not compare every historical completed Ticket with today's checkout. Verify and Finish establish freshness for the selected active Ticket. The exact implementation remains in `omp-extension.mjs` and `hooks/`; this page does not redefine it.
 

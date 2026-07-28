@@ -41,7 +41,7 @@ Loom v7 supports four public carriers:
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
 
-After install or update, restart the host and confirm all seven rituals are discoverable. On OMP, run `omp plugin doctor loom` and, in a disposable project, mark a Ticket `done` without an APPROVE digest: `session_stop` should **report** the missing evidence and force one more turn. That is the whole runtime signal — it does not halt the session, so do not build a workflow that assumes it did.
+After install or update, restart the host and confirm the Loom partner surface is discoverable. On OMP, run `omp plugin doctor loom` and, in a disposable project, mark a Ticket `done` without an APPROVE digest: `session_stop` should **report** the missing evidence as a warning. A malformed or uninitialized `.loom` state also reports a warning. The hook never forces another model turn or halts the session, so do not build a workflow that assumes it did.
 
 ## Upgrade
 
@@ -53,7 +53,7 @@ Git and Node.js 20+ are needed for local development. Public carriers require th
 
 ## Host behavior and safety
 
-No v7 host prevents a stop. OMP adds the strongest diagnostic: it validates active artifacts, checks canonical Verify evidence on `done` Tickets, and may force one more turn with findings. It is a reminder, not a mutation gate; live Git freshness is checked by Verify and Finish. Other carriers provide the same prose contracts without claiming OMP hook parity. See [`docs/hosts.md`](docs/hosts.md).
+No v7 host prevents a stop. OMP adds the strongest report-only diagnostic: it validates active artifacts and checks canonical Verify evidence on `done` Tickets, but never forces another model turn. It is a reminder, not a mutation gate; live Git freshness is checked by Verify and Finish. Other carriers provide the same prose contracts without claiming OMP hook parity. See [`docs/hosts.md`](docs/hosts.md).
 
 Orca is Loom's orchestration adapter. Loom owns durable work meaning and verification boundaries; Git owns file state; Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness. See [`docs/orca.md`](docs/orca.md).
 
