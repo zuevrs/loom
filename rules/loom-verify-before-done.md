@@ -18,4 +18,4 @@ A REJECT-only, stale, missing, or maker-authored digest does not allow `done`. K
 
 No Verify digest → no done.
 
-This rule is OMP's stream reminder. It is the only runtime diagnostic Loom has, and it is report-only: `session_stop` returns warnings for valid findings and malformed or uninitialized Loom state, without forcing another model turn; no host in v7 prevents a stop. The difference between OMP and the others is that OMP tells you. `before_agent_start` supplies only static router/discipline prose. OpenCode, Claude Code, and Codex receive prose-compatible guidance and no runtime diagnostic at all.
+This rule is prose guidance. OMP no longer auto-loads Loom runtime callbacks by default: no `before_agent_start` router injection, no `session_stop` diagnostic, and no hidden continuation loop. OpenCode, Claude Code, Codex, and OMP receive prose-compatible guidance without runtime diagnostic parity.

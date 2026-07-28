@@ -18,9 +18,9 @@ A host marked “yes” for skills can load and follow Loom's Markdown instructi
 
 ## OMP
 
-OMP is the only host with a Loom runtime diagnostic. It is report-only: `session_stop` returns warnings for findings but never forces another turn or prevents a stop. It never runs for subagents.
+OMP is skills/prose-only by default. The package does not auto-load `omp-extension.mjs`, so OMP does not receive Loom `before_agent_start` or `session_stop` callbacks during normal installs.
 
-The adapter injects compact `/loom` guidance, validates the currently selected artifact, checks Verify evidence when a Ticket is marked `done`, and reports stale Workspace bindings for affected Tickets only. It does not inject a current project or Ticket pointer when a session starts, and it does not compare every historical completed Ticket with today's checkout. Verify and Finish establish freshness for the selected active Ticket. The exact implementation remains in `omp-extension.mjs` and `hooks/`; this page does not redefine it.
+The dormant extension file remains in the repository for explicit experiments only. If manually loaded, it is diagnostic-only and must not be described as a gate or automatic retry path. Verify and Finish establish freshness for the selected active Ticket.
 
 The stream rule in `rules/loom-verify-before-done.md` is a reminder and liveness clue, not enforcement. If the rule appears but `/loom` guidance does not, restart OMP; updating a plugin under a running process can leave old adapter code active.
 

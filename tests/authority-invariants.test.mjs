@@ -73,7 +73,7 @@ test("AUTHORITY.md ships a filled instance beside every schema",()=>{
 test("no host prose reintroduces a prevention claim",()=>{
   const corpus=["skills/loom/AUTHORITY.md","skills/loom/OMP.md","skills/loom/CONSTITUTION.md",
     "README.md","docs/hosts.md","rules/loom-verify-before-done.md","SECURITY.md"].map(read).join("\n");
-  // session_stop is report-only; it has never prevented a stop on any host.
+  // OMP no longer auto-loads session_stop; the dormant callback has never prevented a stop on any host.
   for(const claim of ["fail-closed action-boundary","validates active artifacts fail-closed",
     "only omp provides hard enforcement","block every stop attempt","remains fail-closed",
     "supported enforcement host","only v7 enforcement host"]){

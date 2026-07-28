@@ -54,7 +54,7 @@ The terms below support deep skill, host, and troubleshooting docs. Users do not
 
 **Prose-compatible host** — A host that can load and follow Loom skills. This does not claim that Loom can prevent stopping, prove review execution, or enforce lifecycle state.
 
-**OMP diagnostic** — `session_stop` validates selected artifact shape, Verify evidence for `done` Tickets, and affected Workspace bindings. It is report-only, never forces another turn, never runs for subagents, and cannot prevent a stop. Verify and Finish check live Git freshness for the selected active Ticket.
+**OMP carrier** — Skills/prose-only by default. Loom does not auto-load OMP callbacks; Verify and Finish check live Git freshness for the selected active Ticket.
 
 **Owner historical-preservation proof** — The owner Git commit/tree whose traversal-safe Story, optional PRD, Ticket, and relevant `CONTEXT.md`/ADR inventory has derived SHA-256 digests, resolved semantic conflicts, updated durable pointers, and exact post-operation bytes/tree read back successfully. It creates no extra archive manifest or lifecycle state.
 

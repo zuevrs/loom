@@ -4,10 +4,9 @@ Load this adapter only in an OMP project session. Loom supplies routing, durable
 
 ## Supported extension surface
 
-The final Loom OMP extension demonstrates only two callbacks. Both callbacks produce diagnostic evidence only and cannot mutate Story or Ticket disposition, canonical Verify evidence, repository state, or native worker state.
+The packaged OMP carrier is skills/prose-only by default. It does not auto-load Loom callbacks, does not inject router prose through `before_agent_start`, and does not run `session_stop` diagnostics during normal installs.
 
-1. `before_agent_start` appends only static discipline and the exactly-seven-ritual router before an agent turn. It injects no current project, Story, Ticket, repository, checker, or worker pointers. Treat this as context guidance, not proof that the host will obey it and not mutation authority.
-2. `session_stop` validates current artifact shape and canonical Verify evidence, then returns report-only warnings when it finds a problem. It never returns `continue: true`, never forces another model turn, and never prevents a stop. It does **not** re-prove every historical `done` Ticket against today's live Git checkout; current boundary freshness belongs to Verify/Finish for the selected active Ticket. Stale Workspace bindings are reported for affected Tickets only; the callback never fires for subagents. Chat text and a claimed checker run are not authoritative. Treat this as a reminder, not a gate.
+`omp-extension.mjs` remains in the repository as dormant experimental code for later redesign. If an operator manually loads it, both callbacks are diagnostic evidence only and cannot mutate Story or Ticket disposition, canonical Verify evidence, repository state, or native worker state. The dormant `session_stop` path never returns `continue: true`, never forces another model turn, and never prevents a stop. Treat it as experimental evidence, not product behavior.
 
 OMP's `tool_call` event returns `{ block, reason }` and genuinely prevents a tool from executing — `ExtensionToolWrapper.execute` calls it before running and throws with your reason. Loom does not currently configure it; that is a product decision, not a host limitation. Never write that the callback does not exist. The extension owns no Git, hosted review, release, repository, worktree, lane, card, task, terminal, liveness, or cleanup operation, and no machine proof of attended confirmation exists on any host.
 
@@ -55,7 +54,7 @@ Core Loom has no OMP Goal, Advisor, watchdog, TTSR preset, recipe runner, or una
 
 That prohibition is a list, not a category. Loom does propose exactly one OMP preset, offered by `loom-init` under its own confirmation: `compaction.strategy`, the `smol`/`slow`/`plan` model roles, and `task.prewalk`. Those change how faithfully the discipline survives a long session and which model pays for typing — they grant nothing and enable no route. When in doubt about a key not named here, do not offer it.
 
-Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts, not to the `session_stop` diagnostic callback. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
+Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts, not to dormant extension experiments. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
 
 
 ## Capability and failure matrix
@@ -74,7 +73,7 @@ Bounded retry and the no-third-identical-attempt rule apply to native automation
 ## Hard stops
 
 - Static router injection is guidance, not proof of compliance or authority.
-- `session_stop` is report-only: valid findings and invalid or uninitialized Loom state return warnings without continuing. Do not describe it as a gate, fail-closed path, or automatic retry.
+- OMP auto-loads no Loom extension by default. Do not describe `session_stop` as default behavior, a gate, fail-closed path, or automatic retry.
 - No Goal, Advisor, watchdog, TTSR, recipe, permit, witness, or mutation-enforcement claim.
 - No worker chaining across Tickets; no maker self-approval; no fabricated custom-agent availability.
 - No project or external write follows merely from compaction, worker completion, APPROVE, or a host notification.

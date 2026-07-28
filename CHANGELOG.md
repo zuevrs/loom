@@ -12,7 +12,8 @@ Patch release for OMP diagnostic behavior after the public prose simplification.
 
 ### Highlights
 
-- **Report-only OMP stop diagnostic.** `session_stop` now reports valid findings and malformed or uninitialized `.loom` state as warnings without forcing another model turn.
+- **OMP extension disabled by default.** The OMP package no longer registers `omp-extension.mjs`, so OMP receives Loom through skills/prose without `before_agent_start` or `session_stop` context injection.
+- **Report-only OMP stop diagnostic retained for future evaluation.** The dormant extension code reports findings as warnings without forcing another model turn if it is explicitly loaded for experiments.
 
 ### Breaking changes
 
@@ -24,11 +25,11 @@ Patch release for OMP diagnostic behavior after the public prose simplification.
 
 ### Adapter impacts
 
-- **OMP** no longer returns `continue: true` from `session_stop`; the callback is diagnostic-only. Other carriers are unchanged.
+- **OMP** no longer auto-loads `omp-extension.mjs`; the carrier is skills/prose-only by default. The dormant callback code remains diagnostic-only if explicitly loaded for experiments. Other carriers are unchanged.
 
 ### Safety changes
 
-- Removes the hidden automatic continuation loop that could spend extra turns and context after diagnostic findings.
+- Removes the default OMP extension path that could spend extra context through injected router prose and stop diagnostics.
 
 ## [7.3.0] - 2026-07-28
 

@@ -12,10 +12,7 @@
   },
   "omp": {
     "name": "loom",
-    "description": "Engineering partner for coding agents: next honest step, evidence, and contracts.",
-    "extensions": [
-      "./omp-extension.mjs"
-    ]
+    "description": "Engineering partner for coding agents: next honest step, evidence, and contracts."
   },
   "keywords": [
     "agent",
