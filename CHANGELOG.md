@@ -6,6 +6,41 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.3.0] - 2026-07-28
+
+Public prose simplification plus sharper behavioral contracts and runtime validation. This is a minor release because the public floor, Plan materialization gate, continuation validation, and feedback-capture contracts change how agents are expected to operate.
+
+### Highlights
+
+- **Partner-style public surface.** README, managed block, OpenCode injection, and glossary now describe Loom as an engineering partner reached through `/loom`, with a six-rule public floor and deeper contracts behind progressive disclosure.
+- **Small work stays light.** Direct concrete work can skip planning artifacts while still leaving a fail-capable check, independent proportional Verify, and approved knowledge capture only when the run actually teaches something durable.
+- **Plan writes through one gate.** Plan materialization now uses a single exact preview/confirmation boundary for Story, PRD, Tickets, Context, ADR, and Workspace-owned artifacts instead of scattered write moments.
+- **Done Stories stay historical.** Follow-up work on a completed Story must validate and create a linked continuation Story rather than reopening, amending, or appending Tickets to the original record.
+
+### Breaking changes
+
+- Agents and host carriers must treat the six public rules as the minimum Loom contract; older public wording that exposed ritual internals or implied broad workflow-engine behavior is stale.
+- A `done` Story is immutable. Continuation work requires a new Story with the reserved `Continues:` notes discriminator and validation of the original Story path, status, and summary.
+- Plan has one materialization consent boundary. Setup/apply-style writes outside that exact preview are not part of the current contract.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom, restart the host, and rerun Setup where managed blocks still report an older version.
+- For follow-up work on completed Stories, create a linked continuation Story instead of editing the completed Story, PRD, Tickets, or Verify evidence.
+- Remove local assumptions that every change must first materialize a full Plan; direct small work may proceed through Implement when the scope is concrete and safely checkable.
+
+### Adapter impacts
+
+- **OpenCode and managed-block carriers** now inject the compact partner surface and six public rules while preserving the same no-hook-parity stance.
+- **OMP** keeps the same three runtime seams and adds no exported runtime modules; validation language now aligns with the public floor and current Story continuation contract.
+- **Orca boundaries** are documented as host-owned for repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness; Loom owns durable work meaning and verification records.
+
+### Safety changes
+
+- Maintainer feedback has a dedicated capture contract: repeatable or costly accepted feedback becomes a proposed durable rule or note, while rejected or one-off feedback is not silently converted into policy.
+- Host ownership boundaries are stated directly so Loom guidance does not claim authority over native automation, browser state, terminals, or external effects.
+- Historical pilots and ledgers remain explanatory evidence only; current capability must come from deterministic checks, package inspection, and present host verification.
+
 ## [7.2.0] - 2026-07-27
 
 Optional CodeGraph integration guidance for architecture exploration, impact analysis, and graph-backed Verify evidence. The backend remains external, read-only, per-worktree, and optional.
@@ -1368,7 +1403,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.2.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.3.0...HEAD
+[7.3.0]: https://github.com/zuevrs/loom/compare/v7.2.0...v7.3.0
 [7.2.0]: https://github.com/zuevrs/loom/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/zuevrs/loom/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/zuevrs/loom/compare/v6.0.0...v7.0.0

@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "loom",
-  "description": "Seven disciplined engineering rituals for prose-compatible hosts.",
+  "description": "Engineering partner for coding agents: next honest step, evidence, and contracts.",
   "owner": {
     "name": "zuevrs",
     "url": "https://github.com/zuevrs"
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "loom",
-      "description": "Setup, Grill, Plan, Implement, Verify, Finish, and Publish \u2014 skills plus independent checker agents.",
+      "description": "Chooses the next honest step and preserves evidence/contracts.",
       "source": "./",
       "category": "productivity"
     }

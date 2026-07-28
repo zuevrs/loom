@@ -1,7 +1,7 @@
 {
   "name": "loom",
-  "version": "7.2.0",
-  "description": "Seven prose-compatible Loom rituals with independent checker agents.",
+  "version": "7.3.0",
+  "description": "Engineering partner for coding agents: next honest step, evidence, and contracts.",
   "author": {
     "name": "zuevrs",
     "url": "https://github.com/zuevrs"
