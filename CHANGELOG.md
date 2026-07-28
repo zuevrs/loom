@@ -4,7 +4,31 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-- **OMP diagnostic hotfix.** `session_stop` now reports valid findings and malformed or uninitialized `.loom` state as warnings without forcing another model turn.
+- No changes yet.
+
+## [7.3.1] - 2026-07-28
+
+Patch release for OMP diagnostic behavior after the public prose simplification.
+
+### Highlights
+
+- **Report-only OMP stop diagnostic.** `session_stop` now reports valid findings and malformed or uninitialized `.loom` state as warnings without forcing another model turn.
+
+### Breaking changes
+
+- None.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart OMP so the new extension code is loaded.
+
+### Adapter impacts
+
+- **OMP** no longer returns `continue: true` from `session_stop`; the callback is diagnostic-only. Other carriers are unchanged.
+
+### Safety changes
+
+- Removes the hidden automatic continuation loop that could spend extra turns and context after diagnostic findings.
 
 ## [7.3.0] - 2026-07-28
 
@@ -1403,7 +1427,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.3.1...HEAD
+[7.3.1]: https://github.com/zuevrs/loom/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/zuevrs/loom/compare/v7.2.0...v7.3.0
 [7.2.0]: https://github.com/zuevrs/loom/compare/v7.1.0...v7.2.0
 [7.1.0]: https://github.com/zuevrs/loom/compare/v7.0.0...v7.1.0
