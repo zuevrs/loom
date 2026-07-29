@@ -6,6 +6,42 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.4.0] - 2026-07-29
+
+Session-draft staging plus workspace/Orca flow redesign grounded in live OMP and Orca evidence. This is a minor release because the workspace operating model, OMP setup guidance, and planning/materialization contract change expected agent behavior without adding a new ritual.
+
+### Highlights
+
+- **Session draft staging layer.** Added `skills/loom/SESSION.md` and runtime validation for `.loom/session/<session-id>.md` plus archive state. Explicit `/loom` runs can stage confirmed boundary events without polluting `CONTEXT.md` or durable Story state.
+- **Workspace flow clarified around Story owner worktrees.** Canonical owner root is now the dashboard/integration point; the first durable Story/PRD/Ticket write for a material workspace Story belongs in a Story-specific owner worktree.
+- **Vertical Ticket slicing over repo-first slicing.** Multi-repository work now defaults to one independently verifiable vertical Ticket spanning multiple `repositoryKeys` when that is the smallest real outcome; Orca lanes are execution transport, not the semantic slicing rule.
+- **OMP setup guidance tightened.** `task.prewalk` is no longer presented as a baseline preset. It is an explicit optional tactic for bounded implementation workers only.
+
+### Breaking changes
+
+- Workspace planning and execution should no longer assume "one Ticket per service" as the default slicing rule. Tickets are vertical first; repository lanes are transport.
+- For material workspace Stories, the canonical owner checkout is no longer the intended first durable write location. Setup/Plan/Orca prose now expects a Story owner worktree boundary before the first durable Story bundle write.
+- OMP setup guidance no longer treats `task.prewalk` as the generic baseline. Operators relying on the old recommendation should review whether their planning/materialization workers still need strong post-write reasoning.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart the host so the current skills and managed block are loaded.
+- Rerun Setup where the managed block still reports an older version.
+- For multi-repository workspaces, start `/loom` from the canonical owner root for dashboard/Grill/Plan, then materialize confirmed Stories into Story-specific owner worktrees before execution.
+- Review any local OMP preset that set `task.prewalk: true` as a blanket default; keep it only for bounded implementation workers.
+
+### Adapter impacts
+
+- **OMP** now ships the session-draft contract and updated setup guidance. Live proof confirmed attended `/loom setup workspace` reaches exact preview and applies valid workspace state when confirmed.
+- **Orca** boundaries are now documented more sharply: canonical owner root for overview, Story owner worktrees for active coordination, and repo lanes as execution transport inside a vertical Ticket.
+- **Carriers** remain prose/skills driven; no new runtime hook or host-specific enforcement seam was added.
+
+### Safety changes
+
+- Session drafts are explicitly non-durable staging artifacts: no transcript dump, no authority claim, and no promotion without preview, confirmation, and fresh Verify.
+- Workspace documentation now rejects repo-first decomposition as a hidden Git optimization when it would weaken independently verifiable outcomes.
+- The new canaries prevent rollback to baseline `task.prewalk: true`, canonical-owner-first materialization, and `one Ticket per service` as the default workspace rule.
+
 ## [7.3.1] - 2026-07-28
 
 Patch release for OMP diagnostic behavior after the public prose simplification.
