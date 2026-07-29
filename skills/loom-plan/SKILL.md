@@ -37,13 +37,13 @@ Produce the smallest durable v7 plan under `.loom/<story-id>/` without implement
 
 ## Ownership and version
 
-The current project root owns `.loom`, CONTEXT, and ADRs. A single-repository Ticket may omit `repositoryKeys`, meaning current root. Orca keys may be queried and read during Plan to define repository scope, but Plan creates no Orca lane, task, worktree, branch, or other execution state. Unknown keys block confirmation.
+The current owner project root owns `.loom`, CONTEXT, and ADRs. A single-repository Ticket may omit `repositoryKeys`, meaning current root. Orca keys may be queried and read during Plan to define repository scope, but Plan creates no Orca lane, task, branch, or execution state before confirmation. Unknown keys block confirmation. For a Workspace Story, the first durable Story/PRD/Ticket write occurs in a confirmed Story owner worktree, not in the canonical owner checkout.
 
 Validate `.loom/version` first. Missing durable setup may be offered through bounded Setup. A different major or legacy state is a read-only hard stop; v7 performs no migration or compatibility behavior.
 
 ## One materialization gate
 
-No planning artifact is written until one materialization gate previews the **exact target paths, actions, and complete proposed content** for the coherent bundle: Story, optional material PRD, every Ticket, and pending CONTEXT/ADR/PRODUCT/DESIGN deltas. The user reviews destination, success, decisions, materiality, Ticket granularity, blockers, verification, Human policy, and repository scope together. One explicit confirmation authorizes only that exact bundle. Changed target, content, action, scope, repository key, blocker, verification, or base invalidates confirmation.
+No planning artifact is written until one materialization gate previews the **exact target paths, actions, complete proposed content, and first durable write location** for the coherent bundle: Story, optional material PRD, every Ticket, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and, for Workspace Stories, the future Story owner worktree path/base. The user reviews destination, success, decisions, materiality, Ticket granularity, blockers, verification, Human policy, repository scope, and first write target together. One explicit confirmation authorizes only that exact bundle. Changed target, content, action, scope, repository key, blocker, verification, worktree/base, or first write location invalidates confirmation.
 
 Brownfield CONTEXT boot remains a pending draft in the same bundle; it is never written before the complete preview and confirmation.
 

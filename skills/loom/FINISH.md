@@ -1,6 +1,6 @@
 # Explicit finish contract
 
-Lazy-load this fragment only for an explicit Story finish. Load and follow [`STORY.md`](STORY.md) first.
+Lazy-load this fragment only for an explicit Story finish. Load and follow [`STORY.md`](STORY.md) and [`SESSION.md`](SESSION.md) first.
 
 ## Exact intent classification
 
@@ -84,6 +84,8 @@ Sanitize commit and review prose. Exclude Loom/Orca/OMP and agent/control-plane 
 
 Local effects are nontransactional. If owner integration or one repository succeeds and a later command fails, preserve and report every success, the failed command/evidence, and remaining unperformed inventory; do not roll back, rewrite, publish, or repeat successful effects. A later explicit Finish must reread everything and obtain renewed confirmation only for the remaining coherent local outcome.
 
+Before final local closure, read the active `.loom/session/<session-id>.md` when one exists. Offer a compact promotion preview for its confirmed boundary events, assigning each event exactly one smallest canonical owner or `discarded`. Canonical owner writes require fresh explicit confirmation and are a separate proportional change with fresh independent Verify; declining promotion preserves the completed result. After the Finish result is accepted, mark the draft `finished` and archive it as `.loom/session/archive/<session-id>.md`; deletion remains a later explicit cleanup.
+
 Story becomes `done` only after all inventoried local owner/repository results are reread and proven, checks and final Spec + Standards remain current, and the operator explicitly accepts that verified local result. `done` means verified local result accepted; it does not mean pushed, reviewed, merged, released, archived, or cleaned. Finish prepares the sanitized review bundle but performs no remote effect.
 
 ## Owner historical preservation
@@ -109,3 +111,4 @@ This boundary is where an agent talks itself past a gate, because the work feels
 | "The base moved a little; I'll rebase quietly to keep it clean." | Loom runs no history command. A stale base becomes a separate exact proposal using documented project policy only. |
 | "The verdicts were APPROVE an hour ago." | Any changed HEAD, diff, file set, check, or message renews the inventory and the confirmation. Recompute; do not reuse. |
 | "The Story is done, so I may as well clean up the worktree." | Cleanup is its own action, after Publish and proven merge, with its own inventory. `done` grants it nothing. |
+| "The session draft says it, so it is project truth." | The draft is staging. Promote only the confirmed delta to the smallest canonical owner after preview, confirmation, checks, and fresh Verify. |

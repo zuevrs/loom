@@ -42,3 +42,107 @@ test("validates linked continuation Notes and done target",()=>{const root=fixtu
 test("requires substantive artifact section bodies",()=>{const root=fixture(),storyFile=join(root,".loom","alpha","STORY.md"),ticketFile=join(root,".loom","alpha","tickets","01-first.md");try{for(const [name,body] of [["Intent","Rich **intent**."],["Success","- measurable"],["Decisions","Keep it small."]])assert.throws(()=>a.parseStory(story().replace(body,""),storyFile),new RegExp(`empty section ${name}`));for(const [name,body] of [["What to build","Rich prose."],["Acceptance criteria","- [ ] Works"],["Verification","Human approval: not-required\nnode --test"]])assert.throws(()=>a.parseTicket(ticket().replace(body,""),ticketFile),new RegExp(`empty section ${name}`));assert.doesNotThrow(()=>a.parseTicket(ticket(),ticketFile))}finally{rmSync(root,{recursive:true,force:true})}});
 test("readiness requires active Story status",()=>{for(const status of ["active","blocked","done"]){const root=fixture();try{writeFileSync(join(root,".loom","alpha","STORY.md"),story().replace("status: active",`status: ${status}`));assert.deepEqual(a.loadLoom(root).readyTickets,status==="active"?[{storyId:"alpha",id:"01-first"}]:[]);assert.deepEqual(a.loadStoryGraph(root,"alpha").readyTicketIds,status==="active"?["01-first"]:[])}finally{rmSync(root,{recursive:true,force:true})}}});
 test("accepts canonical Orca repository keys",()=>{const root=fixture(),file=join(root,".loom","alpha","tickets","01-first.md");try{for(const keys of ["[api]","[services/api]","[.]"])assert.doesNotThrow(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file));for(const keys of ["[/api]","[services/../api]","[Services/api]","[services//api]"])assert.throws(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file),/repositoryKeys/)}finally{rmSync(root,{recursive:true,force:true})}});
+
+
+test("session drafts are non-canonical staging artifacts under .loom/session",()=>{
+  const root=fixture();
+  try{
+    const sessionDir=join(root,".loom","session");
+    mkdirSync(sessionDir,{recursive:true});
+    const file=join(sessionDir,"abc12345.md");
+    const draft=`---
+id: abc12345
+status: active
+createdAt: 2026-07-29T12:00:00Z
+---
+
+## Scope
+Decide whether Loom needs a per-run session draft.
+
+## Boundary events
+- type: confirmed-decision
+  status: active
+  source: user
+  timestamp: 2026-07-29T12:01:00Z
+  owner: session
+  evidence: User selected ephemeral per-run draft.
+  text: Use one session draft per explicit /loom run.
+
+## Promotion preview
+None yet.
+
+## Finish
+Not finished.
+`;
+    writeFileSync(file,draft);
+    const parsed=a.parseSessionDraft(draft,file);
+    assert.equal(parsed.id,"abc12345");
+    assert.equal(parsed.events[0].type,"confirmed-decision");
+    assert.doesNotThrow(()=>a.loadLoom(root));
+    const rendered=a.renderSessionDraft(parsed);
+    assert.deepEqual(a.parseSessionDraft(rendered,file).events,parsed.events);
+  }finally{rmSync(root,{recursive:true,force:true})}
+});
+
+test("session draft archive status and path must agree",()=>{
+  const root=fixture();
+  try{
+    const active=join(root,".loom","session","abc12345.md");
+    const archived=join(root,".loom","session","archive","abc12345.md");
+    mkdirSync(join(root,".loom","session","archive"),{recursive:true});
+    const draft=status=>`---
+id: abc12345
+status: ${status}
+createdAt: 2026-07-29T12:00:00Z
+---
+
+## Scope
+Scope.
+
+## Boundary events
+None yet.
+
+## Promotion preview
+None yet.
+
+## Finish
+Not finished.
+`;
+    writeFileSync(active,draft("archived"));
+    assert.throws(()=>a.loadLoom(root),/session draft/);
+    rmSync(active);
+    writeFileSync(archived,draft("active"));
+    assert.throws(()=>a.loadLoom(root),/session draft/);
+    writeFileSync(archived,draft("archived"));
+    assert.doesNotThrow(()=>a.loadLoom(root));
+  }finally{rmSync(root,{recursive:true,force:true})}
+});
+
+test("session drafts reject transcript-like freeform boundary events",()=>{
+  const root=fixture();
+  try{
+    const sessionDir=join(root,".loom","session");
+    mkdirSync(sessionDir,{recursive:true});
+    const file=join(sessionDir,"abc12345.md");
+    writeFileSync(file,`---
+id: abc12345
+status: active
+createdAt: 2026-07-29T12:00:00Z
+---
+
+## Scope
+Scope.
+
+## Boundary events
+User: long transcript line
+Assistant: reasoning dump
+
+## Promotion preview
+None yet.
+
+## Finish
+Not finished.
+`);
+    assert.throws(()=>a.loadLoom(root),/session draft/);
+  }finally{rmSync(root,{recursive:true,force:true})}
+});

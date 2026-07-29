@@ -50,15 +50,15 @@ The dashboard is computed on demand from committed artifacts, local bindings, an
 
 ## Execution and concurrent Stories
 
-One Story may span services. Default slicing is one Ticket per service, ordered by blockers. Each Ticket uses an isolated Orca worktree and fresh maker, Spec, and Standards contexts. Cross-service behavior that cannot be verified per service gets an explicit integration Ticket. Verify and Finish prove the selected active Ticket against live Git; historical `done` Tickets retain their recorded evidence instead of being compared with today's checkout.
+One Story may span services. Default slicing is a **vertical independently verifiable Ticket** that may name multiple `repositoryKeys`; Orca lanes are execution transport inside the Ticket, not the Ticket boundary itself. Use one Ticket per service only when a repository-scoped slice is itself the independently verifiable user or contract outcome. If cross-service behavior cannot be verified repo-by-repo, keep one vertical Ticket and run multiple repo lanes under one coordinator-owned Verify boundary. Historical `done` Tickets retain their recorded evidence instead of being compared with today's checkout.
 
-Two Stories may be open at once, but they must not write owner memory from the same checkout. Before the second Story's first durable write, offer a separate owner worktree and show its resulting path:
+Two Stories may be open at once, but they must not write owner memory from the same checkout. Canonical owner root is for dashboard, selection, and later integration; active Story coordination happens in a separate Story owner worktree. The first durable write for a confirmed Story bundle occurs in that Story owner worktree, not in the canonical owner checkout. Before a new Story's first durable write, offer a separate owner worktree and show its resulting path:
 
 ```bash
 orca worktree create --repo id:<ownerRepoId> --name story-<id>
 ```
 
-The operator confirms; Setup never creates it silently. Separate Story directories usually merge cleanly, while concurrent edits to `CONTEXT.md` or the same ADR number do not.
+The operator confirms; Setup never creates it silently. A single materialization preview may include the exact Story bundle bytes, the owner repo/base, the future Story worktree path, and the first write target together, so the user approves one coherent boundary instead of repeated Orca ceremony. Separate Story directories usually merge cleanly, while concurrent edits to `CONTEXT.md` or the same ADR number do not.
 
 Integrating a Story back into the canonical owner branch is a separate serialized Finish step: one writer at a time, with the exact semantic `CONTEXT.md`/ADR change previewed and confirmed. A conflict stops for human reconciliation. Resolve ADR number collisions using the owner's convention and preserve both genuinely distinct decisions.
 

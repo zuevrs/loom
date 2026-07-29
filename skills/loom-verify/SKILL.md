@@ -165,6 +165,8 @@ Show the exact owner and content in one compact capture preview, then **write on
 
 A capture approved after the verdict is a separate small change. It never inherits the verdict that preceded it: run its proportional objective checks and fresh independent Verify before calling that capture verified. This applies to every owner inside a judged repository, especially a code-adjacent `loom:` marker. If the operator declines the extra change, preserve the completed result and leave the capture unwritten.
 
+When an explicit `/loom` session draft exists, record the approved capture decision there as a boundary event before the durable owner write. The draft remains staging and is never itself the canonical owner.
+
 Without this the project pays for the same discovery every time: findings live in a verdict, verdicts are replaced by the next one, and nothing accumulates. Do not write durable knowledge unasked; an unapproved lesson is one agent's opinion promoted to project truth.
 
 ## Hard stops

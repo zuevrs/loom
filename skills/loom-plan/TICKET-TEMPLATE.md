@@ -8,7 +8,7 @@ repositoryKeys: [api]
 
 ## What to build
 
-Replace this body with one thin vertical slice: behavior and contracts, not likely files, estimates, or an implementation checklist. Omit `repositoryKeys` for a one-repository Story rooted at the current project. In a multi-repository Workspace, require stable logical keys such as `[catalog]` or `[notifications]` that match `CONTEXT.md` and the local Orca binding — never filesystem paths or display names.
+Replace this body with one thin vertical slice: behavior and contracts, not likely files, estimates, or an implementation checklist. Omit `repositoryKeys` for a one-repository Story rooted at the current project. In a multi-repository Workspace, require stable logical keys such as `[catalog]` or `[notifications]` that match `CONTEXT.md` and the local Orca binding — never filesystem paths or display names. A Ticket may name multiple logical keys when that is the smallest independently verifiable user or contract outcome; Orca lanes are execution transport, not the Ticket boundary.
 
 ## Acceptance criteria
 

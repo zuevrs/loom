@@ -2,7 +2,7 @@
 
 This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It points to canonical skills; it does not duplicate their boundary contracts.
 
-<!-- loom:begin version=v7.3.1 -->
+<!-- loom:begin version=v7.4.0 -->
 ## Loom engineering partner
 
 For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.md`. At every entry ask: **what is the next honest step?** Follow the dispatcher: explicit intent gets one recommended route and user-language reason; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear.
@@ -14,7 +14,7 @@ For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.m
 5. Do not claim completion without evidence.
 6. Do not perform external or irreversible actions without fresh explicit confirmation.
 
-Keep one Ticket active at a time and respect blockers. Small concrete work may skip planning artifacts; material work earns Story, PRD, and Tickets. Implement never self-approves. Run fail-capable checks and obtain current independent feedback before `done`.
+Keep one Ticket active at a time and respect blockers. Small concrete work may skip planning artifacts; material work earns Story, PRD, and Tickets. An explicit `/loom` run may keep a short `.loom/session/<session-id>.md` draft for confirmed boundary events only; Finish promotes or archives it. Implement never self-approves. Run fail-capable checks and obtain current independent feedback before `done`.
 
 Setup/apply writes require exact preview and confirmation. Finish is local and never authorizes Publish. Never auto-merge, push, publish, release, archive, or clean up.
 <!-- loom:end -->

@@ -157,3 +157,39 @@ test("public Loom prose is one short partner surface over deep contracts",()=>{
   assert.doesNotMatch(publicCore,/Strong Partner authority model|authority floor|four constitution outcomes|ritual harness/i);
   for(const owner of ["AUTHORITY.md","STORY.md","FINISH.md","PUBLISH.md","OMP.md","ORCA.md"])assert.ok(!readme.includes(`skills/loom/${owner}`),`README leaked lazy owner ${owner}`);
 });
+
+
+test("session draft stages confirmed boundary events without becoming durable memory",()=>{
+  const session=read("skills/loom/SESSION.md"),dispatcher=read("skills/loom/SKILL.md"),finish=read("skills/loom/FINISH.md"),verify=read("skills/loom-verify/SKILL.md"),readme=read("README.md"),agents=read("AGENTS.md"),pkg=read("package.json"),corpus=[session,dispatcher,finish,verify,readme,agents].join("\n");
+  for(const anchor of ["staging area","confirmed boundary events","not durable project truth","never replaces `CONTEXT.md`, ADRs, Story, PRD, Tickets, or Git evidence","Create at explicit `/loom` entry only",".loom/session/<session-id>.md","one `/loom` run",".loom/session/archive/<session-id>.md","Loom owns writes","not injected into ordinary OMP/Orca context","Record only boundary events","confirmed-decision","rejected-option","verified-fact","open-question","handoff","Do not record transcript","Promotion at Finish","smallest canonical owner","Resume","reconcile draft state before routing"])assert.ok(session.includes(anchor),`SESSION.md lost ${anchor}`);
+  assert.match(dispatcher,/SESSION\.md[\s\S]*per-run staging draft for confirmed boundary events/is);
+  assert.match(finish,/promotion preview.*confirmed boundary events.*smallest canonical owner/is);
+  assert.match(finish,/archive it as `\.loom\/session\/archive\/<session-id>\.md`/);
+  assert.match(verify,/session draft exists.*boundary event.*staging.*canonical owner/is);
+  assert.match(readme,/session draft.*confirmed boundary events.*not durable project truth/is);
+  assert.match(agents,/\.loom\/session\/<session-id>\.md.*confirmed boundary events only/is);
+  assert.match(pkg,/skills\/loom\/SESSION\.md/);
+  assert.doesNotMatch(corpus,/session draft (?:is|becomes|as) (?:a )?(?:source of truth|durable memory)|record every turn summary|copy raw transcript into the draft|copy reasoning dump into the draft/is);
+});
+
+
+test("workspace flow uses Story owner worktrees and vertical Tickets, not repo-first slicing",()=>{
+  const init=read("skills/loom-init/SKILL.md"),workspaces=read("docs/workspaces.md"),orca=read("docs/orca.md"),plan=read("skills/loom-plan/SKILL.md"),tickets=read("skills/loom-plan/TO-TICKETS.md"),template=read("skills/loom-plan/TICKET-TEMPLATE.md"),corpus=[init,workspaces,orca,plan,tickets,template].join("\n");
+  assert.match(init,/`task\.prewalk`.*optional, not a baseline default/i);
+  assert.match(init,/Do not recommend it for Grill, Plan, Story\/PRD\/ADR materialization/i);
+  assert.doesNotMatch(init,/task:\s*\n\s*prewalk:\s*true/);
+  assert.match(workspaces,/canonical owner root is for dashboard, selection, and later integration/i);
+  assert.match(workspaces,/first durable write.*Story owner worktree, not in the canonical owner checkout/i);
+  assert.match(workspaces,/vertical independently verifiable Ticket/i);
+  assert.match(workspaces,/Orca lanes are execution transport inside the Ticket/i);
+  assert.doesNotMatch(workspaces,/Default slicing is one Ticket per service/i);
+  assert.match(orca,/Canonical owner root is the read-only dashboard and integration point/i);
+  assert.match(orca,/first durable write happens in that Story worktree after confirmation/i);
+  assert.match(orca,/Ticket may span multiple repository lanes/i);
+  assert.match(plan,/first durable Story\/PRD\/Ticket write occurs in a confirmed Story owner worktree/i);
+  assert.match(plan,/first durable write location/i);
+  assert.match(tickets,/smallest independently verifiable user or contract slice/i);
+  assert.match(tickets,/multi-repository vertical slice may run several Orca lanes/i);
+  assert.match(template,/Ticket may name multiple logical keys/i);
+  assert.doesNotMatch(corpus,/one Ticket per service, ordered by blockers/i);
+});

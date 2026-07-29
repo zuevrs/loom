@@ -8,16 +8,16 @@ Before drafting, identify repository scope from the current root and, when avail
 
 - Single repository: omit `repositoryKeys`; omission means current root.
 - Multiple repositories: every Ticket declares `repositoryKeys` in frontmatter using only confirmed read-only keys.
-- Default cross-repository work to dependent repository-scoped Tickets. Keep one Ticket spanning keys only when atomic delivery is required.
+- Default cross-repository work to one vertical Ticket spanning keys when that is the smallest independently verifiable user or contract slice. Split into repository-scoped Tickets only when each repository slice is itself independently verifiable, or when a later explicit integration Ticket better exposes the acceptance boundary.
 - Plan records scope only. It creates no branch, lane, task, terminal, or worktree.
 - On amendment, reopen the same Ticket when its acceptance changed; create a new Ticket only for a new independently verifiable slice. Preserve every unaffected Ticket byte-for-byte, including its current Verify.
 
 ## Draft vertical slices
 
-Break the destination into **tracer-bullet Tickets**. Each is a thin, complete, independently verifiable path through all necessary layers—not a horizontal layer checklist.
+Break the destination into **tracer-bullet Tickets**. Each is a thin, complete, independently verifiable path through all necessary layers—not a horizontal layer checklist, and not merely one repository because Git happened to be split that way.
 
 - Every planned implementation has at least one Ticket.
-- Each Ticket delivers a narrow but complete path through every necessary integration layer and is demoable/verifiable alone. Horizontal "database first, UI later" slicing is not a tracer bullet.
+- Each Ticket delivers a narrow but complete path through every necessary integration layer and is demoable/verifiable alone. Horizontal "database first, UI later" slicing is not a tracer bullet. A multi-repository vertical slice may run several Orca lanes under one coordinator-owned Verify boundary.
 - For each Ticket name the user stories, external contracts, or Story success clauses it covers. Every material clause must map to at least one Ticket; unexplained overlap or uncovered acceptance stops the materialization gate.
 - Put necessary prefactoring first only when it is independently verifiable and truly required: make the change easy, then make the easy change. Do not disguise speculative cleanup as Ticket 1.
 - The first real Ticket crosses the riskiest seam. Learn whether the architecture works in Ticket 1, not Ticket 5.

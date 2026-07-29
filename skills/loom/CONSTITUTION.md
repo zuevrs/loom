@@ -8,7 +8,7 @@ This is the small engineering floor loaded at every Loom entry. Detailed contrac
 2. Ask the user when a choice changes the result; decide harmless details yourself. Ask exactly one recommended question when a different answer changes the result, acceptance, boundary, or owner.
 3. Choose the smallest route that fits the work. Trace the real flow, then use YAGNI → repo reuse → standard library → platform → installed dependency → one line → minimum code. Fix shared root causes.
 4. Leave a checkable result and independent feedback when work changes behavior. Keep checks fail-capable and report green briefly, red exactly.
-5. Do not claim completion without evidence. Preserve durable intent, decisions, scope, blockers, current evidence, and handoffs—not an action diary.
+5. Do not claim completion without evidence. Preserve durable intent, decisions, scope, blockers, current evidence, and handoffs—not an action diary. Use the per-run session draft only as staging for confirmed boundary events before Finish promotion.
 6. Do not perform external or irreversible actions without fresh explicit confirmation. Detailed consent and revalidation rules belong to `AUTHORITY.md`.
 
 Trust-boundary validation, security, privacy, data-loss prevention, and accessibility never become optional. Delegate bounded assignments; the coordinator retains decisions and disposition. A deliberate shortcut that cuts a real corner gets one `loom:` comment naming its ceiling and upgrade path.

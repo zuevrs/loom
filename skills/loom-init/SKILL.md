@@ -66,15 +66,16 @@ modelRoles:
   plan: <the strong model>
   smol: <the cheap model>
   slow: <the reasoning model>
-task:
-  prewalk: true
+# Optional, not a default baseline:
+# task:
+#   prewalk: true
 ```
 
 Say why, because the operator is being asked to change a host default:
 
 - **`compaction.strategy: shake`** is the one strategy that leaves surviving text verbatim — it drops heavy tool results and large blocks and rewrites nothing. `context-full` summarizes in place, so your rules reach the next turn as a paraphrase. The host default `snapcompact` archives history onto images and **falls back to `context-full` on a model without vision** — on a non-vision model the default silently becomes the one strategy that rewrites the discipline. If the operator runs vision models exclusively, `snapcompact` is a defensible choice and you say so; otherwise recommend `shake`.
 - **Model roles** let one Story use a strong model for Grill and Plan and a cheap one for mechanical work, with no change to any Loom prose. Do not invent model identifiers — read the operator's configured models and let them assign. If the `plan` role is left unset, the host performs no model transition, which is a safe default, not a failure.
-- **`task.prewalk`** switches to the cheap model at the first edit after a todo list exists — the strong model plans, the cheap one types. It is event-driven, not timed.
+- **`task.prewalk`** is optional, not a baseline default. It switches a bounded task worker to the cheap model at the first edit after a todo list exists. Use it only when the contract is already frozen and the worker is doing mechanical implementation. Do not recommend it for Grill, Plan, Story/PRD/ADR materialization, or any worker that may still need strong semantic decisions after its first write. It is event-driven, not timed.
 
 Never enable `advisor` here. A second model that can interrupt every turn is a change to how work feels, not a setup detail: name it as available, and let the operator turn it on deliberately when they want it.
 

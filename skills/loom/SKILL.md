@@ -24,7 +24,7 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
 
 ## Process
 
-1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md), then reconstruct relevant current v7 state read-only under the current project root. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
+1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md), [`AUTHORITY.md`](AUTHORITY.md), and [`SESSION.md`](SESSION.md), then reconstruct relevant current v7 state read-only under the current project root. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
 2. Validate `.loom/version` before relying on durable state. It contains the supported major only. Missing state may route to Setup when persistence is required. Any non-current major or legacy state that needs interpretation is a **read-only hard stop** with upgrade guidance: do not migrate, rewrite, or apply compatibility behavior.
 3. Handle explicit setup intent before ordinary routing: load `loom-init`, preserving the intended root. Bare `/loom` never implies Setup.
 4. Classify exactly one interaction:
@@ -62,12 +62,13 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
 
    A numbered menu hands back the ranking work you already did; you read the evidence, so you rank.
 7. State one line before transfer: `Next honest step: <action> — <reason in the user's language>.` Then **execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
-8. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
+8. For explicit `/loom` entry, use the session draft contract in `SESSION.md`: create or reconcile `.loom/session/<session-id>.md` only as a per-run staging draft for confirmed boundary events. Do not inject it into ordinary host context and do not treat it as durable truth.
+9. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
 
 ## Hard stops
 
 - Do not orchestrate Plan → Implement → Verify or remain as controller.
-- Do not create a hidden lifecycle, runtime registry, task, worktree, lane, or dispatcher artifact.
+- Do not create a hidden lifecycle, runtime registry, task, worktree, lane, or dispatcher artifact. The explicit `/loom` session draft is allowed only under `SESSION.md` and is not dispatcher-owned durable truth.
 - Do not mutate project files or external state while dispatching.
 - No compatibility migration. Unsupported durable state is read-only.
 - Ambiguity gets exactly one recommended question.
@@ -81,6 +82,7 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
 | Explicit request conflicts with persisted state | Honor the explicit outcome/target, subject to safety and version validation |
 | Selected work needs persistence | Offer bounded Setup, then resume the selected ritual |
 | `.loom/version` is absent or not the supported major | Missing: Setup if needed. Different major: read-only hard stop; no migration |
+| Active session draft conflicts with Story, Git, or Orca evidence | Stop and ask one reconciliation question before routing |
 
 ## Done when
 

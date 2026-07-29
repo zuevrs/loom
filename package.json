@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "7.3.1",
+  "version": "7.4.0",
   "description": "Engineering partner for coding agents: next honest step, evidence, and contracts",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -40,6 +40,7 @@
     "skills/loom/PUBLISH.md",
     "skills/loom/OMP.md",
     "skills/loom/ORCA.md",
+    "skills/loom/SESSION.md",
     "skills/loom/CODEGRAPH.md",
     "skills/loom-init/**",
     "skills/loom-grill/**",
