@@ -60,16 +60,28 @@ test("direct small work stays light without losing durable knowledge",()=>{
   const direct=implement.split("## Direct small-fix route",2)[1].split("\n## Execution consent",1)[0];
   const capture=verify.split("## Capture the lesson, once",2)[1].split("\n## Hard stops",1)[0];
   assert.match(direct,/Objective:.*Out of scope:.*Check:/s);
+  assert.match(direct,/Observed flow.*Decision.*Rejected\/assumed.*Smallest proof/s);
+  assert.match(direct,/material trade-off.*route to Grill or Plan/i);
   assert.match(direct,/ask only when a different answer would change the result/i);
   assert.match(constitution,/Quick check.*Behavior check.*Full review/s);
   assert.match(direct,/Verification:.*Quick check.*Behavior check.*Full review/);
-  assert.match(direct,/canonical \*\*Capture the lesson, once\*\* contract/);
+  assert.match(direct,/canonical \*\*Capture the lesson, once\*\* contract as the direct route's Ship checkpoint/);
   assert.doesNotMatch(direct,/CONTEXT\.md.*ADR.*loom:.*project skill/s);
   for(const owner of ["CONTEXT.md","ADR","loom:","repository-local `skills/<slug>/SKILL.md`"])assert.ok(capture.includes(owner),`canonical capture lost owner: ${owner}`);
   assert.match(capture,/exact owner and content.*capture preview.*write only after the operator approves/is);
   assert.match(capture,/No durable knowledge means no offer and no write/i);
+  assert.match(direct,/Always make the disposition explicit.*No durable lesson/s);
   assert.match(capture,/separate small change.*never inherits the verdict.*objective checks and fresh independent Verify/is);
   assert.match(direct,/do not create a Story, PRD, or Ticket/i);
+});
+
+
+test("public cycle names Ship without weakening Finish and Publish boundaries",()=>{
+  const constitution=read("skills/loom/CONSTITUTION.md"),readme=read("README.md"),agents=read("AGENTS.md"),glossary=read("docs/glossary.md");
+  for(const text of [constitution,readme,agents])assert.match(text,/Grill → Plan → Implement → Verify → Ship/);
+  assert.match(glossary,/\*\*Ship\*\*[\s\S]*separate attended local `Finish` and remote `Publish` boundaries/);
+  assert.match(constitution,/Finish and Publish are the local and remote boundaries of Ship/);
+  assert.match(readme,/explicit decision about durable capture/);
 });
 
 
@@ -119,6 +131,21 @@ test("continuation preserves a done Story and plans a linked delta Story",()=>{
   assert.match(amend,/do not amend.*done Story.*linked continuation/is);
   assert.match(story,/original.*byte-for-byte unchanged/is);
   assert.doesNotMatch(corpus,/(?:may|can|should) (?:reopen|amend) (?:a |the )?done Story/i);
+});
+
+
+test("continuation packets trim repeated planning context without weakening evidence",()=>{
+  const implement=read("skills/loom-implement/SKILL.md"),verify=read("skills/loom-verify/SKILL.md");
+  for(const text of [implement,verify]){
+    assert.match(text,/compact continuation packet/i);
+    assert.match(text,/Story intent\/success/i);
+    assert.match(text,/relevant PRD decisions\/assumptions/i);
+    assert.match(text,/current Git fixed point\/diff identity/i);
+  }
+  assert.match(implement,/full Story\/PRD remains available for deeper dives/i);
+  assert.match(implement,/does not repeat the whole planning surface by default/i);
+  assert.match(verify,/exact diff text.*Ticket semantics.*Log.*ordered repository Boundary.*gate results/is);
+  assert.match(verify,/assemble the checker context \*\*once\*\*/i);
 });
 
 

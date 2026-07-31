@@ -16,6 +16,8 @@ Start here for the terms users see. Project-specific language belongs in the rep
 
 **Independent feedback** — Review by a context other than the maker. Its depth is a Quick check, Behavior check, or Full review, chosen for the changed boundary and consequences.
 
+**Ship** — The user-facing completion boundary: verified local work plus an explicit decision about durable knowledge capture. Ship contains the separate attended local `Finish` and remote `Publish` boundaries; it never implies either one automatically.
+
 **Finish** — An explicit attended local handoff. It can confirm local integration effects but never authorizes Publish.
 
 **Publish** — A separate explicit attended command for confirmed remote effects. It never auto-merges, releases, or cleans up.

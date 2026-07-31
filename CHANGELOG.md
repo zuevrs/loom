@@ -6,6 +6,38 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.5.0] - 2026-07-31
+
+Quality-cycle completion and bounded continuation context improvements. This is a minor release because the public completion model and fresh Ticket loading contract change expected agent behavior without adding a new ritual.
+
+### Highlights
+
+- **Ship completion boundary.** Public prose now presents `Grill → Plan → Implement → Verify → Ship`, with explicit durable-capture disposition while preserving separate local `Finish` and remote `Publish` authority.
+- **Direct-route quality floor.** Small fixes require compact pre-edit analysis, independent Verify, and an explicit `No durable lesson` or capture decision.
+- **Bounded continuation packets.** Subsequent Tickets receive Story intent/success, relevant PRD decisions, one Ticket, blocker status, standards paths, and Git identity without re-reading unrelated planning surfaces by default.
+- **Instruction budget canary.** Maintainer smoke now checks key Loom instruction surfaces for silent growth.
+
+### Breaking changes
+
+- User-facing completion summaries should use Ship; Finish and Publish remain separate attended boundaries.
+- Fresh continuation makers must use the compact packet contract and deepen into full owners only when evidence requires it.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart the host.
+- Rerun Setup where the managed block still reports an older version.
+- No project artifact migration is required; existing Stories, Tickets, and session archives remain valid.
+
+### Adapter impacts
+
+- OMP and other carriers receive the updated action skills and verification prose; no new runtime hook or forced continuation was added.
+- Orca remains the runtime owner for fresh worktree and terminal execution.
+
+### Safety changes
+
+- Compact loading does not weaken maker/checker separation: Verify still receives one shared evidence packet containing exact diff, Ticket semantics, Log, Boundary, fixed points, and gate results.
+- The new prose canary preserves these fields and the existing full review narrative.
+
 ## [7.4.0] - 2026-07-29
 
 Session-draft staging plus workspace/Orca flow redesign grounded in live OMP and Orca evidence. This is a minor release because the workspace operating model, OMP setup guidance, and planning/materialization contract change expected agent behavior without adding a new ritual.
@@ -1464,7 +1496,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.3.1...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.5.0...HEAD
+[7.5.0]: https://github.com/zuevrs/loom/compare/v7.3.1...v7.5.0
 [7.3.1]: https://github.com/zuevrs/loom/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/zuevrs/loom/compare/v7.2.0...v7.3.0
 [7.2.0]: https://github.com/zuevrs/loom/compare/v7.1.0...v7.2.0

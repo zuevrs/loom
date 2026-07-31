@@ -13,11 +13,12 @@ Use one entry point: `/loom`. Add what you want in natural language; Loom recomm
 ## How it works
 
 - A clear small fix goes directly to implementation with a fail-capable check and proportional independent feedback.
+- Every change still follows the quality loop: **Grill → Plan → Implement → Verify → Ship**. Small work compresses Grill/Plan into evidence-based analysis; it does not skip understanding, independent feedback, or the final memory decision.
 - Material work earns a compact Story, optional material PRD, vertically sliced Tickets, and one exact preview before anything is written. During an explicit `/loom` run, a short session draft may stage confirmed boundary events for Finish promotion; it is not durable project truth.
 - Verification is independent from the maker. Its depth follows the changed boundary: **Quick check**, **Behavior check**, or **Full review**.
 - Completion never silently grants commit, push, review, merge, release, or cleanup.
 
-The question at every entry is simple: **what is the next honest step?** Loom may recommend discussing, planning, implementing, verifying, finishing local work, or publishing—but it loads only the action that fits now.
+The question at every entry is simple: **what is the next honest step?** Loom may recommend discussing, planning, implementing, verifying, or shipping—but it loads only the action that fits now. Ship means verified local completion plus an explicit decision about durable capture; local Finish and remote Publish remain separate attended boundaries.
 
 ## Core rules
 

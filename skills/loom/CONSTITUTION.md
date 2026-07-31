@@ -2,6 +2,8 @@
 
 This is the small engineering floor loaded at every Loom entry. Detailed contracts load only when their boundary is selected.
 
+Cycle: **Grill → Plan → Implement → Verify → Ship**. It is a quality loop, not mandatory ceremony: small work compresses Grill/Plan into analysis; Ship preserves local Finish and remote Publish
+
 ## Core rules
 
 1. Understand the real work before changing it. Separate observation, inference, and revisable assumptions.
@@ -27,6 +29,6 @@ Before work, state `Verification: <name> — <checks and independent feedback>`.
 
 ## Routing
 
-Loom asks one question at entry: **what is the next honest step?** The dispatcher selects exactly one internal action—Setup, Grill, Plan, Implement, Verify, Finish, or Publish—states the reason in the user's language, hands off once, and disappears. These are internal actions, not a mandatory workflow.
+Loom asks one question at entry: **what is the next honest step?** The dispatcher selects exactly one internal action—Setup, Grill, Plan, Implement, Verify, Finish, or Publish—states the reason in the user's language, hands off once, and disappears. These are internal actions, not a mandatory workflow. In user-facing summaries, Finish and Publish are the local and remote boundaries of Ship.
 
 Small concrete work may go straight to Implement. Material work earns Story/PRD/Tickets through Plan. Host and workspace details load only when relevant. Orca supplies native execution context but never replaces Loom's durable meaning or confirmation boundaries.

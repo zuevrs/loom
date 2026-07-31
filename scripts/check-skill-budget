@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# loom: keep instruction surfaces from growing silently; raise the budget with evidence after review.
+set -euo pipefail
+
+ROOT="${1:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$ROOT"
+
+check() {
+  local path="$1" max="$2" actual
+  actual=$(wc -c < "$path" | tr -d ' ')
+  printf '%7d / %-7d %s\n' "$actual" "$max" "$path"
+  if (( actual > max )); then
+    printf 'budget exceeded: %s is %d bytes over its %d-byte budget\n' "$path" "$((actual - max))" "$max" >&2
+    return 1
+  fi
+}
+
+printf '%s\n' 'Loom instruction-surface budget (bytes)' 'actual / budget path'
+
+# Budgets are current baselines with roughly 10% headroom, not permission to grow.
+check AGENTS.md 3300
+check commands/loom.md 900
+check skills/loom/SKILL.md 7600
+check skills/loom/CONSTITUTION.md 3200
+check skills/loom/AUTHORITY.md 10900
+check skills/loom/SESSION.md 4700
+
+check skills/loom-grill/SKILL.md 13700
+check skills/loom-plan/SKILL.md 10600
+check skills/loom-plan/GRILL.md 24100
+check skills/loom-implement/SKILL.md 25400
+check skills/loom-verify/SKILL.md 27200
+
+printf '%s\n' '{"status":"pass","message":"Instruction-surface budgets passed"}'

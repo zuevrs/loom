@@ -15,5 +15,6 @@ run npm test
 run bash scripts/check-drift
 run bash scripts/check-skill-template-contract
 run bash scripts/check-template-sections
+run bash scripts/check-skill-budget
 
 echo '{"status":"pass","message":"Structural smoke passed"}'
