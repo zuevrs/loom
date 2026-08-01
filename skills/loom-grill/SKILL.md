@@ -21,6 +21,10 @@ Investigate, stress-test, debug, or think through a question in freeform discuss
 
 Use current project evidence read-only during ordinary discussion. Do not create or update Story, PRD, or Tickets. If the user asks to capture planning state or a decision whose proper owner is a Story/PRD/Ticket, recommend Plan. Confirmed non-planning CONTEXT/ADR/code materialization uses the current project root and the explicit action gate below.
 
+## Output shape
+
+Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+
 ## Outputs
 
 - Decisions → lightweight ADR (`docs/adr/NNNN-<slug>.md`: Question / Decision / Why) — only when all three hold: hard to reverse + surprising without context + result of a real trade-off

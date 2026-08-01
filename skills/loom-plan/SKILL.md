@@ -19,6 +19,10 @@ Produce the smallest durable v7 plan under `.loom/<story-id>/` without implement
 - Read-only Orca repository keys/context when available
 - Optional CodeGraph evidence, when configured and fresh; load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) before relying on it
 
+## Output shape
+
+Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+
 ## Outputs
 
 - `.loom/<story-id>/STORY.md`

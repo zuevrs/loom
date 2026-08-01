@@ -91,6 +91,10 @@ After independent feedback, apply `loom-verify`'s canonical **Capture the lesson
 
 Selecting a named Ticket explicitly authorizes Ticket-scoped project changes, `## Log` updates, replacement of the current canonical Verify result, and frontmatter `status: done` only after APPROVE (or `status: ready-for-human` when the stable Human gate requires it). It does not authorize scope expansion, commit, Finish, Publish, or any external action. Approval grants no commit or publication authority.
 
+## Output shape
+
+Lead with the result or next action. For more than one action, use the fewest numbered bounded steps. Keep adjacent ideas separate. When reporting an error, state `location → cause → fix`; do not bury the actionable result in a preamble.
+
 ## Outputs
 
 - Code/doc changes scoped to the Ticket

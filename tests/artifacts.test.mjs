@@ -84,6 +84,38 @@ Not finished.
   }finally{rmSync(root,{recursive:true,force:true})}
 });
 
+test("session progress checkpoint is closed, safe, and round-trips",()=>{
+  const root=fixture();
+  try{
+    const dir=join(root,".loom","session"),file=join(dir,"abc12345.md");mkdirSync(dir,{recursive:true});
+    const checkpoint={done:"Ticket 01 verified",current:"Ship capture",next:"show capture preview",blocker:"None",decision:"No durable lesson",owners:".loom/alpha/tickets/01-first.md",fixedPoint:"abc1234"};
+    const body=a.renderProgressCheckpoint(checkpoint),draft=`---
+id: abc12345
+status: active
+createdAt: 2026-07-29T12:00:00Z
+---
+
+## Scope
+Scope.
+
+## Boundary events
+None yet.
+
+## Progress checkpoint
+${body}
+
+## Promotion preview
+None yet.
+
+## Finish
+Not finished.
+`;
+    const parsed=a.parseSessionDraft(draft,file);assert.deepEqual(parsed.progressCheckpoint,checkpoint);assert.deepEqual(a.parseSessionDraft(a.renderSessionDraft(parsed),file).progressCheckpoint,checkpoint);
+    for(const bad of [body.split("\n").slice(0,-1).join("\n"),`${body}\nextra: no`,body.replace("done: Ticket 01 verified","done: first\ndone: second"),body.replace("current: Ship capture","malformed")])assert.throws(()=>a.parseProgressCheckpoint(bad),/progress checkpoint/);
+    for(const bad of [{...checkpoint,extra:"no"},{...checkpoint,done:""},{...checkpoint,done:"ok\ncurrent: injected"},{...checkpoint,done:undefined}])assert.throws(()=>a.renderProgressCheckpoint(bad),/progress checkpoint/);
+  }finally{rmSync(root,{recursive:true,force:true})}
+});
+
 test("session draft archive status and path must agree",()=>{
   const root=fixture();
   try{

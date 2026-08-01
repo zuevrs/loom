@@ -2,6 +2,10 @@
 
 Lazy-load this fragment only for an explicit Story finish. Load and follow [`STORY.md`](STORY.md) and [`SESSION.md`](SESSION.md) first.
 
+## Output shape
+
+Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+
 ## Exact intent classification
 
 Classify before checks, instructions, or lifecycle writes. Only exact `/loom finish` or a narrow positive imperative that asks to finalize or close **this/current Story** and explicitly includes its local integration/commit outcome is `FINISH`. Negation, a question mark, a conditional or question prefix, altered slash syntax, another Story, or incomplete wording is `ASK`: ask one focused question and perform no effect. Casual phrases such as `looks good`, `done for now`, `ship it`, or card switching are `NOOP`.
@@ -84,7 +88,7 @@ Sanitize commit and review prose. Exclude Loom/Orca/OMP and agent/control-plane 
 
 Local effects are nontransactional. If owner integration or one repository succeeds and a later command fails, preserve and report every success, the failed command/evidence, and remaining unperformed inventory; do not roll back, rewrite, publish, or repeat successful effects. A later explicit Finish must reread everything and obtain renewed confirmation only for the remaining coherent local outcome.
 
-Before final local closure, read the active `.loom/session/<session-id>.md` when one exists. If Finish discovers a pending promotion decision without a draft, create the draft with that first boundary event; otherwise create nothing. Offer a compact promotion preview for its confirmed boundary events, assigning each event exactly one smallest canonical owner or `discarded`. Canonical owner writes require fresh explicit confirmation and are a separate proportional change with fresh independent Verify; declining promotion preserves the completed result. After the Finish result is accepted, mark the draft `finished` and archive it as `.loom/session/archive/<session-id>.md`; deletion remains a later explicit cleanup.
+Before final local closure, read the active `.loom/session/<session-id>.md` when one exists. If Finish discovers a pending promotion decision without a draft, create the draft with that first boundary event; otherwise create nothing. Offer a compact promotion preview for its confirmed boundary events, assigning each event exactly one smallest canonical owner or `discarded`. Canonical owner writes require fresh explicit confirmation and are a separate proportional change with fresh independent Verify; declining promotion preserves the completed result. After the Finish result is accepted and checkpoint disposition is explicit, never promote the checkpoint itself: mark the draft `finished` and archive it as `.loom/session/archive/<session-id>.md`, or remove it only under separately confirmed cleanup.
 
 Story becomes `done` only after all inventoried local owner/repository results are reread and proven, checks and final Spec + Standards remain current, and the operator explicitly accepts that verified local result. `done` means verified local result accepted; it does not mean pushed, reviewed, merged, released, archived, or cleaned. Finish prepares the sanitized review bundle but performs no remote effect.
 

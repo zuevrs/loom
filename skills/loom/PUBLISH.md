@@ -2,6 +2,10 @@
 
 Lazy-load this fragment only for an explicit Story publish. Load and follow [`STORY.md`](STORY.md) and [`FINISH.md`](FINISH.md) first.
 
+## Output shape
+
+Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+
 ## Exact intent and prerequisite
 
 Classify before remote instructions or state changes. Only exact `/loom publish` or a narrow positive imperative to push/publish **this/current Story**, create/open its hosted review, or perform its explicitly named release effect is `PUBLISH`. Negation, a question, conditional wording, altered slash syntax, another Story, or ambiguity is `ASK`; ask one focused question and perform no effect. Casual completion, card, review, merge, or release wording is `NOOP` unless it names the exact current-Story remote effect.

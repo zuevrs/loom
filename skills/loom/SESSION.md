@@ -4,12 +4,12 @@ Lazy-load this fragment only for explicit `/loom` entry, resume, or Finish. A se
 
 ## Purpose
 
-Keep useful session knowledge from being lost without turning `CONTEXT.md` into a transcript. The draft records only confirmed boundary events that may need later promotion to the smallest canonical owner.
+Keep confirmed recovery-worthy events until Finish promotion.
 
 ## Location and identity
 
 - Explicit `/loom` establishes identity and reads any draft, but creates no file. Create `.loom/session/<session-id>.md` only for the first recovery-worthy event: confirmed decision/rejection/open question, handoff, unresolved resume, or pending promotion. Never create an empty draft.
-- One draft belongs to one `/loom` run. A new `/loom` run gets a new `<session-id>`.
+- One draft belongs to one `/loom` run.
 - `<session-id>` is the stable host session/runtime id when available; otherwise use a generated lowercase UUID-like id. It is path-safe and never contains `/`, `\`, `..`, spaces, or uppercase letters. `createdAt` is first buffer-write time.
 - Archived drafts move to `.loom/session/archive/<session-id>.md` after Finish. Deletion is cleanup/Tend-like work with its own exact preview and confirmation.
 
@@ -17,11 +17,11 @@ Keep useful session knowledge from being lost without turning `CONTEXT.md` into 
 
 Loom owns writes to the draft. Ordinary agents do not append freeform notes. The draft is read just-in-time at `/loom` entry, resume, and Finish; it is not injected into ordinary OMP/Orca context.
 
-A draft is evidence to classify and promote, not a source of truth. If it conflicts with canonical artifacts, Git, or live Orca/OMP evidence, stop and reconcile before routing.
+Conflicts with artifacts, Git, or Orca/OMP stop routing for reconciliation.
 
 ## Event model
 
-Record only boundary events. A routine verified fact alone does not create a draft:
+Record only boundary events; routine verified facts alone create nothing.
 
 - `confirmed-decision` — the user explicitly chose an option that changes result, acceptance, boundary, or owner.
 - `rejected-option` — a material option was explicitly rejected and would otherwise be rediscovered.
@@ -52,6 +52,17 @@ One compact sentence naming the `/loom` run objective.
   evidence: User chose ephemeral per-run draft in Grill.
   text: Use one session draft per explicit `/loom` run.
 
+## Progress checkpoint
+None yet. On durable boundary, blocker/decision, handoff/resume, or pending Finish delta, replace with exactly:
+`done: …`
+`current: …`
+`next: …`
+`blocker: …`
+`decision: …`
+`owners: <canonical paths>`
+`fixedPoint: <Git fixed point>`
+This is a recovery pointer, not authority; never add transcript, token/model details, terminal output, runtime IDs, or full Git/Orca state.
+
 ## Promotion preview
 None yet.
 
@@ -59,7 +70,7 @@ None yet.
 Not finished.
 ```
 
-Allowed frontmatter statuses are `active`, `finished`, and `archived`. Allowed event statuses are `active`, `promoted`, and `discarded`. Allowed owners are `session`, `CONTEXT.md`, `ADR`, `Story`, `Ticket`, `loom-marker`, and `project-skill`.
+Statuses: draft `active|finished|archived`; event `active|promoted|discarded`. Owners: `session|CONTEXT.md|ADR|Story|Ticket|loom-marker|project-skill`.
 
 ## Promotion at Finish
 
@@ -71,7 +82,7 @@ Finish reads the active draft and offers a compact promotion preview. For each e
 - deliberate code shortcut with ceiling → `loom:` marker beside code;
 - repeatable project procedure → repository-local `skills/<slug>/SKILL.md`.
 
-Write canonical owners only after explicit confirmation. Promotion is a separate change with proportional checks and fresh independent Verify. If the operator declines, archive the draft unchanged except for status/Finish notes.
+Write owners only after confirmation and fresh proportional Verify. Decline archives unchanged except status/Finish. Archive or remove checkpoints after disposition; never promote them automatically.
 
 ## Resume
 

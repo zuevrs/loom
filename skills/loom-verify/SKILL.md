@@ -22,6 +22,10 @@ Judge the change on two axes without fixing it. Fresh eyes, maker/checker separa
 - Maker identity and the pre-completion Human classification
 - Optional CodeGraph evidence, only when its current-worktree identity and freshness are established; load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md)
 
+## Output shape
+
+Lead with `Verdict` or the next required action. Group findings by axis; end with one recommended next action. Errors state `location → cause → fix`; brevity never removes evidence.
+
 ## Outputs
 
 Two explicitly separate formats:

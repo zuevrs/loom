@@ -6,6 +6,65 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 - No changes yet.
 
+## [7.7.0] - 2026-08-01
+
+Action-first output and lazy progress checkpoint improvements. This is a minor release because the session-draft schema gains a backward-compatible checkpoint and every action changes its user-facing delivery contract.
+
+### Highlights
+
+- **Thin action-first output floor.** Loom leads with the result or next action, uses the fewest bounded steps, keeps tangents separate, and ends open responses with one concrete next step.
+- **Consistent action reporting.** Setup, Grill, Plan, Implement, Verify, Finish, and Publish use numbered bounded steps and the factual error shape `location → cause → fix`.
+- **Lazy progress checkpoint.** Existing session drafts may carry exactly `done`, `current`, `next`, `blocker`, `decision`, canonical `owners`, and Git `fixedPoint` for recovery.
+- **Strict checkpoint validation.** Parser and renderer share one closed-shape validator with fail-capable malformed and round-trip tests.
+
+### Breaking changes
+
+- None. Existing session drafts without a progress checkpoint remain valid.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart the host.
+- Rerun Setup where the managed block still reports an older version.
+- No project artifact migration is required.
+
+### Adapter impacts
+
+- All prose carriers receive the same action-output contract; no new OMP hook, Orca runtime state, or upstream skill dependency was added.
+- The optional OMP runtime guard remains default-off and unchanged.
+
+### Safety changes
+
+- Progress checkpoints are recovery pointers, never authority or automatic canonical memory.
+- Checkpoints reject missing, extra, blank, non-string, and multiline fields and exclude transcripts, token/model details, terminal output, runtime IDs, and full Git/Orca snapshots.
+- Ship archives or removes checkpoints only after explicit disposition and never promotes checkpoint content automatically.
+
+## [7.6.0] - 2026-08-01
+
+Bounded verification and opt-in OMP mutation safety. This historical section repairs the missing changelog body from the already published v7.6.0 tag.
+
+### Highlights
+
+- Added bounded Verify rounds, packet-first evidence, proportional Quick/Behavior/Full tiers, and `smol`-first checker selection.
+- Added fresh maker boundaries per Ticket, hard materiality stops, and lazy session-draft creation.
+- Replaced OMP lifecycle callbacks with a default-off stateless guard for agent-issued Git, release, publish, and cleanup commands.
+
+### Breaking changes
+
+- OMP no longer receives automatic Loom lifecycle callbacks; the optional runtime guard blocks matching mutations without changing Loom state.
+
+### Migration steps
+
+- Update through the installed carrier and enable `runtime-guard` only when agent-issued mutation blocking is desired.
+
+### Adapter impacts
+
+- OMP is skills/prose-only by default; Orca remains the native Workspace execution owner.
+
+### Safety changes
+
+- Verify is limited to one initial round and one finding-scoped recheck, with explicit full-rerun triggers and no third lap.
+- Quick checks use the exact non-approval Spec sentinel only under the Quick tier.
+
 ## [7.5.0] - 2026-07-31
 
 Quality-cycle completion and bounded continuation context improvements. This is a minor release because the public completion model and fresh Ticket loading contract change expected agent behavior without adding a new ritual.
@@ -1496,7 +1555,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.6.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.7.0...HEAD
+[7.7.0]: https://github.com/zuevrs/loom/compare/v7.6.0...v7.7.0
 [7.6.0]: https://github.com/zuevrs/loom/compare/v7.5.0...v7.6.0
 [7.5.0]: https://github.com/zuevrs/loom/compare/v7.3.1...v7.5.0
 [7.3.1]: https://github.com/zuevrs/loom/compare/v7.3.0...v7.3.1

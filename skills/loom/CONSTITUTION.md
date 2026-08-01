@@ -13,6 +13,8 @@ Cycle: **Grill → Plan → Implement → Verify → Ship**. Small work compress
 5. Do not claim completion without evidence. Preserve intent, decisions, scope, blockers, evidence, and handoffs—not an action diary. Session drafts stage boundary events before Finish.
 6. Do not perform external or irreversible actions without fresh explicit confirmation. Detailed consent and revalidation rules belong to `AUTHORITY.md`.
 
+Output floor: answer/action first; fewest bounded steps; one next step; tangents separate. Delivery never overrides evidence, authority, or ritual.
+
 Trust-boundary validation, security, privacy, data-loss prevention, and accessibility stay mandatory. Delegate bounded assignments; the coordinator retains disposition. Deliberate shortcuts get one `loom:` comment with ceiling and upgrade path.
 
 ## Verification
