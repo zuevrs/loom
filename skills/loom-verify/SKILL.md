@@ -42,13 +42,17 @@ For multi-repository Story work, Orca is the sole coordinator and supplies the o
 
 ## Process
 
+Verify has a bounded budget. Run one initial round. A rejecting axis gets at most one finding-scoped recheck in its same checker context; an approving axis is not rerun unless the rework newly affects it. A full new round is allowed only when acceptance or an explicit user contract expands, the public/inter-service contract expands, the repository or dependency set expands, or rework newly affects the second axis. A second overlapping REJECT stops under the existing two-strikes rule; there is no third checker lap.
+
 1. Pin the **Boundary** before judging: Maker identity; Ticket digest; ordered repositories with identity, HEAD, fixed point, and diff digest; and the exact included semantics. Confirm at least one repository diff is non-empty. The Boundary excludes only Ticket lifecycle frontmatter `status` and the entire current `## Verify` block, and includes every other Ticket semantic byte plus exact repository state. This exact self-exclusion prevents writing Verify or changing status from invalidating its own digest; any other Ticket or repository change makes the result stale and requires fresh Verify.
 2. **Run the objective gates before spawning anyone.** Take the Verify tier from `CONSTITUTION.md` (tier 1 docs/tests-only, tier 2 internal logic, tier 3 contract/data/auth/migration/new dependency; ties take the higher tier). Tier 1 runs the Ticket-required checks; tier 2 adds the focused gates for the changed files; tier 3 adds the full relevant repository gates. Discover the commands from package scripts, Makefile, and CI configuration — never invent one. A repo with a lint script that Verify never ran is an unearned APPROVE.
 
    Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), while a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. A cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence.
 
    **Any red gate short-circuits: REJECT now.** Blockers name the failing commands, write-back happens as usual, and checkers are **not spawned**. Record in both Spec and Standards evidence summaries: `REJECT; not spawned — objective gate red; {failing command}`. Judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
-3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers:
+3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers. The packet is hash-pinned and maps every applicable acceptance criterion or named standard to an evidence anchor: diff hunk, source line, test/check result, Ticket/PRD line, ADR, or applicable project quality/review skill section. A checker may make one bounded live dive only for an absent, ambiguous, or context-dependent anchor; it names the question and bounded files/symbols first and never reconstructs the repository by default. Applicable project security, performance, CI, architecture, or review skills are Standards inputs only when their declared scope matches the changed surface; they never create another canonical axis.
+
+
    - **Spec-backed:** spawn **two parallel checker sub-agents** in separate contexts when the host supports it:
      - **Spec**: does the change satisfy Ticket + Story/optional PRD or explicit user contract? Quote spec lines for findings. Bind the Spec checker role explicitly in the host's supported syntax.
      - **Standards**: warp + discipline floor — conventions, and the Ticket's runnable check exists and **can fail**. Pass/fail itself arrives with the briefing's gate results; checker tools are read-only. Bind the Standards checker role explicitly in the host's supported syntax.
@@ -58,7 +62,7 @@ For multi-repository Story work, Orca is the sole coordinator and supplies the o
    - **Named checker agents:** if the host ships pre-configured checker agents such as `loom-verify-spec` and `loom-verify-standards`, **attempt them once per session**. Never assume unavailability without one recorded attempt. Record found/not found in the applicable evidence summary and reuse that discovery result for later verifies in the session. On not-found, fall back to generic independent sub-agents with the checker manifests inlined.
    - **Prefer named checker agents when listed.** A generic task/reviewer sub-agent is the fallback for hosts that do not list them, not a peer option. Names carry role constraints and the model tier below.
    - **Each checker prompt carries its own agent binding.** Batch two spawns for parallelism only if the interface binds the agent per item; one agent field spanning two prompts can run both under one checker manifest and silently lose the other axis's role and tier (observed on OMP: Standards ran under the Spec label).
-   - **Checker model tier:** use the host's **fast/cheap tier** when selectable. Named manifests may pin it (OMP `model: pi/smol`, Claude Code `model: haiku`); when a generic interface exposes model selection, pick the host's fast/cheap tier. The **user's host configuration always wins** — including model roles, redefined agents, and user rules. If no tier is discernible, inherit the session model. Include the tier used in each applicable evidence summary.
+   - **Checker model tier:** use `smol` by default (`pi/smol` in OMP). Escalate to a strong model only for unresolved ambiguity after the bounded dive, cross-axis conflict, high-consequence authentication/data-loss/public-contract uncertainty, or one invalid/empty smol result; record the reason and model tier. Strong escalation does not reset the one-recheck budget. The user's host configuration always wins.
    - **Capability fallback:** if parallel workers are unavailable, run required axes in independent sequential contexts and record the limitation. If an independent review cannot be obtained, fail closed with `ESCALATE_HUMAN`; never simulate the missing checker in the maker context.
 4. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15 seconds or more). Fill the wait with Verify's remaining work: pre-assemble the digest frame, scope, Boundary, fixed points, and step-2 gate results in their slots, so checker verdicts drop into a prepared digest. No empty rapid-fire polls: a field run burned six consecutive no-op polls exactly here.
 5. Aggregate the full chat digest with blocking findings first. Findings cite the contract line (Spec) or named source (Standards). Gate results are verdict input, not decoration — **evidence beats opinion**, and an APPROVE whose Checks executed section is empty is unearned by definition.
@@ -91,7 +95,7 @@ APPROVE | REJECT | ESCALATE_HUMAN
 - Named checker agents: attempted this session (yes/no) → found / not found (reuse first attempt)
 - Review execution: host-native parallel batch | parallel sub-agents | independent sequential fallback (limitation recorded)
 - Role binding: Spec checker (yes/no/not required) | Standards checker (yes/no)
-- Checker model tier: fast/cheap tier | inherited session model | user-configured (which)
+- Checker model tier: smol by default | explicit strong-model escalation with reason | user-configured (which)
 - If parallel sub-agents are unavailable: document limitation and run required checks sequentially in separate contexts
 
 ## Risk/Scope notes
@@ -121,7 +125,7 @@ REJECT
 - Named checker agents: attempted this session yes → found
 - Review execution: host-native parallel batch
 - Role binding: Spec checker yes | Standards checker yes
-- Checker model tier: fast/cheap tier
+- Checker model tier: smol by default
 
 ## Risk/Scope notes
 - Reviewed only the pinned export Ticket Boundary; no release or migration behavior was included.
@@ -165,7 +169,7 @@ Show the exact owner and content in one compact capture preview, then **write on
 
 A capture approved after the verdict is a separate small change. It never inherits the verdict that preceded it: run its proportional objective checks and fresh independent Verify before calling that capture verified. This applies to every owner inside a judged repository, especially a code-adjacent `loom:` marker. If the operator declines the extra change, preserve the completed result and leave the capture unwritten.
 
-When an explicit `/loom` session draft exists, record the approved capture decision there as a boundary event before the durable owner write. The draft remains staging and is never itself the canonical owner.
+When an explicit `/loom` session draft exists, record the approved capture decision there as a boundary event before the durable owner write. If no draft exists, lazy-create one only when the approved capture decision must survive to promotion; ordinary Verify does not create a draft. The draft remains staging and is never itself the canonical owner.
 
 Without this the project pays for the same discovery every time: findings live in a verdict, verdicts are replaced by the next one, and nothing accumulates. Do not write durable knowledge unasked; an unapproved lesson is one agent's opinion promoted to project truth.
 

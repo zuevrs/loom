@@ -8,6 +8,8 @@ Classify before remote instructions or state changes. Only exact `/loom publish`
 
 Publish requires a current verified local Finish result that the operator explicitly accepted. Story may be `done`; Story has no publish-specific status. Ticket APPROVE, prior Story/Finish confirmation, Finish confirmation, local commits, a prior publish effect, or a review state grants no authority for another remote effect. Human merge and release remain separate explicit gates.
 
+The operator performs each remote effect manually; Loom supplies instructions and read-only verification only. The optional OMP runtime guard can block recognizable agent-issued bash push/release/publish commands, but it does not replace the exact inventory, confirmation, manual execution, or revalidation.
+
 ## One full pass
 
 Everything below is the reference. This is the shape. Same Story as the Finish example, two repositories:

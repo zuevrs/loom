@@ -8,9 +8,9 @@ Keep useful session knowledge from being lost without turning `CONTEXT.md` into 
 
 ## Location and identity
 
-- Create at explicit `/loom` entry only: `.loom/session/<session-id>.md`.
+- Explicit `/loom` establishes identity and reads any draft, but creates no file. Create `.loom/session/<session-id>.md` only for the first recovery-worthy event: confirmed decision/rejection/open question, handoff, unresolved resume, or pending promotion. Never create an empty draft.
 - One draft belongs to one `/loom` run. A new `/loom` run gets a new `<session-id>`.
-- `<session-id>` is the stable host session/runtime id when available; otherwise use a generated lowercase UUID-like id. It is path-safe and never contains `/`, `\`, `..`, spaces, or uppercase letters.
+- `<session-id>` is the stable host session/runtime id when available; otherwise use a generated lowercase UUID-like id. It is path-safe and never contains `/`, `\`, `..`, spaces, or uppercase letters. `createdAt` is first buffer-write time.
 - Archived drafts move to `.loom/session/archive/<session-id>.md` after Finish. Deletion is cleanup/Tend-like work with its own exact preview and confirmation.
 
 ## Authority
@@ -21,7 +21,7 @@ A draft is evidence to classify and promote, not a source of truth. If it confli
 
 ## Event model
 
-Record only boundary events:
+Record only boundary events. A routine verified fact alone does not create a draft:
 
 - `confirmed-decision` — the user explicitly chose an option that changes result, acceptance, boundary, or owner.
 - `rejected-option` — a material option was explicitly rejected and would otherwise be rediscovered.
@@ -83,7 +83,7 @@ On resume, reconcile draft state before routing:
 
 ## Hard stops
 
-- Do not create a draft for ordinary host sessions without explicit `/loom` entry.
+- Do not create a draft for entry or routine routing.
 - Do not treat the draft as durable memory or a canonical owner.
 - Do not copy raw transcript/tool output into the draft.
 - Do not promote without preview and fresh explicit confirmation.

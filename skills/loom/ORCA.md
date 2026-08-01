@@ -51,7 +51,7 @@ orca worktree set --worktree <selector> --comment "loom: <ticket-id> maker runni
 
 The claim is advisory, which is exactly why it is written before the maker starts and rewritten at the Verify verdict. Two live claims on one lane is a stop for human reconciliation, never resolved by recency, `lastActivityAt`, or display name.
 
-Keep one healthy maker per lane and reuse that same maker for rework. Replace it only when native Orca liveness says it is unhealthy or unavailable.
+Keep one healthy maker per Ticket assignment and reuse that same maker only for that Ticket’s rework. The next Ticket requires a newly spawned host-native maker, even on the same lane. Compaction, summarization, model switching, or continuation is recovery, not freshness. Replace a rework maker only when native Orca liveness says it is unhealthy or unavailable. Any Workspace Ticket, including a one-repository Ticket, uses a coherent Orca lane; missing native evidence stops rather than falling back to raw Git.
 
 **A maker that hits real uncertainty asks — it does not decide quietly.** The operator can see every lane's terminal, so the question reaches a human either way; what differs is where the answer lands. Route by materiality, using the classifiers already in `STORY.md` § Adaptive continuation:
 

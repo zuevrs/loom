@@ -1,6 +1,6 @@
 ---
 name: loom-verify-before-done
-description: Verify before marking done; OMP enforces at session stop
+description: Verify before marking done; hosts provide prose guidance and optional OMP mutation guard
 condition: ['status:\s*done']
 scope: [tool:write, tool:edit]
 globs: [".loom/*/tickets/*.md"]

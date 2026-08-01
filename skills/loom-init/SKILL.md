@@ -57,7 +57,7 @@ Malformed local binding JSON/schema is a global stop. A missing or stale individ
 
 ## Host preset (OMP)
 
-On OMP, offer a project preset once, as its own preview and its own confirmation, separate from the managed-block transaction. Setup writes host configuration only when the operator accepts it; declining is a normal outcome and changes nothing else. Preserve existing YAML — merge these keys, never rewrite the file.
+On OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. The compaction/model-role preset changes context tuning only. The optional `runtime-guard` feature changes agent-issued tool execution and must have its own named preview; declining leaves runtime behavior unchanged. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
 
 ```yaml
 compaction:
@@ -77,7 +77,13 @@ Say why, because the operator is being asked to change a host default:
 - **Model roles** let one Story use a strong model for Grill and Plan and a cheap one for mechanical work, with no change to any Loom prose. Do not invent model identifiers — read the operator's configured models and let them assign. If the `plan` role is left unset, the host performs no model transition, which is a safe default, not a failure.
 - **`task.prewalk`** is optional, not a baseline default. It switches a bounded task worker to the cheap model at the first edit after a todo list exists. Use it only when the contract is already frozen and the worker is doing mechanical implementation. Do not recommend it for Grill, Plan, Story/PRD/ADR materialization, or any worker that may still need strong semantic decisions after its first write. It is event-driven, not timed.
 
-Never enable `advisor` here. A second model that can interrupt every turn is a change to how work feels, not a setup detail: name it as available, and let the operator turn it on deliberately when they want it.
+Optional OMP runtime guard preview:
+
+```json
+{"features":{"loom":["runtime-guard"]}}
+```
+
+This feature is default-off and blocks only recognizable agent-issued bash commands for `git commit/push/merge/tag/cleanup`, release creation, package publish, and explicit Orca cleanup. It directs the operator to run the exact command manually and then reread state. It is stateless, does not route or continue, and is a lexical bash guard rather than a shell sandbox. Never enable `advisor` here. A second model that can interrupt every turn is a change to how work feels, not a setup detail: name it as available, and let the operator turn it on deliberately when they want it.
 
 Never write memory or learning settings on the operator's behalf. Those decide what leaves the machine.
 

@@ -13,15 +13,16 @@ Repositories:
 - {repository key} | head {40-64 hex oid} | diff sha256:{64-hex digest}
 Boundary: sha256:{64-hex boundary digest}
 Spec: APPROVE|REJECT | {distinct checker identity} | {one-line contract-cited evidence}
+Spec: NOT REQUIRED | Quick check | Quick check
 Standards: APPROVE|REJECT | {distinct checker identity} | {one-line named-source evidence including objective command/result summaries}
 Human: NOT REQUIRED
 ```
 
-When Ticket policy requires Human approval, replace only the last line with `Human: APPROVE | {distinct identity} | {one-line evidence}`. There are no separate canonical checks, findings, execution, or checker-provenance fields. Keep detailed findings and red output in the chat digest; durable details may live in Ticket `## Log` or referenced check output. Spec and Standards evidence must each remain one line with no `|`; Standards includes every objective gate summary, or `no runnable checks — {why}`. Checker verdicts remain `APPROVE|REJECT`; `NOT REQUIRED` is only the Human policy sentinel.
+When Ticket policy requires Human approval, replace only the last line with `Human: APPROVE | {distinct identity} | {one-line evidence}`. There are no separate canonical checks, findings, execution, or checker-provenance fields. Keep detailed findings and red output in the chat digest; durable details may live in Ticket `## Log` or referenced check output. Spec and Standards evidence must each remain one line with no `|`; Standards includes every objective gate summary, or `no runnable checks — {why}`. `Spec: NOT REQUIRED | Quick check | Quick check` is the only Quick sentinel; Behavior and Full require a real Spec checker. Other checker verdicts remain `APPROVE|REJECT`; `NOT REQUIRED` is not a Human policy sentinel.
 
 Status effects for a Spec-backed Loom Ticket: **APPROVE** → replace the current `## Verify`, then set lowercase frontmatter `status: ready-for-human` when Human is required or `status: done` otherwise. **REJECT** → replace the current result; no automatic `status` change. Standards-only output stays in chat and never mutates a Ticket.
 
-**APPROVE vouches only for the exact Boundary it judged.** Any included Ticket semantic or repository-state change after the verdict makes the current Verify stale and requires a full fresh Verify. There is no post-Verify delta exception. Changes to only the self-excluded lifecycle frontmatter `status` or replacement current `## Verify` block do not stale it.
+**APPROVE vouches only for the exact Boundary it judged.** Any included Ticket semantic or repository-state change after the verdict makes the current Verify stale. A Log-only change with unchanged acceptance/user contract, public contract, repositories, dependencies, and affected axes requires a fresh digest and canonical record rewrite, but no model rerun; carry forward unchanged checker evidence only after recomputing both hashes. Any other change requires the bounded fresh Verify policy. Changes to only the self-excluded lifecycle frontmatter `status` or replacement current `## Verify` block do not stale it.
 
 **No delta is not a pass.** An empty repository diff stops Verify until the fixed point and intended scope are corrected. Boundary freshness is checked once before review and again immediately before write-back; a result over stale bytes is discarded, never patched with a note.
 

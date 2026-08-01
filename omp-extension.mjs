@@ -1,10 +1,7 @@
-import { existsSync } from "node:fs";
-import { createRequire } from "node:module";
-import { resolve } from "node:path";
-const require=createRequire(import.meta.url),artifacts=require("./hooks/artifacts.cjs"),gate=require("./hooks/verify-gate.cjs");
-const ROUTER="Loom router: Setup, Grill, Plan, Implement, Verify, Finish, Publish. Route explicit /loom intent or a selected Ticket exactly once; preserve independent verification.";
-const root=()=>process.env.PI_PROJECT_DIR||process.cwd();
-export default function loomExtension(omp){
-  omp.on("before_agent_start",event=>{const base=Array.isArray(event.systemPrompt)?event.systemPrompt.join("\n\n"):event.systemPrompt||"";return{systemPrompt:`${base}\n\n${ROUTER}`}});
-  omp.on("session_stop",()=>{const project=root(),loom=resolve(project,".loom");if(!existsSync(loom))return undefined;try{const state=artifacts.loadLoom(project),issues=[];for(const ticket of state.tickets.filter(x=>x.status==="done")){const result=gate.checkDoneTicket(ticket);if(!result.ok)issues.push(`${ticket.storyId}/${ticket.id}: ${result.errors.join("; ")}`)}if(state.bindingState.affectedTickets.length)issues.push(`stale Workspace bindings affect: ${state.bindingState.affectedTickets.join(", ")}`);if(!issues.length)return undefined;return{additionalContext:`WARNING: ${issues.join(" | ")}`}}catch(error){return{additionalContext:`WARNING: active Loom state is invalid: ${String(error?.message||error).split(/\r?\n/,1)[0]}`}}});
-}
+const MUTATION=/^(?:git(?:\s+(?:-C\s+\S+|-c\s+\S+))*\s+(?:commit|push|merge|tag|clean|branch\s+-D|worktree\s+(?:remove|prune))|gh\s+release\s+(?:create|edit|upload|delete)|(?:npm|pnpm|yarn|bun)\s+publish|orca\s+(?:worktree\s+(?:rm|remove)|workspace\s+(?:rm|remove)|project\s+(?:rm|remove)))(?:\s|$)/i;
+const SEGMENT=/[;&|\n]/;
+function commandSegments(command){return String(command).split(SEGMENT).map(x=>x.trim()).filter(Boolean)}
+function blockedCommand(command){if(typeof command!=="string")return false;return commandSegments(command).some(segment=>MUTATION.test(segment))}
+function reason(command){return `Loom blocks this agent-issued mutation: ${command}. Present the exact command to the operator for manual execution, then perform read-only verification. This guard is stateless and changes no project or host state.`}
+export function isBlockedCommand(command){return blockedCommand(command)}
+export default function loomExtension(omp){omp.on("tool_call",event=>{if(event?.toolName==="bash"&&blockedCommand(event.input?.command))return{block:true,reason:reason(event.input.command)}})}

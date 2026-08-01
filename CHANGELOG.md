@@ -1496,7 +1496,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.5.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.6.0...HEAD
+[7.6.0]: https://github.com/zuevrs/loom/compare/v7.5.0...v7.6.0
 [7.5.0]: https://github.com/zuevrs/loom/compare/v7.3.1...v7.5.0
 [7.3.1]: https://github.com/zuevrs/loom/compare/v7.3.0...v7.3.1
 [7.3.0]: https://github.com/zuevrs/loom/compare/v7.2.0...v7.3.0

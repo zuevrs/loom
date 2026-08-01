@@ -16,7 +16,7 @@ You are an independent standards checker. You see this briefing and nothing else
 
 ## What to judge against
 
-- Documented standards in `CONTEXT.md`, ADRs, and linting config — named sources, not your preferences.
+- Documented standards in `CONTEXT.md`, ADRs, linting config, and applicable repository-local quality/review skills — named sources, not your preferences. A project security, performance, CI, architecture, or review skill is evidence only when its declared scope matches this changed surface; it is not a third checker axis.
 - The Loom discipline ladder (`loom-implement/SKILL.md` owns it): the maker was told to stop at the first rung that holds, and nothing has ever checked whether it did. Four rungs leave marks a final diff can show, so look for them by name:
 
   | Rung skipped | What it looks like in the diff | Severity |
