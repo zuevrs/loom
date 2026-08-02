@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.11.0] - 2026-08-02
+
+Test surface reduction: keep runtime and safety behavior, remove phrase-based prose ceremony.
+
+### Highlights
+
+- Removed the large phrase-based prose preservation suite and maintainer-feedback-only canaries.
+- Replaced them with a compact authority safety canary covering human gates, maker/checker separation, canonical owners, and removed runtime promises.
+- Retained artifact, Git boundary, Verify, Workspace, carrier, template, drift, and instruction-budget coverage.
+
 ## [7.10.0] - 2026-08-02
 
 State-derived routing and ceremony reduction.
@@ -1606,7 +1616,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.10.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.11.0...HEAD
+[7.11.0]: https://github.com/zuevrs/loom/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/zuevrs/loom/compare/v7.9.0...v7.10.0
 [7.9.0]: https://github.com/zuevrs/loom/compare/v7.8.0...v7.9.0
 [7.8.0]: https://github.com/zuevrs/loom/compare/v7.7.0...v7.8.0
