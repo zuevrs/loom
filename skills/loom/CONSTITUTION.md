@@ -26,4 +26,4 @@ State `Verification: <name> — <checks and independent feedback>`; ties take th
 
 ## Routing
 
-At entry Loom asks: **what is the next honest step?** The dispatcher selects one route, explains it, hands off once, and disappears. Finish and Publish are the local and remote boundaries of Ship. Small work may go to Implement; material work earns Story/PRD/Tickets through Plan. Host adapters own dispatch and recovery mechanics; Loom owns semantic boundaries and evidence.
+At entry Loom asks: **what is the next honest step?** A thin dispatcher reads current canonical facts plus live evidence, selects one route, explains it, hands off once, and disappears. It stores no phase, route, current-step, or lifecycle state. Finish and Publish are the local and remote boundaries of Ship, invoked only when their effects exist. Small work may go to Implement; material work earns Story/Tickets through Plan, with PRD only when load-bearing. Host adapters own execution and recovery mechanics; Loom owns semantic boundaries and evidence.

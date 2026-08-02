@@ -24,7 +24,7 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
 
 ## Process
 
-1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md), [`AUTHORITY.md`](AUTHORITY.md), and [`SESSION.md`](SESSION.md), then reconstruct relevant current v7 state read-only under the current project root. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
+1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md), then reconstruct the relevant current v7 facts read-only under the current project root. Load [`SESSION.md`](SESSION.md) only for explicit recovery signals; it is never ordinary routing state. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
 2. Validate `.loom/version` before relying on durable state. It contains the supported major only. Missing state may route to Setup when persistence is required. Any non-current major or legacy state that needs interpretation is a **read-only hard stop** with upgrade guidance: do not migrate, rewrite, or apply compatibility behavior.
 3. Handle explicit setup intent before ordinary routing: load `loom-init`, preserving the intended root. Bare `/loom` never implies Setup.
 4. Classify exactly one interaction:
@@ -46,7 +46,7 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
 
    A numbered menu hands back the ranking work you already did; you read the evidence, so you rank.
 7. State one line before transfer: `Next honest step: <action> — <reason in the user's language>.` Then **execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
-8. For explicit `/loom` entry, use `SESSION.md`: reconcile an existing draft read-only, but create no empty draft. Lazy-create `.loom/session/<session-id>.md` only on a durable boundary, blocker/decision, handoff/resume, or pending Finish delta. When a checkpoint exists, read `done/current/next/blocker/decision/owners/fixedPoint` before routing; it is a pointer, not authority. Do not inject it into ordinary host context or treat it as durable truth.
+8. For explicit recovery, handoff, resume, blocker, or pending Finish delta, read `SESSION.md` as a pointer, create no empty draft, and lazy-create `.loom/session/<session-id>.md` only on those signals. Its fields may orient the next read, but canonical Story/Ticket/Verify/Git evidence computes the route. Do not inject it into ordinary host context or treat it as authority.
 9. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
 
 ## Hard stops

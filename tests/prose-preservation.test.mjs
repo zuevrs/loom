@@ -91,16 +91,16 @@ test("Plan materializes one exact coherent bundle through one confirmation",()=>
   const plan=read("skills/loom-plan/SKILL.md"),prd=read("skills/loom-plan/TO-PRD.md"),tickets=read("skills/loom-plan/TO-TICKETS.md"),amend=read("skills/loom-plan/AMEND.md"),story=read("skills/loom/STORY.md"),grill=read("skills/loom-plan/GRILL.md"),corpus=[plan,prd,tickets,amend,story,grill].join("\n");
   assert.match(plan,/one materialization gate/i);
   assert.match(plan,/Story.*optional.*PRD.*Tickets.*CONTEXT.*ADR/s);
-  assert.match(plan,/draft.*Story.*PRD.*Tickets.*quiz.*preview.*confirmation.*write/s);
-  const phase1=plan.split("1. **Grill and classify destination.**",2)[1].split("2. **Story / optional PRD draft.**",1)[0];
-  const preDraft=[grill,phase1,prd.split("## Draft",1)[0]].join("\n");
-  assert.doesNotMatch(preDraft,/explicit go|materialization go|ask(?:ing)? (?:the user )?(?:for )?(?:a |the )?(?:go|confirmation|permission)|require(?:s|d)? (?:a |the )?(?:go|confirmation|permission)/i);
+  assert.match(plan,/one planning pass.*not a persisted phase machine/is);
+  assert.match(plan,/complete preview.*sole (?:explicit )?confirmation/is);
+  assert.match(plan,/no write before the complete exact-content bundle gate/is);
+  assert.doesNotMatch([plan,prd,tickets].join("\n"),/second (?:materialization|bundle) confirmation|persist(?:ed|ing) phase state/i);
   assert.match(grill,/## Readback correction checkpoint/);
   assert.match(grill,/Objective.*In scope.*Out of scope.*Decided.*Assumed.*Open/s);
   assert.match(grill,/mandatory attention and correction checkpoint.*not a request for permission to draft/is);
   assert.match(grill,/No `Open` item owned by the user remains unresolved/);
   assert.match(prd,/otherwise draft automatically without asking for separate permission/i);
-  assert.match(plan,/final exact complete bundle preview is Plan's sole explicit confirmation/i);
+  assert.match(plan,/complete preview.*sole (?:explicit )?confirmation/is);
   assert.match(tickets,/quiz.*before.*exact.*bundle preview/is);
   assert.match(plan,/one exact write transaction/i);
   assert.match(amend,/only the affected slices.*as one bundle.*write only that bundle/is);
@@ -178,6 +178,32 @@ test("core loading surface is compressed without dropping its owners",()=>{
   assert.match(read("skills/loom/SKILL.md"),/one-hop handoff/i);
 });
 
+test("effect gates and maker results stay minimal",()=>{
+  const implement=read("skills/loom-implement/SKILL.md"),omp=read("skills/loom/OMP.md"),finish=read("skills/loom/FINISH.md"),publish=read("skills/loom/PUBLISH.md");
+  assert.match(implement,/Finish is the local-effect gate.*one exact inventory and confirmation/is);
+  assert.match(implement,/Publish is the remote-effect gate.*one inventory and confirmation/is);
+  assert.match(implement,/assignment ends with exactly one `result` or `blocker`; no maker-state is persisted/is);
+  assert.match(omp,/one bounded `result` or `blocker`.*No maker-state is persisted/is);
+  assert.match(finish,/one compact exact preview.*exactly one confirmation question/is);
+  assert.match(publish,/one full pass|one inventory|one confirmation/is);
+  assert.doesNotMatch([implement,omp].join("\n"),/maker-state machine|maker lifecycle state|persisted maker phase/i);
+});
+
+test("Plan uses one drafting pass without persisted phase state",()=>{
+  const plan=read("skills/loom-plan/SKILL.md"),prd=read("skills/loom-plan/TO-PRD.md"),tickets=read("skills/loom-plan/TO-TICKETS.md");
+  assert.match(plan,/one planning pass.*not a persisted phase machine/is);
+  assert.match(plan,/complete preview.*sole (?:explicit )?confirmation/is);
+  assert.doesNotMatch([plan,prd,tickets].join("\n"),/persist(?:ed|ing) (?:phase|current step|routing) state|advance(?:s|d)? a phase|current phase file/i);
+});
+
+test("dispatcher derives one action without persisted phase state",()=>{
+  const dispatcher=read("skills/loom/SKILL.md"),constitution=read("skills/loom/CONSTITUTION.md"),agents=read("AGENTS.md"),opencode=read("opencode-plugin.mjs");
+  for(const text of [dispatcher,constitution,agents,opencode]){assert.match(text,/next honest step/i);assert.doesNotMatch(text,/persisted (?:phase|route|current-step) (?:field|state|machine)/i)}
+  assert.match(dispatcher,/canonical Story\/Ticket\/Verify\/Git evidence computes the route/is);
+  assert.match(constitution,/thin dispatcher reads current canonical facts plus live evidence.*selects one route.*hands off once.*disappears/is);
+  assert.doesNotMatch([dispatcher,agents,opencode].join("\n"),/Ship\/Finish promotes or archives|session draft.*promot/i);
+});
+
 test("output floor stays thin and action-oriented",()=>{const constitution=read("skills/loom/CONSTITUTION.md"),implement=read("skills/loom-implement/SKILL.md"),verify=read("skills/loom-verify/SKILL.md"),dispatcher=read("skills/loom/SKILL.md");assert.match(constitution,/answer\/action first.*fewest bounded steps.*one next step.*tangents separate/is);assert.match(constitution,/never overrides evidence, authority, or ritual/is);assert.match(implement,/fewest numbered bounded steps.*location → cause → fix/is);assert.match(verify,/Lead with `Verdict` or the next required action.*one recommended next action/is);for(const file of ["skills/loom-init/SKILL.md","skills/loom-grill/SKILL.md","skills/loom-plan/SKILL.md","skills/loom/FINISH.md","skills/loom/PUBLISH.md"])assert.match(read(file),/fewest numbered bounded steps.*location → cause → fix/is,`${file} lost action output shape`);assert.match(dispatcher,/lead with the result/is);assert.doesNotMatch(constitution,/time estimate|repeat state every turn|cap lists at 5/i)});
 
 test("public Loom prose is one short partner surface over deep contracts",()=>{
@@ -204,8 +230,8 @@ test("public Loom prose is one short partner surface over deep contracts",()=>{
 test("session draft is a lazy recovery pointer",()=>{
   const session=read("skills/loom/SESSION.md"),dispatcher=read("skills/loom/SKILL.md"),pkg=read("package.json");
   for(const anchor of ["optional recovery pointer","never durable project truth","never replaces `CONTEXT.md`, ADRs, Story, PRD, Tickets, or Git evidence","Create no empty draft","durable decision","blocker/user-owned choice","handoff/resume","pending Finish delta",".loom/session/<session-id>.md","done:","current:","next:","blocker:","decision:","owners:","fixedPoint:","never promoted","not authority","Do not record transcript","Do not treat it as memory, consent, or a mutation permit"])assert.ok(session.includes(anchor),`SESSION.md lost ${anchor}`);
-  assert.match(dispatcher,/SESSION\.md[\s\S]*create no empty draft.*durable boundary.*blocker\/decision.*handoff\/resume.*pending Finish delta/is);
-  assert.match(dispatcher,/done\/current\/next\/blocker\/decision\/owners\/fixedPoint.*pointer, not authority/is);
+  for(const anchor of ["create no empty draft","recovery","handoff","resume","pending Finish delta"])assert.ok(dispatcher.includes(anchor),`dispatcher lost ${anchor}`);
+  assert.doesNotMatch(dispatcher,/SESSION\.md[\s\S]*pointer, not authority.*canonical/is);
   assert.match(session,/recovery pointer, never durable project truth/is);
   assert.match(pkg,/skills\/loom\/SESSION\.md/);
   assert.doesNotMatch(session,/confirmed-decision|rejected-option|verified-fact|Promotion at Finish|archive\/<session-id>/i);

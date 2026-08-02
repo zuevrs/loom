@@ -1,4 +1,4 @@
-// loom — OpenCode prose adapter. Version: 7.9.0
+// loom — OpenCode prose adapter. Version: 7.10.0
 // Registers canonical skills and injects compact, truthful guidance. OpenCode
 // receives no Loom runtime enforcement.
 
@@ -18,7 +18,7 @@ For explicit /loom intent or a selected Loom Ticket, ask: what is the next hones
 5. Do not claim completion without evidence.
 6. Do not perform external or irreversible actions without fresh explicit confirmation.
 
-Small concrete work may skip planning artifacts; material work earns Story, PRD, and Tickets. Implement never self-approves. Finish is local and never authorizes Publish. Never auto-merge, push, publish, release, archive, or clean up.`;
+Small concrete work may skip planning artifacts; material work earns Story and Tickets, with PRD only when load-bearing. The dispatcher derives one next action from canonical facts and live evidence; it stores no phase or lifecycle state. Implement never self-approves. Finish is local and never authorizes Publish. Never auto-merge, push, publish, release, archive, or clean up.`;
 
 export default async () => ({
   config: async (config) => {

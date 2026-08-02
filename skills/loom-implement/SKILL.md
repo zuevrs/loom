@@ -52,23 +52,23 @@ An explicit Story target does not itself authorize orchestration. First show one
 - authority policy: execution confirmation grants no commit, Finish, Publish, push, hosted-review, merge, release, or cleanup effect; and
 - project language, checks, and public-prose conventions.
 
-Ask for bounded confirmation of that exact preview before Orca creates or resumes execution state. A changed Story, Ticket set, repository, base, worktree action, writer scope, atomicity decision, or check boundary invalidates the preview and requires renewed confirmation. Confirmation authorizes only supervised Ticket execution through Orca. It never turns a Story target into Git or host authority.
+Ask for bounded confirmation of that exact Story execution inventory before Orca creates or resumes native work. A changed Story, Ticket set, repository, base, worktree action, writer scope, atomicity decision, or check boundary invalidates the inventory and requires renewed confirmation. This is the execution gate only; it grants no Git or host authority.
 
 After confirmation, follow [`../loom/ORCA.md`](../loom/ORCA.md) through complete, blocked, or a documented stop. Without coherent native Orca context, stop; do not emulate the coordinator with an OMP loop, retained chat state, an ad hoc task list, or chained maker context.
 
 ### Explicit story finish
 
-Finish is never entered by APPROVE or Ticket completion. Only an explicit finish route from the dispatcher lazy-loads and follows [`../loom/FINISH.md`](../loom/FINISH.md). It owns one exact complete local inventory and one confirmation, current objective checks, reuse of current Ticket verdicts plus conditional compact integration Spec+Standards only for aggregate risk, immediate load-bearing revalidation, agent-executed ordinary local commits/hooks with authoritative readback, remaining-only partial recovery, the declared owner/lifecycle Story and session transition, terminal receipt, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
+Finish is never inferred from APPROVE or Ticket completion. An explicit finish route lazy-loads [`../loom/FINISH.md`](../loom/FINISH.md). Finish is the local-effect gate: one exact inventory and confirmation, current objective checks, conditional integration review, immediate revalidation, ordinary local commits/hooks with authoritative readback, remaining-only recovery, lifecycle writes, and one terminal receipt. It creates no push or hosted review. Publish remains separate.
 
 ### Explicit story publish
 
-Publish is never inferred from finish, APPROVE, or review readiness. Only an explicit publish route from the dispatcher lazy-loads and follows [`../loom/PUBLISH.md`](../loom/PUBLISH.md); its separate digest confirmation owns only the exact pending push and hosted-review effects.
+Publish is never inferred from Finish, APPROVE, or review readiness. An explicit publish route lazy-loads [`../loom/PUBLISH.md`](../loom/PUBLISH.md). Publish is the remote-effect gate: its one inventory and confirmation cover only exact pending push, hosted-review, tag, or release effects named by the operator.
 
 ### Orca coordinator and maker boundaries
 
 For multi-repository Story work, the Orca root coordinator may run the exactly confirmed Story preview until complete, blocked, or stopped after two overlapping Verify REJECTs. It stays thin: scheduling and durable evidence come from source owners, not retained chat memory. Follow [`../loom/ORCA.md`](../loom/ORCA.md) for repository/worktree identity, dispatch, waits, and resume. No other host runner substitutes for Orca.
 
-Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Apply `CONSTITUTION.md` routing as a host hint: the boundary class is Quick, Behavior, or Full; the host chooses its configured role or default. A maker may repair one obvious local check failure, then stops on repeated/unknown failure or any listed stop signal. If the host supports escalation, allow at most one fresh maker per Ticket with current diff, fixed point, checks, decisions, and blocker; do not restart by default. A material signal routes to Plan, and escalation does not reset Verify/recheck budget. Verify APPROVE grants no commit or host mutation. REJECT keeps the same maker and sends one compact finding batch. A subsequent Ticket always gets a new host-native maker and fresh packet; deepen into full owners only for a load-bearing gap.
+Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Apply `CONSTITUTION.md` routing as a host hint: the boundary class is Quick, Behavior, or Full; the host chooses its configured role or default. A maker may repair one obvious local check failure, then stops on repeated/unknown failure or any listed stop signal. Each bounded assignment ends with exactly one `result` or `blocker`; no maker-state is persisted. If the host supports escalation, allow at most one fresh maker per Ticket with current diff, fixed point, checks, decisions, and blocker; do not restart by default. A material signal routes to Plan, and escalation does not reset Verify/recheck budget. Verify APPROVE grants no commit or host mutation. REJECT keeps the same maker for one compact finding batch. A subsequent Ticket always gets a new host-native maker and fresh packet; deepen into full owners only for a load-bearing gap.
 
 ## Direct small-fix route
 

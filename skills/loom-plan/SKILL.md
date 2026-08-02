@@ -51,15 +51,15 @@ No planning artifact is written until one materialization gate previews the **ex
 
 Brownfield CONTEXT boot remains a pending draft in the same bundle; it is never written before the complete preview and confirmation.
 
-## Process — three phases
+## Process — one planning pass
 
-Run phases in order. Read only the current phase file; interruption never advances a phase or shrinks its discipline.
+Plan is one bounded drafting pass, not a persisted phase machine. Read the smallest applicable guidance at each boundary; canonical artifacts and the pending bundle, not a phase label, determine where to resume.
 
-1. **Grill and classify destination.** On mature brownfield with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan, read [`BROWNFIELD.md`](BROWNFIELD.md). Then read [`GRILL.md`](GRILL.md). Explore local-first; separate facts from decisions; ask exactly one recommended question at a time; maintain pending domain delta inline; apply ADR triple gate. Resolve whether PRD is material. Exit after the mandatory readback correction checkpoint establishes shared understanding and no user-owned decision remains open; pending drafting then proceeds automatically without a separate confirmation. When CodeGraph is available, use it for a bounded architecture/dependency pass before fixing repository scope. Treat its output as evidence with explicit worktree and freshness metadata, never as durable truth.
-2. **Story / optional PRD draft.** Read [`TO-PRD.md`](TO-PRD.md). Synthesize; do not re-interview. Draft the compact Story and, if material, the full [`PRD-TEMPLATE.md`](PRD-TEMPLATE.md), plus applicable templates. Write nothing yet; this phase supplies the destination portion of the final bundle.
-3. **Tickets, quiz, and one bundle write.** Read [`TO-TICKETS.md`](TO-TICKETS.md). Use vertical/risky slicing and quiz granularity, blockers, and repository scope before the exact preview. Then preview the complete Story, optional PRD, every Ticket, and every pending domain/product/design action as one coherent bundle. This final exact complete bundle preview is Plan's sole explicit confirmation: after it, apply the confirmed bundle as one exact write transaction through the canonical templates and validate the complete result.
+1. **Align and classify.** On mature brownfield with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan, read [`BROWNFIELD.md`](BROWNFIELD.md), then [`GRILL.md`](GRILL.md). Explore local-first; separate facts from decisions; ask exactly one recommended question at a time; maintain pending domain delta inline; apply the ADR triple gate. Resolve whether PRD is material. The mandatory readback correction checkpoint must establish shared understanding and no user-owned decision remains open. When CodeGraph is available, use it for a bounded architecture/dependency pass before fixing repository scope; treat its output as evidence, never durable truth.
+2. **Draft the destination.** Read [`TO-PRD.md`](TO-PRD.md) and synthesize without re-interviewing. Draft the compact Story and, only when material, the PRD and applicable templates. Keep all drafts pending; they do not authorize implementation or writing.
+3. **Slice and materialize once.** Read [`TO-TICKETS.md`](TO-TICKETS.md), use vertical/risky slicing and quiz granularity, blockers, and repository scope, then preview the complete Story, optional PRD, every Ticket, and pending domain/product/design actions as one coherent bundle. This exact complete preview is Plan's sole confirmation; after approval, apply and validate the bundle.
 
-If interrupted, re-read the current phase file, restate the last unresolved question/gate, reconstruct from current evidence, and continue exactly there.
+If interrupted, reconstruct from the last visible question, pending draft, or materialization gate. Do not invent or persist a phase, current step, or routing state.
 
 ## Planning write and recovery evidence
 
@@ -74,7 +74,7 @@ Name the lowest-numbered unblocked `ready-for-agent` Ticket. Recommend a fresh I
 ## Hard stops
 
 - No write before the complete exact-content bundle gate.
-- Preserve phase order: grill → destination draft → Ticket slicing and quiz → one bundle confirmation and write.
+- Preserve the bounded planning pass: align → draft → slice → one bundle confirmation and write.
 - No planned implementation without a Ticket.
 - No PRD when the materiality threshold is absent; no compressed PRD when it is present.
 - Plan never creates branches, lanes, tasks, worktrees, or runtime state.
@@ -84,8 +84,8 @@ Name the lowest-numbered unblocked `ready-for-agent` Ticket. Recommend a fresh I
 
 | Symptom | Response |
 |---|---|
-| Tempted to skip a phase or the bundle gate | Stop; the phase discipline and confirmation are the user's |
-| Interrupted mid-phase | Re-read current phase; resume the unanswered question/gate |
+| Tempted to skip alignment or the bundle gate | Stop; the planning discipline and confirmation are the user's |
+| Interrupted mid-pass | Reconstruct from the last visible question, draft, or gate; resume the unanswered question/gate |
 | Active amendment balloons into new scope | Stop; full Plan for a new Story. If the original is `done`, make that Story a linked continuation. |
 | Single-repo scope omitted | Treat current root as the scope |
 | Orca repository key is unknown | Stop before bundle confirmation and ask one recommended scope question |
@@ -107,7 +107,7 @@ Name the lowest-numbered unblocked `ready-for-agent` Ticket. Recommend a fresh I
 
 | Excuse | Reality |
 |---|---|
-| "Confirm the Story now and Tickets later" | The phases stay separate for attention, but one complete bundle preview prevents repeated confirmation ceremony and contradictory partial state. |
+| "Confirm the Story now and Tickets later" | Keep drafts pending, then use one complete bundle preview to prevent repeated confirmation ceremony and contradictory partial state. |
 | "Write drafts so the user can review files" | Review the exact proposed bytes in the gate; project files are not scratch space. |
 | "A tiny Plan does not need a Ticket" | The user chose Plan. Keep it compact, but planned implementation remains executable through a Ticket. |
 | "Material work can use a short PRD" | Crossing the threshold requires the full product/decision/testing contract, not ceremonial prose. |
