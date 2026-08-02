@@ -68,13 +68,13 @@ Publish is never inferred from finish, APPROVE, or review readiness. Only an exp
 
 For multi-repository Story work, the Orca root coordinator may run the exactly confirmed Story preview until complete, blocked, or stopped after two overlapping Verify REJECTs. It stays thin: scheduling and durable evidence come from source owners, not retained chat memory. Follow [`../loom/ORCA.md`](../loom/ORCA.md) for repository/worktree identity, dispatch, waits, and resume. No other host runner substitutes for Orca.
 
-Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Apply `CONSTITUTION.md` routing: Quick uses a `smol` maker; Behavior uses `smol`; Full/material uses `default/strong`. These are host-mapped runtime hints, never model IDs or Ticket authority. A `smol` maker may repair one obvious local check failure, then stops on repeated/unknown failure or any listed stop signal. At most once per Ticket, continue through a fresh OMP maker or Orca worker mapped to `default/strong`, with current diff, fixed point, checks, decisions, and blocker; do not restart by default. A material signal routes to Plan, and escalation does not reset Verify/recheck budget. Verify APPROVE grants no commit or host mutation. REJECT keeps the same maker and sends one compact finding batch. A subsequent Ticket always gets a new host-native maker and fresh packet; deepen into full owners only for a load-bearing gap.
+Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Apply `CONSTITUTION.md` routing as a host hint: the boundary class is Quick, Behavior, or Full; the host chooses its configured role or default. A maker may repair one obvious local check failure, then stops on repeated/unknown failure or any listed stop signal. If the host supports escalation, allow at most one fresh maker per Ticket with current diff, fixed point, checks, decisions, and blocker; do not restart by default. A material signal routes to Plan, and escalation does not reset Verify/recheck budget. Verify APPROVE grants no commit or host mutation. REJECT keeps the same maker and sends one compact finding batch. A subsequent Ticket always gets a new host-native maker and fresh packet; deepen into full owners only for a load-bearing gap.
 
 ## Direct small-fix route
 
-Without a named Ticket, treat the user's concrete build/fix/add request as the complete local contract. Keep the route compact, not thoughtless: understand the flow, surface the decision, make the smallest verified change, and close the knowledge loop. Do not create a Story, PRD, or Ticket unless the analysis reveals material scope or an unresolved user-owned decision.
+Without a Ticket, the concrete request is the local contract. Keep it compact: understand the flow, surface the decision, make the smallest verified change, and close knowledge. Create Story/PRD/Ticket only for material scope or an unresolved user-owned decision.
 
-Before editing, give one compact alignment block in the user's language:
+Before editing, give one proportional Grill checkpoint. Quick: load-bearing choice, non-goal, proof. Behavior/Full: add assumptions and user-owned Open items. Then give the alignment block:
 
 ```text
 Objective: <the result>

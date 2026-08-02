@@ -37,25 +37,9 @@ Act as the engineering partner at Loom entry: determine the next honest step, sa
    - **Publish** — explicit push/hosted-review/release intent → the Publish interaction owned by `loom-implement` and [`PUBLISH.md`](PUBLISH.md).
 5. Explicit natural-language intent wins over persisted work and keyword heuristics.
 
-   **Bare entry with a Workspace** (`.loom/local/workspace.json` exists, or any Ticket uses logical `repositoryKeys`): render this exact read-only dashboard, then wait. Do not route, do not act.
+   **Bare entry with a Workspace** (`.loom/local/workspace.json` exists, or any Ticket uses logical `repositoryKeys`): show the current Story and one next honest action, then wait. Add lanes, blockers, or stale evidence only when ambiguity, recovery, or an explicit status request makes them load-bearing. Orca owns live lane state; Loom owns semantic routing.
 
-   ```
-   Story  csv-export — Add CSV export to reports        active
-
-   repo   lane    branch            state
-   api    ok      feat/csv-export   clean @ a1b2c3d
-   web    STALE   feat/csv-export   lane says 9f8e7d6, git says 4c5d6e7
-
-   tickets  T1 done · T2 done · T3 ready · T4 blockedBy T3
-   blocked  T4 — waits on T3
-   recover  api has an uncommitted diff in src/export.ts, matches T3
-
-   next  Implement T3 in api  →  /loom implement
-   ```
-
-   `STALE` means the two owners disagree: name both observations on the same line and never pick one. Copy the columns literally — two agents rendering the same state must produce the same screen, or the operator relearns the interface on every call.
-
-   **Bare entry without a Workspace:** recommend the strongest coherent continuation, ranked in this order — rework or interruption evidence for a Ticket; then the uniquely active Story's next unblocked Ticket; then nothing, ask. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
+**Bare entry without a Workspace:** recommend the strongest coherent continuation, ranked in this order — rework or interruption evidence for a Ticket; then the uniquely active Story's next unblocked Ticket; then nothing, ask. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
 6. Genuine ambiguity gets one recommended question, never a menu. Recommendation first, so the operator can answer in one word:
 
    > Two active Stories touch `api`. I'd take **csv-export** — its T3 matches the uncommitted diff in `src/export.ts`. The other, `auth-refresh`, has no dirty state. Go with csv-export?

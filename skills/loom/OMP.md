@@ -18,7 +18,7 @@ After compaction, handoff, or worker replacement, reconstruct from artifacts, Gi
 
 ## Workers and decisions
 
-Outside Orca, require one newly spawned host-native maker per new Ticket when the host can supply it. Reuse the same maker only for that Ticket's REJECT rework. The boundary-derived Quick/Behavior/Full class travels in the packet as a routing hint: the host maps `smol` and `default/strong` roles to configured models; no Loom artifact or Ticket field selects a model. Compaction, continuation, or switching a model inside a session is not freshness. If the host cannot create a fresh maker, stop and report it. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared packet plus one independent axis. The coordinator retains selection, user decisions, durable write-back, and disposition. Orca coordinates dispatch/recovery; it neither judges quality nor chooses models. If worker discovery is unavailable, use an independent fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and report the limitation. Implement never self-approves; never fabricate worker output.
+Outside Orca, require one newly spawned host-native maker per new Ticket when the host can supply it. Reuse the same maker only for that Ticket's REJECT rework. The boundary-derived Quick/Behavior/Full class travels in the packet as a routing hint; the host may map it to configured roles, otherwise use the host default. Compaction, continuation, or switching a model inside a session is not freshness. If the host cannot create a fresh maker, stop and report it. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared packet plus one independent axis. The coordinator retains selection, user decisions, durable write-back, and disposition. Orca coordinates dispatch/recovery; it neither judges quality nor chooses models. If worker discovery is unavailable, use an independent fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and report the limitation. Implement never self-approves; never fabricate worker output.
 
 Workers receive a bounded assignment. This is text you physically send to another agent that has none of your context, so send the whole shape — never a title, never a transcript:
 
@@ -31,7 +31,7 @@ Acceptance: export of 100k rows stays under 200MB RSS; archived rows present whe
 Out of scope: the download UI, the retention job
 Repository: api @ feat/csv-export, base 4c5d6e7 — work only here
 Starting state: clean tree
-Routing hint: Behavior — maker `smol`; Verify Spec + Standards `default/strong` (host mappings)
+Routing hint: Behavior (host may apply its role mapping; otherwise use host default)
 Checks that must be able to go red: npm test -- export, npm run lint
 You may write: src/export/**, tests/export/**
 You must not: commit, push, open a PR, touch another repository, change the Ticket status
@@ -39,13 +39,13 @@ Stuck or the contract is silent? Ask me before inventing — quote the line you 
 Stop when: acceptance met and checks captured, or blocked twice on the same error
 ```
 
-Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A `smol` maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; repeated or unknown failure escalates.
+Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; host-specific escalation applies only when the host supports it.
 
 A maker report names changed files and repositories, actual base/HEAD/diff, checks with pass/fail, decisions made, assumptions used, blockers/open questions, and whether work is complete or partial. A checker report uses the canonical APPROVE/REJECT evidence contract. Empty, malformed, or fabricated output is not completion. A worker completion is evidence only: the coordinator rereads the artifacts and live repository state, attributes the result to the bounded assignment, and runs independent Verify before any Ticket disposition.
 
 A load-bearing decision discovered inside a worker returns as `decision-needed` with one recommended question and consequences. The worker does not silently decide it or write Story/PRD/ADR truth. Pause only dependent work; unrelated independent work may continue when the native host can prove that independence.
 
-Each Ticket permits at most one `smol` to `default/strong` escalation. Spawn a fresh OMP maker or Orca worker; send a compact handoff with current diff, fixed point, checks, decisions, and blocker. Preserve work and continue from that evidence - no full restart by default. Deepen into Story/PRD only for a load-bearing gap; a material signal routes to Plan instead of escalation. Escalation never resets Verify or its recheck budget.
+If the host supports model-role escalation, allow at most one fresh maker escalation per Ticket with current diff, fixed point, checks, decisions, and blocker. Preserve work and continue from that evidence; do not restart by default. Deepen into Story/PRD only for a load-bearing gap; a material signal routes to Plan instead of escalation. Escalation never resets Verify or its recheck budget.
 
 ## Bounded execution guidance
 

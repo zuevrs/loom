@@ -18,15 +18,7 @@ Verify is independent from the maker. Depth follows boundary and consequences, n
 | **Behavior check** | internal behavior; no public contract or dependency change | Spec + Standards over the behavioral seam |
 | **Full review** | public/external/inter-service contract, auth, persistence/data path, migration, or dependency | Spec + Standards over the touched surface |
 
-| Routing | Maker role | Verify roles |
-|---|---|---|
-| Quick | `smol` | `smol` Standards |
-| Behavior | `smol` | `default/strong` Spec + Standards |
-| Full/material | `default/strong` | `default/strong` Spec + Standards |
-
-This class comes from boundary classification; the compact packet carries it only as a runtime routing hint. Roles are host mappings, not model IDs or artifact authority; host configuration wins.
-
-A `smol` maker stops on `decision-needed`, blocked work, contract/PRD contradiction, material signal, or an objective-check failure beyond one obvious bounded local repair. Repeated/unknown failure escalates once per Ticket to a fresh OMP maker or Orca worker with current diff, fixed point, checks, decisions, and blocker. No restart by default; deepen into Story/PRD only for a load-bearing gap. Material signals route to Plan, never escalation. Verify stays independent with its existing recheck budget.
+The class comes from boundary classification and travels as a semantic hint. A host may map it to model roles; absent host mapping, use the host default. Roles are never model IDs or artifact authority. Host-specific worker routing and escalation belong to the selected adapter, not this core floor.
 
 Material signals require Plan: auth, persistence/data path, migration, public/external/inter-service contract, or new dependency.
 
@@ -34,4 +26,4 @@ State `Verification: <name> — <checks and independent feedback>`; ties take th
 
 ## Routing
 
-At entry Loom asks: **what is the next honest step?** The dispatcher selects one route, explains it, hands off once, and disappears. Finish and Publish are the local and remote boundaries of Ship. Small work may go to Implement; material work earns Story/PRD/Tickets through Plan. Orca dispatches/recoveries but does not judge quality or choose models. Never switch models inside a session.
+At entry Loom asks: **what is the next honest step?** The dispatcher selects one route, explains it, hands off once, and disappears. Finish and Publish are the local and remote boundaries of Ship. Small work may go to Implement; material work earns Story/PRD/Tickets through Plan. Host adapters own dispatch and recovery mechanics; Loom owns semantic boundaries and evidence.

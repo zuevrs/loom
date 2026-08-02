@@ -3,6 +3,7 @@ import {mkdtempSync,mkdirSync,readFileSync,rmSync,writeFileSync} from "node:fs";
 import {join,resolve} from "node:path";
 import {tmpdir} from "node:os";
 import {createRequire} from "node:module";
+import {execFileSync} from "node:child_process";
 import test from "node:test";
 const root=resolve(import.meta.dirname,"..");
 const require=createRequire(import.meta.url),artifacts=require("../hooks/artifacts.cjs");
@@ -72,7 +73,8 @@ test("direct small work stays light without losing durable knowledge",()=>{
   assert.match(capture,/No durable knowledge means no offer and no write/i);
   assert.match(direct,/Always make the disposition explicit.*No durable lesson/s);
   assert.match(capture,/separate small change.*never inherits the verdict.*objective checks and fresh independent Verify/is);
-  assert.match(direct,/do not create a Story, PRD, or Ticket/i);
+  assert.match(direct,/Create Story\/PRD\/Ticket only for material scope/i);
+  assert.match(implement,/boundary class is Quick, Behavior, or Full; the host chooses its configured role or default/i);
 });
 
 
@@ -167,6 +169,15 @@ test("OMP and Orca keep runtime native while Loom keeps durable meaning",()=>{
 
 test("bounded Verify policy has one scoped recheck and no third lap",()=>{const verify=read("skills/loom-verify/SKILL.md");assert.match(verify,/one initial round/i);assert.match(verify,/at most one finding-scoped recheck/i);assert.match(verify,/same checker context/i);assert.match(verify,/no third checker lap/i);for(const trigger of ["acceptance or an explicit user contract expands","public/inter-service contract expands","repository or dependency set expands","rework newly affects the second axis"])assert.match(verify,new RegExp(trigger,"i"),`full-rerun trigger missing: ${trigger}`);assert.match(verify,/hash-pinned.*evidence packet/is);assert.match(verify,/one bounded live dive/is);assert.match(verify,/Quick.*`smol` Standards.*Behavior.*Full.*`default\/strong` Spec \+ Standards/is)});
 
+test("core loading surface is compressed without dropping its owners",()=>{
+  const files=["skills/loom/SKILL.md","skills/loom/CONSTITUTION.md","skills/loom/AUTHORITY.md","skills/loom/SESSION.md"], current=files.reduce((n,file)=>n+read(file).length,0);
+  const baseline=files.reduce((n,file)=>n+execFileSync("git",["show","v7.8.0:"+file],{encoding:"utf8"}).length,0);
+  assert.ok(current<=baseline*0.75,`core loading surface did not shrink 25%: ${current}/${baseline}`);
+  assert.match(read("skills/loom/AUTHORITY.md"),/authority-examples\.md/i);
+  assert.match(read("skills/loom/CONSTITUTION.md"),/host may map it to model roles; absent host mapping, use the host default/i);
+  assert.match(read("skills/loom/SKILL.md"),/one-hop handoff/i);
+});
+
 test("output floor stays thin and action-oriented",()=>{const constitution=read("skills/loom/CONSTITUTION.md"),implement=read("skills/loom-implement/SKILL.md"),verify=read("skills/loom-verify/SKILL.md"),dispatcher=read("skills/loom/SKILL.md");assert.match(constitution,/answer\/action first.*fewest bounded steps.*one next step.*tangents separate/is);assert.match(constitution,/never overrides evidence, authority, or ritual/is);assert.match(implement,/fewest numbered bounded steps.*location → cause → fix/is);assert.match(verify,/Lead with `Verdict` or the next required action.*one recommended next action/is);for(const file of ["skills/loom-init/SKILL.md","skills/loom-grill/SKILL.md","skills/loom-plan/SKILL.md","skills/loom/FINISH.md","skills/loom/PUBLISH.md"])assert.match(read(file),/fewest numbered bounded steps.*location → cause → fix/is,`${file} lost action output shape`);assert.match(dispatcher,/lead with the result/is);assert.doesNotMatch(constitution,/time estimate|repeat state every turn|cap lists at 5/i)});
 
 test("public Loom prose is one short partner surface over deep contracts",()=>{
@@ -190,20 +201,14 @@ test("public Loom prose is one short partner surface over deep contracts",()=>{
 });
 
 
-test("session draft stages confirmed boundary events without becoming durable memory",()=>{
-  const session=read("skills/loom/SESSION.md"),dispatcher=read("skills/loom/SKILL.md"),finish=read("skills/loom/FINISH.md"),verify=read("skills/loom-verify/SKILL.md"),readme=read("README.md"),agents=read("AGENTS.md"),pkg=read("package.json"),corpus=[session,dispatcher,finish,verify,readme,agents].join("\n");
-  for(const anchor of ["staging area","confirmed boundary events","not durable project truth","never replaces `CONTEXT.md`, ADRs, Story, PRD, Tickets, or Git evidence","Explicit `/loom` establishes identity",".loom/session/<session-id>.md","one `/loom` run",".loom/session/archive/<session-id>.md","Loom owns writes","not injected into ordinary OMP/Orca context","Record only boundary events","confirmed-decision","rejected-option","verified-fact","open-question","handoff","Do not record transcript","Promotion at Finish","smallest canonical owner","Resume","reconcile draft state before routing"])assert.ok(session.includes(anchor),`SESSION.md lost ${anchor}`);
+test("session draft is a lazy recovery pointer",()=>{
+  const session=read("skills/loom/SESSION.md"),dispatcher=read("skills/loom/SKILL.md"),pkg=read("package.json");
+  for(const anchor of ["optional recovery pointer","never durable project truth","never replaces `CONTEXT.md`, ADRs, Story, PRD, Tickets, or Git evidence","Create no empty draft","durable decision","blocker/user-owned choice","handoff/resume","pending Finish delta",".loom/session/<session-id>.md","done:","current:","next:","blocker:","decision:","owners:","fixedPoint:","never promoted","not authority","Do not record transcript","Do not treat it as memory, consent, or a mutation permit"])assert.ok(session.includes(anchor),`SESSION.md lost ${anchor}`);
   assert.match(dispatcher,/SESSION\.md[\s\S]*create no empty draft.*durable boundary.*blocker\/decision.*handoff\/resume.*pending Finish delta/is);
   assert.match(dispatcher,/done\/current\/next\/blocker\/decision\/owners\/fixedPoint.*pointer, not authority/is);
-  assert.match(session,/## Progress checkpoint[\s\S]*done:.*current:.*next:.*blocker:.*decision:.*owners:.*fixedPoint:/is);
-  assert.match(session,/durable boundary, blocker\/decision, handoff\/resume, or pending Finish delta/is);assert.match(session,/never add transcript, token\/model details, terminal output, runtime IDs, or full Git\/Orca state/is);
-  assert.match(finish,/promotion preview.*confirmed boundary events.*smallest canonical owner/is);
-  assert.match(finish,/never promote the checkpoint itself.*archive it as `\.loom\/session\/archive\/<session-id>\.md`/is);
-  assert.match(verify,/session draft exists.*boundary event.*staging.*canonical owner/is);
-  assert.match(readme,/session draft.*created only when.*recovery-worthy.*not durable project truth/is);
-  assert.match(agents,/\.loom\/session\/<session-id>\.md.*recovery-worthy confirmed boundary event/is);
+  assert.match(session,/recovery pointer, never durable project truth/is);
   assert.match(pkg,/skills\/loom\/SESSION\.md/);
-  assert.doesNotMatch(corpus,/session draft (?:is|becomes|as) (?:a )?(?:source of truth|durable memory)|record every turn summary|copy raw transcript into the draft|copy reasoning dump into the draft/is);
+  assert.doesNotMatch(session,/confirmed-decision|rejected-option|verified-fact|Promotion at Finish|archive\/<session-id>/i);
 });
 
 
@@ -231,8 +236,9 @@ test("workspace flow uses Story owner worktrees and vertical Tickets, not repo-f
 
 test("model cost routing stays prose-only and out of Ticket schema",()=>{
   const constitution=read("skills/loom/CONSTITUTION.md"),omp=read("skills/loom/OMP.md"),implement=read("skills/loom-implement/SKILL.md"),verify=read("skills/loom-verify/SKILL.md"),init=read("skills/loom-init/SKILL.md"),ticket=read("skills/loom-plan/TICKET-TEMPLATE.md"),schema=read("hooks/artifacts.cjs"),corpus=[constitution,omp,implement,verify,init].join("\n");
-  assert.match(constitution,/Quick[\s\S]*`smol`[\s\S]*Behavior[\s\S]*`default\/strong`[\s\S]*Full\/material/);
-  for(const anchor of ["decision-needed","contract/PRD contradiction","material signal","one obvious bounded local repair","at most one `smol` to `default/strong` escalation","current diff, fixed point, checks, decisions, and blocker","does not reset Verify"])assert.ok(corpus.includes(anchor),`routing policy lost ${anchor}`);
+  assert.match(constitution,/Quick check[\s\S]*Behavior check[\s\S]*Full review/);
+  assert.match(constitution,/host may map it to model roles; absent host mapping, use the host default/i);
+  for(const anchor of ["decision-needed","contract/PRD contradiction","material signal","host-specific escalation applies only when the host supports it","current diff, fixed point, checks, decisions, and blocker","does not reset Verify"])assert.ok(corpus.includes(anchor),`routing policy lost ${anchor}`);
   assert.match(corpus,/host configuration wins/i);
   assert.match(omp,/Orca coordinates dispatch\/recovery; it neither judges quality nor chooses models/i);
   assert.match(corpus,/no full restart by default|do not restart by default/i);
@@ -243,9 +249,9 @@ test("model cost routing stays prose-only and out of Ticket schema",()=>{
 
 test("semantic reconciliation contract survives predicate mutations",()=>{
   const files={story:read("skills/loom/STORY.md"),amend:read("skills/loom-plan/AMEND.md"),implement:read("skills/loom-implement/SKILL.md"),finish:read("skills/loom/FINISH.md"),session:read("skills/loom/SESSION.md"),context:read("skills/loom-plan/CONTEXT-FORMAT.md"),adr:read("skills/loom-plan/ADR-FORMAT.md")};
-  const contract=x=>/Story, material PRD, and CONTEXT stay current/.test(x.story)&&/After `done`, Story and PRD are immutable/.test(x.story)&&/Finish cannot legalize code retrospectively/.test(x.story)&&/contract-preserving feedback\/deviation stays in this Ticket/i.test(x.implement)&&/accepted deviation\/rework, rejected alternative/.test(x.implement)&&/Architecture\/ADR or material change returns `decision-needed`/.test(x.implement)&&/affected Ticket Logs.*active-session boundary events.*explicitly accepted user feedback.*amendment pointers.*actual diff.*Verify findings/is.test(x.finish)&&/never a transcript or full-repository drift scan/.test(x.finish)&&/planned owner -> accepted result -> delta -> disposition/.test(x.finish)&&["already current","update owner","supersede ADR","Ticket Log only","amendment/linked Story required","No semantic delta"].every(v=>x.finish.includes(v))&&/changed reconciliation delta.*expires.*confirmation/is.test(x.finish)&&/Stop before commit, owner\/lifecycle mutation, Story closure, or session archive/.test(x.finish)&&/Routine detail creates no event; checkpoints are never promoted/.test(x.session)&&/surgically replacing only affected definitions and preserving unrelated bytes/.test(x.context)&&/Never accumulate superseded history/i.test(x.context)&&/Accepted — Supersedes ADR-NNNN/.test(x.adr)&&/old ADR receives only the reciprocal `Superseded by ADR-NNNN`/.test(x.adr)&&/never rewritten rationale/.test(x.adr);
+  const contract=x=>/Story, material PRD, and CONTEXT stay current/.test(x.story)&&/After `done`, Story and PRD are immutable/.test(x.story)&&/Finish cannot legalize code retrospectively/.test(x.story)&&/contract-preserving feedback\/deviation stays in this Ticket/i.test(x.implement)&&/accepted deviation\/rework, rejected alternative/.test(x.implement)&&/Architecture\/ADR or material change returns `decision-needed`/.test(x.implement)&&/affected Ticket Logs.*current session recovery pointer.*never as semantic evidence.*explicitly accepted user feedback.*amendment pointers.*actual diff.*Verify findings/is.test(x.finish)&&/never a transcript or full-repository drift scan/.test(x.finish)&&/planned owner -> accepted result -> delta -> disposition/.test(x.finish)&&["already current","update owner","supersede ADR","Ticket Log only","amendment/linked Story required","No semantic delta"].every(v=>x.finish.includes(v))&&/changed reconciliation delta.*expires.*confirmation/is.test(x.finish)&&/Stop before commit, owner\/lifecycle mutation, Story closure, or session archive/.test(x.finish)&&/optional recovery pointer.*never promoted/is.test(x.session)&&/surgically replacing only affected definitions and preserving unrelated bytes/.test(x.context)&&/Never accumulate superseded history/i.test(x.context)&&/Accepted — Supersedes ADR-NNNN/.test(x.adr)&&/old ADR receives only the reciprocal `Superseded by ADR-NNNN`/.test(x.adr)&&/never rewritten rationale/.test(x.adr);
   assert.ok(contract(files));
-  for(const [file,phrase] of [["story","Finish cannot legalize code retrospectively"],["implement","Architecture/ADR or material change returns `decision-needed`"],["finish","No semantic delta"],["session","checkpoints are never promoted"],["context","preserving unrelated bytes"],["adr","never rewritten rationale"]])assert.equal(contract({...files,[file]:files[file].replaceAll(phrase,"")}),false,`mutation did not break ${file} canary`);
+  for(const [file,phrase] of [["story","Finish cannot legalize code retrospectively"],["implement","Architecture/ADR or material change returns `decision-needed`"],["finish","No semantic delta"],["session","optional recovery pointer"],["context","preserving unrelated bytes"],["adr","never rewritten rationale"]])assert.equal(contract({...files,[file]:files[file].replaceAll(phrase,"")}),false,`mutation did not break ${file} canary`);
 });
 
 test("disposable reconciliation scenarios keep Finish atomic",()=>{

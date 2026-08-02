@@ -12,26 +12,19 @@ Classify before checks, preview, or lifecycle writes. Only exact `/loom finish` 
 
 ## One exact preview and confirmation
 
-Finish presents one compact exact preview for every declared local effect, then asks exactly one confirmation question. A multi-repository inventory is still one Finish inventory and one confirmation:
+Finish presents one compact exact preview for every declared local effect, then asks exactly one confirmation question. A multi-repository inventory is still one Finish inventory and one confirmation.
+
+**Adaptive presentation:** always show Story identity/lifecycle, exact paths/effects, commit groups/messages, checks, review reuse/trigger, session disposition, readback, and explicit remote/history/cleanup exclusions. Start with one summary row per repository or owner group. Expand branch/base/HEAD/index, worktree cleanliness, diff summary, artifact digests, parent/tree expectations, hooks, and sanitized public-bundle details when the inventory is dirty, multi-repository, risk-bearing, recovering from partial failure, or the operator asks for full detail. Collapsing presentation never collapses inventory, confirmation scope, revalidation, or readback.
+
+Example compact receipt:
 
 ```text
 Finish — csv-export
-
-group 1 · product
-  api   feat/csv-export @ a1b2c3d, base 4c5d6e7, index clean
-        4 files, +118 −12 · commit "feat: stream CSV export"
-  web   feat/csv-export @ 7e8f901, base 2a3b4c5, index clean
-        3 files, +64 −5 · commit "feat: download streamed exports"
-
-group 2 · owner/lifecycle
-  owner feat/csv-export @ 9f8e7d6
-        .loom/csv-export/**, ADR-0007 · commit "docs: close csv-export story"
-        Story active → done · session draft → archive
-
+api + web · 2 product repositories · clean · 7 files · commits: 2
+owner/lifecycle · Story active → done
 checks   npm test -- export · npm run lint
-review   reuse current Ticket Spec+Standards; integration review not triggered — independent Ticket boundaries unchanged
-readback parent, HEAD, committed tree, intended files, hooks, remaining diff after each commit; lifecycle/session bytes after owner effect
-excluded no push, PR, hosted review, merge, release, tag, rebase/amend/squash/force, cleanup
+review   Ticket verdicts reused; integration review not triggered
+readback parent/tree/paths/hooks/remainder · excluded: push, PR, merge, release, tag, history rewrite, cleanup
 
 Confirm this exact local Finish inventory?
 ```
@@ -50,9 +43,9 @@ Build the preview from a traversal-safe inventory rooted in the owner repository
 
 ## Semantic reconciliation
 
-Before checks, preview, confirmation, commit, lifecycle mutation, or session archive, build a bounded reconciliation packet. Read only affected Ticket Logs, active-session boundary events (never its checkpoint), explicitly accepted user feedback, amendment pointers, the actual diff, and Verify findings—never a transcript or full-repository drift scan. Each row is exactly `planned owner -> accepted result -> delta -> disposition`. Closed dispositions are `already current`, `update owner`, `supersede ADR`, `Ticket Log only`, or `amendment/linked Story required`. If there are no rows, emit exactly `No semantic delta`.
+Before checks, preview, confirmation, commit, or lifecycle mutation, build a bounded reconciliation packet. Read only affected Ticket Logs, the current session recovery pointer for routing context (never as semantic evidence), explicitly accepted user feedback, amendment pointers, the actual diff, and Verify findings—never a transcript or full-repository drift scan. Each row is exactly `planned owner -> accepted result -> delta -> disposition`. Closed dispositions are `already current`, `update owner`, `supersede ADR`, `Ticket Log only`, or `amendment/linked Story required`. If there are no rows, emit exactly `No semantic delta`.
 
-Contract-preserving reconciliation may promote repeatable knowledge a future agent would otherwise rederive; normal implementation detail remains in Git and Ticket Log. Include exact `update owner`, `supersede ADR`, and Ticket Log writes in the same single Finish preview/confirmation, owner/lifecycle commit, immediate revalidation, authoritative readback, and terminal receipt. A changed reconciliation delta expires that confirmation. Create no AS-BUILT document, parser, schema, manifest, or runtime state.
+Contract-preserving reconciliation may update the smallest canonical owner when the active ritual owns that write; normal implementation detail remains in Git and Ticket Log. Include exact owner writes in the same single Finish preview/confirmation, owner/lifecycle commit, immediate revalidation, authoritative readback, and terminal receipt. A changed reconciliation delta expires that confirmation. The session pointer is never promoted, archived, or treated as authority. Create no AS-BUILT document, parser, schema, manifest, or runtime state.
 
 A delta to success, acceptance, scope, public/inter-service contract, repository boundary, architecture/ADR constraint, persistence/data path, or security/privacy is material. Stop before commit, owner/lifecycle mutation, Story closure, or session archive; leave an active Story active or blocked and owners unchanged. Route active work to amendment and work discovered after `done` to a linked Story. Never rewrite Story/PRD at Finish to legalize the implementation.
 
@@ -88,7 +81,7 @@ Local effects are nontransactional. Preserve every proven success if a later add
 
 Integrate semantic project knowledge before historical proof. A semantic conflict stops for human reconciliation. Resolve ADR number or filename collisions under the owner's convention, preserve distinct decisions, and update affected durable pointers. The proven owner commit/tree is historical-preservation evidence; prove post-operator bytes and commit-tree equality, and where project policy uses one, the service merge ref and durable pointer. Create no extra durable manifest, archive manifest, registry, or extra lifecycle state machine.
 
-When a session draft exists, include a promotion preview of its confirmed boundary events inside the owner/lifecycle group. Assign each event one smallest canonical owner or `discarded`; never promote the checkpoint itself; archive it as `.loom/session/archive/<session-id>.md` only in the declared owner/lifecycle effect. Canonical semantic owner changes require current proportional checks and review under the conditional rules above. After the local result is proven, perform that declared archive effect. Removal outside that declared lifecycle effect is cleanup and remains separate.
+When a session pointer exists, use it only to recover `done`, `current`, `next`, `blocker`, `decision`, `owners`, and `fixedPoint` before building the current inventory. It supplies no semantic delta, consent, promotion, or lifecycle authority. Canonical semantic owner changes come from current Ticket/Story/PRD evidence and require proportional checks and review under the conditional rules above.
 
 Story becomes `done` only when every declared local effect, commit/tree, lifecycle byte, session disposition, objective check, and required review is authoritatively reread and proven. `done` means verified local result accepted. It never means pushed, hosted-reviewed, merged, released, tagged, archived outside the declared session lifecycle, or cleaned up.
 

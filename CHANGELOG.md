@@ -4,6 +4,17 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.9.0] - 2026-08-02
+
+Core prose optimization and host alignment are prepared for the next release.
+
+### Highlights
+
+- Reduced always-loaded Loom context by moving authority examples to a lazy reference and shrinking session state to a recovery pointer.
+- Added compact Verify receipts and adaptive Finish previews without weakening machine evidence, exact confirmation, revalidation, or remote exclusions.
+- Made Grill/Plan depth proportional to Quick, Behavior, and Material work while preserving the materialization gate and independent Verify.
+- Removed host-specific model policy and stale OMP runtime metadata from the current carrier surface.
+
 ## [7.8.0] - 2026-08-02
 
 Finish now reconciles semantic truth with less ceremony, conditional review, prose-only OMP integration, and boundary-derived model cost routing.
@@ -1584,7 +1595,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.8.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.9.0...HEAD
+[7.9.0]: https://github.com/zuevrs/loom/compare/v7.8.0...v7.9.0
 [7.8.0]: https://github.com/zuevrs/loom/compare/v7.7.0...v7.8.0
 [7.7.0]: https://github.com/zuevrs/loom/compare/v7.6.0...v7.7.0
 [7.6.0]: https://github.com/zuevrs/loom/compare/v7.5.0...v7.6.0

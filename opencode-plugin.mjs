@@ -1,4 +1,4 @@
-// loom — OpenCode prose adapter. Version: 7.8.0
+// loom — OpenCode prose adapter. Version: 7.9.0
 // Registers canonical skills and injects compact, truthful guidance. OpenCode
 // receives no Loom runtime enforcement.
 

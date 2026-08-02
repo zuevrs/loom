@@ -26,12 +26,12 @@ const AUTHORITY_RULES=[
   "complete displayed multi-repository local inventory",
   "check set","review target","release target","cleanliness state","activity state",
   // revalidation immediately before the effect, and every named row of its catalogue
-  "immediately before performing a confirmed effect",
-  "privacy and secret boundaries","worktree cleanliness","repository/lane ownership",
-  "intended files","checks and verify boundary","local integration or commit target",
+  "immediately before each confirmed effect",
+  "privacy/secrets","worktree","repository/lane",
+  "intended files","checks/verify boundary","local or remote target",
   "cleanup eligibility",
   "missing, stale, mismatched, contradictory, unexplained, or over-broad evidence stops",
-  "never substitutes for rereading the current state",
+  "never replaces rereading current state",
   // instruct, then prove
   "only after the applicable confirmation",
   "proves what succeeded",
@@ -43,13 +43,8 @@ const AUTHORITY_RULES=[
   "after publish","proven merge",
   "never implied by finish, by publish, by a closed review, or by story completion",
   // evidence records
-  "not executable authority carriers","not required module exports",
-  "{ state, outcomes, evidence, assumptions, ending }",
-  "verified-result","decision-request","bounded-escalation",
-  "{ kind, source, observedat, digest, summary }",
-  "terminal verified result requires relevant test or verification evidence",
-  "{ storyid?, decisions, scope, blockers, evidence, handoff?, delegation?, staleevidence? }",
-  "no session, terminal, task, card, lane, repository runtime key, or worktree identifier is authority",
+  "detailed behavioral record examples are optional reference material","not part of the always-loaded authority floor",
+  "outcomereceipt","semanticcheckpoint",
   // scope of the model
   "story.md`, `finish.md`, `publish.md`, `omp.md`, or `orca.md`",
   "no tend or unattended runtime ritual",
@@ -62,12 +57,13 @@ test("AUTHORITY.md states every load-bearing authority rule",()=>{
   }
 });
 
-test("AUTHORITY.md ships a filled instance beside every schema",()=>{
-  const authority=read("skills/loom/AUTHORITY.md");
-  // A schema with no instance is a test of imagination, and two sessions imagine differently.
-  assert.match(authority,/```json[\s\S]*"ending"[\s\S]*```/,"OutcomeReceipt lost its filled example");
-  assert.match(authority,/```json[\s\S]*"staleevidence"[\s\S]*```/,"SemanticCheckpoint lost its filled example");
-  assert.match(authority,/```\nrevalidated for:/,"the revalidation block lost its printable form");
+test("AUTHORITY.md keeps examples outside the always-loaded floor",()=>{
+  const authority=read("skills/loom/AUTHORITY.md"),examples=read("skills/loom/AUTHORITY-EXAMPLES.md");
+  assert.match(authority,/authority-examples\.md/);
+  assert.doesNotMatch(authority,/```json[\s\S]*"ending"/);
+  assert.match(examples,/```json[\s\S]*"ending"[\s\S]*```/);
+  assert.match(examples,/```json[\s\S]*"staleevidence"[\s\S]*```/);
+  assert.match(authority,/immediately before each confirmed effect/);
 });
 
 test("no host prose reintroduces a prevention claim",()=>{
@@ -123,19 +119,12 @@ test("text the agent reads is treated as data, not instruction",()=>{
     "DIAGNOSE lost the untrusted-probe-output rule — the widest surface in the set");
 });
 
-test("the grill has an observable stop test and a floor under it",()=>{
-  // `every branch resolved` is visible only to the model and justifies the fourth question exactly
-  // as well as the twenty-fifth. The predictive test can be answered; the floor and the
-  // counter-ceiling stop it from licensing a three-question briefing or an endless loop.
+test("the grill has proportional observable floors",()=>{
   const grill=read("skills/loom-plan/GRILL.md");
-  assert.match(grill,/predict the user's answers to the next three questions/,
-    "the stop test stopped being answerable");
-  assert.match(grill,/a resolved scope edge, a named non-goal, and one confirmed trade-off/,
-    "the floor under the stop test disappeared — predictions alone can now end a grill");
-  assert.match(grill,/three consecutive rounds where the answers do not narrow the scope/,
-    "the counter-ceiling disappeared — an incoherent task can be grilled forever");
-  assert.match(grill,/only sound thoughtful/,
-    "the agreeable-answer detector disappeared; a returned proposal counts as an answer again");
+  assert.match(grill,/quick.*behavior.*material/is);
+  assert.match(grill,/resolved scope edge.*named non-goal.*confirmed trade-off/is);
+  assert.match(grill,/smallest proof|proof compact/i);
+  assert.match(grill,/readback.*correction checkpoint.*not.*permission to draft/is);
 });
 
 test("the grill readback is a correction checkpoint with non-optional Out of scope",()=>{
@@ -237,6 +226,13 @@ test("the discipline ladder is checked by a checker, not only preached",()=>{
 });
 
 
+test("Finish adaptive presentation preserves exact authority inventory",()=>{
+  const finish=read("skills/loom/FINISH.md");
+  assert.match(finish,/adaptive presentation/i);
+  assert.match(finish,/always show Story identity\/lifecycle, exact paths\/effects, commit groups\/messages, checks, review reuse\/trigger, session disposition, readback, and explicit remote\/history\/cleanup exclusions/is);
+  assert.match(finish,/Collapsing presentation never collapses inventory, confirmation scope, revalidation, or readback/is);
+  assert.match(finish,/confirm this exact local finish inventory/i);
+});
 test("Finish authority is one current local gate with remaining-only recovery",()=>{
   const finish=read("skills/loom/FINISH.md"),authority=read("skills/loom/AUTHORITY.md");
   assert.match(finish,/one compact exact preview[\s\S]*exactly one confirmation question/);
@@ -271,6 +267,8 @@ test("Finish reconciles semantics before every local effect",()=>{
   const finish=read("skills/loom/finish.md"),reconciliation=finish.indexOf("## semantic reconciliation"),checks=finish.indexOf("## conditional finish verification"),effects=finish.indexOf("## verify, execute, and prove local effects");
   assert.ok(reconciliation>0&&reconciliation<checks&&checks<effects,"semantic reconciliation must precede checks and effects");
   assert.match(finish,/same single finish preview\/confirmation.*owner\/lifecycle commit.*authoritative readback.*terminal receipt/);
+  assert.match(finish,/session pointer.*never promoted, archived, or treated as authority/is);
+  assert.doesNotMatch(finish,/active-session boundary events|promotion preview/i);
   assert.match(finish,/material[\s\S]*leave an active story active or blocked and owners unchanged/);
   assert.doesNotMatch(finish,/as-built\.md|full-repository drift scan.*allowed|transcript.*allowed/);
 });

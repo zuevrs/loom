@@ -36,30 +36,13 @@ Apply this contract proportionally: Plan and Grill research decisions; Implement
 
 ## Interview rules
 
-Interview the user **relentlessly** about every aspect of the plan until **every branch of the decision tree is resolved**. Continue beyond a merely coherent PRD; end the interview when the mandatory readback has exposed shared understanding, corrections are integrated, and no user-owned decision remains open.
+Apply Grill proportionally to the route. **Quick** work gets one compact agent-owned check of flow, non-goal, and proof. **Behavior** work surfaces load-bearing assumptions and asks only when a user-owned choice changes the result, with one adversarial edge case when useful. **Material** work gets the full sequential interview, domain probes, and readback. Never edit before the applicable floor is met; end when the route's readback is visible and no user-owned decision remains open.
 
-- **One `ask` call = exactly ONE question.** Put one question object in each call and keep prose to that question. Each answer branches the next question; a single-question cadence preserves that context.
-- **Resolve decision dependencies in order.** When one open decision depends on another, ask the load-bearing one first — an answer built on an unresolved dependency is a guess the interview will have to re-litigate.
-- **Recommend an answer** with every question — say which option you'd pick and *why*, and mark it (list it first / label it recommended). A bare multiple-choice menu is an interrogation, not a grill.
-- **Surface every load-bearing decision.** For output format, command/interface names, parser or tech approach, error contracts, edge-case behavior, and precision, ask the user or record an explicit assumption for confirmation. A plan records confirmed choices rather than unconfirmed guesses.
-- **Start broad, then narrow.** Scope, users, success criteria first; then push boundaries — "What's explicitly NOT in scope?" — and stress edge cases and trade-offs one-by-one.
-- **Probe for unstated constraints.** After named questions are resolved, ask about assumptions the user treats as obvious. Offer a concrete option the user would reject; that rejection makes the constraint explicit.
-- **Seams.** Propose where the feature will be tested. Prefer existing seams, use the highest seam, the fewer the better (ideal: one). Confirm the seams with the user.
-- **Resume after interruptions.** After a dropped connection, an error, or the user saying "continue", re-read this file, restate the last unanswered question, and resume. Preserve the full interview rather than treating the interruption as a shortcut.
-- **The interview runs in the user's language** — questions, options, recommendations, all of it, with no English duplicates in parentheses. Technical terms and ritual names stay as-is.
-
-## When you have grilled enough
-
-`Every branch resolved` is a judgement only you can see, and it justifies the fourth question exactly as well as the twenty-fifth. Replace it with a test that has an observable answer, run before each new question:
-
-**Can you predict the user's answers to the next three questions you would ask?** Predict them silently. If all three predictions feel forced, the branches are open — keep going. If you can state all three answers and would bet the diff on them, the interview is done: read the predictions back at the correction checkpoint as assumptions instead of asking them.
-
-That test is a ceiling, not a licence to stop early. Below it sits a floor: **an interview that has not produced a resolved scope edge, a named non-goal, and one confirmed trade-off is not finished**, however confident the predictions feel. Three questions with three agreeable answers is a briefing, not a grill.
-
-And a counter-ceiling in the other direction: **three consecutive rounds where the answers do not narrow the scope mean the problem is the task, not the answers.** Say so and change the object — "we've circled this three times; I think the request itself holds two features. Split it, or pick which one ships first?" Continuing to ask about an incoherent task produces a coherent PRD for the wrong thing, which is the expensive failure, not the slow interview.
-
-Watch for answers that only sound thoughtful. "Yeah, that makes sense", "good point, let's do that", "whatever you recommend" resolve nothing — they return your own proposal to you with the user's name on it. An answer counts when it adds a fact you did not have: a rejected option, a number, a constraint, a name. When three answers in a row add nothing, ask the one question the user cannot answer from your framing: "what would make this the wrong thing to build?"
-
+- **One question per ask call.** Keep the question in the user's language and recommend the answer with its reason.
+- Resolve decision dependencies in order; surface only choices that can change result, boundary, or proof.
+- Explore local evidence before asking; distinguish facts from user-owned decisions.
+- Maintain the pending domain delta inline and keep all writes behind the owning ritual gate.
+- Use the full scope/non-goal/trade-off interview only for Material work or when a smaller route exposes unresolved material ambiguity.
 ## Model the domain as you grill
 
 The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.md` for vocabulary"; it is *changing* the model as decisions crystallise):
@@ -74,15 +57,7 @@ The active `domain-modeling` discipline, run inline (this is not "read `CONTEXT.
 
 ## The cadence, worked
 
-One exchange showing the moves — one question, recommendation first, inline CONTEXT write, ADR offered (not written):
-
-> **Agent:** When a report is exported while filters are active — does the CSV mirror the filtered view or the full dataset? I'd recommend the filtered view: it matches what the user sees, and "export = screenshot of my view" is the least surprising contract. *(waits)*
->
-> **User:** Filtered. And "report" is wrong — we call it a "ledger view" internally.
->
-> **Agent:** *(updates the pending domain delta: "Ledger view — the filtered, user-visible projection of the ledger; exports always mirror it" — before asking anything else)* That export contract is hard to reverse once users share CSVs, it'd surprise a newcomer, and we just traded completeness for predictability — want an ADR for it? *(waits; keeps it pending only on yes)*
-
-Ten flat multiple-choice questions in a row with no evolving domain delta is the anti-pattern this file exists to prevent.
+The route determines the cadence. Quick keeps the alignment block and proof compact. Behavior asks one recommended question only when an assumption changes the result, boundary, or proof. Material uses sequential questions, domain probes, and the full readback. The pending domain delta stays inline; nothing is written before the owning gate.
 
 ## Verification depth
 
