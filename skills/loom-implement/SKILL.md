@@ -18,7 +18,7 @@ Ship one vertical slice in a maker with minimal diffs and independent Verify. Or
 - Story and optional parent PRD
 - Project conventions (git style, test/lint commands)
 - `CONTEXT.md` and the ADRs whose Scope covers this Ticket's repository keys — these are the standards the Standards checker will judge you against, so read them before the first edit, in the same batch as everything else. A decision that contradicts a recorded one is a stop and one question, not a quiet deviation. Where neither file exists, this degrades to nothing and costs nothing.
-- **Fresh maker session:** use a compact continuation packet containing Story intent/success, only the PRD decisions and assumptions relevant to this Ticket, the selected Ticket, blocker status lines, standards paths, and the current Git fixed point/diff identity. "One Ticket only" bounds the *work*, not the project's own rules — a checker citing an ADR the maker was never shown is a REJECT lap nobody needed. The full Story/PRD remains available for deeper dives; do not re-read unrelated templates or sibling Tickets by default.
+- **Fresh maker session:** use a compact continuation packet containing Story intent/success, relevant PRD decisions/assumptions, the selected Ticket, blocker status, standards paths, current Git fixed point/diff identity, and the boundary-derived Quick/Behavior/Full routing hint. "One Ticket only" bounds the *work*, not project rules. The full Story/PRD remains available for deeper dives; the packet does not repeat the whole planning surface by default; do not re-read unrelated templates or sibling Tickets.
 - Optional CodeGraph evidence may narrow architecture and impact exploration. Load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) first; use only a fresh current-worktree result and fall back visibly to direct repository inspection.
 
 ## Story and repository ownership
@@ -46,9 +46,9 @@ An explicit Story target does not itself authorize orchestration. First show one
 - the uniquely resolved Story and current coordinator context;
 - every planned repository key, native base, worktree action, and writer scope known now;
 - dependency order, including which repository lanes may run independently and which Ticket is explicitly atomic across repositories;
-- worker policy: one healthy writer per repository lane, fresh bounded Ticket input, same healthy maker for REJECT rework, and no Ticket chaining inside a maker context;
+- worker policy: one healthy writer per repository lane, fresh bounded Ticket input, same healthy maker for REJECT rework, no Ticket chaining, and Quick/Behavior/Full routing per `CONSTITUTION.md`;
 - independent Verify after every Ticket and the stable Human-approval policy for each Ticket;
-- stop conditions: unresolved blocker, `needs-info`, contradictory repository identity, unavailable required lane, two overlapping REJECTs, or the same unchanged execution error twice;
+- stop conditions: unresolved blocker, `needs-info`, contradictory repository identity, unavailable lane, `decision-needed`, contract/PRD contradiction, material signal, failed objective check beyond one obvious bounded repair, two overlapping REJECTs, or the same unchanged error twice;
 - authority policy: execution confirmation grants no commit, Finish, Publish, push, hosted-review, merge, release, or cleanup effect; and
 - project language, checks, and public-prose conventions.
 
@@ -58,7 +58,7 @@ After confirmation, follow [`../loom/ORCA.md`](../loom/ORCA.md) through complete
 
 ### Explicit story finish
 
-Finish is never entered by APPROVE or Ticket completion. Only an explicit finish route from the dispatcher lazy-loads and follows [`../loom/FINISH.md`](../loom/FINISH.md). It owns the exact inventory, renewed bounded confirmation, checks, independent final Spec+Standards on one boundary, immediate boundary recheck, ordinary local commits/hooks, failure/partial evidence, the Story `done` transition, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
+Finish is never entered by APPROVE or Ticket completion. Only an explicit finish route from the dispatcher lazy-loads and follows [`../loom/FINISH.md`](../loom/FINISH.md). It owns one exact complete local inventory and one confirmation, current objective checks, reuse of current Ticket verdicts plus conditional compact integration Spec+Standards only for aggregate risk, immediate load-bearing revalidation, agent-executed ordinary local commits/hooks with authoritative readback, remaining-only partial recovery, the declared owner/lifecycle Story and session transition, terminal receipt, and sanitized review bundle. Finish creates no push or hosted review. Publish remains separate.
 
 ### Explicit story publish
 
@@ -68,7 +68,7 @@ Publish is never inferred from finish, APPROVE, or review readiness. Only an exp
 
 For multi-repository Story work, the Orca root coordinator may run the exactly confirmed Story preview until complete, blocked, or stopped after two overlapping Verify REJECTs. It stays thin: scheduling and durable evidence come from source owners, not retained chat memory. Follow [`../loom/ORCA.md`](../loom/ORCA.md) for repository/worktree identity, dispatch, waits, and resume. No other host runner substitutes for Orca.
 
-Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Verify APPROVE permits disposition according to the stable Human requirement but grants no commit or host mutation. Verify REJECT keeps the same maker and sends one compact batch of all findings, affected boundaries, and prior evidence; recheck only evidence affected by rework. A subsequent Ticket always receives a newly spawned host-native maker and a fresh bounded continuation packet: Story intent/success, relevant PRD decisions/assumptions, one Ticket, blocker status lines, standards paths, and current Git fixed point/diff identity. It may deepen into the full owners when evidence requires it, but it does not repeat the whole planning surface by default.
+Every maker obeys the one-Ticket Process and Hard stops below. `worker_done` returns control and never marks a Ticket complete. Apply `CONSTITUTION.md` routing: Quick uses a `smol` maker; Behavior uses `smol`; Full/material uses `default/strong`. These are host-mapped runtime hints, never model IDs or Ticket authority. A `smol` maker may repair one obvious local check failure, then stops on repeated/unknown failure or any listed stop signal. At most once per Ticket, continue through a fresh OMP maker or Orca worker mapped to `default/strong`, with current diff, fixed point, checks, decisions, and blocker; do not restart by default. A material signal routes to Plan, and escalation does not reset Verify/recheck budget. Verify APPROVE grants no commit or host mutation. REJECT keeps the same maker and sends one compact finding batch. A subsequent Ticket always gets a new host-native maker and fresh packet; deepen into full owners only for a load-bearing gap.
 
 ## Direct small-fix route
 
@@ -104,7 +104,7 @@ Lead with the result or next action. For more than one action, use the fewest nu
 
 ## Process
 
-1. Apply **Selection** first. For Ticket work, assemble one compact continuation packet in a single batch: Story intent/success, relevant PRD decisions/assumptions, this Ticket, only blockers’ status lines, standards paths, and current Git fixed point/diff identity. Explicit Ticket means exactly that Ticket. Bare Implement takes the lowest-numbered `ready-for-agent` Ticket whose blockers are all `done`. Never read sibling Ticket cards or unrelated planning templates in full by default — deepen only when the packet leaves a load-bearing gap. **Stop** when a blocker is not `done`; a Ticket marked `ready-for-human` is not agent work. Plan-invoked work without a Ticket is invalid and returns to Plan; the direct concrete small-fix route remains artifact-free.
+1. Apply **Selection** first. For Ticket work, assemble one compact continuation packet in a single batch: Story intent/success, relevant PRD decisions/assumptions, this Ticket, only blockers’ status lines, standards paths, current Git fixed point/diff identity, and the Quick/Behavior/Full routing hint. Explicit Ticket means exactly that Ticket. Bare Implement takes the lowest-numbered `ready-for-agent` Ticket whose blockers are all `done`. Never read sibling Ticket cards or unrelated planning templates in full by default — deepen only when the packet leaves a load-bearing gap. **Stop** when a blocker is not `done`; a Ticket marked `ready-for-human` is not agent work. Plan-invoked work without a Ticket is invalid and returns to Plan; the direct concrete small-fix route remains artifact-free.
 2. **Pre-flight baseline:** run the project's existing checks (test/lint commands from conventions) BEFORE touching code. A red baseline makes "tests pass" unattributable — note pre-existing failures in `## Log`; if the Ticket's own verification path is already red, stop and report instead of building on it.
 
    In the same pass, `grep -rn 'loom:' {the files this Ticket touches}`. A shortcut whose ceiling you are about to stand on is cheapest to pay down while you are already in the file. A marker naming no upgrade path is the one that rots silently — flag it in `## Log` as `no-trigger` even when you leave it untouched. Close the pre-flight with one line: `loom: markers in scope: 2, no-trigger: 1`.
@@ -119,7 +119,7 @@ Lead with the result or next action. For more than one action, use the fewest nu
 9. **Prototype spike:** timebox exploratory code; absorb validated decisions into the scoped slice. Prototype evidence must be durable, independently inspectable, and accessible to later maker/checker contexts through a stable pointer (an existing durable branch reference, a durable host artifact, or an external primary source). Ephemeral scratch is insufficient unless persisted durably. A user-confirmed inline result is a user-owned assumption/decision, not prototype evidence — it cannot silently become production code. Record the pointer in `## Log`. Never merge prototype branches.
 10. Leave **one runnable check** that can go red. Tier 1 may lean on an existing check; tiers 2 and 3 leave a new one at the agreed seam. A check that cannot fail is not a check — if you cannot describe the edit that would turn it red, you have not written one.
 11. Run Ticket verification commands; capture evidence in the Ticket comment **silent pass, loud fail** — a green command is one line (`npm test → pass (14/14)`), a red command lands with its failing output verbatim; pasting green walls buries the one line that matters. Climb the **verification ladder** as far as the repo allows: static (lint/typecheck) → tests → a smoke run of the touched behavior. Tier 1 stops at static plus the Ticket's own check; tier 2 reaches tests; tier 3 reaches the smoke run. Skipping a rung the repo already has is a gap the checker will name.
-12. **Log as you go, not at the end.** Append a `## Log` bullet (before the final `## Verify`) at the moment a key decision, deviation from the Ticket as written, or open question happens — 3–5 bullets per Ticket, not a diary. A session that dies mid-implement changes no status and writes no report; bullets written in the moment are the only trace the next session inherits. At this step: re-read and trim the Log, don't write it from memory. This is the maker's claim; the checker compares it against the actual diff. The shape:
+12. **Log as you go, not at the end.** Contract-preserving feedback/deviation stays in this Ticket. Add one concise `## Log` bullet (before final `## Verify`) for accepted deviation/rework, rejected alternative, key decision, or open question—3–5 bullets, not duplicate acceptance/history. Architecture/ADR or material change returns `decision-needed` before continuing. Trim the Log; compare claims with the diff. The shape:
 
     ```markdown
     ## Log
@@ -174,7 +174,8 @@ Before writing code, stop at the **first rung that holds**:
 | Ticket marked `ready-for-human` | Not agent work; stop |
 | Verification command fails | Fix or stop; never mark done |
 | User asks to skip verify | Refuse; document host limitation if truly blocked |
-| Scope creep mid-Ticket | Report it and stay scoped. After user confirmation, route to Plan to create a new Ticket; Implement does not create triage stubs |
+| Contract-preserving feedback/deviation | Same Ticket; log accepted deviation/rework or rejected alternatives concisely |
+| Material or architecture/ADR change | Return `decision-needed` and stop; Plan amends before implementation continues |
 | Existing `loom:` debt is in scope | Pay it down only with the real verified code change; otherwise preserve the marker and its ceiling/upgrade path |
 | Existing `loom:` debt is unrelated | Leave it untouched and report it separately; do not turn this Ticket into maintenance |
 | Question only the user can answer, mid-Ticket | Set Ticket frontmatter to `status: needs-info`, write the exact question into `## Log`, and stop |

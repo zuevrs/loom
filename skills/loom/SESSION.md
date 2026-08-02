@@ -4,7 +4,7 @@ Lazy-load this fragment only for explicit `/loom` entry, resume, or Finish. A se
 
 ## Purpose
 
-Keep confirmed recovery-worthy events until Finish promotion.
+Stage recovery-worthy events; accepted semantic delta may be a Finish candidate.
 
 ## Location and identity
 
@@ -21,7 +21,7 @@ Conflicts with artifacts, Git, or Orca/OMP stop routing for reconciliation.
 
 ## Event model
 
-Record only boundary events; routine verified facts alone create nothing.
+Record only boundary events. Routine detail creates no event; checkpoints are never promoted.
 
 - `confirmed-decision` — the user explicitly chose an option that changes result, acceptance, boundary, or owner.
 - `rejected-option` — a material option was explicitly rejected and would otherwise be rediscovered.
@@ -82,7 +82,7 @@ Finish reads the active draft and offers a compact promotion preview. For each e
 - deliberate code shortcut with ceiling → `loom:` marker beside code;
 - repeatable project procedure → repository-local `skills/<slug>/SKILL.md`.
 
-Write owners only after confirmation and fresh proportional Verify. Decline archives unchanged except status/Finish. Archive or remove checkpoints after disposition; never promote them automatically.
+Promote only repeatable knowledge a future agent would rederive; normal detail stays in Git and Ticket Log. Write owners only after confirmation and proportional Verify. Decline archives unchanged except status/Finish; never promote checkpoints.
 
 ## Resume
 

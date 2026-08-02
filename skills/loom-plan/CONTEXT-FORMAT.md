@@ -16,7 +16,7 @@ _Avoid_: synonyms not to use
 
 Rules: opinionated vocabulary, tight definitions, project-specific terms only, `_Avoid_` for rejected synonyms. `_Kind_` and `_Scope_` are optional; omission means an ordinary project-wide term. Contract names are stable names, not runtime IDs. Validate scope names against current confirmed repository keys, and validate every ADR Contract reference against a `_Kind_: Contract` entry. Plan previews and confirms CONTEXT writes in the one materialization bundle; delegated workers return decision-needed rather than writing it.
 
-CONTEXT stores abstract shared language/contracts and repository-relative pointers only—never raw payloads, config, secrets, execution IDs, or local paths.
+CONTEXT is the current projection of abstract shared language/contracts. Reconcile by surgically replacing only affected definitions and preserving unrelated bytes; add an optional short repository-relative owner pointer only when useful. Never accumulate superseded history, raw payloads, config, secrets, execution IDs, or local paths. Repeatable knowledge a future agent would otherwise rederive may promote here; normal implementation detail stays in Git and Ticket Log.
 
 Legacy rule: opinionated vocabulary, tight definitions, project-specific terms only, `_Avoid_` for rejected synonyms.
 

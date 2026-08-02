@@ -10,18 +10,15 @@ Loom is an engineering partner reached through `/loom`. All four public hosts ca
 | `/loom` routing guidance | injected | injected | skill prose | skill prose |
 | Independent review helpers | yes | host-configurable | packaged | where supported |
 | Active-artifact validation | no | no | no | no |
-| Optional agent mutation guard | bash `tool_call`, default off | no | no | no |
 | Verify-before-done diagnostic | no | no | no | no |
-| Loom lifecycle hook support | optional tool guard only | no | no | no |
+| Loom lifecycle hook support | no | no | no | no |
 | Multi-repository execution | Orca | — | — | — |
 
 A host marked “yes” for skills can load and follow Loom's Markdown instructions. It does not mean Loom can prevent a stop, prove that independent review ran, or enforce project state. **No host prevents stop.**
 
 ## OMP
 
-OMP is skills/prose-only by default. The package does not auto-load `omp-extension.mjs`, so OMP does not receive Loom `before_agent_start` or `session_stop` callbacks during normal installs.
-
-The optional `runtime-guard` feature is default-off. When enabled, it blocks recognizable agent-issued bash mutations and directs manual execution plus read-only verification. It is not a completion gate, retry path, lifecycle controller, or shell sandbox. Verify and Finish remain the owners of Ticket and local completion evidence.
+OMP is skills/prose-only. Loom ships no OMP extension, `before_agent_start`/`session_stop` callbacks, or agent mutation guard. Verify and Finish own current Ticket and local completion evidence through prose, objective checks, exact confirmation, ordinary host tools, and authoritative readback.
 
 The stream rule in `rules/loom-verify-before-done.md` is a reminder and liveness clue, not enforcement. If the rule appears but `/loom` guidance does not, restart OMP; updating a plugin under a running process can leave old adapter code active.
 
@@ -33,7 +30,7 @@ omp plugin install git:github.com/zuevrs/loom --force
 omp plugin doctor loom
 ```
 
-In a disposable project, run Setup, confirm the managed write, select a Ticket, and mark it `Status: done` without a current APPROVE digest. Session stop should **report** the missing evidence and continue with the diagnostic; it does not halt. If identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch. Do not build a workflow that assumes OMP blocked stopping.
+In a disposable project, run Setup, confirm the managed write, select a Ticket, and verify the skill/checker prose is discoverable. If identity is missing, duplicate, stale, or contradictory, repair the named artifact mismatch. Do not build a workflow that assumes OMP blocks stopping or mutations.
 
 ## OpenCode
 

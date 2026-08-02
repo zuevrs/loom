@@ -35,7 +35,7 @@ Two explicitly separate formats:
 
 On APPROVE, set lowercase frontmatter `status: ready-for-human` when the stable Human requirement applies, otherwise `status: done`. On REJECT, leave `status` unchanged and return every current finding as one batch to the same maker. **No Ticket file** (direct small-fix/ad-hoc review): deliver the digest in chat; no write-back or status mutation.
 
-No approval authorizes commit, Finish, Publish, push, hosted review, merge, release, or cleanup. Those are separate manual boundaries. Maker/checker separation and the judge-only rule grant no Git authority.
+No approval by itself authorizes commit, Finish, Publish, push, hosted review, merge, release, or cleanup. A later exact confirmed Finish inventory may separately authorize its declared ordinary local effects. Those are separate manual boundaries. Maker/checker separation and the judge-only rule grant no Git authority.
 
 **Review branches:**
 
@@ -46,7 +46,7 @@ For multi-repository Story work, Orca is the sole coordinator and supplies the o
 
 ## Process
 
-Verify has a bounded budget. Run one initial round. A rejecting axis gets at most one finding-scoped recheck in its same checker context; an approving axis is not rerun unless the rework newly affects it. A full new round is allowed only when acceptance or an explicit user contract expands, the public/inter-service contract expands, the repository or dependency set expands, or rework newly affects the second axis. A second overlapping REJECT stops under the existing two-strikes rule; there is no third checker lap.
+Verify has a bounded budget. Finish may reuse current Ticket Spec/Standards verdicts while their boundaries remain current; its compact integration use of this skill is triggered only by observed cross-Ticket behavior, a changed aggregate boundary, or a new integration contract. Lifecycle-only deltas do not trigger model review. Host project/custom review skills aggregate as inputs to the one Standards packet, never extra axes. Run one initial round. A rejecting axis gets at most one finding-scoped recheck in its same checker context; an approving axis is not rerun unless the rework newly affects it. A full new round is allowed only when acceptance or an explicit user contract expands, the public/inter-service contract expands, the repository or dependency set expands, or rework newly affects the second axis. A second overlapping REJECT stops under the existing two-strikes rule; there is no third checker lap.
 
 1. Pin the **Boundary** before judging: Maker identity; Ticket digest; ordered repositories with identity, HEAD, fixed point, and diff digest; and the exact included semantics. Confirm at least one repository diff is non-empty. The Boundary excludes only Ticket lifecycle frontmatter `status` and the entire current `## Verify` block, and includes every other Ticket semantic byte plus exact repository state. This exact self-exclusion prevents writing Verify or changing status from invalidating its own digest; any other Ticket or repository change makes the result stale and requires fresh Verify.
 2. **Run the objective gates before spawning anyone.** Take the Verify tier from `CONSTITUTION.md` (tier 1 docs/tests-only, tier 2 internal logic, tier 3 contract/data/auth/migration/new dependency; ties take the higher tier). Tier 1 runs the Ticket-required checks; tier 2 adds the focused gates for the changed files; tier 3 adds the full relevant repository gates. Discover the commands from package scripts, Makefile, and CI configuration — never invent one. A repo with a lint script that Verify never ran is an unearned APPROVE.
@@ -57,16 +57,16 @@ Verify has a bounded budget. Run one initial round. A rejecting axis gets at mos
 3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers. The packet is hash-pinned and maps every applicable acceptance criterion or named standard to an evidence anchor: diff hunk, source line, test/check result, Ticket/PRD line, ADR, or applicable project quality/review skill section. A checker may make one bounded live dive only for an absent, ambiguous, or context-dependent anchor; it names the question and bounded files/symbols first and never reconstructs the repository by default. Applicable project security, performance, CI, architecture, or review skills are Standards inputs only when their declared scope matches the changed surface; they never create another canonical axis.
 
 
-   - **Spec-backed:** spawn **two parallel checker sub-agents** in separate contexts when the host supports it:
-     - **Spec**: does the change satisfy Ticket + Story/optional PRD or explicit user contract? Quote spec lines for findings. Bind the Spec checker role explicitly in the host's supported syntax.
-     - **Standards**: warp + discipline floor — conventions, and the Ticket's runnable check exists and **can fail**. Pass/fail itself arrives with the briefing's gate results; checker tools are read-only. Bind the Standards checker role explicitly in the host's supported syntax.
+   - **Spec-backed:** Quick runs one independent Standards checker and records the canonical Spec-not-required sentinel. Behavior/Full spawn **two parallel checker sub-agents** in separate contexts when supported:
+     - **Spec**: does the change satisfy Ticket + Story/optional PRD or explicit user contract? Quote spec lines for findings. Bind the Spec role explicitly.
+     - **Standards**: warp + discipline floor - conventions, and the Ticket's runnable check exists and **can fail**. Gate pass/fail arrives in the briefing; tools are read-only. Bind the Standards role explicitly.
    - **Standards-only:** obtain only the independent Standards review. Put `Spec unavailable — no Ticket/Story/PRD/user contract supplied` in the digest and Spec evidence; no Spec checker is required.
    - **Shared briefing:** assemble the checker context **once** as a host-supported shared evidence packet and hand both checkers the same packet plus their own axis. For a continuation Ticket, reuse the maker's compact continuation packet fields — Story intent/success, relevant PRD decisions/assumptions, and current Git fixed point/diff identity — and add the exact diff text, Ticket semantics, Log, ordered repository Boundary, fixed points, and gate results; do not make each checker reconstruct the full Story/PRD by default. When relevant, include CodeGraph callers, affected flows, test relationships, source paths, index identity, and freshness status. Graph evidence remains subordinate to live HEAD/diff evidence and objective gates. Prefer a scratch file outside the repository worktree (`$TMPDIR` or host scratch such as OMP `local://`) when that carrier is truthful and available. Two hand-copied prompts drift; one briefing guarantees both checkers judge the same input, while scratch outside the worktree keeps the judged diff clean. If the host has no shared scratch carrier, send identical packet text through its supported prompt transport.
    - **The briefing carries evidence, not pointers.** Include the **diff text itself**, not just the command; the **Ticket card verbatim except only its self-excluded lifecycle frontmatter `status` field and current `## Verify` block**, acceptance criteria included; Ticket `## Log`; Maker; the full ordered repository Boundary and fixed points; **step-2 gate results**; and Story/PRD/standards **paths** for deeper dives. You already computed the diff in step 1 — a checker re-deriving it read-by-read is the single biggest Verify cost on record (field run: 9 checkers, 199 turns, most spent re-assembling evidence the orchestrator had). Size valve: past ~400 diff lines, embed the file list plus per-file hunk summary instead and let checkers read changed files themselves.
    - **Named checker agents:** if the host ships pre-configured checker agents such as `loom-verify-spec` and `loom-verify-standards`, **attempt them once per session**. Never assume unavailability without one recorded attempt. Record found/not found in the applicable evidence summary and reuse that discovery result for later verifies in the session. On not-found, fall back to generic independent sub-agents with the checker manifests inlined.
    - **Prefer named checker agents when listed.** A generic task/reviewer sub-agent is the fallback for hosts that do not list them, not a peer option. Names carry role constraints and the model tier below.
    - **Each checker prompt carries its own agent binding.** Batch two spawns for parallelism only if the interface binds the agent per item; one agent field spanning two prompts can run both under one checker manifest and silently lose the other axis's role and tier (observed on OMP: Standards ran under the Spec label).
-   - **Checker model tier:** use `smol` by default (`pi/smol` in OMP). Escalate to a strong model only for unresolved ambiguity after the bounded dive, cross-axis conflict, high-consequence authentication/data-loss/public-contract uncertainty, or one invalid/empty smol result; record the reason and model tier. Strong escalation does not reset the one-recheck budget. The user's host configuration always wins.
+   - **Checker role routing:** Quick uses `smol` Standards only; Behavior and Full use `default/strong` Spec + Standards. These are host-configured role mappings/runtime hints, not canonical model names or Ticket fields; host configuration wins. Where a `smol` checker applies, one invalid, empty, or ambiguous result may escalate once to a fresh `default/strong` checker. Record why; escalation never resets Verify or recheck budget.
    - **Capability fallback:** if parallel workers are unavailable, run required axes in independent sequential contexts and record the limitation. If an independent review cannot be obtained, fail closed with `ESCALATE_HUMAN`; never simulate the missing checker in the maker context.
 4. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15 seconds or more). Fill the wait with Verify's remaining work: pre-assemble the digest frame, scope, Boundary, fixed points, and step-2 gate results in their slots, so checker verdicts drop into a prepared digest. No empty rapid-fire polls: a field run burned six consecutive no-op polls exactly here.
 5. Aggregate the full chat digest with blocking findings first. Findings cite the contract line (Spec) or named source (Standards). Gate results are verdict input, not decoration — **evidence beats opinion**, and an APPROVE whose Checks executed section is empty is unearned by definition.
@@ -99,7 +99,7 @@ APPROVE | REJECT | ESCALATE_HUMAN
 - Named checker agents: attempted this session (yes/no) → found / not found (reuse first attempt)
 - Review execution: host-native parallel batch | parallel sub-agents | independent sequential fallback (limitation recorded)
 - Role binding: Spec checker (yes/no/not required) | Standards checker (yes/no)
-- Checker model tier: smol by default | explicit strong-model escalation with reason | user-configured (which)
+- Checker role routing: Quick `smol` Standards | Behavior/Full `default/strong` Spec + Standards | escalation reason, if any
 - If parallel sub-agents are unavailable: document limitation and run required checks sequentially in separate contexts
 
 ## Risk/Scope notes
@@ -129,7 +129,7 @@ REJECT
 - Named checker agents: attempted this session yes → found
 - Review execution: host-native parallel batch
 - Role binding: Spec checker yes | Standards checker yes
-- Checker model tier: smol by default
+- Checker role routing: Behavior `default/strong` Spec + Standards (host mappings)
 
 ## Risk/Scope notes
 - Reviewed only the pinned export Ticket Boundary; no release or migration behavior was included.
@@ -199,7 +199,7 @@ Without this the project pays for the same discovery every time: findings live i
 | Host worker fails or yields no verdict | Let the host own one recovery attempt; without branch-required independent verdict, fail closed |
 | OMP `task` agent not found | Fall back to a host reviewer or generic independent sub-agents whose prose assignments explicitly bind Spec or Standards; no obsolete transport field is required; document fallback |
 | Sub-agents unavailable | ESCALATE_HUMAN with explicit limitation |
-| Checker yields null/empty (host glitch) | Respawn that checker **once**; a second null/empty is `REJECT` with blocker "checker yield lost (host glitch)" — never a third spawn |
+| Checker yields null/empty (host glitch) | If `smol` applies, escalate once to a fresh `default/strong` checker; otherwise respawn once. A second null/empty is `REJECT` with blocker "checker yield lost (host glitch)" - never a third spawn or budget reset |
 | Conflicting Spec vs Standards | Spec-backed only: REJECT with both cited |
 | Checker tries to fix | Stop checker; re-run with the read-only role manifest |
 
@@ -224,10 +224,10 @@ Verify policy is host-neutral prose. Named-agent availability and parallelism ar
 | Named Loom checker manifests may be installed | yes; discovery can vary | carrier/config dependent | plugin agents | carrier/config dependent |
 | Parallel independent sub-agents | host capability; use when discovered | host capability/config dependent | yes when Agent workers available | yes when sub-agents available |
 | Independent sequential fallback | yes | yes | yes | yes |
-| Loom runtime enforcement claimed here | `session_stop` current-result check only | no | no | no |
+| Loom runtime enforcement | no | no | no | no |
 | Multi-repository coordination | Orca boundary only | Orca boundary only | Orca boundary only | Orca boundary only |
 
-**OMP named-agent discovery caveat:** some OMP versions/configurations may not discover plugin-provided agents through `task`. Do not infer failure in advance: attempt named agents once per session, record found/not found, then use a host reviewer or generic independent Spec and Standards contexts with manifests inlined. This preserves checker independence without claiming transport fields or hook parity. OMP's only claimed runtime enforcement here remains current artifact/current Verify consistency at `session_stop`; availability of parallel sub-agents is prose-level host capability.
+**OMP named-agent discovery caveat:** some OMP versions/configurations may not discover plugin-provided agents through `task`. Do not infer failure in advance: attempt named agents once per session, record found/not found, then use a host reviewer or generic independent Spec and Standards contexts with manifests inlined. This preserves checker independence without claiming transport fields or hook parity. OMP has no Loom runtime enforcement; availability of parallel sub-agents is a host capability.
 
 The general contract remains unchanged across carriers: same shared evidence, objective gates, checker independence, full chat digest, canonical current-result write-back, and no approval authority beyond the judged Boundary.
 

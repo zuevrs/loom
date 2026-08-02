@@ -28,11 +28,10 @@ Use repository search and the release diff; do not rely on memory. At minimum in
 - `.codex-plugin/plugin.json`
 - `AGENTS.md` managed marker
 - canonical Setup/managed-block source
-- `omp-extension.mjs`
 - `opencode-plugin.mjs` header
 - any installer/carrier metadata that embeds a version
 
-The v7 package must expose the thin OpenCode main/export and OMP extension without exporting removed runtime modules. Its positive `files` allowlist must contain canonical skills, agents, public docs, carrier metadata and exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs` as runtime seams. Inspect the tarball; an allowlist in source is not proof of packed contents.
+The v7 package must expose the thin OpenCode main/export and skills/prose-only OMP metadata without any OMP extension. Its positive `files` allowlist must contain canonical skills, agents, public docs, carrier metadata and exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs` as runtime seams. Inspect the tarball; an allowlist in source is not proof of packed contents.
 
 ## 4. Run deterministic checks
 
@@ -58,7 +57,7 @@ mkdir .release-pack
 npm pack --json --pack-destination .release-pack > .release-pack/pack.json
 ```
 
-Read the generated filename from `pack.json`; do not guess it. Verify the file list includes every intended canonical skill/checker/doc/carrier and only the three runtime seams. Verify removed runtime, maintenance, unattended, recipe, secret, test-fixture, local-state, and unrelated development files are absent.
+Read the generated filename from `pack.json`; do not guess it. Verify the file list includes every intended canonical skill/checker/doc/carrier and deterministic helper modules, and excludes `omp-extension.mjs` and `runtime-guard` metadata. Verify removed runtime, maintenance, unattended, recipe, secret, test-fixture, local-state, and unrelated development files are absent.
 
 Unpack into an isolated directory and test the artifact, not the source checkout:
 
@@ -66,7 +65,6 @@ Unpack into an isolated directory and test the artifact, not the source checkout
 mkdir .release-pack/unpacked
 tar -xzf ".release-pack/<filename>.tgz" -C .release-pack/unpacked
 node -e "import('./.release-pack/unpacked/package/opencode-plugin.mjs').then(m => { if (typeof m.default !== 'function') process.exit(1) })"
-node -e "import('./.release-pack/unpacked/package/omp-extension.mjs')"
 node -e "const p=require('./.release-pack/unpacked/package/package.json'); if(p.version!=='X.Y.Z') process.exit(1)"
 ```
 

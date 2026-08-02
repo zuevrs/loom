@@ -2,13 +2,9 @@
 
 Load this adapter only in an OMP project session. Loom supplies routing, durable project context, and Verify policy. OMP supplies the current session and native worker facilities. Loom never invokes compaction itself and never describes host behavior that has not been observed or documented. Keep durable project truth in Loom files and project docs; personal preferences belong in explicit host rules or configuration, not in Story state.
 
-## Supported extension surface
+## Skills/prose-only surface
 
-The packaged OMP carrier is skills/prose-only by default. The optional `runtime-guard` feature is the only supported extension and is not enabled by default. When selected, it loads a stateless bash `tool_call` guard for recognizable agent-issued commit/push/merge/tag/release/publish/cleanup commands. It does not inject router prose or run lifecycle diagnostics.
-
-The opt-in extension is stateless and cannot mutate Story/Ticket disposition, Verify evidence, repository state, or native worker state. It blocks recognizable agent-issued bash mutations before execution and returns manual-command/read-only-verification guidance. It does not prove attendance, completion, freshness, or shell-wide safety; hidden commands in scripts or non-bash tools remain outside this lexical guard.
-
-OMP's `tool_call` event returns `{ block, reason }` and genuinely prevents a tool from executing — `ExtensionToolWrapper.execute` calls it before running and throws with your reason. The feature is opt-in; normal installs do not configure it. That is a product decision, not a host limitation. Never write that the callback does not exist. The extension owns no Git, hosted review, release, repository, worktree, lane, card, task, terminal, liveness, or cleanup operation, and no machine proof of attended confirmation exists on any host.
+The packaged OMP carrier is unambiguously skills/prose-only. Loom ships no OMP extension, lifecycle callback, router injection, mutation guard, completion gate, retry loop, or machine proof of attended confirmation. OMP supplies its native session and worker facilities; Loom supplies canonical skill prose and checker assignments. Authority remains the exact human-confirmed prose boundary plus current evidence and authoritative readback.
 
 ## Context lifecycle and recovery
 
@@ -22,7 +18,7 @@ After compaction, handoff, or worker replacement, reconstruct from artifacts, Gi
 
 ## Workers and decisions
 
-Outside Orca, require one newly spawned host-native maker per new Ticket when the host can supply it. Reuse the same maker only for that Ticket's REJECT rework. Compaction, summarization, model switching, or continuation is recovery, not freshness; if the host cannot create a fresh maker, stop and report the limitation. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared evidence packet plus exactly one independent axis. The coordinator retains selection, user-owned decisions, durable write-back, and final disposition. If worker discovery is unavailable, use the host's independent reviewer/worker fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and that limitation must be reported. Implement never self-approves. Do not claim that a named custom agent exists until the host actually resolves it, and never fabricate worker output.
+Outside Orca, require one newly spawned host-native maker per new Ticket when the host can supply it. Reuse the same maker only for that Ticket's REJECT rework. The boundary-derived Quick/Behavior/Full class travels in the packet as a routing hint: the host maps `smol` and `default/strong` roles to configured models; no Loom artifact or Ticket field selects a model. Compaction, continuation, or switching a model inside a session is not freshness. If the host cannot create a fresh maker, stop and report it. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared packet plus one independent axis. The coordinator retains selection, user decisions, durable write-back, and disposition. Orca coordinates dispatch/recovery; it neither judges quality nor chooses models. If worker discovery is unavailable, use an independent fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and report the limitation. Implement never self-approves; never fabricate worker output.
 
 Workers receive a bounded assignment. This is text you physically send to another agent that has none of your context, so send the whole shape — never a title, never a transcript:
 
@@ -35,6 +31,7 @@ Acceptance: export of 100k rows stays under 200MB RSS; archived rows present whe
 Out of scope: the download UI, the retention job
 Repository: api @ feat/csv-export, base 4c5d6e7 — work only here
 Starting state: clean tree
+Routing hint: Behavior — maker `smol`; Verify Spec + Standards `default/strong` (host mappings)
 Checks that must be able to go red: npm test -- export, npm run lint
 You may write: src/export/**, tests/export/**
 You must not: commit, push, open a PR, touch another repository, change the Ticket status
@@ -42,19 +39,21 @@ Stuck or the contract is silent? Ask me before inventing — quote the line you 
 Stop when: acceptance met and checks captured, or blocked twice on the same error
 ```
 
-Fields that never drop out, whatever the Ticket: role, contract pointer, acceptance, repository and base, red-capable checks, allowed writes, forbidden effects, escalation path, stop condition. A worker that has to guess any of them guesses in your name.
+Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A `smol` maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; repeated or unknown failure escalates.
 
 A maker report names changed files and repositories, actual base/HEAD/diff, checks with pass/fail, decisions made, assumptions used, blockers/open questions, and whether work is complete or partial. A checker report uses the canonical APPROVE/REJECT evidence contract. Empty, malformed, or fabricated output is not completion. A worker completion is evidence only: the coordinator rereads the artifacts and live repository state, attributes the result to the bounded assignment, and runs independent Verify before any Ticket disposition.
 
 A load-bearing decision discovered inside a worker returns as `decision-needed` with one recommended question and consequences. The worker does not silently decide it or write Story/PRD/ADR truth. Pause only dependent work; unrelated independent work may continue when the native host can prove that independence.
 
+Each Ticket permits at most one `smol` to `default/strong` escalation. Spawn a fresh OMP maker or Orca worker; send a compact handoff with current diff, fixed point, checks, decisions, and blocker. Preserve work and continue from that evidence - no full restart by default. Deepen into Story/PRD only for a load-bearing gap; a material signal routes to Plan instead of escalation. Escalation never resets Verify or its recheck budget.
+
 ## Bounded execution guidance
 
 Core Loom has no OMP Goal, Advisor, watchdog, TTSR preset, recipe runner, or unattended mode. Do not install or propose project presets **for those** as part of Loom — each one either takes authority Loom does not grant or spends tokens on every turn for a benefit no ritual claims.
 
-That prohibition is a list, not a category. Loom does propose exactly one OMP preset, offered by `loom-init` under its own confirmation: `compaction.strategy`, the `smol`/`slow`/`plan` model roles, and `task.prewalk`. Those change how faithfully the discipline survives a long session and which model pays for typing — they grant nothing and enable no route. When in doubt about a key not named here, do not offer it.
+That prohibition is a list, not a category. Loom proposes exactly one OMP preset, offered by `loom-init` under confirmation: `compaction.strategy`, existing host model-role mappings, and `task.prewalk`. Roles are runtime hints, not model IDs or artifact authority; they grant nothing and enable no route. When in doubt about an unnamed key, do not offer it.
 
-Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts, not to the stateless runtime guard. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
+Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
 
 
 ## Capability and failure matrix
@@ -72,8 +71,8 @@ Bounded retry and the no-third-identical-attempt rule apply to native automation
 
 ## Hard stops
 
-- Static router injection is guidance, not proof of compliance or authority.
-- OMP auto-loads no Loom extension by default. The optional runtime guard is not a completion gate, fail-closed lifecycle path, or automatic retry.
+- Skill prose is guidance, not proof of compliance or authority.
+- OMP has no Loom extension, lifecycle callback, mutation guard, completion gate, or automatic retry.
 - No Goal, Advisor, watchdog, TTSR, recipe, permit, witness, or mutation-enforcement claim.
 - No worker chaining across Tickets; no maker self-approval; no fabricated custom-agent availability.
 - No project or external write follows merely from compaction, worker completion, APPROVE, or a host notification.

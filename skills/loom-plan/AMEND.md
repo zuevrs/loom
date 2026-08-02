@@ -1,6 +1,6 @@
 # Conditional amendment phase
 
-Entry condition: an active or blocked Story/PRD is contradicted or outgrown, including a `needs-info` Ticket naming the contradiction or the Verify two-strikes fork. A done Story never enters amendment: requested follow-up routes to the linked continuation contract in [`../loom/STORY.md`](../loom/STORY.md).
+Entry condition: an active or blocked Story/PRD is contradicted or outgrown, including a `needs-info` Ticket naming the contradiction or the Verify two-strikes fork. Story, material PRD, and CONTEXT are current projections while active; a material delta to success, acceptance, scope, public/inter-service contract, repository boundary, architecture/ADR constraint, persistence/data path, or security/privacy enters amendment immediately, before implementation continues. Finish cannot legalize code retrospectively. A done Story and PRD are immutable: follow-up routes to the linked continuation contract in [`../loom/STORY.md`](../loom/STORY.md).
 
 ## Procedure
 

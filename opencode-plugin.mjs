@@ -1,6 +1,6 @@
-// loom — OpenCode prose adapter. Version: 7.7.0
+// loom — OpenCode prose adapter. Version: 7.8.0
 // Registers canonical skills and injects compact, truthful guidance. OpenCode
-// does not receive Loom's OMP runtime enforcement.
+// receives no Loom runtime enforcement.
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";

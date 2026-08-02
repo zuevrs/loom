@@ -36,4 +36,4 @@ For every Spec-backed result, replace the Ticket's existing `## Verify` section,
 
 Ticket self-exclusion is exact: digest all Ticket semantics except the complete current `## Verify` section and lifecycle frontmatter `status` field. Those two lifecycle values may change after approval without invalidating judgment. Editing acceptance criteria, `## Log`, dependencies, or any other Ticket semantics changes the digest and makes Verify stale. Any repository HEAD/diff change likewise requires fresh Verify.
 
-OMP `session_stop` checks only the **current** Ticket artifact/current Verify relationship, and reports rather than prevents. Other hosts follow the prose contract with no runtime diagnostic at all.
+Hosts provide prose-level Verify guidance only. No Loom lifecycle callback or runtime guard checks or prevents a stop; current Ticket and Verify evidence must be read and validated through the ordinary ritual.

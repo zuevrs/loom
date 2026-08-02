@@ -16,17 +16,17 @@ const AUTHORITY_RULES=[
   "evidence supports a decision but never authorizes an effect",
   "explicit, narrow, current human consent at the owning ritual boundary",
   // what carries authority, and what cannot be minted
-  "honest routing","exact previews","immediate revalidation","host-native human action",
+  "honest routing","exact previews","immediate revalidation","host-native human confirmation",
   "mutation permit","opaque capability","authority mint","mutation guard",
   // records that do not prove a human is attending
   "chat timestamp","copied approval","provenance string","host callback",
   // consent is narrow, non-transitive, and expires
   "targets, actions, scope, base, and effects",
   "non-transitive",
-  "repository, lane, local command, remote, hosted review, archive, or cleanup",
+  "complete displayed multi-repository local inventory",
   "check set","review target","release target","cleanliness state","activity state",
   // revalidation immediately before the effect, and every named row of its catalogue
-  "immediately before asking the operator to perform an effect",
+  "immediately before performing a confirmed effect",
   "privacy and secret boundaries","worktree cleanliness","repository/lane ownership",
   "intended files","checks and verify boundary","local integration or commit target",
   "cleanup eligibility",
@@ -37,7 +37,7 @@ const AUTHORITY_RULES=[
   "proves what succeeded",
   "never claim an effect from an instruction, a command transcript, a chat report, a card status, or a callback alone",
   // the three boundaries
-  "does not execute git integration or history commands",
+  "ordinary local `git add` and `git commit`",
   "does not push, create hosted reviews, merge, or release",
   "human merge and release gates remain explicit",
   "after publish","proven merge",
@@ -234,4 +234,43 @@ test("the discipline ladder is checked by a checker, not only preached",()=>{
     "the availability qualifier disappeared — 'a library exists' becomes a finding");
   assert.match(std,/report `note`, not `major`/,
     "the unsure-verdict floor disappeared; equivalence guesses become majors");
+});
+
+
+test("Finish authority is one current local gate with remaining-only recovery",()=>{
+  const finish=read("skills/loom/FINISH.md"),authority=read("skills/loom/AUTHORITY.md");
+  assert.match(finish,/one compact exact preview[\s\S]*exactly one confirmation question/);
+  assert.match(authority,/one exact current confirmation may cover the complete displayed multi-repository local inventory/);
+  assert.match(finish,/one logical commit group[\s\S]*second group[\s\S]*two groups are the ceiling/);
+  assert.match(finish,/ordinary local effects with host tools, including `git add` and `git commit`/);
+  assert.match(finish,/immediately before \*\*each\*\* effect[\s\S]*load-bearing/);
+  assert.match(finish,/authoritative git state—not just command output/);
+  assert.match(finish,/renewed confirmation for \*\*only that remaining inventory\*\*/);
+  assert.match(finish,/no push, hosted review, merge, release, tag, history rewrite, or cleanup in finish/);
+});
+
+test("Finish verification reuses Tickets and triggers integration only on aggregate risk",()=>{
+  const finish=read("skills/loom/FINISH.md"),verify=read("skills/loom-verify/SKILL.md");
+  assert.match(finish,/objective checks always run/);
+  assert.match(finish,/reuse each current ticket's spec and standards approve/);
+  for(const trigger of ["behavior crossing ticket boundaries","changed aggregate multi-ticket or multi-repository boundary","new integration contract"])assert.ok(finish.includes(trigger),`Finish integration trigger missing: ${trigger}`);
+  assert.match(finish,/lifecycle-only changes[\s\S]*do not trigger model review/);
+  assert.match(finish,/one standards packet[\s\S]*never create extra loom axes/);
+  assert.match(verify,/finish may reuse current ticket spec\/standards verdicts/);
+});
+
+test("Finish terminal receipt has one next action",()=>{
+  const finish=read("skills/loom/FINISH.md");
+  assert.match(finish,/## terminal receipt/);
+  assert.match(finish,/exactly one next step/);
+  assert.match(finish,/do not append alternatives, cleanup suggestions, or a second call to action/);
+});
+
+
+test("Finish reconciles semantics before every local effect",()=>{
+  const finish=read("skills/loom/finish.md"),reconciliation=finish.indexOf("## semantic reconciliation"),checks=finish.indexOf("## conditional finish verification"),effects=finish.indexOf("## verify, execute, and prove local effects");
+  assert.ok(reconciliation>0&&reconciliation<checks&&checks<effects,"semantic reconciliation must precede checks and effects");
+  assert.match(finish,/same single finish preview\/confirmation.*owner\/lifecycle commit.*authoritative readback.*terminal receipt/);
+  assert.match(finish,/material[\s\S]*leave an active story active or blocked and owners unchanged/);
+  assert.doesNotMatch(finish,/as-built\.md|full-repository drift scan.*allowed|transcript.*allowed/);
 });

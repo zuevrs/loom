@@ -19,19 +19,18 @@ Before writing code, understand the real flow and stop at the first rung that ho
 
 - Exactly seven rituals: Setup, Grill, Plan, Implement, Verify, Finish, Publish.
 - Canonical skill prose is single-source; carrier dialects stay thin.
-- Runtime has exactly three seams: `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs`.
-- `omp-extension.mjs` is dormant experimental code; the packaged OMP carrier must not auto-load it without a deliberate redesign.
+- Deterministic artifact/boundary helpers live under `hooks/`; no Loom runtime wires them into OMP lifecycle events.
+- OMP is skills/checker prose only; Loom ships no OMP extension or mutation guard.
 - OpenCode registers skills and injects compact truthful prose only.
 - Claude Code and Codex package prose-compatible skills and checker metadata only; do not add hooks or enforcement claims.
 - Orca is the sole orchestration adapter.
-- Finish and Publish are manual command boundaries, never implicit Git/GitHub authority.
+- Finish uses one confirmed local inventory and ordinary host tools; Publish remains a separate manual remote boundary.
 
 ## Repository structure
 
 ```text
 skills/             canonical dispatcher and ritual skills
-hooks/              the three v7 runtime seams
-omp-extension.mjs   dormant OMP experiment
+hooks/              deterministic artifact/boundary helpers
 agents/              canonical OMP checker agents
 .claude-plugin/     Claude prose/checker packaging
 .codex-plugin/      Codex prose packaging

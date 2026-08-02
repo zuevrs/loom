@@ -61,7 +61,7 @@ Malformed local binding JSON/schema is a global stop. A missing or stale individ
 
 ## Host preset (OMP)
 
-On OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. The compaction/model-role preset changes context tuning only. The optional `runtime-guard` feature changes agent-issued tool execution and must have its own named preview; declining leaves runtime behavior unchanged. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
+On OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. The compaction/model-role preset changes context tuning only. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
 
 ```yaml
 compaction:
@@ -78,16 +78,8 @@ modelRoles:
 Say why, because the operator is being asked to change a host default:
 
 - **`compaction.strategy: shake`** is the one strategy that leaves surviving text verbatim — it drops heavy tool results and large blocks and rewrites nothing. `context-full` summarizes in place, so your rules reach the next turn as a paraphrase. The host default `snapcompact` archives history onto images and **falls back to `context-full` on a model without vision** — on a non-vision model the default silently becomes the one strategy that rewrites the discipline. If the operator runs vision models exclusively, `snapcompact` is a defensible choice and you say so; otherwise recommend `shake`.
-- **Model roles** let one Story use a strong model for Grill and Plan and a cheap one for mechanical work, with no change to any Loom prose. Do not invent model identifiers — read the operator's configured models and let them assign. If the `plan` role is left unset, the host performs no model transition, which is a safe default, not a failure.
+- **Model roles** map Loom's runtime hints to host configuration; they do not hardcode model IDs or add artifact fields. Recommend a cheap model for `smol` and the operator's normal strong model for `default/strong` work; map existing host roles accordingly after reading configured models. If a role is unset, the host performs no transition - a safe default, not a failure.
 - **`task.prewalk`** is optional, not a baseline default. It switches a bounded task worker to the cheap model at the first edit after a todo list exists. Use it only when the contract is already frozen and the worker is doing mechanical implementation. Do not recommend it for Grill, Plan, Story/PRD/ADR materialization, or any worker that may still need strong semantic decisions after its first write. It is event-driven, not timed.
-
-Optional OMP runtime guard preview:
-
-```json
-{"features":{"loom":["runtime-guard"]}}
-```
-
-This feature is default-off and blocks only recognizable agent-issued bash commands for `git commit/push/merge/tag/cleanup`, release creation, package publish, and explicit Orca cleanup. It directs the operator to run the exact command manually and then reread state. It is stateless, does not route or continue, and is a lexical bash guard rather than a shell sandbox. Never enable `advisor` here. A second model that can interrupt every turn is a change to how work feels, not a setup detail: name it as available, and let the operator turn it on deliberately when they want it.
 
 Never write memory or learning settings on the operator's behalf. Those decide what leaves the machine.
 

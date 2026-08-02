@@ -1,6 +1,6 @@
 ---
 name: loom-verify-before-done
-description: Verify before marking done; hosts provide prose guidance and optional OMP mutation guard
+description: Verify before marking done; all hosts receive prose guidance
 condition: ['status:\s*done']
 scope: [tool:write, tool:edit]
 globs: [".loom/*/tickets/*.md"]
@@ -18,4 +18,4 @@ A REJECT-only, stale, missing, or maker-authored digest does not allow `done`. K
 
 No Verify digest → no done.
 
-This rule is prose guidance. OMP no longer auto-loads Loom runtime callbacks by default: no `before_agent_start` router injection, no `session_stop` diagnostic, and no hidden continuation loop. OpenCode, Claude Code, Codex, and OMP receive prose-compatible guidance without runtime diagnostic parity.
+This rule is prose guidance. OMP has no Loom extension: no `before_agent_start` router injection, no `session_stop` diagnostic, no mutation guard, and no hidden continuation loop. OpenCode, Claude Code, Codex, and OMP receive prose-compatible guidance without runtime diagnostic parity.

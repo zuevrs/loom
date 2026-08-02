@@ -37,12 +37,12 @@ Loom v7 supports four public carriers:
 
 | Host | Install | Update | Uninstall | v7 capability |
 |---|---|---|---|---|
-| OMP | `omp plugin install git:github.com/zuevrs/loom` | same command with `--force`, then restart OMP | `omp plugin uninstall loom` | Skills/prose and canonical checker agents; no OMP extension is auto-loaded by default |
+| OMP | `omp plugin install git:github.com/zuevrs/loom` | same command with `--force`, then restart OMP | `omp plugin uninstall loom` | Skills/prose and canonical checker agents; Loom ships no OMP extension |
 | OpenCode | `opencode plugin -g github:zuevrs/loom` | update the configured package/ref, then restart OpenCode | remove `github:zuevrs/loom` from `opencode.json` | Skills plus compact prose injection; no Loom hook/enforcement parity |
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
 
-After install or update, restart the host and confirm the Loom partner surface is discoverable. OMP no longer auto-loads Loom runtime callbacks; if a local experiment manually loads `omp-extension.mjs`, treat its output as diagnostic evidence only.
+After install or update, restart the host and confirm the Loom partner surface is discoverable. OMP receives Loom through skills and checker prose only; Loom ships no OMP extension or runtime callbacks.
 
 ## Upgrade
 
@@ -54,7 +54,7 @@ Git and Node.js 20+ are needed for local development. Public carriers require th
 
 ## Host behavior and safety
 
-No v7 host prevents a stop. OMP is skills/prose-only by default and does not auto-load Loom callbacks. Live Git freshness is checked by Verify and Finish. Other carriers provide the same prose contracts without claiming OMP hook parity. See [`docs/hosts.md`](docs/hosts.md).
+No v7 host prevents a stop. OMP is skills/prose-only and Loom ships no OMP extension or callbacks. Live Git freshness is checked by Verify and Finish. Other carriers provide the same prose contracts without claiming OMP hook parity. See [`docs/hosts.md`](docs/hosts.md).
 
 Orca is Loom's orchestration adapter. Loom owns durable work meaning and verification boundaries; Git owns file state; Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness. See [`docs/orca.md`](docs/orca.md).
 

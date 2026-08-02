@@ -4,7 +4,36 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
-- No changes yet.
+## [7.8.0] - 2026-08-02
+
+Finish now reconciles semantic truth with less ceremony, conditional review, prose-only OMP integration, and boundary-derived model cost routing.
+
+### Highlights
+
+- **Reconciled semantic truth at Finish.** Active Story, PRD, and CONTEXT stay current; contract-preserving drift joins the single Finish gate, while material drift blocks closure pending amendment or a linked Story.
+- **Simplified local Finish authority.** One exact current preview and confirmation can cover all declared multi-repository local effects, followed by immediate revalidation and authoritative readback.
+- **Conditional Finish review.** Current Ticket verdicts are reused while their boundaries remain current; compact integration Spec+Standards runs only for observed aggregate risk, and lifecycle-only deltas require no model review.
+- **Boundary-derived model cost routing.** Quick, Behavior, and Full boundaries select host-mapped `smol` or `default`/`strong` maker and checker roles, with bounded fresh-worker escalation and no new artifact schema or runtime machinery.
+
+### Breaking changes
+
+- None. Current v7 carrier and project artifact contracts remain compatible.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart the host.
+- Rerun Setup where the managed block still reports an older version.
+- No project artifact migration is required.
+
+### Adapter impacts
+
+- OMP is now explicitly skills-and-checker prose only: `omp-extension.mjs`, runtime-guard feature metadata, Setup guard configuration, and current runtime-enforcement claims were removed.
+- Claude Code, Codex, and OpenCode remain prose carriers; model routing uses each host's configured role mapping and adds no runtime extension.
+
+### Safety changes
+
+- Finish revalidates the exact local-effect inventory before execution, reads authoritative state back afterward, preserves partial successes, and retries only remaining effects.
+- Material semantic drift cannot close silently, while current Ticket verdicts avoid redundant review only when their reviewed boundaries remain current.
 
 ## [7.7.0] - 2026-08-01
 
@@ -1555,7 +1584,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.7.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.8.0...HEAD
+[7.8.0]: https://github.com/zuevrs/loom/compare/v7.7.0...v7.8.0
 [7.7.0]: https://github.com/zuevrs/loom/compare/v7.6.0...v7.7.0
 [7.6.0]: https://github.com/zuevrs/loom/compare/v7.5.0...v7.6.0
 [7.5.0]: https://github.com/zuevrs/loom/compare/v7.3.1...v7.5.0

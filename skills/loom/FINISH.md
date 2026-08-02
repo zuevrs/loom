@@ -8,111 +8,145 @@ Lead with the result or next action. Use the fewest numbered bounded steps; keep
 
 ## Exact intent classification
 
-Classify before checks, instructions, or lifecycle writes. Only exact `/loom finish` or a narrow positive imperative that asks to finalize or close **this/current Story** and explicitly includes its local integration/commit outcome is `FINISH`. Negation, a question mark, a conditional or question prefix, altered slash syntax, another Story, or incomplete wording is `ASK`: ask one focused question and perform no effect. Casual phrases such as `looks good`, `done for now`, `ship it`, or card switching are `NOOP`.
+Classify before checks, preview, or lifecycle writes. Only exact `/loom finish` or a narrow positive imperative that asks to finalize or close **this/current Story** and explicitly includes its local integration/commit outcome is `FINISH`. Negation, a question mark, a conditional or question prefix, altered slash syntax, another Story, or incomplete wording is `ASK`: ask one focused question and perform no effect. Casual phrases such as `looks good`, `done for now`, `ship it`, or card switching are `NOOP`.
 
-## One full pass
+## One exact preview and confirmation
 
-Everything below is the reference. This is the shape. A Story touching one service and the owner:
+Finish presents one compact exact preview for every declared local effect, then asks exactly one confirmation question. A multi-repository inventory is still one Finish inventory and one confirmation:
 
-```
+```text
 Finish — csv-export
 
-api        feat/csv-export @ a1b2c3d, base 4c5d6e7, index clean
-           4 files, +118 −12 · src/export/stream.ts, src/export/index.ts, tests/export/stream.test.ts, package.json
-owner      feat/csv-export @ 9f8e7d6 · .loom/csv-export/{STORY.md,PRD.md,tickets/01..04}, docs/adr/0007-stream-export.md
+group 1 · product
+  api   feat/csv-export @ a1b2c3d, base 4c5d6e7, index clean
+        4 files, +118 −12 · commit "feat: stream CSV export"
+  web   feat/csv-export @ 7e8f901, base 2a3b4c5, index clean
+        3 files, +64 −5 · commit "feat: download streamed exports"
 
-tickets    01 done · 02 done · 03 done · 04 done — all Spec+Standards APPROVE at a1b2c3d
-checks     npm test -- export · npm run lint  (will run now, then final Spec+Standards over the integration boundary)
+group 2 · owner/lifecycle
+  owner feat/csv-export @ 9f8e7d6
+        .loom/csv-export/**, ADR-0007 · commit "docs: close csv-export story"
+        Story active → done · session draft → archive
 
-commits    api:   feat: stream CSV export instead of buffering
-           owner: docs: record csv-export story and ADR-0007
-excluded   no push, no PR, no merge, no tag, no rebase/amend/squash/force, no cleanup
+checks   npm test -- export · npm run lint
+review   reuse current Ticket Spec+Standards; integration review not triggered — independent Ticket boundaries unchanged
+readback parent, HEAD, committed tree, intended files, hooks, remaining diff after each commit; lifecycle/session bytes after owner effect
+excluded no push, PR, hosted review, merge, release, tag, rebase/amend/squash/force, cleanup
 
-Confirm this inventory?
+Confirm this exact local Finish inventory?
 ```
 
-Operator confirms. Checks run, final Spec + Standards APPROVE. Then **one command at a time**:
+The preview includes Story identity/lifecycle; the reconciliation packet and exact contract-preserving owner writes; artifact paths/digests; every repository/lane, branch, base, HEAD, index/worktree state, intended file set/diff summary; current Ticket verdict boundaries; checks; review reuse/trigger; groups/order; commit message, parent/tree expectation, hooks/readback; session disposition; sanitized public bundle; and remote/history/cleanup exclusions.
 
-```
-Run this in api, then paste the result:
+Default to **one logical commit group**. A second group is allowed only for a genuine owner/lifecycle boundary or for coherent remaining recovery after partial failure. Two groups are the ceiling. A multi-repository group may contain one predeclared commit per repository; that does not create more confirmation gates. Story and session lifecycle belong in the declared owner/lifecycle group, never in an undeclared follow-up.
 
-    git -C ~/orca/workspaces/svc-api/csv-export commit -am "feat: stream CSV export instead of buffering"
-```
-
-Operator reports success. You **reread** before offering anything else — parent, HEAD, committed tree, intended-file boundary, hook outcome, remaining diff:
-
-```
-Read back api: HEAD 7b2e1a9, parent a1b2c3d, tree matches the 4 intended files, pre-commit hook passed, working tree clean.
-
-Next, in the owner repo:
-
-    git -C ~/orca/workspaces/idea/csv-export commit -am "docs: record csv-export story and ADR-0007"
-```
-
-After the last readback proves every inventoried result, and only then:
-
-```
-Both commits proven. Story csv-export → done.
-done means: verified local result accepted. Not pushed, not reviewed, not merged, not released, not cleaned up.
-Publish is a separate explicit command.
-```
-
-Three things the example is showing you. The inventory is one screen, not nine paragraphs. Commands go out **one at a time** with a readback between them — never a script the operator pastes in bulk, because a bulk paste hides which command failed. And the closing line says what `done` does *not* mean, every time.
+Ask the one confirmation only after displaying the complete current inventory. A digest identifies the preview but grants nothing by itself. Load-bearing change to reconciliation delta, repository/lane identity, branch/base/HEAD, diff/index/intended files, artifact semantics, Ticket verdict boundary, check set, review trigger, group/split/order, message, lifecycle/session disposition, public bundle, or declared effect expires confirmation. Incidental clock time, refreshed read-only observations with identical values, or other non-load-bearing presentation changes do not.
 
 ## Fixed local inventory
 
-Finish starts only from Story `active`, or `blocked` when the exact external blocker is part of the finish inventory and the remaining local result can still be proven. Reread Story, PRD, every Ticket, relevant ADR/CONTEXT, current Git state for every touched repository, and native Orca context when active. Every required Ticket must be current, `done`, and covered by a current independent Spec + Standards APPROVE at the exact relevant fixed point. A non-`done` Ticket, stale, missing, self-approved, unexplained, or post-verdict change stops Finish.
+Finish starts only from Story `active`, or `blocked` when the exact external blocker is represented and the remaining local result can still be proven. Reread Story, optional PRD, every Ticket, relevant ADR/CONTEXT, current Git state for every touched repository, and native Orca context when active. Every required Ticket must be current, `done`, and covered by independent Spec + Standards APPROVE at its exact fixed point. A non-`done`, stale, missing, self-approved, or unexplained Ticket stops Finish.
 
-Build one compact exact inventory containing:
+Build the preview from a traversal-safe inventory rooted in the owner repository containing the current `STORY.md`, optional `PRD.md`, every Ticket, and only relevant `CONTEXT.md` and ADR files and live Git evidence. Reject absolute paths, parent traversal, symlink escapes, duplicates, missing required artifacts, paths outside the owner root, unsafe index state, unexplained diffs, or contradictory repository identity. Derive SHA-256 artifact digests internally from exact bytes; do not persist a digest manifest.
 
-- Story identity/lifecycle and exact Story, PRD, Ticket, ADR, and CONTEXT paths with current content digests;
-- every touched repository and, in Orca, its native repository key and unique lane resolved from live context—not stored Loom runtime IDs;
-- branch, base, HEAD, index state, worktree status, nonempty diff/material-change summary, and every normalized intended product file derived from that diff;
-- all current Ticket statuses and Spec + Standards verdict/fixed-point evidence, including any stale or unresolved acceptance;
-- the exact nonempty integration checks to run and one integration-focused final Spec + Standards plan over the same fixed boundary, covering cross-Ticket/repository seams, aggregate acceptance, stale evidence, public prose, and local result integrity rather than replaying every Ticket review;
-- exact owner-artifact integration and each repository's intended local commit/integration boundary, parent, tree expectation, commit split, hooks, and proposed manual local commands in execution order;
-- a conservative public commit/review bundle synthesized only from public diff, acceptance, and current checks; and
-- explicit exclusions: no push, hosted review, publication, merge at the host, release, rebase, amend, squash, stash, force, reset, or history rewrite.
+## Semantic reconciliation
 
-Show the whole inventory and obtain bounded confirmation. A digest may identify it but is not authority. Any changed path/content, repository/lane identity, branch/base/HEAD, diff/index/file set, Ticket/verdict, check, command, commit split/message, or public bundle renews the inventory and confirmation.
+Before checks, preview, confirmation, commit, lifecycle mutation, or session archive, build a bounded reconciliation packet. Read only affected Ticket Logs, active-session boundary events (never its checkpoint), explicitly accepted user feedback, amendment pointers, the actual diff, and Verify findings—never a transcript or full-repository drift scan. Each row is exactly `planned owner -> accepted result -> delta -> disposition`. Closed dispositions are `already current`, `update owner`, `supersede ADR`, `Ticket Log only`, or `amendment/linked Story required`. If there are no rows, emit exactly `No semantic delta`.
 
-## Verify, instruct, and prove
+Contract-preserving reconciliation may promote repeatable knowledge a future agent would otherwise rederive; normal implementation detail remains in Git and Ticket Log. Include exact `update owner`, `supersede ADR`, and Ticket Log writes in the same single Finish preview/confirmation, owner/lifecycle commit, immediate revalidation, authoritative readback, and terminal receipt. A changed reconciliation delta expires that confirmation. Create no AS-BUILT document, parser, schema, manifest, or runtime state.
 
-Run only the previewed checks, then independent final Spec and Standards checkers over the same exact current integration boundary. Reuse current Ticket evidence and focus on integration. Both must APPROVE. If independent checking is unavailable, provide no local Git instructions and preserve Story as `active`, or as `blocked` with the exact external reason when that is the truthful current lifecycle state. Ticket statuses are never used as Story statuses.
+A delta to success, acceptance, scope, public/inter-service contract, repository boundary, architecture/ADR constraint, persistence/data path, or security/privacy is material. Stop before commit, owner/lifecycle mutation, Story closure, or session archive; leave an active Story active or blocked and owners unchanged. Route active work to amendment and work discovered after `done` to a linked Story. Never rewrite Story/PRD at Finish to legalize the implementation.
 
-Immediately before presenting the first manual Git or owner-integration command, recollect and compare the complete live inventory. Require a safe index, current base under existing project policy, no unexplained diff/experiment, and exact identity, HEAD, diff, file, check, verdict, message, and command agreement. If the base is stale, present a separate exact update proposal using only documented project policy; invent no merge/rebase rule. Any mismatch, failed check/Verify, conflict, hook failure, or uncertain policy stops and preserves Story as `active`, or `blocked` with the exact external reason. A failure never assigns a Ticket status to Story.
+## Conditional Finish verification
 
-Loom does not execute `git commit`, merge, rebase, stash, reset, amend, checkout, or any other Git integration/history command. The optional OMP runtime guard can block recognizable agent-issued bash mutations, but manual execution and read-only revalidation remain the authority boundary. After confirmation and immediate revalidation, supply the exact manual local commands one effect at a time. The operator executes them and reports the result. After each report, reread authoritative Git and file state: verify parent/HEAD, committed tree and intended-file boundary, hook outcome, remaining diff/index, and exact public commit prose before offering the next command. A report or command transcript alone is not proof. Run ordinary hooks; never suggest bypassing them. Default to one product-facing commit per affected repository; multiple commits require an obvious independently reviewable split already in the inventory.
+Objective checks always run against the exact current Finish state. Reuse each current Ticket's Spec and Standards APPROVE when its self-excluding Ticket semantics, repository fixed point, intended behavior, and applicable standards boundary remain current.
 
-Sanitize commit and review prose. Exclude Loom/Orca/OMP and agent/control-plane terminology, private Story/Ticket paths or IDs, Logs/Verify prose, model markers, terminal/task/card/worktree mechanics, absolute/home/Windows/UNC paths, and secrets. Internal consent may include exact local paths and native keys; public prose may not. The final Standards checker judges leak absence on the exact inventory.
+Run one compact integration Spec + Standards round only when Finish **observes** at least one of:
 
-Local effects are nontransactional. If owner integration or one repository succeeds and a later command fails, preserve and report every success, the failed command/evidence, and remaining unperformed inventory; do not roll back, rewrite, publish, or repeat successful effects. A later explicit Finish must reread everything and obtain renewed confirmation only for the remaining coherent local outcome.
+- behavior crossing Ticket boundaries;
+- a changed aggregate multi-Ticket or multi-repository boundary; or
+- a new integration contract not judged by current Ticket verdicts.
 
-Before final local closure, read the active `.loom/session/<session-id>.md` when one exists. If Finish discovers a pending promotion decision without a draft, create the draft with that first boundary event; otherwise create nothing. Offer a compact promotion preview for its confirmed boundary events, assigning each event exactly one smallest canonical owner or `discarded`. Canonical owner writes require fresh explicit confirmation and are a separate proportional change with fresh independent Verify; declining promotion preserves the completed result. After the Finish result is accepted and checkpoint disposition is explicit, never promote the checkpoint itself: mark the draft `finished` and archive it as `.loom/session/archive/<session-id>.md`, or remove it only under separately confirmed cleanup.
+Lifecycle-only changes—Story status, owner-history disposition, or session archival with no semantic/product boundary change—do not trigger model review. They still require objective validation and authoritative readback. When integration review is triggered, judge only aggregate acceptance, cross-Ticket/repository seams, new integration contracts, public prose, and local-result integrity; do not replay independent Ticket reviews.
 
-Story becomes `done` only after all inventoried local owner/repository results are reread and proven, checks and final Spec + Standards remain current, and the operator explicitly accepts that verified local result. `done` means verified local result accepted; it does not mean pushed, reviewed, merged, released, archived, or cleaned. Finish prepares the sanitized review bundle but performs no remote effect.
+The existing Verify budget applies across Finish: one initial Spec/Standards round and at most one finding-scoped recheck in the same checker contexts; a second overlapping REJECT stops. Applicable host project/custom security, performance, CI, architecture, or review skills are evidence inputs aggregated into the **one Standards packet**. They never create extra Loom axes or extra review rounds.
 
-## Owner historical preservation
+If required current Ticket evidence or triggered independent integration review cannot be obtained, stop with Story unchanged. A lifecycle-only delta never becomes a pretext to spawn checkers.
 
-When Finish integrates the owner repository, historical preservation is proven by that owner Git commit and tree; do not create an archive directory, manifest, registry, or lifecycle state machine. Build an exact traversal-safe inventory rooted in the owner repository containing the current `STORY.md`, optional `PRD.md`, every Ticket, and only the relevant `CONTEXT.md` and ADR files. Reject absolute paths, parent traversal, symlink escapes, duplicates, missing required artifacts, or paths outside the owner root. Derive SHA-256 content digests internally from the exact inventoried bytes for comparison; never ask the operator to supply digests and never persist an extra digest file.
+## Verify, execute, and prove local effects
 
-Integrate semantic project knowledge before historical proof. Compare relevant CONTEXT/ADR meaning rather than copying blindly. A semantic conflict stops for human reconciliation. Resolve ADR number or filename collisions under the owner's existing ADR convention, preserve both decisions when distinct, and update every affected durable pointer to the resolved owner path. A closed review, missing ref, branch name, Ticket or card status, commit message, or chat assertion is not merge proof.
+After the one confirmation, the agent may execute the exact previewed ordinary local effects with host tools, including `git add` and `git commit`. Finish does not authorize merge, rebase, stash, reset, amend, checkout, history rewriting, or any remote action.
 
-Preview the exact owner files and intended tree, obtain bounded confirmation, and give one manual owner Git integration command at a time under the ordinary Finish rules. After the operator reports success, reread every inventoried path from the owner checkout, recompute the internally derived SHA-256 digests, and compare the exact post-operator bytes, paths, mode/type, and committed owner tree to the confirmed inventory and expected commit tree. Also verify parent and HEAD. For service repositories, verify the relevant merge commit/tree or other documented service merge ref where the project policy uses one, and ensure the owner artifact pointers name those proven refs. Any mismatch, conflict, missing ref, or partial owner tree stops; no historical-preservation claim is made until exact readback and commit-tree equality hold.
+Immediately before **each** effect, recollect the rows load-bearing for that effect and compare them to the confirmed inventory: Story/Ticket state, repository identity/ownership, branch/base/HEAD, index/diff/intended files, checks and review boundary, message/tree target, privacy/secrets, and lifecycle/session bytes where applicable. Print the revalidated result. Any load-bearing mismatch expires authority for the remaining inventory; stop and preview only the still-coherent remainder.
 
-The proven owner commit/tree is the durable historical-preservation evidence. Record no extra durable manifest. Preservation is separate from cleanup: Finish never removes Story files, branches, worktrees, lanes, cards, tasks, or terminals. Cleanup requires its own fresh exact inventory and confirmation after Publish and proven merge. Cleanup failure or partial cleanup never rolls back, weakens, or erases the already proven `done` Story and owner commit/tree evidence.
+Execute one predeclared effect at a time. For a repository commit: stage only its exact intended paths with ordinary `git add`, inspect the staged boundary, run ordinary hooks through `git commit`, and never bypass hooks. Immediately after the effect, reread authoritative Git state—not just command output—and prove parent, HEAD, committed tree, intended-file boundary, exact public commit prose, hook outcome, index/worktree remainder, and the next remaining item. For owner/lifecycle effects, reread exact artifact bytes/path/mode and committed owner tree before claiming lifecycle or session disposition.
+
+Sanitize commit and review prose. Exclude Loom/Orca/OMP and agent/control-plane terminology, private Story/Ticket paths or IDs, Logs/Verify prose, model markers, terminal/task/card/worktree mechanics, absolute/home/Windows/UNC paths, and secrets. Internal consent may include exact local paths and native keys; public prose may not.
+
+Local effects are nontransactional. Preserve every proven success if a later add, hook, commit, owner write, lifecycle write, or readback fails. Do not roll back, amend, rewrite, repeat a successful effect, or broaden the result. Report the failed evidence and exact remaining unperformed inventory. A later explicit Finish rereads current state and asks one renewed confirmation for **only that remaining inventory**; the recovery inventory may use the second logical group but cannot exceed the two-group ceiling.
+
+## Lifecycle, session, and historical preservation
+
+Integrate semantic project knowledge before historical proof. A semantic conflict stops for human reconciliation. Resolve ADR number or filename collisions under the owner's convention, preserve distinct decisions, and update affected durable pointers. The proven owner commit/tree is historical-preservation evidence; prove post-operator bytes and commit-tree equality, and where project policy uses one, the service merge ref and durable pointer. Create no extra durable manifest, archive manifest, registry, or extra lifecycle state machine.
+
+When a session draft exists, include a promotion preview of its confirmed boundary events inside the owner/lifecycle group. Assign each event one smallest canonical owner or `discarded`; never promote the checkpoint itself; archive it as `.loom/session/archive/<session-id>.md` only in the declared owner/lifecycle effect. Canonical semantic owner changes require current proportional checks and review under the conditional rules above. After the local result is proven, perform that declared archive effect. Removal outside that declared lifecycle effect is cleanup and remains separate.
+
+Story becomes `done` only when every declared local effect, commit/tree, lifecycle byte, session disposition, objective check, and required review is authoritatively reread and proven. `done` means verified local result accepted. It never means pushed, hosted-reviewed, merged, released, tagged, archived outside the declared session lifecycle, or cleaned up.
+
+Cleanup remains a separate explicit action after Publish and proven merge. Cleanup failure or partial cleanup never rolls back, weakens, or erases an already proven Story, commit/tree, or lifecycle result.
+
+## Terminal receipt
+
+Finish ends with one terminal receipt, including on partial failure. It lists:
+
+- proven local commits and exact trees/parents per repository;
+- proven reconciliation dispositions and exact owner writes;
+- proven owner/Story lifecycle and session disposition;
+- current objective checks and reused Ticket or triggered integration Spec/Standards evidence;
+- exact remaining local inventory, or `none`;
+- explicit remote exclusions: no push, hosted review, merge, release, tag, or cleanup; and
+- **exactly one next step**: `/loom publish` when local Finish is complete and a remote handoff is wanted, `local completion — no further action` when no remote handoff is wanted, or `/loom finish` for only the named remaining inventory after partial failure.
+
+Do not append alternatives, cleanup suggestions, or a second call to action after that line.
 
 ## Anti-rationalization
 
-This boundary is where an agent talks itself past a gate, because the work feels over and one more step looks harmless. Each excuse below is one you will actually produce:
-
 | Excuse | Reality |
 |---|---|
-| "They said finish, and a push is obviously next." | Finish is local only. Publish is a separate command with its own inventory and its own confirmation. Wanting the next step is not being given it. |
-| "The operator pasted the commit output, so it worked." | A transcript is a claim. Reread parent, HEAD, committed tree, and remaining diff from Git before offering the next command. |
-| "Both commits are basically identical work — I'll give them together." | One command, one readback. A bulk paste hides which command failed, and local effects do not roll back. |
-| "The first repo committed fine, so the second will too — I'll call it done." | `done` requires every inventoried result reread and proven. A partial pass reports exactly what succeeded and stops. |
-| "The base moved a little; I'll rebase quietly to keep it clean." | Loom runs no history command. A stale base becomes a separate exact proposal using documented project policy only. |
-| "The verdicts were APPROVE an hour ago." | Any changed HEAD, diff, file set, check, or message renews the inventory and the confirmation. Recompute; do not reuse. |
-| "The Story is done, so I may as well clean up the worktree." | Cleanup is its own action, after Publish and proven merge, with its own inventory. `done` grants it nothing. |
-| "The session draft says it, so it is project truth." | The draft is staging. Promote only the confirmed delta to the smallest canonical owner after preview, confirmation, checks, and fresh Verify. |
+| "They confirmed Finish, so I need another confirmation per repo." | The one displayed current Finish inventory covers all of its declared local repositories and effects. Revalidate and execute it; do not manufacture gates. |
+| "The command succeeded, so the commit is proven." | Command output is a claim. Reread parent, HEAD, tree, intended files, hooks, and remainder immediately. |
+| "The first repo succeeded; retrying the whole group is simpler." | Success is preserved. Renew consent for remaining inventory only; never repeat or rewrite proven effects. |
+| "The Tickets were approved, so integration review is always redundant." | Reuse them only while boundaries remain current; observed cross-Ticket behavior, aggregate change, or a new integration contract triggers one compact round. |
+| "Only lifecycle changed, so I should ask models to be safe." | Lifecycle-only deltas require checks and readback, not model review. Extra checker fan-out is not safety. |
+| "Finish obviously includes push and cleanup." | Finish is local. Publish and cleanup remain separate human-gated boundaries. |
+
+## Hard stops
+
+- No exact complete preview and one current confirmation → no local effect.
+- More than two logical groups, or a second group without owner/lifecycle or remaining-recovery reason → stop and simplify.
+- Failed/stale checks or required review, unsafe index, unexplained diff, identity mismatch, hook failure, or uncertain project policy → stop and preserve proven successes.
+- No authoritative readback after an effect → do not claim it or continue.
+- No push, hosted review, merge, release, tag, history rewrite, or cleanup in Finish.
+
+## Failure modes
+
+| Symptom | Response |
+|---|---|
+| Load-bearing state changes before an effect | Stop; rebuild and reconfirm only the coherent remaining inventory |
+| Check fails | Preserve proven prior effects; Story stays not-`done`; report exact failing evidence and remainder |
+| Commit hook or readback fails | Preserve proven commits; do not bypass/amend; report remaining-only recovery inventory |
+| Integration trigger exists but checker is unavailable | Stop with checks/evidence; no lifecycle closure |
+| Only Story/session lifecycle changed | Run objective validation and readback; spawn no model review |
+| One repository succeeds and another fails | Prove the success, preserve it, and offer one future Finish preview only for the remainder |
+
+## Done when
+
+- One exact preview covered every declared local effect and received exactly one current confirmation
+- Semantic reconciliation ran first from bounded sources; its packet or exact `No semantic delta` sentinel stayed current
+- Objective checks passed on the current Finish state
+- Current Ticket verdicts were reused where valid, and compact integration Spec+Standards ran only when a named trigger was observed
+- No more than two logical groups were used, with at most one predeclared commit per repository in each multi-repository group
+- Every effect received immediate load-bearing revalidation and authoritative post-effect readback
+- Story and session lifecycle were completed only in the declared owner/lifecycle group
+- Partial success, if any, preserved successes and named only remaining inventory
+- Terminal receipt contains all required evidence, remote exclusions, and exactly one next step
+- No remote, history-rewrite, or cleanup effect occurred

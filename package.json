@@ -1,6 +1,6 @@
 {
   "name": "loom",
-  "version": "7.7.0",
+  "version": "7.8.0",
   "description": "Engineering partner for coding agents: next honest step, evidence, and contracts",
   "license": "MIT",
   "repository": "zuevrs/loom",
@@ -12,14 +12,7 @@
   },
   "omp": {
     "name": "loom",
-    "description": "Engineering partner for coding agents: next honest step, evidence, and contracts.",
-    "features": {
-      "runtime-guard": {
-        "description": "Block recognizable agent-issued Git, release, publish, and cleanup commands; default off.",
-        "default": false,
-        "extensions": ["./omp-extension.mjs"]
-      }
-    }
+    "description": "Engineering partner for coding agents: next honest step, evidence, and contracts."
   },
   "keywords": [
     "agent",
@@ -68,7 +61,6 @@
     "hooks/artifacts.cjs",
     "hooks/boundary.cjs",
     "hooks/verify-gate.cjs",
-    "omp-extension.mjs",
     "opencode-plugin.mjs"
   ]
 }

@@ -79,15 +79,15 @@ Co-locate templates with the ritual that materializes them. Plan owns PRD, Ticke
 
 Current artifacts are authoritative only when their identity and state validate now. Historical pilots, migration ledgers, transcripts, and prior digests may explain decisions but never prove present behavior or grant authority.
 
-## The three runtime seams
+## Deterministic helper modules
 
-Runtime behavior is single-source in exactly three CommonJS modules:
+Repository checks share three CommonJS helper modules:
 
 1. `hooks/artifacts.cjs` — locate and validate the active artifact from current evidence.
 2. `hooks/boundary.cjs` — compute the content-addressed boundary: a digest over the Ticket (excluding its own `## Verify`) and over each repository's HEAD, staged diff, unstaged diff, and untracked entries. It observes and hashes; it decides and authorizes nothing.
-3. `hooks/verify-gate.cjs` — decide Verify-before-done from the active Ticket and current digest/check evidence.
+3. `hooks/verify-gate.cjs` — evaluate Verify-before-done from the active Ticket and current digest/check evidence.
 
-`omp-extension.mjs` adapts these seams to OMP router injection and `session_stop`. Do not duplicate their decisions in adapter prose, rules, checker prompts, or carrier metadata. The OMP stream rule is a reminder, not a fourth seam.
+These are deterministic authoring/test helpers, not an OMP extension or lifecycle runtime. Do not duplicate their decisions in adapter prose, rules, checker prompts, or carrier metadata. OMP remains skills/checker prose only.
 
 OpenCode's adapter may register the skill directory and inject compact discipline/router prose only. It must not import workspace/config modules, register old lifecycle hooks, or imply blocking. Claude Code and Codex plugin manifests carry prose-compatible skills and checker metadata their packaging supports; they have no Loom hooks field or enforcement parity claim.
 
@@ -96,7 +96,7 @@ OpenCode's adapter may register the skill directory and inject compact disciplin
 Canonical semantic owner → derived dialect:
 
 - ritual behavior → `skills/**`;
-- active identity/boundary/gate decisions → the three runtime seams;
+- deterministic identity/boundary/gate helpers → `hooks/`;
 - OMP checker intent → `agents/loom-verify-*.md`;
 - Claude checker dialect → `.claude-plugin/agents/loom-verify-*.md`;
 - compact carrier summary → managed block and OpenCode injection.

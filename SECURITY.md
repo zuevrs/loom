@@ -6,15 +6,9 @@ Only the latest release line receives security fixes. Loom is pre-1.0 and its co
 
 ## Runtime and trust boundary
 
-Loom's v7 runtime is local and offline. It has exactly three seams:
+Loom is local and offline. Its skills and checker prose may read project artifacts and Git state through the host's ordinary tools. Loom ships no OMP extension, lifecycle callback, mutation guard, or runtime network service.
 
-1. `hooks/artifacts.cjs` reads and validates active Loom artifacts.
-2. `hooks/boundary.cjs` computes the content-addressed boundary: a digest over the Ticket (excluding its own `## Verify`) and over each repository's HEAD, staged diff, unstaged diff, and untracked entries. It observes and hashes; it authorizes nothing.
-3. `hooks/verify-gate.cjs` enforces Verify-before-done; OMP connects it to `session_stop`.
-
-OMP additionally injects the router through `omp-extension.mjs`. OpenCode injects compact prose and registers skills. Claude Code and Codex consume prose-compatible skills and checker metadata only; Loom does not claim hook or enforcement parity on those carriers.
-
-The seams inspect Loom/Git state needed for their decision. They do not edit project files, run project commands, commit, push, publish, merge, tag, archive, or clean up. There are no runtime network calls and no telemetry.
+The CommonJS modules under `hooks/` are deterministic parsing/boundary helpers used by repository checks; no packaged OMP runtime wires them to host events. They do not edit project files, run project commands, commit, push, publish, merge, tag, archive, or clean up. There are no runtime network calls and no telemetry.
 
 ## Installer scope
 
