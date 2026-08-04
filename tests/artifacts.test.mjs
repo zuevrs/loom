@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync} from "node:fs";
+import {existsSync,mkdtempSync,mkdirSync,readFileSync,readdirSync,realpathSync,rmSync,symlinkSync,writeFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {createRequire} from "node:module";
 import test from "node:test";
 const require=createRequire(import.meta.url),a=require("../hooks/artifacts.cjs");
+test("loom shortcut markers use canonical shape",()=>{const markers=readFileSync(join(import.meta.dirname,"..","hooks","artifacts.cjs"),"utf8").split("\n").filter(line=>line.includes("loom: shortcut"));assert.equal(markers.length,2);for(const marker of markers)assert.match(marker,/^\s*\/\/ loom: shortcut — ceiling: .+; upgrade: .+\.$/)});
 const story=(id="alpha")=>`---\nid: ${id}\ntitle: Alpha story\nstatus: active\n---\n\n## Intent\nRich **intent**.\n\n## Success\n- measurable\n\n## Decisions\nKeep it small.\n`;
 const ticket=(id="01-first",storyId="alpha",status="ready-for-agent",blockedBy="[]")=>`---\nid: ${id}\nstoryId: ${storyId}\nstatus: ${status}\nblockedBy: ${blockedBy}\n---\n\n## What to build\nRich prose.\n\n## Acceptance criteria\n- [ ] Works\n\n## Verification\nHuman approval: not-required\nnode --test\n\n## Verify\n`;
 function fixture(){const root=mkdtempSync(join(tmpdir(),"loom-artifacts-"));mkdirSync(join(root,".loom","alpha","tickets"),{recursive:true});writeFileSync(join(root,".loom","version"),"7\n");writeFileSync(join(root,".loom","alpha","STORY.md"),story());writeFileSync(join(root,".loom","alpha","tickets","01-first.md"),ticket());return root}
@@ -44,137 +45,79 @@ test("readiness requires active Story status",()=>{for(const status of ["active"
 test("accepts canonical Orca repository keys",()=>{const root=fixture(),file=join(root,".loom","alpha","tickets","01-first.md");try{for(const keys of ["[api]","[services/api]","[.]"])assert.doesNotThrow(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file));for(const keys of ["[/api]","[services/../api]","[Services/api]","[services//api]"])assert.throws(()=>a.parseTicket(ticket().replace("blockedBy: []",`blockedBy: []\nrepositoryKeys: ${keys}`),file),/repositoryKeys/)}finally{rmSync(root,{recursive:true,force:true})}});
 
 
-test("session drafts are non-canonical staging artifacts under .loom/session",()=>{
-  const root=fixture();
-  try{
-    const sessionDir=join(root,".loom","session");
-    mkdirSync(sessionDir,{recursive:true});
-    const file=join(sessionDir,"abc12345.md");
-    const draft=`---
-id: abc12345
-status: active
-createdAt: 2026-07-29T12:00:00Z
----
+const pointer={Story:".loom/alpha/STORY.md",Ticket:".loom/alpha/tickets/01-first.md",Action:"Resume Ticket 01 implementation",Evidence:"git diff -- hooks/artifacts.cjs tests/artifacts.test.mjs",Decision:"Use a hint-only seven-field pointer",Blocker:"None",Next:"Run focused artifact tests"};
 
-## Scope
-Decide whether Loom needs a per-run session draft.
-
-## Boundary events
-- type: confirmed-decision
-  status: active
-  source: user
-  timestamp: 2026-07-29T12:01:00Z
-  owner: session
-  evidence: User selected ephemeral per-run draft.
-  text: Use one session draft per explicit /loom run.
-
-## Promotion preview
-None yet.
-
-## Finish
-Not finished.
-`;
-    writeFileSync(file,draft);
-    const parsed=a.parseSessionDraft(draft,file);
-    assert.equal(parsed.id,"abc12345");
-    assert.equal(parsed.events[0].type,"confirmed-decision");
-    assert.doesNotThrow(()=>a.loadLoom(root));
-    const rendered=a.renderSessionDraft(parsed);
-    assert.deepEqual(a.parseSessionDraft(rendered,file).events,parsed.events);
-  }finally{rmSync(root,{recursive:true,force:true})}
+test("recovery pointers have one strict round-tripping shape",()=>{
+  const rendered=a.renderRecoveryPointer(pointer);
+  assert.deepEqual(a.parseRecoveryPointer(rendered),pointer);
+  assert.deepEqual(rendered.split("\n").filter(Boolean).map(line=>line.split(":",1)[0]),["Story","Ticket","Action","Evidence","Decision","Blocker","Next"]);
+  assert.ok(Buffer.byteLength(rendered)<=1500);
 });
 
-test("session progress checkpoint is closed, safe, and round-trips",()=>{
+test("recovery pointers reject unknown, missing, duplicate, multiline, non-ASCII, and oversized values",()=>{
+  const body=a.renderRecoveryPointer(pointer);
+  for(const bad of [
+    body.replace("Next:","Extra: no\nNext:"),
+    body.split("\n").filter(line=>!line.startsWith("Blocker:")).join("\n")+"\n",
+    body.replace("Story:","Story: duplicate\nStory:"),
+    body.replace("Action: Resume Ticket 01 implementation","Action: first\ncontinuation"),
+    body.replace("Decision: Use a hint-only seven-field pointer","Decision: naïve"),
+    body.replace("Evidence: git diff -- hooks/artifacts.cjs tests/artifacts.test.mjs",`Evidence: ${"x".repeat(281)}`),
+    `${body}${" ".repeat(1501)}`,
+  ])assert.throws(()=>a.parseRecoveryPointer(bad),/recovery pointer/);
+  for(const bad of [{...pointer,Extra:"no"},{...pointer,Next:""},{...pointer,Action:"first\nsecond"},{...pointer,Decision:"naïve"},{...pointer,Evidence:"x".repeat(281)}])assert.throws(()=>a.renderRecoveryPointer(bad),/recovery pointer/);
+});
+
+test("loadLoom validates only active recovery pointers and tolerates clearing",()=>{
   const root=fixture();
   try{
     const dir=join(root,".loom","session"),file=join(dir,"abc12345.md");mkdirSync(dir,{recursive:true});
-    const checkpoint={done:"Ticket 01 verified",current:"Ship capture",next:"show capture preview",blocker:"None",decision:"No durable lesson",owners:".loom/alpha/tickets/01-first.md",fixedPoint:"abc1234"};
-    const body=a.renderProgressCheckpoint(checkpoint),draft=`---
-id: abc12345
-status: active
-createdAt: 2026-07-29T12:00:00Z
----
-
-## Scope
-Scope.
-
-## Boundary events
-None yet.
-
-## Progress checkpoint
-${body}
-
-## Promotion preview
-None yet.
-
-## Finish
-Not finished.
-`;
-    const parsed=a.parseSessionDraft(draft,file);assert.deepEqual(parsed.progressCheckpoint,checkpoint);assert.deepEqual(a.parseSessionDraft(a.renderSessionDraft(parsed),file).progressCheckpoint,checkpoint);
-    for(const bad of [body.split("\n").slice(0,-1).join("\n"),`${body}\nextra: no`,body.replace("done: Ticket 01 verified","done: first\ndone: second"),body.replace("current: Ship capture","malformed")])assert.throws(()=>a.parseProgressCheckpoint(bad),/progress checkpoint/);
-    for(const bad of [{...checkpoint,extra:"no"},{...checkpoint,done:""},{...checkpoint,done:"ok\ncurrent: injected"},{...checkpoint,done:undefined}])assert.throws(()=>a.renderProgressCheckpoint(bad),/progress checkpoint/);
-  }finally{rmSync(root,{recursive:true,force:true})}
-});
-
-test("session draft archive status and path must agree",()=>{
-  const root=fixture();
-  try{
-    const active=join(root,".loom","session","abc12345.md");
-    const archived=join(root,".loom","session","archive","abc12345.md");
-    mkdirSync(join(root,".loom","session","archive"),{recursive:true});
-    const draft=status=>`---
-id: abc12345
-status: ${status}
-createdAt: 2026-07-29T12:00:00Z
----
-
-## Scope
-Scope.
-
-## Boundary events
-None yet.
-
-## Promotion preview
-None yet.
-
-## Finish
-Not finished.
-`;
-    writeFileSync(active,draft("archived"));
-    assert.throws(()=>a.loadLoom(root),/session draft/);
-    rmSync(active);
-    writeFileSync(archived,draft("active"));
-    assert.throws(()=>a.loadLoom(root),/session draft/);
-    writeFileSync(archived,draft("archived"));
+    writeFileSync(file,a.renderRecoveryPointer(pointer));
     assert.doesNotThrow(()=>a.loadLoom(root));
+    rmSync(file);
+    assert.doesNotThrow(()=>a.loadLoom(root));
+    mkdirSync(join(dir,"archive"));
+    assert.throws(()=>a.loadLoom(root),/session directory/);
   }finally{rmSync(root,{recursive:true,force:true})}
 });
 
-test("session drafts reject transcript-like freeform boundary events",()=>{
-  const root=fixture();
+
+test("shared recovery-pointer helpers create, update, and delete the public artifact",()=>{
+  const root=fixture(),id="maker1234",file=join(root,".loom","session",`${id}.md`);
   try{
-    const sessionDir=join(root,".loom","session");
-    mkdirSync(sessionDir,{recursive:true});
-    const file=join(sessionDir,"abc12345.md");
-    writeFileSync(file,`---
-id: abc12345
-status: active
-createdAt: 2026-07-29T12:00:00Z
----
+    assert.equal(a.writeRecoveryPointer(root,id,pointer),realpathSync(file));
+    assert.deepEqual(a.parseRecoveryPointer(readFileSync(file,"utf8")),pointer);
+    const changed={...pointer,Blocker:"Required checker unavailable"};
+    assert.equal(a.writeRecoveryPointer(root,id,changed),realpathSync(file));
+    assert.deepEqual(a.parseRecoveryPointer(readFileSync(file,"utf8")),changed);
+    assert.equal(a.deleteRecoveryPointer(root,id),true);
+    assert.equal(existsSync(file),false);
+    assert.equal(a.deleteRecoveryPointer(root,id),false);
+  }finally{rmSync(root,{recursive:true,force:true})}
+});
 
-## Scope
-Scope.
 
-## Boundary events
-User: long transcript line
-Assistant: reasoning dump
+test("failed recovery-pointer replacement preserves prior bytes and removes temp files",()=>{
+  for(const internal of [
+    {writeFileSync(){throw new Error("injected temp write failure")}},
+    {validate(){throw new Error("injected validation failure")}},
+    {renameSync(){throw new Error("injected rename failure")}},
+  ]){
+    const root=fixture(),id="maker1234",dir=join(root,".loom","session"),file=join(dir,`${id}.md`),prior=a.renderRecoveryPointer(pointer);
+    try{
+      mkdirSync(dir);writeFileSync(file,prior);
+      assert.throws(()=>a.writeRecoveryPointer(root,id,{...pointer,Blocker:"Changed"},internal));
+      assert.equal(readFileSync(file,"utf8"),prior);
+      assert.deepEqual(readdirSync(dir),[`${id}.md`]);
+    }finally{rmSync(root,{recursive:true,force:true})}
+  }
+});
 
-## Promotion preview
-None yet.
-
-## Finish
-Not finished.
-`);
-    assert.throws(()=>a.loadLoom(root),/session draft/);
+test("recovery-pointer writes never follow an existing symlink",()=>{
+  const root=fixture(),id="maker1234",dir=join(root,".loom","session"),file=join(dir,`${id}.md`),target=join(root,"target.md");
+  try{
+    mkdirSync(dir);writeFileSync(target,"keep\n");symlinkSync(target,file);
+    assert.throws(()=>a.writeRecoveryPointer(root,id,pointer),/recovery pointer/);
+    assert.equal(readFileSync(target,"utf8"),"keep\n");
   }finally{rmSync(root,{recursive:true,force:true})}
 });

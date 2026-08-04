@@ -19,10 +19,6 @@ After ordinary Setup, offer the optional CodeGraph capability described in [`../
 - Installed Loom skill tree
 - Current project root, `AGENTS.md`, and `.loom/version`
 
-## Output shape
-
-Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
-
 ## Outputs
 
 - Managed Loom block in `AGENTS.md`

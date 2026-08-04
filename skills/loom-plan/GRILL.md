@@ -4,7 +4,7 @@
 
 This file is the sole canonical source for the interview discipline shared by Plan and Grill. Apply `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` as one body. Plan uses that body to produce planning artifacts only and exits through its Story/optional-PRD and Ticket gates below.
 
-Stay in the interview phase until its decision branches are resolved; leave `TO-PRD.md` and `TO-TICKETS.md` unread and produce planning artifacts only after this phase. During the interview classify PRD materiality: multiple Tickets/repositories, product decisions, an external/public/inter-service contract, or multi-session work.
+Stay in the interview phase until its decision branches are resolved; leave `TO-PRD.md` and `TO-TICKETS.md` unread and produce planning artifacts only after this phase. During the interview classify whether material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires a PRD. Count, size, duration, repository breadth, and public contracts alone do not earn one.
 
 ## Inbound triage (when applicable)
 

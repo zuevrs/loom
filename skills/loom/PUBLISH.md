@@ -1,108 +1,61 @@
-# Explicit publish contract
+# Explicit remote Publish contract
 
-Lazy-load this fragment only for an explicit Story publish. Load and follow [`STORY.md`](STORY.md) and [`FINISH.md`](FINISH.md) first.
+Load only for explicit remote intent after successful local Finish. Follow [`CONSTITUTION.md`](CONSTITUTION.md), [`AUTHORITY.md`](AUTHORITY.md), and [`FINISH.md`](FINISH.md); they own output, consent, revalidation, and the local fixed point. Publish owns read-only inspection, non-executable preview, post-confirmation manual instructions, and remote readback.
 
-## Output shape
+## Trigger
 
-Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+Enter only when the operator explicitly requests one or more remote effects for the current finished source: push a branch/ref/tag already present locally; create or update a hosted review; create a remote release from an already-created exact tag/ref; or send an external message. Questions, conditions, negation, casual completion language, unknown defaults, or unclear source, target, body, visibility, or effect stop before preview.
 
-## Exact intent and prerequisite
+Finish, APPROVE, a prior Publish, local commits, and remote existence grant no Publish authority. Publish never creates a local tag: exact local tag creation belongs only to Finish. Release and message effects must each be explicitly named. Merge and cleanup remain separate gates.
 
-Classify before remote instructions or state changes. Only exact `/loom publish` or a narrow positive imperative to push/publish **this/current Story**, create/open its hosted review, or perform its explicitly named release effect is `PUBLISH`. Negation, a question, conditional wording, altered slash syntax, another Story, or ambiguity is `ASK`; ask one focused question and perform no effect. Casual completion, card, review, merge, or release wording is `NOOP` unless it names the exact current-Story remote effect.
+## Inputs
 
-Publish requires a current verified local Finish result that the operator explicitly accepted. Story may be `done`; Story has no publish-specific status. Ticket APPROVE, prior Story/Finish confirmation, Finish confirmation, local commits, a prior publish effect, or a review state grants no authority for another remote effect. Human merge and release remain separate explicit gates.
+- A successful current local Finish receipt and the same current source identity: repository, branch, HEAD/tree, finished paths, checks, and any exact tag/ref already created locally.
+- Read-only current remote evidence for target identity, account/namespace, permissions, conflicts, matching refs/reviews/releases/messages, and required checks.
+- The exact requested payload and effect-specific owner: current Git and repository guidance for Git effects; host or service-owner guidance for hosted review, release, or message effects.
 
-The operator performs each remote effect manually; Loom supplies instructions and read-only verification only. No host extension replaces the exact inventory, confirmation, manual execution, or revalidation.
+Receipts, digests, tool output, and reports are evidence, never consent or proof. Publish performs no local or remote mutation.
 
-## One full pass
+## Decision and effect
 
-Everything below is the reference. This is the shape. Same Story as the Finish example, two repositories:
+1. Prove the Finish receipt is successful and current at the same source identity. Inspect local and remote state read-only. Stop on missing, stale, contradictory, excessive, unauthorized, conflicting, or unverifiable evidence; unavailable required tools or owner references are hard stops, with no browser workaround or guessed command.
+2. Build one coherent exact bundle containing only honestly available requested effects. Name each operation exactly as `push branch`, `push ref`, `push tag`, `create/update review`, `create release`, or `send message`; include source identity, remote/repository/destination, visibility, overwrite or destructive risk, expected URL/ref/identity, preconditions, exact payload, order, readback, and exclusions. A pushed tag or release source must identify an already-created exact local tag/ref.
+3. Inventory every title, body, note, annotation, and attachment. Show short content in full. For long content show its digest, load-bearing summary, and exact read-only way to reveal it. Unknown defaults, hidden generated prose, local-tag creation, or unlisted payload drift stop.
+4. Preview the exact ordered effects, targets, payload/body, risks, expected identities, and each instruction digest plus a non-executable description when useful; reveal no executable host command or instruction before confirmation. Then ask once: `Confirm this exact remote Publish bundle?` Confirmation covers only that coherent bundle. Any source, target, operation/order, instruction digest or description, body, metadata, visibility, risk, existing-effect state, or expected identity drift requires fresh read-only inspection and a new preview.
+5. Only after current confirmation, immediately reread the next effect's rows. If they match the preview, reveal only that effect's exact manual instruction; otherwise stop for fresh preview and confirmation. The operator performs the mutation. Loom then rereads authoritative remote state and records the effect as `applied` or `failed`; an operator report or command transcript alone proves nothing.
+6. Continue in confirmed order only after authoritative readback proves the prior effect applied. On the first failed or unverifiable result, stop instructions for all later effects and mark them `not-attempted`. Perform no rollback, retry loop, remote mutation, local repair, merge, or cleanup.
+7. Return the constitutional receipt with every listed effect classified `applied`, `failed`, or `not-attempted`. A partial result preserves applied effects and names the exact failure and remainder; then this interaction ends.
 
-```
-Publish — csv-export   (local Finish accepted at api 7b2e1a9, owner 3d4c5b6)
+## Local signal map
 
-effect 1  push    api    feat/csv-export → origin  (github.com/acme/svc-api)   remote ref absent
-effect 2  review  api    feat/csv-export → main    "Stream CSV export instead of buffering"   no existing PR
-effect 3  push    owner  feat/csv-export → origin  (github.com/acme/workspace) remote ref absent
-effect 4  review  owner  feat/csv-export → main    "Record csv-export story and ADR-0007"     no existing PR
+| Signal | Reference | Use |
+|---|---|---|
+| Consent, exact bundle, drift, or remote readback | [`AUTHORITY.md`](AUTHORITY.md) and this `PUBLISH.md` | required for every Publish |
+| Local fixed point and source identity | [`FINISH.md`](FINISH.md) | required before inventory |
+| Git remote, branch, ref, or tag push | [`ORCA.md`](ORCA.md) plus current Git and repository-owner guidance | required when that signal exists |
+| Hosted review, release, visibility, or message | [`../../docs/hosts.md`](../../docs/hosts.md) plus current host-native or service-owner guidance loaded through the available effect-specific tool | required when that signal exists |
 
-excluded  no merge, no rebase/amend/squash/force, no remote deletion, no tag, no release, no cleanup
+Load only selected owners.
 
-Confirm this remote inventory?
-```
+## Exact preview and receipt
 
-Operator confirms. Then **one effect at a time**, each revalidated immediately before it:
+The preview names the Finish fixed point; current source/remote evidence; every operation, target, destination, visibility, risk, expected identity, precondition, payload/body, instruction digest and optional non-executable description, order, readback, and exclusion. It contains no executable host command or instruction. For example:
 
-```
-Effect 1 of 4 — revalidated: api HEAD still 7b2e1a9, origin/feat/csv-export still absent.
-
-    git -C ~/orca/workspaces/svc-api/csv-export push -u origin feat/csv-export
-```
-
-Operator reports success. Verify independently — the remote-tracking ref, not the report:
-
-```
-Verified: origin/feat/csv-export → 7b2e1a9, tracking set.
-effect 1 succeeded
-
-Effect 2 of 4 — revalidated: head 7b2e1a9, base main at 1f0e9d8, no matching PR exists.
-
-    gh pr create -R acme/svc-api --base main --head feat/csv-export \
-      --title "Stream CSV export instead of buffering" --body-file /tmp/pr-api.md
+```text
+effect A: push branch api@7b2e1a9, feat/export -> origin/feat/export; private; non-force; expect remote ref 7b2e1a9; instruction sha256:… (publish the named branch without force)
+effect B: create/update review in acme/api, feat/export -> main; title shown; body sha256:…; expect review URL; instruction sha256:… (create or update the named review)
+excluded: local tag creation, merge, release, message, cleanup
+Confirm this exact remote Publish bundle?
 ```
 
-If effect 3 fails, the run stops there and reports honestly:
+The receipt names source identity; each effect as `applied`, `failed`, or `not-attempted` with authoritative URL/ref/identity or exact failure; readback; and remainder or `none`. Never say shipped when any effect failed or was not attempted. Publish writes no pointer, route state, or other artifact.
 
-```
-effect 1  succeeded    origin/feat/csv-export → 7b2e1a9
-effect 2  review-created  acme/svc-api#412
-effect 3  FAILED       remote rejected: protected branch requires a signed commit
-effect 4  pending      not attempted
+## Hard stops
 
-Nothing is rolled back. #412 stays open. Re-running Publish will re-inventory only effects 3 and 4
-and ask again — it will not re-push api or recreate #412.
-```
+- **Intent and authority:** no explicit remote intent, unavailable effect, excessive authority, missing exact preview/current confirmation, or load-bearing drift means no instruction.
+- **Evidence and owners:** unsuccessful/stale Finish, source mismatch, local-tag creation, unlisted payload drift, unknown default, conflict, missing permission, or unavailable required owner/tool stops; never use a browser workaround or guessed command.
+- **Execution:** Loom never executes a remote mutation. After the first failed or unverifiable operator effect, stop later instructions, preserve successes, mark the rest not attempted, and perform no rollback or retry loop.
 
-Three things the example is showing you. Each effect is revalidated **immediately before it fires**, not once at the start. Success is read from Git and the host, never from the operator's paste. And a partial run is a normal outcome that gets reported as a table of proven states — not a failure to hide and not a reason to redo what already worked.
+## Next action
 
-## Separate remote inventory
-
-Reread the finished local result, sanitized review bundle, current Git state, native Orca context when active, and current host/remote state. Build one exact remote-effect inventory containing:
-
-- Story identity and verified local Finish fixed point;
-- each repository/native key, local branch/base, current local and remote refs, commit/tree, checks, and clean or explained local state;
-- exact remote/host/account/namespace and target branch for each ordinary push;
-- exact hosted-review target, head/base, draft/ordinary state, conservative public title/body/check summary, and whether a matching review already exists;
-- each explicitly requested release target, immutable artifact/version/tag/ref and release notes, only when release is separately named and gated;
-- exact manual command or host instruction for each effect in canonical sequential order;
-- durable observed result for every prior effect (`pending`, `succeeded`, `review-created`, `manual-review-required`, `released`, or exact failure), derived from current Git/host evidence rather than chat memory; and
-- explicit exclusions: no merge, rebase, amend, squash, force, remote deletion, cleanup, or rewriting/repeating a prior success.
-
-Show this inventory separately from Finish and obtain explicit bounded confirmation. A changed repository/key, branch/base/ref, commit/tree, check, remote/host/account, review/release target, public prose, command, existing-effect state, or requested effect renews confirmation.
-
-## Sequential operator execution
-
-Loom does not push, create or update a hosted review, publish a release, merge, or delete remote state. Immediately before each pending effect, reread local Git, native Orca, and remote/host state and revalidate the complete pending inventory. Then supply exactly one manual command or host instruction for the next effect. The operator executes it and reports the result; Loom independently verifies the resulting local remote-tracking refs and host state before recording success or offering the next effect. Never infer success from exit text, a card status, or the operator report alone.
-
-Process effects sequentially in the confirmed canonical order. Stop on the first failure or unverifiable result. Preserve and report successful prior effects; never roll back a push, close/recreate a review, delete a release, or repeat an effect already proven successful. Refresh the complete inventory and obtain separate confirmation before retrying only pending or failed effects. Idempotence is evidence-based: if a push, hosted review, tag, artifact, or release already matches the confirmed target, classify it as succeeded/no-op and do not recreate it.
-
-If the preferred host CLI is unavailable or unsupported, provide an honest manual review/release bundle and exact UI instructions; do not claim creation. Public title, body, commit/release notes, and summaries must remain sanitized of Loom/Orca/OMP and agent/control-plane terms, private Story/Ticket paths or IDs, Logs/Verify prose, model markers, local paths, terminal/task/card/worktree mechanics, and secrets.
-
-A hosted review being closed is not merge proof. Only a durable host merge record that matches repository, review, head, target base, and merge commit proves merge; accepted local merge additionally needs exact matching refs, observed ancestry, and explicit operator acceptance. Unknown, missing, duplicate, or mismatched proof stops. Humans merge and release through their explicit host gates.
-
-After Publish, retain Story, worktrees, lanes, cards, and terminals. Cleanup is a separate explicit operator action owned by `ORCA.md`, with a fresh exact inventory and confirmation. Publish neither performs nor implies archive or cleanup and does not change Story lifecycle.
-
-## Anti-rationalization
-
-Remote effects are the one boundary where a wrong step is visible to other people and cannot be undone quietly. Each excuse below is one you will actually produce:
-
-| Excuse | Reality |
-|---|---|
-| "Finish was accepted, so publishing is the same authorization continued." | Finish authorized local commits and nothing else. Publish needs its own inventory and its own confirmation, taken now. |
-| "They approved the four effects, so I'll run them and report at the end." | One effect, then independent verification, then the next. Revalidate immediately before each — the state you confirmed five minutes ago is not the state you are about to write to. |
-| "`git push` printed no error, so it landed." | Read the remote-tracking ref. Exit text, a card status, and the operator's paste are claims, not evidence. |
-| "Effect 3 failed, so I'll redo the whole thing cleanly." | Never repeat a proven success. Report what landed, re-inventory only what is pending or failed, and ask again. |
-| "The PR is closed, so it must be merged." | A closed review proves nothing. Merge needs a durable host merge record matching repository, review, head, base, and merge commit. |
-| "The branch is protected — I'll just force it." | Force, merge, rebase, amend, squash, and remote deletion are excluded by construction. A protected branch is a stop and a report, not an obstacle to route around. |
-| "The PR body reads better with the Ticket ID and the Verify digest." | Public prose carries no Loom/Orca/OMP terms, no Story or Ticket paths or IDs, no Log or Verify prose, no local paths, no model markers. The final Standards checker judges leak absence. |
-| "Everything is published, so the worktree can go." | Cleanup is a separate action after proven merge, with its own inventory. Publish grants it nothing. |
+Stop after the receipt. Offer exactly one human action: inspect the named failure/remainder in a new interaction, follow a separately explicit human merge/release/cleanup gate when available, or `none`.

@@ -6,7 +6,7 @@ import {join} from "node:path";
 import {createRequire} from "node:module";
 import test from "node:test";
 const require=createRequire(import.meta.url),a=require("../hooks/artifacts.cjs"),b=require("../hooks/boundary.cjs"),g=require("../hooks/verify-gate.cjs");
-function repo(){const root=mkdtempSync(join(tmpdir(),"loom-e2e-"));execFileSync("git",["init","-q",root]);execFileSync("git",["-C",root,"config","user.email","test@example.com"]);execFileSync("git",["-C",root,"config","user.name","Test"]);writeFileSync(join(root,"README"),"seed\n");execFileSync("git",["-C",root,"add","."]);execFileSync("git",["-C",root,"commit","-qm","seed"]);return root}
+function repo(){const root=mkdtempSync(join(tmpdir(),"loom-e2e-"));execFileSync("git",["init","-q",root]);execFileSync("git",["-C",root,"config","user.email","test@example.com"]);execFileSync("git",["-C",root,"config","user.name","Test"]);execFileSync("git",["-C",root,"config","commit.gpgsign","false"]);writeFileSync(join(root,"README"),"seed\n");execFileSync("git",["-C",root,"add","."]);execFileSync("git",["-C",root,"commit","-qm","seed"]);return root}
 const ticket=(id,keys)=>`---\nid: ${id}\nstoryId: order-flow\nstatus: ready-for-agent\nblockedBy: []\nrepositoryKeys: ${JSON.stringify(keys)}\n---\n\n## What to build\nSlice ${id}.\n\n## Acceptance criteria\n- [ ] ok\n\n## Verification\nHuman approval: not-required\nnode --test\n\n## Verify\n`;
 test("multi-repository Workspace contour end to end",()=>{
   const owner=repo(),catalog=repo(),notify=repo();

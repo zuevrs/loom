@@ -18,7 +18,7 @@ After compaction, handoff, or worker replacement, reconstruct from artifacts, Gi
 
 ## Workers and decisions
 
-Outside Orca, require one newly spawned host-native maker per new Ticket when the host can supply it. Reuse the same maker only for that Ticket's REJECT rework. The boundary-derived Quick/Behavior/Full class travels in the packet as a routing hint; the host may map it to configured roles, otherwise use the host default. Compaction, continuation, or switching a model inside a session is not freshness. If the host cannot create a fresh maker, stop and report it. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared packet plus one independent axis. The coordinator retains selection, user decisions, durable write-back, and disposition. Orca coordinates dispatch/recovery; it neither judges quality nor chooses models. If worker discovery is unavailable, use an independent fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and report the limitation. Implement never self-approves; never fabricate worker output.
+Outside Orca, require one newly spawned host-native maker for every material Ticket and every rework. Never reuse a maker, persist maker state, or treat compaction, continuation, or model switching as freshness. If the host cannot create a fresh maker, stop and report it. The boundary-derived Quick/Behavior/Full class travels in the packet as a routing hint; the host may map it to configured roles, otherwise use the host default. A maker receives Story + optional PRD + exactly one Ticket; a checker receives the shared packet plus one independent axis. The coordinator retains selection, user decisions, durable write-back, and disposition. Orca coordinates dispatch/recovery; it neither judges quality nor chooses models. If worker discovery is unavailable, use an independent fallback; Spec and Standards may run sequentially when parallel workers cannot be created, and report the limitation. Implement never self-approves; never fabricate worker output.
 
 Workers receive a bounded assignment. This is text you physically send to another agent that has none of your context, so send the whole shape — never a title, never a transcript:
 
@@ -41,7 +41,7 @@ Stop when: acceptance met and checks captured, or blocked twice on the same erro
 
 Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; host-specific escalation applies only when the host supports it.
 
-A maker report is one bounded `result` or `blocker`: it names changed files and repositories, actual base/HEAD/diff, checks with pass/fail, decisions made, assumptions used, blockers/open questions, and whether the assignment is complete or partial. No maker-state is persisted. A checker report uses the canonical APPROVE/REJECT evidence contract. Empty, malformed, or fabricated output is not completion. A worker result is evidence only: the coordinator rereads artifacts and live repository state, attributes it to the bounded assignment, and runs independent Verify before any Ticket disposition.
+A maker report is one bounded `result` or `blocker`: it names changed files and repositories, actual base/HEAD/diff, checks with pass/fail, decisions made, assumptions used, blockers/open questions, and whether the assignment is complete or partial. No separate maker-status artifact is written. A checker report uses `APPROVE|REJECT|BLOCKED`; BLOCKED is operational transport, while the canonical Ticket record remains binary APPROVE/REJECT. Empty, malformed, or fabricated output is not completion. A worker result is evidence only: the coordinator rereads artifacts and live repository state, attributes it to the bounded assignment, and runs independent Verify before any Ticket disposition.
 
 A load-bearing decision discovered inside a worker returns as `decision-needed` with one recommended question and consequences. The worker does not silently decide it or write Story/PRD/ADR truth. Pause only dependent work; unrelated independent work may continue when the native host can prove that independence.
 
@@ -63,11 +63,11 @@ Bounded retry and the no-third-identical-attempt rule apply to native automation
 | Named maker/checker resolves | Use it with the explicit bounded role; never infer extra capabilities from its name |
 | Named worker is not found | Record one real failed discovery attempt, then use a generic independent worker/reviewer with the role prose inlined |
 | Parallel checkers unavailable | Run Spec then Standards in independent sequential contexts and record the limitation |
-| No independent context exists | `ESCALATE_HUMAN`; maker never simulates its own checker |
+| No independent context exists after one bounded fallback attempt | `BLOCKED`; maker never simulates its own checker |
 | Context was compacted or replaced | Reconstruct from artifacts and live repository evidence before continuing |
-| Worker yields empty/malformed output | Retry that worker once only when the host failure is transient; second identical failure stops with evidence |
-| Worker state conflicts with repository/artifacts | Stop and report exact source, field, expected and observed values; never repair by inference |
-| Required command, tool, or data unavailable | Route to attended work or blocker; do not claim verification |
+| Worker yields empty/malformed output | Retry once only when transient; second failure returns `BLOCKED` with evidence, never REJECT |
+| Worker report conflicts with repository/artifacts | Stop and report exact source, field, expected and observed values; never repair by inference |
+| Required evidence, command, tool, or data unavailable after one bounded retry | Return `BLOCKED`; do not claim verification or REJECT |
 
 ## Hard stops
 

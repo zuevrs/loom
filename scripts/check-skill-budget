@@ -17,18 +17,21 @@ check() {
 
 printf '%s\n' 'Loom instruction-surface budget (bytes)' 'actual / budget path'
 
-# Budgets are current baselines with roughly 10% headroom, not permission to grow.
-check AGENTS.md 3300
-check commands/loom.md 900
-check skills/loom/SKILL.md 7600
-check skills/loom/CONSTITUTION.md 3200
-check skills/loom/AUTHORITY.md 10900
-check skills/loom/SESSION.md 4700
+# Budgets are measured current baselines with about 10% headroom, not permission to grow.
+check AGENTS.md 2100
+check commands/loom.md 600
+check skills/loom/SKILL.md 5800
+check skills/loom/CONSTITUTION.md 3500
+check skills/loom/AUTHORITY.md 7900
+check skills/loom/SESSION.md 2000
 
-check skills/loom-grill/SKILL.md 13700
-check skills/loom-plan/SKILL.md 10600
-check skills/loom-plan/GRILL.md 24100
-check skills/loom-implement/SKILL.md 25400
-check skills/loom-verify/SKILL.md 27200
+check skills/loom-grill/SKILL.md 12900
+check skills/loom-plan/SKILL.md 6200
+check skills/loom-plan/GRILL.md 20000
+check skills/loom-implement/SKILL.md 6405
+check skills/loom-verify/SKILL.md 7900
+check skills/loom-verify/TICKET-RECORD.md 4300
+check skills/loom/FINISH.md 8600
+check skills/loom/PUBLISH.md 7900
 
 printf '%s\n' '{"status":"pass","message":"Instruction-surface budgets passed"}'

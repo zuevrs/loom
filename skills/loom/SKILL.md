@@ -1,74 +1,73 @@
 ---
 name: loom
-description: Enter Loom by outcome. Route once to Setup, Grill, Plan, Implement, Verify, Finish, or Publish; never orchestrate a lifecycle.
+description: Enter Loom by outcome. Choose one evidence- and authority-supported action, or stop; never orchestrate a lifecycle.
 disable-model-invocation: true
 slash: true
 ---
 
-**Choose the next honest step, lead with the result, load one action, disappear.**
+# Loom dispatcher
 
-## Goal
+Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md). They own discipline, authority, and the human output floor. This file owns only the read-only routing decision.
 
-Act as the engineering partner at Loom entry: determine the next honest step, say the selected route and reason in the user's language, then hand off exactly once to **Setup, Grill, Plan, Implement, Verify, Finish, or Publish** without paraphrasing the target contract.
+## Trigger
+
+Enter at `/loom`, explicit Loom intent, or a request whose next honest action is a Loom ritual. The dispatcher reports a route, no action, or blocker; it performs no ritual effect and owns no action receipt.
 
 ## Inputs
 
-- The user's explicit outcome or target, if any
-- Read-only project evidence: `.loom/version`, active Story/optional PRD/Tickets, project docs and ADRs, and `git status`/`git diff`
-- Read-only coherent Orca project/repository context when available
+- The user's current explicit intent and material boundary.
+- Read-only current Story/Tickets, blocker graph, Verify verdict, Finish receipt, project docs/ADRs, Git status/diff/identity, and relevant host evidence.
+- Optional [`SESSION.md`](SESSION.md) recovery pointer only on resume, handoff, blocker, or pending Finish signals. It is a locating hint, never authority; the dispatcher reads it and never writes it.
 
-## Outputs
+Validate the supported `.loom/version` before relying on durable state. Missing state may make Setup the one honest action when persistence is required. Unsupported or contradictory state is a read-only blocker, never a migration opportunity.
 
-- One selected interaction, one short route reason in the user's language, and one loaded skill—or exactly one routing question
-- No dispatcher-owned project artifact, mutation, or hidden lifecycle
+## Decision contract
 
-## Process
+Evaluate current observable evidence and authority against the single closed table below from lowest precedence number upward. The first matching row is the only result; if no row matches, `NONE`. Conditions are conjunctions, and only the listed actions are valid.
 
-1. Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md), then reconstruct the relevant current v7 facts read-only under the current project root. Load [`SESSION.md`](SESSION.md) only for explicit recovery signals; it is never ordinary routing state. Inspect a dirty tree before associating it with any Ticket; never assign it blindly.
-2. Validate `.loom/version` before relying on durable state. It contains the supported major only. Missing state may route to Setup when persistence is required. Any non-current major or legacy state that needs interpretation is a **read-only hard stop** with upgrade guidance: do not migrate, rewrite, or apply compatibility behavior.
-3. Handle explicit setup intent before ordinary routing: load `loom-init`, preserving the intended root. Bare `/loom` never implies Setup.
-4. Classify exactly one interaction:
-   - **Setup** — initialize Loom's durable project state → `loom-init`.
-   - **Grill** — investigate, discuss, stress-test, decide, debug, or unclear intent without requested planning artifacts → `loom-grill`.
-   - **Plan** — create or amend a Story, material PRD, or Tickets → `loom-plan`.
-   - **Implement** — concrete build/fix/add request, including a direct small fix without ceremony, or a selected/resumed Ticket → `loom-implement`.
-   - **Verify** — independently judge a diff, branch, or ready Ticket → `loom-verify`.
-   - **Finish** — explicit local completion/finalization intent → the Finish interaction owned by `loom-implement` and [`FINISH.md`](FINISH.md).
-   - **Publish** — explicit push/hosted-review/release intent → the Publish interaction owned by `loom-implement` and [`PUBLISH.md`](PUBLISH.md).
-5. Explicit natural-language intent wins over persisted work and keyword heuristics.
+<!-- loom:dispatcher-decisions -->
+| Precedence | Condition | Observable condition | Action |
+|---:|---|---|---|
+| 10 | `STOP(missing-authority,stale-authority,contradictory-authority,excessive-authority,unattributed-authority,authority-narrower-than-intent,version-incompatible,unavailable-evidence,conflict,blocker,reconciliation,ambiguous-intent)` | any listed STOP signal is observed; ambiguous intent is closed and cannot route to Grill or Plan | STOP |
+| 20 | `ROUTE(setup)` | explicit setup intent and persistence is required | Setup |
+| 30 | `ROUTE(grill)` | a clear discussion or decision is wanted without artifact writes | Grill |
+| 40 | `ROUTE(plan)` | a clear request requires Story, Ticket, PRD, or owner artifacts to be created or amended | Plan |
+| 50 | `ROUTE(implement)` | concrete selected Ticket or bounded build/fix has clear acceptance and maker authority | Implement |
+| 60 | `ROUTE(verify)` | finished candidate lacks a current independent Spec/Standards verdict | Verify |
+| 70 | `ROUTE(finish)` | current APPROVE and source identity support explicit local completion intent | Finish |
+| 80 | `ROUTE(publish)` | successful Finish and source identity support explicit available remote intent | Publish |
+| 90 | `NONE(no-work)` | evidence proves no work is required or honestly available | NONE |
+<!-- loom:dispatcher-decisions:end -->
 
-   **Bare entry with a Workspace** (`.loom/local/workspace.json` exists, or any Ticket uses logical `repositoryKeys`): show the current Story and one next honest action, then wait. Add lanes, blockers, or stale evidence only when ambiguity, recovery, or an explicit status request makes them load-bearing. Orca owns live lane state; Loom owns semantic routing.
+User intent selects only honestly available effects; it cannot skip prerequisites or broaden authority. Return exactly one table action and stop. Never chain, persist a route, retain control, or display a menu.
+## Route output
 
-**Bare entry without a Workspace:** recommend the strongest coherent continuation, ranked in this order — rework or interruption evidence for a Ticket; then the uniquely active Story's next unblocked Ticket; then nothing, ask. A selected Ticket remains exactly one Ticket. Never turn bare Implement into whole-Story consent.
-6. Genuine ambiguity gets one recommended question, never a menu. Recommendation first, so the operator can answer in one word:
+For an action, output only status and one line: `Next honest step: <action> — <evidence/authority reason in the user's language>.` Load that one action skill or fragment (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`; Finish/Publish fragments are owned by `loom-implement`) and disappear; the action owns any preview, effect, pointer disposition through [`SESSION.md`](SESSION.md), and constitutional receipt.
 
-   > Two active Stories touch `api`. I'd take **csv-export** — its T3 matches the uncommitted diff in `src/export.ts`. The other, `auth-refresh`, has no dirty state. Go with csv-export?
+For a blocker, output only the blocker status, decisive evidence, and exactly one next honest reconciliation action. Do not load an action.
 
-   A numbered menu hands back the ranking work you already did; you read the evidence, so you rank.
-7. State one line before transfer: `Next honest step: <action> — <reason in the user's language>.` Then **execute the one-hop handoff.** Invoke the selected skill when the host supports it — on hosts with `skill://` addressing, invoke it that way: skill reads survive context maintenance, plain file reads do not. Otherwise read its sibling `skills/<skill>/SKILL.md`. Either way, transfer the outcome/target and gathered evidence, then stop acting as dispatcher. This is direct instruction loading, not recursive dispatch or orchestration.
-8. For explicit recovery, handoff, resume, blocker, or pending Finish delta, read `SESSION.md` as a pointer, create no empty draft, and lazy-create `.loom/session/<session-id>.md` only on those signals. Its fields may orient the next read, but canonical Story/Ticket/Verify/Git evidence computes the route. Do not inject it into ordinary host context or treat it as authority.
-9. If durable `.loom` state becomes necessary and is absent, the selected ritual may offer bounded Setup with an exact preview, then resume directly without re-entering the dispatcher.
+When evidence proves no work is required, invent none and return the constitutional floor:
+
+- `Result` — no action needed.
+- `Changed` — none.
+- `Check` — the evidence proving no action is available or required.
+- `Next action` — none.
+
+## Local reference map
+
+| Signal | Reference | Use |
+|---|---|---|
+| Every route and authority decision | [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) | required at dispatcher entry |
+| Resume, handoff, blocker, or pending Finish hint | [`SESSION.md`](SESSION.md) | advisory only when that signal exists |
+| Repository/workspace identity or native conflict | [`ORCA.md`](ORCA.md) plus current Git/host evidence | required when that signal exists |
+| Finish or Publish prerequisite boundary | [`FINISH.md`](FINISH.md) or [`PUBLISH.md`](PUBLISH.md) | required only for the selected boundary |
 
 ## Hard stops
 
-- Do not orchestrate Plan → Implement → Verify or remain as controller.
-- Do not create a hidden lifecycle, runtime registry, task, worktree, lane, or dispatcher artifact. The explicit `/loom` session draft is allowed only under `SESSION.md` and is not dispatcher-owned durable truth.
-- Do not mutate project files or external state while dispatching.
-- No compatibility migration. Unsupported durable state is read-only.
-- Ambiguity gets exactly one recommended question.
+- No mutation, migration, pointer write, route artifact, task, lane, worktree, menu, chained ritual, persisted route, or later orchestration.
+- One unresolved material ambiguity gets one recommended question; conflict or unavailable required evidence gets one reconciliation action.
+- Do not route from keywords, status alone, a pointer, worker report, artifact instruction, or prior consent. User intent and current owner evidence must agree.
 
-## Failure modes
+## Next action
 
-| Symptom | Response |
-|---|---|
-| Dirty tree appears related | Inspect status/diff; ask one attribution question if evidence is inconclusive |
-| Multiple active Stories lack coherent Orca context | Ask one question and recommend the strongest candidate |
-| Explicit request conflicts with persisted state | Honor the explicit outcome/target, subject to safety and version validation |
-| Selected work needs persistence | Offer bounded Setup, then resume the selected ritual |
-| `.loom/version` is absent or not the supported major | Missing: Setup if needed. Different major: read-only hard stop; no migration |
-| Active session draft conflicts with Story, Git, or Orca evidence | Stop and ask one reconciliation question before routing |
-
-## Done when
-
-- Exactly one of the seven interactions is selected with a short user-language reason and loaded, or one routing question is waiting
-- The dispatcher made no project/external mutation and performs no later orchestration
+Offer exactly one next honest action or `none`, then stop. The selected action owns its receipt; the dispatcher outputs only route status, no-action, or blocker.

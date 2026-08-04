@@ -4,17 +4,7 @@ Loom skills are executable prose. Canonical behavior belongs in the canonical sk
 
 ## Skill contract
 
-Every ritual `SKILL.md` includes:
-
-| Section | Purpose |
-|---|---|
-| `## Goal` | One concrete outcome sentence |
-| `## Inputs` | Required artifacts, identity, and authority |
-| `## Outputs` | Files, evidence, or report produced |
-| `## Process` | Ordered, executable steps |
-| `## Hard stops` | Conditions that halt rather than degrade |
-| `## Failure modes` | Symptom → honest response |
-| `## Done when` | Observable completion and checks |
+Reference-first action owners use one executable shape: `Trigger`, `Inputs`, `Decision and effect`, `Local signal map`, `Hard stops`, and `Next action`. Setup and Grill retain their established goal/process shape. The dispatcher owns routing, while Finish and Publish use the executable action shape without becoming separate skill directories.
 
 Frontmatter should make user-invoked rituals explicit. Verify may be model-invoked after Implement, but its checker context remains independent. The public router contains exactly Setup, Grill, Plan, Implement, Verify, Finish, and Publish. Do not expose maintenance, unattended, recipes, migration, or historical internals as current rituals.
 
@@ -32,10 +22,9 @@ The description is the only line of a ritual loaded **before** the ritual is, an
 
 Numbers for this repository's own prose, so the guide obeys its own rule 2:
 
-- A ritual `SKILL.md` past **~180 lines** owes a disclosure decision, not an apology. Two have crossed it: `loom-verify/SKILL.md` and `loom-implement/SKILL.md`. The test is branch reach, not taste — a block every run reads stays inline; a block only some runs reach moves behind a pointer, the way `TDD.md`, `DIAGNOSE.md`, and `TICKET-RECORD.md` already did.
-- Reference material an agent consults on demand — a template, a format, a phase file — earns its own file once it passes **~40 lines** inside a `SKILL.md`.
-- Pointers stay **one hop deep**. `SKILL.md → TDD.md` gets reached; `SKILL.md → AUTHORITY.md → a third file` is a file the run will not open. `CONSTITUTION.md` and `AUTHORITY.md` carry no onward links today; keep it that way.
-- The managed block in `AGENTS.md` is the only always-loaded surface. It is 13 lines today and capped at **20**: it is injected into every turn of every session on every host, so a line costs more there than anywhere else in the repository.
+- A ritual `SKILL.md` past **~180 lines** owes a disclosure decision: keep universal decisions inline and move signal-specific guidance behind a local reference.
+- Reference material earns a file only when a real signal can select it; keep pointers one hop from the action owner.
+- The managed block in `AGENTS.md` is the only always-loaded surface and remains capped at **20 lines**.
 
 ## Every rule carries its cost
 

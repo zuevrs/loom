@@ -1,115 +1,71 @@
 ---
 name: loom-plan
-description: Turn an idea into a confirmed Story, an optional material PRD, and executable Tickets. Not implementation or freeform discussion.
+description: Turn a user goal, observed context, and explicit material boundary into one confirmed Story and executable Tickets. Route unresolved discovery to loom-grill; never implement.
 disable-model-invocation: true
 ---
 
-**Never write planning artifacts without exact preview and explicit confirmation.**
+# Plan
 
-Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md), [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md), and [`../loom/STORY.md`](../loom/STORY.md).
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md), [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md), and [`../loom/STORY.md`](../loom/STORY.md). They own the human receipt, authority, exact-write discipline, and durable planning schema; this file owns only the Plan boundary.
 
-## Goal
+## Trigger
 
-Produce the smallest durable v7 plan under `.loom/<story-id>/` without implementing it: always a Story and at least one Ticket for planned implementation; a PRD only when material.
+Enter only with a user goal, observed context, and an explicit material boundary. If any is missing or unresolved, route to [`GRILL.md`](GRILL.md).
+
+Plan never implements. Material implementation requires a Story and at least one Ticket. Add a PRD only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract; count, size, duration, repository breadth, or a public contract alone never earns one.
 
 ## Inputs
 
-- User intent (greenfield, extension, inbound bug/report, or amendment)
-- Local code, tests, types, dependencies, project docs, ADRs, `CONTEXT.md`, and existing `.loom/` state
-- Read-only Orca repository keys/context when available
-- Optional CodeGraph evidence, when configured and fresh; load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) before relying on it
+- The user goal and explicit material boundary, including nearest non-goals.
+- Observed code, tests, `.loom/` artifacts, and project truth.
+- Read-only repository/host topology when scope crosses owners.
+- Confirmed decisions and unresolved owner choices from Grill.
 
-## Output shape
+Read `CONTEXT.md`, scoped ADRs, and host topology only when their terms, constraints, trade-offs, ownership, or placement are load-bearing.
 
-Lead with the result or next action. Use the fewest numbered bounded steps; keep tangents separate. Errors state `location → cause → fix`.
+## Decision and effect
 
-## Outputs
+1. Separate facts, recommendations, assumptions, and owner choices. Ask one recommended question at a time; unresolved material scope returns to Grill.
+2. Draft the smallest plan in memory: Story plus Tickets; add PRD, ADR, or CONTEXT only on a load-bearing semantic trigger. Create no runtime or implementation state.
+3. Cut vertical Tickets around outcomes. State scope/non-goals, acceptance, blockers/order, and a deterministic Verify seam; prescribe no files, estimates, or steps.
+4. Load every applicable template selected by the inventory and validate each draft. Templates shape drafts, never scope. Missing/invalid required templates stop before preview/write.
+5. Preview exact target paths, actions, complete bytes, repository owner/base, and write location.
+6. Ask for one explicit confirmation immediately before writes; it permits only that exact inventory. Any post-preview inventory drift requires re-preview.
+7. Before any write, validate the closed confirmed path set, target and parent filesystem types, complete bytes, and Story/PRD/Ticket/product/design cross-artifact identities. Failure stops with zero writes. After confirmation, write only listed artifacts, read them back, and run artifact validation. Preserve proven writes on partial failure and preview remaining work again; do not infer rollback. If a recovery-worthy decision, blocker, or handoff must survive context, Plan may create or update the pointer through the shared artifact helper; report pointer failure without changing planning truth.
+8. Stop with one lowest-numbered unblocked ready Ticket and the constitutional four-field receipt. Do not start Implement.
 
-- `.loom/<story-id>/STORY.md`
-- Optional `.loom/<story-id>/PRD.md` when material
-- `.loom/<story-id>/tickets/<NN>-<slug>.md`, at least one
-- Confirmed CONTEXT/ADR/PRODUCT/DESIGN deltas when applicable
+## Local signal map
 
-## Route scope
+| Signal | Reference | Use |
+|---|---|---|
+| Missing goal, boundary, non-goal, or owner decision | [`GRILL.md`](GRILL.md) | required |
+| Mature repository with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan | [`BROWNFIELD.md`](BROWNFIELD.md) | required when this signal exists |
+| Material acceptance or constraints would overflow Story and Tickets without semantic loss | [`TO-PRD.md`](TO-PRD.md) | required when this signal exists |
+| First-adoption product contract is load-bearing | [`PRODUCT-TEMPLATE.md`](PRODUCT-TEMPLATE.md) | required when this signal exists |
+| UI interaction or design artifact is load-bearing | [`DESIGN-TEMPLATE.md`](DESIGN-TEMPLATE.md) | required when this signal exists |
+| Vertical slicing crosses a risky seam or needs clause/blocker coverage | [`TO-TICKETS.md`](TO-TICKETS.md) | required when this signal exists |
+| Active Story/PRD boundary changed or accepted-result evidence may be stale | [`AMEND.md`](AMEND.md) | required when this signal exists |
+| Module interface, seam, or decomposition is load-bearing | [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) plus live repository evidence | advisory |
+| Domain vocabulary changes or a hard-to-reverse surprising trade-off emerges | [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), [`ADR-FORMAT.md`](ADR-FORMAT.md), and the applicable local `CONTEXT.md` or scoped ADR | required when this signal exists |
+| Repository ownership, workspace topology, or execution placement matters | [`../loom/ORCA.md`](../loom/ORCA.md) and current read-only host evidence | required |
 
-- Explicit Plan runs this ritual; never auto-start Implement.
-- A concrete direct small fix that did not explicitly invoke Plan may route to Implement without Story/Ticket ceremony.
-- Once Plan is invoked, any planned implementation has at least one Ticket—even if the Story is small.
-- A PRD is material when there are multiple Tickets or repositories, product decisions, an external/public/inter-service contract, or multi-session work. Otherwise keep the Story compact and omit PRD.
-- Existing active plan contradicted or outgrown: read [`AMEND.md`](AMEND.md) and isolate the delta; do not re-run the world. Requested work after Story `done` is a linked continuation under [`../loom/STORY.md`](../loom/STORY.md), created through Plan's one materialization gate without changing the original.
-- Write project content in the project's language; interaction names and `loom:` markers remain English.
-
-## Ownership and version
-
-The current owner project root owns `.loom`, CONTEXT, and ADRs. A single-repository Ticket may omit `repositoryKeys`, meaning current root. Orca keys may be queried and read during Plan to define repository scope, but Plan creates no Orca lane, task, branch, or execution state before confirmation. Unknown keys block confirmation. For a Workspace Story, the first durable Story/PRD/Ticket write occurs in a confirmed Story owner worktree, not in the canonical owner checkout.
-
-Validate `.loom/version` first. Missing durable setup may be offered through bounded Setup. A different major or legacy state is a read-only hard stop; v7 performs no migration or compatibility behavior.
-
-## One materialization gate
-
-No planning artifact is written until one materialization gate previews the **exact target paths, actions, complete proposed content, and first durable write location** for the coherent bundle: Story, optional material PRD, every Ticket, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and, for Workspace Stories, the future Story owner worktree path/base. The user reviews destination, success, decisions, materiality, Ticket granularity, blockers, verification, Human policy, repository scope, and first write target together. One explicit confirmation authorizes only that exact bundle. Changed target, content, action, scope, repository key, blocker, verification, worktree/base, or first write location invalidates confirmation.
-
-Brownfield CONTEXT boot remains a pending draft in the same bundle; it is never written before the complete preview and confirmation.
-
-## Process — one planning pass
-
-Plan is one bounded drafting pass, not a persisted phase machine. Read the smallest applicable guidance at each boundary; canonical artifacts and the pending bundle, not a phase label, determine where to resume.
-
-1. **Align and classify.** On mature brownfield with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan, read [`BROWNFIELD.md`](BROWNFIELD.md), then [`GRILL.md`](GRILL.md). Explore local-first; separate facts from decisions; ask exactly one recommended question at a time; maintain pending domain delta inline; apply the ADR triple gate. Resolve whether PRD is material. The mandatory readback correction checkpoint must establish shared understanding and no user-owned decision remains open. When CodeGraph is available, use it for a bounded architecture/dependency pass before fixing repository scope; treat its output as evidence, never durable truth.
-2. **Draft the destination.** Read [`TO-PRD.md`](TO-PRD.md) and synthesize without re-interviewing. Draft the compact Story and, only when material, the PRD and applicable templates. Keep all drafts pending; they do not authorize implementation or writing.
-3. **Slice and materialize once.** Read [`TO-TICKETS.md`](TO-TICKETS.md), use vertical/risky slicing and quiz granularity, blockers, and repository scope, then preview the complete Story, optional PRD, every Ticket, and pending domain/product/design actions as one coherent bundle. This exact complete preview is Plan's sole confirmation; after approval, apply and validate the bundle.
-
-If interrupted, reconstruct from the last visible question, pending draft, or materialization gate. Do not invent or persist a phase, current step, or routing state.
-
-## Planning write and recovery evidence
-
-The confirmed bundle is one exact write transaction. Before mutation, validate closed artifact paths, target filesystem types, complete bytes, and cross-artifact identities. Write only the confirmed set, reread exact bytes, and run the current artifact parser. If one artifact fails after another succeeded, preserve and report the proven writes, remove only a newly created invalid artifact when exact ownership is clear, and require a renewed preview for remaining work. Never claim atomic multi-file rollback without proof.
-
-The completion report covers the one materialization gate: confirmed decisions/assumptions, paths written, exact readback/validation, unchanged artifacts, Orca queries performed read-only, remaining questions, and the first runnable Ticket. An interruption inherits only completed proven bundle state; an unconfirmed draft remains conversation, not project truth.
-
-## Handoff
-
-Name the lowest-numbered unblocked `ready-for-agent` Ticket. Recommend a fresh Implement context with Story, optional PRD, and exactly one Ticket. Do not auto-start.
+Before preview, use [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md) and only applicable Story/PRD/product/design/ADR/CONTEXT templates to validate the decided inventory. Create no reference without repeated costly failure, stable ownership, and a real disclosure boundary.
 
 ## Hard stops
 
-- No write before the complete exact-content bundle gate.
-- Preserve the bounded planning pass: align → draft → slice → one bundle confirmation and write.
-- No planned implementation without a Ticket.
-- No PRD when the materiality threshold is absent; no compressed PRD when it is present.
-- Plan never creates branches, lanes, tasks, worktrees, or runtime state.
-- No migration or compatibility behavior.
+- **Missing user goal:** stop and ask for it through Grill.
+- **Acceptance ownership:** stop on unresolved ambiguity or an unowned deterministic verification seam; no draft materialization until the choice and Verify owner are explicit.
+- **Canonical truth conflict:** stop and name the conflicting owners and fields; never reconcile by inference.
+- **Reference availability:** a required reference unavailable stops the plan and names what it blocks; an advisory reference unavailable is named, then falls back to constitutional core and live repository evidence.
+- **Missing or drifted confirmation:** stop before writes and present the exact current preview.
 
-## Failure modes
+## Costly failure cautions
 
-| Symptom | Response |
-|---|---|
-| Tempted to skip alignment or the bundle gate | Stop; the planning discipline and confirmation are the user's |
-| Interrupted mid-pass | Reconstruct from the last visible question, draft, or gate; resume the unanswered question/gate |
-| Active amendment balloons into new scope | Stop; full Plan for a new Story. If the original is `done`, make that Story a linked continuation. |
-| Single-repo scope omitted | Treat current root as the scope |
-| Orca repository key is unknown | Stop before bundle confirmation and ask one recommended scope question |
-| User invokes Plan for a tiny change | Keep artifacts proportional, but create a compact Story and at least one Ticket |
-| One write succeeds and another fails | Preserve exact proven writes, remove only invocation-created invalid bytes when safe, and renew the remaining preview |
-| Generated Ticket fails current parser | Stop the bundle write; do not hand off or silently patch after confirmation |
+- Confirmation of one inventory grants no authority over a changed inventory.
+- Templates shape confirmed artifacts; they do not decide scope.
+- Ticket slicing follows observable outcomes, not repository layers or file count.
+- Six Tickets across two repositories alone use Story and Tickets; semantic overflow that cannot fit there without loss earns a PRD.
 
-## Done when
+## Next action
 
-- Story satisfies its compact contract; PRD exists iff material
-- At least one Ticket exists for planned implementation
-- One materialization gate confirmed the exact destination, granularity, blockers, verification, and repository scope
-- Every Ticket has acceptance criteria, deterministic Verification, and empty/preserved Verify evidence area
-- CONTEXT vocabulary and ADR decisions agree with the plan
-- Handoff names the first unblocked Ticket; implementation has not started
-
-
-## Anti-rationalization
-
-| Excuse | Reality |
-|---|---|
-| "Confirm the Story now and Tickets later" | Keep drafts pending, then use one complete bundle preview to prevent repeated confirmation ceremony and contradictory partial state. |
-| "Write drafts so the user can review files" | Review the exact proposed bytes in the gate; project files are not scratch space. |
-| "A tiny Plan does not need a Ticket" | The user chose Plan. Keep it compact, but planned implementation remains executable through a Ticket. |
-| "Material work can use a short PRD" | Crossing the threshold requires the full product/decision/testing contract, not ceremonial prose. |
-| "Create Orca lanes while repository scope is fresh" | Plan records keys only. Native execution state begins later under its own confirmation. |
-| "Re-slice unaffected Tickets during amendment" | Preserve them byte-for-byte; change only the confirmed blast radius. |
+Recommend a fresh `loom-implement` maker with the Story, optional PRD, and exactly one ready Ticket. Stop Plan.

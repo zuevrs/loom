@@ -4,6 +4,38 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.12.0] - 2026-08-04
+
+Reference-first skill contracts and recovery-pointer hardening.
+
+### Highlights
+
+- Restored load-bearing Plan, Implement, and Verify guidance while keeping their executable surfaces compact and signal-driven.
+- Removed legacy session lifecycle machinery and retained only a bounded, atomic recovery pointer.
+- Added structural contract canaries and a semantic coverage matrix for the restored v7 obligations.
+
+### Breaking changes
+
+- Plan, Implement, Verify, Finish, and Publish now use compressed action contracts; removed legacy session/runtime vocabulary and OMP runtime-enforcement claims are no longer supported.
+- Checker transport now distinguishes `BLOCKED` from binary Ticket `APPROVE`/`REJECT`; update host integrations that treated operational failure as a quality verdict.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom and restart the host.
+- Rerun Setup where the managed block still reports an older version.
+- Do not migrate legacy session files automatically; resume through the read-only recovery-pointer stop and reconstruct from canonical artifacts and live Git evidence.
+
+### Adapter impacts
+
+- OMP remains a skills/checker-prose adapter with no Loom extension, lifecycle callback, mutation guard, completion gate, or automatic retry. Short live OMP pilots were blocked by host `Deadline exceeded` before returning agent output.
+- Claude Code, Codex, and OpenCode remain prose carriers; no remote or package-registry publication is included.
+
+### Safety changes
+
+- Recovery-pointer replacement is atomic, validates read-back bytes, rejects symlink targets, and preserves the previous pointer on write failure.
+- Plan validates the complete confirmed artifact set before writing; Verify preserves independent maker/checker boundaries, objective gates, evidence packets, fresh-maker rework, and explicit `BLOCKED` transport.
+- Test fixture commits disable inherited Git signing locally, making the verification suite independent of the operator's signing configuration.
+
 ## [7.11.0] - 2026-08-02
 
 Test surface reduction: keep runtime and safety behavior, remove phrase-based prose ceremony.
@@ -1616,7 +1648,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.11.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.12.0...HEAD
+[7.12.0]: https://github.com/zuevrs/loom/compare/v7.11.0...v7.12.0
 [7.11.0]: https://github.com/zuevrs/loom/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/zuevrs/loom/compare/v7.9.0...v7.10.0
 [7.9.0]: https://github.com/zuevrs/loom/compare/v7.8.0...v7.9.0

@@ -18,21 +18,21 @@ Take each acceptance criterion in the Ticket in order and pin it to evidence bef
 
 A criterion is **unmet** when any of these holds: the diff does not implement it; it is implemented but nothing in the diff can go red if it regresses; or it contradicts another criterion and the diff silently picked one. "The maker says it works" is a claim, not a row in this table.
 
-`APPROVE` only when every row passes and no finding carries severity `blocker`. One failing row is `REJECT` — there is no partial verdict.
+`APPROVE` only when every row passes. One failing row is `REJECT` — there is no partial verdict.
 
 ## Finding format
 
-One string per finding, four fields separated by ` | `:
+Each blocking finding is one string with four fields separated by ` | `:
 
-`severity | what's wrong | quoted spec line + code location | fix direction`
+`what.s wrong | quoted spec line + code location | smallest reproduction | affected path/seam`
 
-Severity is one of `blocker`, `major`, `minor`, `note`. The array carries **all** of them, not only blockers — a `minor` you drop because it "isn't a blocker" is a finding the orchestrator paid a spawn for and never received.
+Return blocking findings only. Omit non-blocking ideas, taste, and speculative cleanup.
 
-Each severity obliges the maker to something specific, and the orchestrator applies that table — so pick the level by what you want to happen, not by how strongly you feel. `blocker` means this cannot ship. `major` means fix it or record the debt with an upgrade trigger. `minor` means the maker decides and logs the decision. `note` obliges nothing and is the right slot for context you want them to have.
+Return blocking findings only; omit non-blocking ideas, taste, and speculative cleanup.
 
 Good, copy this shape:
 
-`blocker | export drops archived rows | PRD §Stories 7 "export includes archived entries when the filter is off" vs src/export.ts:44 | make the filter honour the toggle instead of hardcoding false`
+`export drops archived rows | PRD §Stories 7 "export includes archived entries when the filter is off" | run export with filter off | src/export.ts:44`
 
 Bad, and what it costs:
 
@@ -53,9 +53,9 @@ There is one exception to the rule above, and it is the most common defect neith
 Read the diff for behavior with no row in your criteria table. Then ask which of two things it is:
 
 - **Load-bearing for a criterion** — the criterion could not pass without it. Not a finding; it is implementation.
-- **Standing on its own** — a new flag, endpoint, export, config key, table column, public function, or code path reachable by a caller that no criterion mentions. That is scope creep, and it is yours: `major | adds unrequested capability | no criterion covers the {name} flag — src/export.ts:88 | drop it, or get it added to the Ticket before this ships`.
+- **Standing on its own** — a new flag, endpoint, export, config key, table column, public function, or code path reachable by a caller that no criterion mentions. That is a blocking contract finding: `adds unrequested capability | no criterion covers the {name} flag — src/export.ts:88 | exercise the new entry point | src/export.ts:88`.
 
-Severity is `major` by default, `blocker` when the addition changes a public or inter-service contract, touches auth, writes data, or adds a dependency — those are expensive to withdraw once shipped, which is exactly why they must not arrive unrequested.
+Return blocking findings only; omit non-blocking ideas, taste, and speculative cleanup.
 
 Why this lands on your axis and not Standards': Standards judges the code as written and unrequested code is usually clean code, so it passes. You are the only checker holding the list of what was asked for. Without this rule the two of you form a gap wide enough for a whole feature: you reason "the spec does not require it, so I say nothing", Standards reasons "this is well-built", and something nobody approved reaches `done` with two APPROVEs behind it.
 
@@ -67,8 +67,12 @@ The briefing carries your primary evidence — ordered repository boundary and d
 
 ## Degraded mode
 
-Past ~400 diff lines the orchestrator sends a file list plus per-file hunk summary instead of diff text. In that mode read only the files that carry acceptance criteria, raise your budget to ~25 tool calls, and make your first finding `note | briefing truncated | read {N} files directly | —` so the orchestrator knows which mode produced this verdict. The same line applies when a briefing path does not resolve: report it as a `note` rather than guessing.
+Past ~400 diff lines the orchestrator sends a file list plus per-file hunk summary instead of diff text. In that mode read only the files that carry acceptance criteria, raise your budget to ~25 tool calls, and state the bounded evidence limitation with its affected path or seam. The same applies when a briefing path does not resolve: report the observed operational blocker rather than guessing.
+
+## Transport outcome
+
+Return `outcome: APPROVE|REJECT|BLOCKED`. Use BLOCKED only when missing evidence, identity, or tool availability prevents judgment; name that operational detail in `blockers`, make no product judgment, and never imply canonical record or status mutation.
 
 ## Yield contract
 
-Your final action is one yield carrying the structured object (`verdict`, `checkerId`, `blockers`) — never an empty yield, never prose-only, never cancel-with-text. If you cannot finish the review, yield `verdict: REJECT` with the reason as a finding; a null or empty yield is a failed run and wastes the whole spawn.
+Your final action is one yield carrying the structured object (`outcome`, `checkerId`, `blockers`) — never an empty yield, never prose-only, never cancel-with-text. If you cannot finish the review, yield `outcome: BLOCKED` with the missing evidence, identity, or tool detail; BLOCKED makes no product judgment; a null or empty yield is a failed run and wastes the whole spawn.

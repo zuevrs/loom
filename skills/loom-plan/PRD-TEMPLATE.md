@@ -2,7 +2,7 @@
 
 **Story:** `STORY.md` (same Story directory)
 
-{Use this full template only for material work: multiple Tickets/repositories, product decisions, an external/public/inter-service contract, or multi-session work. Preserve depth; do not compress it into ceremony.}
+{Use this full template only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires it. Count, size, duration, repository breadth, and public contracts alone do not earn it. Preserve depth; do not compress it into ceremony.}
 
 ## Problem
 

@@ -33,7 +33,7 @@ A small Story is deliberately compact—usually **2–4 lines of body content** 
 
 ## Progressive disclosure
 
-A direct concrete small fix may remain Story-free and route straight to Implement. When Plan is invoked, it creates or amends a Story and every planned implementation has at least one Ticket. Add a PRD only when material: multiple Tickets or repositories, product decisions, an external/public/inter-service contract, or multi-session work. Preserve full PRD depth when that threshold is crossed; do not use a thin PRD as ceremony.
+A direct concrete small fix may remain Story-free and route straight to Implement. When Plan is invoked, it creates or amends a Story and every planned implementation has at least one Ticket. Add a PRD only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract. Count, size, duration, repository breadth, and a public contract are signals to inspect, never sufficient triggers. Preserve full PRD depth when earned; do not use a thin PRD as ceremony.
 
 ## Creation and exact-write discipline
 

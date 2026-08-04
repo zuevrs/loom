@@ -2,7 +2,7 @@
 
 Entry condition: the mandatory readback was seen, its corrections were integrated (with uncorrected assumptions retaining the existing confirmed semantics), and no user-owned `Open` decision remains unresolved. If any condition is missing, STOP — return to `GRILL.md`; otherwise draft automatically without asking for separate permission.
 
-Do NOT re-interview the user — the grill already surfaced every decision. Synthesize what you already know. Do NOT open `TO-TICKETS.md` yet. First classify whether a PRD is material: multiple Tickets/repositories, product decisions, an external/public/inter-service contract, or multi-session work. If not material, synthesize only the compact Story. In either case, keep every draft pending for the one materialization gate.
+Do NOT re-interview the user — the grill already surfaced every decision. Synthesize what you already know. Do NOT open `TO-TICKETS.md` yet. First classify whether material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires a PRD. Count, size, duration, repository breadth, and public contracts alone do not earn one. Otherwise synthesize only the compact Story. In either case, keep every draft pending for the one materialization gate.
 
 ## Draft
 

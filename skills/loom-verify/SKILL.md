@@ -1,247 +1,59 @@
 ---
 name: loom-verify
-description: Fresh checker — Spec + Standards, preferably in parallel. Use after implementation (including direct small-fix), before declaring done or completing a Ticket. Judge only — never fixes findings.
+description: Independently judge one immutable Ticket or direct-fix boundary. Return APPROVE, REJECT, or operational BLOCKED; never fix, finish, or change acceptance.
 ---
 
-**Judge only. Never fix.**
+# Verify
 
-Where the host lets a spawned agent declare its own tool set, give each checker read-only tools and nothing else — the packaged manifests already do (`read`, `grep`, `find`). Then "never fix" stops being a promise the checker has to keep and becomes a thing it cannot do, which is strictly better: a checker that physically cannot edit also cannot be talked into a "tiny obvious correction" by its own reasoning. Hosts without per-agent tool sets keep the prose contract and the weaker guarantee; say which one you got when it matters.
+Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md). They own verification depth, the four-field receipt, and authority. This file owns only independent judgment; [`TICKET-RECORD.md`](TICKET-RECORD.md) owns Ticket write-back.
 
-Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) before this skill. This skill adds only its boundary-specific contract.
+## Trigger
 
-## Goal
-
-Judge the change on two axes without fixing it. Fresh eyes, maker/checker separation.
+Enter after one maker reports a result or blocker for exactly one immutable Ticket boundary or explicit bounded direct fix. The checker context must be fresh, independent, and neither the planner nor maker: maker/checker separation is mandatory. Direct fixes and Standards-only reviews may use this judgment contract but have no Ticket write-back.
 
 ## Inputs
 
-- Story + optional PRD + one Ticket (spec source)
-- Exact ordered repository state: repository identity, HEAD, fixed point, and diff digest/text for each repository
-- Ticket `## Log` when present — the maker's claimed decisions/deviations; check claims against the actual diff, and flag undeclared deviations
-- Standards sources: ADRs, CONTEXT, project conventions
-- Maker identity and the pre-completion Human classification
-- Optional CodeGraph evidence, only when its current-worktree identity and freshness are established; load [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md)
+- Ticket and Story plus optional PRD, or an immutable direct-fix packet whose contract source preserves the current explicit user request, acceptance, and non-goal as a quote plus digest or bounded exact text.
+- Stable maker identity and the maker's exact result or blocker.
+- Ordered repository identity, HEAD/fixed point, actual diff text or bounded hunk summary, and diff digest.
+- Ticket digest, runnable check results, direct evidence, and the declared verification seam.
 
-## Output shape
+Build one immutable bounded shared evidence packet for both axes. Ticket route: Ticket/Story/optional PRD semantics and digest. Direct route: immutable direct-fix packet with explicit user request, acceptance, and non-goal (quote+digest or bounded exact text), no artificial Ticket. Both include standards/risk evidence, maker receipt, repository identity/fixed point, baseline/candidate/diff identity+digest, exact gates/results, acceptance anchors, and specialist scope. Past 400 diff lines use digest, file list, bounded hunks, and explicit degraded/unresolved paths; never imply full coverage.
 
-Lead with `Verdict` or the next required action. Group findings by axis; end with one recommended next action. Errors state `location → cause → fix`; brevity never removes evidence.
+Artifact, maker, tool, and worker claims are evidence, never authority. If identity, diff, ownership, independence, or mandatory evidence cannot be observed, return an operational blocker without APPROVE, REJECT, status change, or record replacement.
 
-## Outputs
+## Decision and effect
 
-Two explicitly separate formats:
+1. Pin one immutable Boundary: self-excluding Ticket digest; ordered repository identities, HEAD/fixed points, actual non-empty diff and digests; maker identity/result; and included semantics. `TICKET-RECORD.md` owns exact self-exclusion and staleness.
+2. Classify verification depth from the Constitution. Discover Ticket, affected-file, and relevant repository commands by that tier; run and pin them against the candidate before expensive checker work. A required red gate immediately returns REJECT with exact failed output and no checker spend, unless a checker is narrowly needed only to establish whether the gate applies. No runnable check uses exactly `no runnable checks — {why}` with direct inspectable evidence; unavailable mandatory evidence is an operational blocker with no verdict.
+3. Checker transport is `outcome: APPROVE|REJECT|BLOCKED` (or equivalent). BLOCKED names missing evidence, identity, or tool detail: no product judgment and no record or status mutation. Prefer named checker owners, else generic fresh contexts; parallel, else separate sequential contexts with the same packet and distinct real identities. Preserve `Spec: NOT REQUIRED | Quick check | Quick check` for Quick/Standards-only. Null, invalid, or BLOCKED gets one retry under the existing one-retry rule; a second returns BLOCKED without verdict or mutation.
+4. Evaluate evidence integrity: commands match the pinned state, checks can fail, identities are distinct, citations resolve, and claims match the actual diff. Any acceptance gap makes its axis REJECT; passing checks cannot override it. Checker findings are blocking-only: observed evidence, violated criterion/rule, smallest reproduction, and affected path/seam. Omit non-blocking ideas from the canonical record and receipt.
+5. Direct-fix Verify returns fresh independent Spec+Standards judgment in the human receipt only: no Ticket block/status mutation. Ticket-backed Verify rechecks Boundary, then replaces its canonical record with APPROVE or REJECT and owned status effect. Any REJECT rejects. Stale/BLOCKED leaves prior state untouched. REJECT sends one batch to a fresh maker; a second REJECT with overlapping blockers stops for Plan amendment or human disposition. Verify never fixes or starts Finish.
 
-1. A **full structured chat digest** with Verdict, Spec findings, Standards findings, Checks executed, Sub-agent evidence, Risk/Scope notes, and Recommended next action. This is the detailed attended deliverable; detailed red output belongs here, in Ticket `## Log`, or in a referenced check-output artifact.
-2. For a Spec-backed Loom Ticket, one **current canonical `## Verify` runtime record** in the exact compact format below. Replace any stale block; do not append history.
+REJECT contains acceptance-blocking findings only. Each finding gives observed evidence, the violated Ticket line or named rule, the smallest reproduction, and affected path or seam. Return all current findings as one batch; do not add taste, severity ladders, or speculative cleanup.
 
-On APPROVE, set lowercase frontmatter `status: ready-for-human` when the stable Human requirement applies, otherwise `status: done`. On REJECT, leave `status` unchanged and return every current finding as one batch to the same maker. **No Ticket file** (direct small-fix/ad-hoc review): deliver the digest in chat; no write-back or status mutation.
+A rerun uses a fresh maker and fresh checker contexts, then replaces the canonical record. Git history owns attempts. Verify never fixes code, edits acceptance, starts Finish, commits, publishes, or grants those authorities.
 
-No approval by itself authorizes commit, Finish, Publish, push, hosted review, merge, release, or cleanup. A later exact confirmed Finish inventory may separately authorize its declared ordinary local effects. Those are separate manual boundaries. Maker/checker separation and the judge-only rule grant no Git authority.
+## Local signal map
 
-**Review branches:**
-
-- **Spec-backed** — a Ticket, PRD, Story, or explicit user contract exists. Run Spec + Standards. Plan-invoked work always supplies a Ticket; a direct small fix's request remains a spec without artifacts.
-- **Standards-only** — no Ticket, Story, PRD, or user contract exists. Run Standards only and state `Spec unavailable — no Ticket/Story/PRD/user contract supplied`. Do not spawn, require, or simulate a Spec checker. It cannot complete a Loom Ticket or authorize any Loom status change.
-
-For multi-repository Story work, Orca is the sole coordinator and supplies the ordered repository boundary. Other hosts can run this same prose manually but claim no hooks or orchestration parity.
-
-## Process
-
-Verify has a bounded budget. Finish may reuse current Ticket Spec/Standards verdicts while their boundaries remain current; its compact integration use of this skill is triggered only by observed cross-Ticket behavior, a changed aggregate boundary, or a new integration contract. Lifecycle-only deltas do not trigger model review. Host project/custom review skills aggregate as inputs to the one Standards packet, never extra axes. Run one initial round. A rejecting axis gets at most one finding-scoped recheck in its same checker context; an approving axis is not rerun unless the rework newly affects it. A full new round is allowed only when acceptance or an explicit user contract expands, the public/inter-service contract expands, the repository or dependency set expands, or rework newly affects the second axis. A second overlapping REJECT stops under the existing two-strikes rule; there is no third checker lap.
-
-1. Pin the **Boundary** before judging: Maker identity; Ticket digest; ordered repositories with identity, HEAD, fixed point, and diff digest; and the exact included semantics. Confirm at least one repository diff is non-empty. The Boundary excludes only Ticket lifecycle frontmatter `status` and the entire current `## Verify` block, and includes every other Ticket semantic byte plus exact repository state. This exact self-exclusion prevents writing Verify or changing status from invalidating its own digest; any other Ticket or repository change makes the result stale and requires fresh Verify.
-2. **Run the objective gates before spawning anyone.** Take the Verify tier from `CONSTITUTION.md` (tier 1 docs/tests-only, tier 2 internal logic, tier 3 contract/data/auth/migration/new dependency; ties take the higher tier). Tier 1 runs the Ticket-required checks; tier 2 adds the focused gates for the changed files; tier 3 adds the full relevant repository gates. Discover the commands from package scripts, Makefile, and CI configuration — never invent one. A repo with a lint script that Verify never ran is an unearned APPROVE.
-
-   Record results **silent pass, loud fail**: a green command is one line (`npm test → pass (14/14)`), while a red command lands with its failing output verbatim. No runnable checks in the repo → record `no runnable checks — {why}`; silence is indistinguishable from skipping. A cited check must be **able to fail** — a tautological assert that recomputes the expected value the way the code does, or a smoke line that cannot go red, is not evidence.
-
-   **Any red gate short-circuits: REJECT now.** Blockers name the failing commands, write-back happens as usual, and checkers are **not spawned**. Record in both Spec and Standards evidence summaries: `REJECT; not spawned — objective gate red; {failing command}`. Judging spec prose on a diff that already fails its own checks spends two sub-agents to confirm a fact.
-3. Gates green → choose the review branch and assemble **one shared evidence packet** before invoking checkers. The packet is hash-pinned and maps every applicable acceptance criterion or named standard to an evidence anchor: diff hunk, source line, test/check result, Ticket/PRD line, ADR, or applicable project quality/review skill section. A checker may make one bounded live dive only for an absent, ambiguous, or context-dependent anchor; it names the question and bounded files/symbols first and never reconstructs the repository by default. Applicable project security, performance, CI, architecture, or review skills are Standards inputs only when their declared scope matches the changed surface; they never create another canonical axis.
-
-
-   - **Spec-backed:** Quick runs one independent Standards checker and records the canonical Spec-not-required sentinel. Behavior/Full spawn **two parallel checker sub-agents** in separate contexts when supported:
-     - **Spec**: does the change satisfy Ticket + Story/optional PRD or explicit user contract? Quote spec lines for findings. Bind the Spec role explicitly.
-     - **Standards**: warp + discipline floor - conventions, and the Ticket's runnable check exists and **can fail**. Gate pass/fail arrives in the briefing; tools are read-only. Bind the Standards role explicitly.
-   - **Standards-only:** obtain only the independent Standards review. Put `Spec unavailable — no Ticket/Story/PRD/user contract supplied` in the digest and Spec evidence; no Spec checker is required.
-   - **Shared briefing:** assemble the checker context **once** as a host-supported shared evidence packet and hand both checkers the same packet plus their own axis. For a continuation Ticket, reuse the maker's compact continuation packet fields — Story intent/success, relevant PRD decisions/assumptions, and current Git fixed point/diff identity — and add the exact diff text, Ticket semantics, Log, ordered repository Boundary, fixed points, and gate results; do not make each checker reconstruct the full Story/PRD by default. When relevant, include CodeGraph callers, affected flows, test relationships, source paths, index identity, and freshness status. Graph evidence remains subordinate to live HEAD/diff evidence and objective gates. Prefer a scratch file outside the repository worktree (`$TMPDIR` or host scratch such as OMP `local://`) when that carrier is truthful and available. Two hand-copied prompts drift; one briefing guarantees both checkers judge the same input, while scratch outside the worktree keeps the judged diff clean. If the host has no shared scratch carrier, send identical packet text through its supported prompt transport.
-   - **The briefing carries evidence, not pointers.** Include the **diff text itself**, not just the command; the **Ticket card verbatim except only its self-excluded lifecycle frontmatter `status` field and current `## Verify` block**, acceptance criteria included; Ticket `## Log`; Maker; the full ordered repository Boundary and fixed points; **step-2 gate results**; and Story/PRD/standards **paths** for deeper dives. You already computed the diff in step 1 — a checker re-deriving it read-by-read is the single biggest Verify cost on record (field run: 9 checkers, 199 turns, most spent re-assembling evidence the orchestrator had). Size valve: past ~400 diff lines, embed the file list plus per-file hunk summary instead and let checkers read changed files themselves.
-   - **Named checker agents:** if the host ships pre-configured checker agents such as `loom-verify-spec` and `loom-verify-standards`, **attempt them once per session**. Never assume unavailability without one recorded attempt. Record found/not found in the applicable evidence summary and reuse that discovery result for later verifies in the session. On not-found, fall back to generic independent sub-agents with the checker manifests inlined.
-   - **Prefer named checker agents when listed.** A generic task/reviewer sub-agent is the fallback for hosts that do not list them, not a peer option. Names carry role constraints and the model tier below.
-   - **Each checker prompt carries its own agent binding.** Batch two spawns for parallelism only if the interface binds the agent per item; one agent field spanning two prompts can run both under one checker manifest and silently lose the other axis's role and tier (observed on OMP: Standards ran under the Spec label).
-   - **Checker role routing:** Quick uses `smol` Standards only; Behavior and Full use `default/strong` Spec + Standards. These are host-configured role mappings/runtime hints, not canonical model names or Ticket fields; host configuration wins. Where a `smol` checker applies, one invalid, empty, or ambiguous result may escalate once to a fresh `default/strong` checker. Record why; escalation never resets Verify or recheck budget.
-   - **Capability fallback:** if parallel workers are unavailable, run required axes in independent sequential contexts and record the limitation. If an independent review cannot be obtained, fail closed with `ESCALATE_HUMAN`; never simulate the missing checker in the maker context.
-4. **The wait is work time.** Checkers take tens of seconds to minutes. Prefer the host's blocking wait; with polling, space polls out (~15 seconds or more). Fill the wait with Verify's remaining work: pre-assemble the digest frame, scope, Boundary, fixed points, and step-2 gate results in their slots, so checker verdicts drop into a prepared digest. No empty rapid-fire polls: a field run burned six consecutive no-op polls exactly here.
-5. Aggregate the full chat digest with blocking findings first. Findings cite the contract line (Spec) or named source (Standards). Gate results are verdict input, not decoration — **evidence beats opinion**, and an APPROVE whose Checks executed section is empty is unearned by definition.
-
-   The canonical Ticket record deliberately has no separate checks or checker-execution fields, and no separate findings or checker-provenance fields. Include objective command/result summaries in one-line Standards evidence. Keep detailed findings and red output in the chat digest; durable detail may live in Ticket `## Log` or a referenced check-output artifact.
-
-   Recheck the Boundary immediately before write-back. If anything included changed, discard the stale result and run fresh Verify. Read the canonical first line of Ticket `## Verification`: `Human approval: required|not-required`. It is included in the Ticket digest. Write `Human: NOT REQUIRED` only for `not-required`; obtain and write `Human: APPROVE | {identity} | {evidence}` for `required`. `ready-for-human` requires `required`, `ready-for-agent` requires `not-required`, and `done`/`needs-info` preserve either policy. Never infer policy from `status`.
-
-## Full chat digest output format
-
-This detailed chat digest is separate from, and intentionally richer than, the compact canonical Ticket `## Verify` runtime record.
-
-```markdown
-## Verdict
-APPROVE | REJECT | ESCALATE_HUMAN
-
-## Spec findings
-- severity: blocker|major|minor|note | claim | evidence | fix direction
-- Standards-only branch: `Spec unavailable — no Ticket/Story/PRD/user contract supplied`
-
-## Standards findings
-- severity: blocker|major|minor|note | claim | evidence | fix direction
-
-## Checks executed
-- command → pass/fail   (never empty: list commands, or `no runnable checks — {why}`; silent pass — one line per green command; loud fail — red output verbatim)
-
-## Sub-agent evidence
-- Spec sub-agent: invoked (yes/no/not required — Standards-only) | checker identity | tool/host used
-- Standards sub-agent: invoked (yes/no) | checker identity | tool/host used
-- Named checker agents: attempted this session (yes/no) → found / not found (reuse first attempt)
-- Review execution: host-native parallel batch | parallel sub-agents | independent sequential fallback (limitation recorded)
-- Role binding: Spec checker (yes/no/not required) | Standards checker (yes/no)
-- Checker role routing: Quick `smol` Standards | Behavior/Full `default/strong` Spec + Standards | escalation reason, if any
-- If parallel sub-agents are unavailable: document limitation and run required checks sequentially in separate contexts
-
-## Risk/Scope notes
-
-## Recommended next action
-```
-
-What good findings look like — Spec quotes its contract line, Standards names its source, and Checks executed contains real commands:
-
-```markdown
-## Verdict
-REJECT
-
-## Spec findings
-- severity: blocker | export skips archived rows | PRD §Stories 7 "export includes archived entries when the filter is off" — `src/export.ts` drops them unconditionally | make the filter respect the toggle
-
-## Standards findings
-- severity: minor | new helper duplicates `formatDate` in `lib/dates.ts` | CONTEXT.md names dates a single-owner seam | reuse the existing helper
-
-## Checks executed
-- `npm test` → pass (14/14)
-- `npm run lint` → pass
-
-## Sub-agent evidence
-- Spec sub-agent: invoked yes | loom-verify-spec | host-native worker
-- Standards sub-agent: invoked yes | loom-verify-standards | host-native worker
-- Named checker agents: attempted this session yes → found
-- Review execution: host-native parallel batch
-- Role binding: Spec checker yes | Standards checker yes
-- Checker role routing: Behavior `default/strong` Spec + Standards (host mappings)
-
-## Risk/Scope notes
-- Reviewed only the pinned export Ticket Boundary; no release or migration behavior was included.
-
-## Recommended next action
-Return both cited findings to the same maker as one rework batch, then run fresh Verify.
-```
-
-A finding without a quoted contract line or named standards source is opinion, not evidence. The worked REJECT includes both review axes and the exact commands that earned the gate evidence; remaining digests must be equally concrete.
-
-## What each severity obliges
-
-Severity is declared four ways and, until this table, obliged nothing. That is why the same digest produces two opposite failures: a maker who fixes ten `minor` notes and burns a lap on taste, or a maker who argues with a `blocker` as though it were a preference. This is the canonical owner of what a severity *costs*:
-
-| Severity | The maker must | Before `done`? |
+| Signal | Reference | Use |
 |---|---|---|
-| `blocker` | Fix it, or escalate the disagreement below. No third option. | Yes — a `blocker` and `done` cannot both be true |
-| `major` | Fix it, or record a `loom:` marker with its ceiling and upgrade trigger and say so in `## Log`. | Yes, in one of those two forms |
-| `minor` | Decide, one line in `## Log`: fixed, or deferred and why. | No — deferral is legitimate and recorded |
-| `note` | Read it. Nothing else. | No |
+| Ticket-backed result or rerun | [`TICKET-RECORD.md`](TICKET-RECORD.md) | required for schema, status effect, staleness, and replacement |
+| Spec/Standards depth and output | [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) | required for both axes, Quick sentinel, checks, and receipt |
+| Mutation, identity, or delegation boundary | [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) | required when authority or independence is in question |
+| Risk or host-specific specialist signal | [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) plus the applicable repository or host-native owner | required only when that signal exists; aggregate into an existing axis |
+| Semantic or recovery conflict | [`../loom/STORY.md`](../loom/STORY.md) and [`../loom/SESSION.md`](../loom/SESSION.md) | required only when current semantics or pointer evidence conflicts |
 
-`note` obliging nothing is deliberate: it is the slot a checker uses for context the maker should have (`briefing truncated`, `this file has a second caller`), and giving it weight would make checkers stop sending it.
-
-**A finding the maker disagrees with is not a finding the maker may skip.** Silent non-compliance is the failure this row exists for — the digest says `blocker`, the diff says nothing, and the next Verify re-derives it. Instead say it out loud, once, in the rework batch: quote the finding, state why the code is right, and name the evidence the checker did not have. Then the orchestrator decides between three outcomes and records which one it chose:
-
-- The checker was wrong on evidence the briefing did not carry → the finding is dropped, and the missing context goes into the next briefing so the same spawn does not rediscover it.
-- The disagreement is a real trade-off nobody has decided → `ESCALATE_HUMAN`. Two agents disagreeing about a contract is exactly the case the human gate exists for.
-- The maker is rationalising → the finding stands unchanged, and the argument counts as one of the two strikes.
-
-One round of this per finding. A maker that re-argues a finding already upheld is on strike two.
-
-## Ticket record
-
-When the result is a Spec-backed Loom Ticket, load [`TICKET-RECORD.md`](TICKET-RECORD.md) and follow it for the canonical `## Verify` block, its status effects, staleness, the two-strikes rule, and `ESCALATE_HUMAN`. Standards-only and direct-fix results stop at the chat digest — do not load it, and never write a Ticket record for them.
-
-## Capture the lesson, once
-
-A run that surfaced durable knowledge a future agent would otherwise re-derive is the only moment the project can learn cheaply. Offer the smallest existing owner, never a new task log: a resolved term, durable fact, or stable project boundary goes to `CONTEXT.md`; a hard-to-reverse, surprising decision produced by a real trade-off goes to an ADR; a deliberate implementation shortcut with a known ceiling goes to a `loom:` marker beside the code; a recurring project procedure goes to a repository-local `skills/<slug>/SKILL.md`.
-
-Show the exact owner and content in one compact capture preview, then **write only after the operator approves**. Capture only the confirmed delta and do not start Plan or another implementation automatically. No durable knowledge means no offer and no write; the ordinary result already lives in the diff and Git history.
-
-A capture approved after the verdict is a separate small change. It never inherits the verdict that preceded it: run its proportional objective checks and fresh independent Verify before calling that capture verified. This applies to every owner inside a judged repository, especially a code-adjacent `loom:` marker. If the operator declines the extra change, preserve the completed result and leave the capture unwritten.
-
-When an explicit `/loom` session draft exists, record the approved capture decision there as a boundary event before the durable owner write. If no draft exists, lazy-create one only when the approved capture decision must survive to promotion; ordinary Verify does not create a draft. The draft remains staging and is never itself the canonical owner.
-
-Without this the project pays for the same discovery every time: findings live in a verdict, verdicts are replaced by the next one, and nothing accumulates. Do not write durable knowledge unasked; an unapproved lesson is one agent's opinion promoted to project truth.
+Load only references selected by the Boundary or a real signal. The Ticket record and Spec/Standards contract are always required for Ticket-backed Verify.
 
 ## Hard stops
 
-- No evidence → no APPROVE.
-- Empty **Checks executed** in chat → no APPROVE: list real commands/results or explicit `no runnable checks — {why}`.
-- Standards evidence without objective command/result summaries → no APPROVE.
-- No independent Spec/Standards evidence → no APPROVE, except Standards-only explicitly marks Spec unavailable/not required.
-- No **Sub-agent evidence** in chat → no APPROVE; documented independent sequential fallback is evidence, not an exemption.
-- Do not downgrade blockers to style notes.
-- Do not fix code during Verify. Return findings to Implement/the same maker.
-- Approval grants no commit, Finish, Publish, push, merge, release, hosted-review, or cleanup authority.
+- **Boundary:** unavailable repository identity/fixed point, empty or unavailable actual diff, stale digest, changed Ticket semantics, or contradictory scope stops without a verdict.
+- **Independence:** unavailable required checker owner, maker/planner overlap, or unproven identity separation stops without a verdict; never simulate independence.
+- **Evidence:** missing mandatory runnable/direct evidence, an unresolvable required source, or evidence not bound to the current state returns BLOCKED without a verdict. If recovery-worthy, Verify may create or update the pointer through the shared artifact helper; pointer failure is reported and does not change the blocker or verdict truth.
+- **Judgment:** findings without observed evidence and a violated acceptance/rule cannot support REJECT; known acceptance gaps cannot be downgraded into APPROVE.
+- **Authority:** Verify makes no fix, acceptance amendment, Finish/Publish start, commit, or other effect beyond the canonical current-result/status seam.
 
-## Failure modes
+## Next action
 
-| Symptom | Response |
-|---|---|
-| Empty diff | Stop; pin fixed point and confirm scope |
-| Objective gate red (step 2) | REJECT without spawning checkers; blockers name failing commands and both evidence summaries say `not spawned — objective gate red` |
-| Parallel workers unavailable | Run required axes in independent sequential contexts; document the limitation |
-| Independent checker context unavailable | ESCALATE_HUMAN with the explicit capability limitation; fail closed |
-| Host worker fails or yields no verdict | Let the host own one recovery attempt; without branch-required independent verdict, fail closed |
-| OMP `task` agent not found | Fall back to a host reviewer or generic independent sub-agents whose prose assignments explicitly bind Spec or Standards; no obsolete transport field is required; document fallback |
-| Sub-agents unavailable | ESCALATE_HUMAN with explicit limitation |
-| Checker yields null/empty (host glitch) | If `smol` applies, escalate once to a fresh `default/strong` checker; otherwise respawn once. A second null/empty is `REJECT` with blocker "checker yield lost (host glitch)" - never a third spawn or budget reset |
-| Conflicting Spec vs Standards | Spec-backed only: REJECT with both cited |
-| Checker tries to fix | Stop checker; re-run with the read-only role manifest |
-
-## Anti-rationalization
-
-| Excuse | Reality |
-|---|---|
-| "Looks fine, skip sub-agents" | Spec-backed requires Spec+Standards; Standards-only still requires its Standards checker |
-| "Gates are green, skip the checkers" | Green gates earn checkers, not an APPROVE — tests cannot read the spec |
-| "Checkers APPROVE, and the maker said tests pass" | The maker's word is a claim; Checks executed and Standards evidence name commands Verify ran and results |
-| "I'll fix it myself in Verify" | Verify judges; hand back to Implement/the same maker |
-| "Approve with known gap" | REJECT or ESCALATE_HUMAN; explicit debt is a user-owned disposition, not checker approval |
-| "Named agents probably aren't discoverable — straight to fallback" | One recorded attempt per session first; assumption is not evidence |
-
-## Host limitations
-
-Verify policy is host-neutral prose. Named-agent availability and parallelism are host capabilities, not hook parity. Attempt named checker agents once; if unavailable, use generic independent contexts with manifests inlined. Prefer parallel roles with per-item role binding; otherwise run independent sequential contexts and record the limitation. If independence cannot be obtained, `ESCALATE_HUMAN`; never simulate a checker in maker context.
-
-| Capability | OMP | OpenCode | Claude Code | Codex |
-|---|:-:|:-:|:-:|:-:|
-| Run objective repository gates | yes | yes | yes | yes |
-| Named Loom checker manifests may be installed | yes; discovery can vary | carrier/config dependent | plugin agents | carrier/config dependent |
-| Parallel independent sub-agents | host capability; use when discovered | host capability/config dependent | yes when Agent workers available | yes when sub-agents available |
-| Independent sequential fallback | yes | yes | yes | yes |
-| Loom runtime enforcement | no | no | no | no |
-| Multi-repository coordination | Orca boundary only | Orca boundary only | Orca boundary only | Orca boundary only |
-
-**OMP named-agent discovery caveat:** some OMP versions/configurations may not discover plugin-provided agents through `task`. Do not infer failure in advance: attempt named agents once per session, record found/not found, then use a host reviewer or generic independent Spec and Standards contexts with manifests inlined. This preserves checker independence without claiming transport fields or hook parity. OMP has no Loom runtime enforcement; availability of parallel sub-agents is a host capability.
-
-The general contract remains unchanged across carriers: same shared evidence, objective gates, checker independence, full chat digest, canonical current-result write-back, and no approval authority beyond the judged Boundary.
-
-## Done when
-
-- Objective gates ran first — results appear in the full chat digest and shared briefing, or red-gate short-circuit REJECT was delivered
-- Every cited check can fail; green is one line, red output is verbatim, and no-runnable-checks is explicit
-- Branch-required checker(s) ran: Spec+Standards, preferably in parallel, for Spec-backed; Standards only for Standards-only; or documented red-gate/capability path delivered the required closed result
-- Named checker agents were attempted once this session when supported, and fallback/outcome was recorded
-- Both checkers received the same evidence packet, with diff evidence and Ticket semantics rather than pointers alone
-- Full chat digest has Verdict, Spec findings, Standards findings, Checks executed, Sub-agent evidence, Risk/Scope notes, and Recommended next action
-- Checks executed lists commands and pass/fail, or explicit `no runnable checks — {why}`
-- Boundary was rechecked immediately before write-back and remains fresh
-- Spec-backed Ticket result replaced `## Verify` with the exact canonical runtime record; direct-fix/Standards-only digest was delivered in chat
-- Standards-only never completes or mutates a Loom Ticket
-- Lowercase frontmatter `status` effect matches Human policy; REJECT does not change status
-- Verify made no fixes and granted no Git, Finish, or Publish authority
+APPROVE hands the unchanged Boundary to explicit Finish. REJECT hands one batch to a fresh maker, then fresh Verify. BLOCKED names the missing owner, identity, tool, or evidence. A recovery-worthy handoff may update the pointer through the shared artifact helper. Stop.

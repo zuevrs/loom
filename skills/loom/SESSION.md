@@ -1,33 +1,30 @@
-# Loom session draft contract
+# Loom recovery pointer contract
 
 Lazy-load only for explicit `/loom` entry, resume, or Finish. This file is an optional recovery pointer, never durable project truth or authority. It never replaces `CONTEXT.md`, ADRs, Story, PRD, Tickets, or Git evidence.
 
 ## Contract
 
-Create no empty draft. Create `.loom/session/<session-id>.md` only when a durable decision, blocker/user-owned choice, handoff/resume, or pending Finish delta must survive the current context. Read it just-in-time at entry, resume, and Finish; do not inject it into ordinary host context. Conflicting Story, Git, or host evidence stops for reconciliation.
+The action that observes a recovery-worthy decision, blocker, or handoff may create or update `.loom/session/<session-id>.md` through the shared artifact helper only when it must survive context. Create no empty pointer. Read it only at entry, resume, and Finish. Conflicting Story, Git, or host evidence stops. The dispatcher is read-only. Finish owns partial rewrite and full delete; other actions do not delete it. Pointer failures are reported and do not change semantic truth.
 
-Use only this compact shape:
+Use exactly seven ordered lines and no frontmatter:
 
-```markdown
----
-id: <session-id>
-status: active
----
-
-done: <verified result or completed boundary>
-current: <work in progress>
-next: <one next action>
-blocker: <none or exact blocker>
-decision: <confirmed choice or none>
-owners: <canonical paths>
-fixedPoint: <Git fixed point or none>
+```text
+Story: <canonical Story path or none>
+Ticket: <canonical Ticket path or none>
+Action: <current bounded action>
+Evidence: <canonical or live evidence reference>
+Decision: <confirmed choice or none>
+Blocker: <exact blocker or none>
+Next: <one next action>
 ```
 
-Fields are a recovery pointer, not authority. Do not record transcript, reasoning, routine detail, token/model data, terminal output, runtime IDs, or full Git/Orca state. The draft is disposable: canonical owners receive durable knowledge through their owning ritual; the checkpoint itself is never promoted.
+Every value is non-empty, single-line printable ASCII and at most 280 characters. The complete UTF-8 file is at most 1500 bytes. Unknown, missing, duplicated, or reordered fields are invalid.
+
+These fields are hints for locating current authority, not authority themselves. Do not record lifecycle state, transcripts, snapshots, reasoning, routine detail, token/model data, terminal output, runtime IDs, or full Git/Orca state. The pointer is disposable and is never promoted or archived.
 
 ## Hard stops
 
-- Do not create a draft for ordinary routing.
+- Do not create a pointer for ordinary routing.
 - Do not treat it as memory, consent, or a mutation permit.
 - Do not promote or mutate canonical owners from this file without the owning ritual’s exact preview and confirmation.
 - Do not hide conflicts with canonical artifacts or live repository/host evidence.

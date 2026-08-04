@@ -8,7 +8,7 @@ Start here for the terms users see. Project-specific language belongs in the rep
 
 **Story** — A compact destination and lifecycle index at `.loom/<story-id>/STORY.md`. It records intent, success, and decisions for material work. Its status is `active`, `blocked`, or `done`.
 
-**PRD** — An optional product/build contract at `.loom/<story-id>/PRD.md`. It is earned when work has multiple Tickets or repositories, important product or interface decisions, or needs multiple sessions.
+**PRD** — An optional product/build contract at `.loom/<story-id>/PRD.md`. It is earned when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract; count, size, duration, and repository breadth alone do not earn it.
 
 **Ticket** — One independently checkable vertical slice at `.loom/<story-id>/tickets/<ticket-id>.md`. Status is `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`.
 
