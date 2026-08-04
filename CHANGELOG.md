@@ -27,7 +27,7 @@ Reference-first skill contracts and recovery-pointer hardening.
 
 ### Adapter impacts
 
-- OMP remains a skills/checker-prose adapter with no Loom extension, lifecycle callback, mutation guard, completion gate, or automatic retry. Short live OMP pilots were blocked by host `Deadline exceeded` before returning agent output.
+- OMP remains a skills/checker-prose adapter with no Loom extension, lifecycle callback, mutation guard, completion gate, or automatic retry. A first pilot setup timed out because it disabled host discovery and did not pin the working model; a corrected run returned Plan, Implement, and Verify results.
 - Claude Code, Codex, and OpenCode remain prose carriers; no remote or package-registry publication is included.
 
 ### Safety changes
