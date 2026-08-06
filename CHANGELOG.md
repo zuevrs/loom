@@ -4,6 +4,49 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+### Breaking changes
+
+### Migration steps
+
+### Adapter impacts
+
+### Safety changes
+
+## [7.13.0] - 2026-08-06
+
+Adaptive Grill ownership, model-free behavioral evaluation scaffolding, and fail-closed carrier release gates.
+
+### Highlights
+
+- Moved the shared interview canon to Grill, added Quick/Behavior/Material depth selection, premise and question-admission rules, proportional readbacks, and an ephemeral decision frontier for coupled decisions and bounded fact lookups.
+- Added deterministic maintainer harnesses for Grill quality, isolated behavioral evaluations, strict comparison packets, blinded judging boundaries, resumable evidence identity, and recursive secret/path redaction.
+- Added disposable native carrier load smokes and the callable `scripts/check-carriers --all --scratch` release gate for required OMP and Claude seams.
+
+### Breaking changes
+
+- Grill now owns the canonical interview. Plan consumes a resolved conversational handoff and may ask only newly-created materialization choices; integrations that invoke Plan as the interview owner must route unresolved scope back through Grill.
+- Release preparation now fails closed when required OMP or Claude carrier seams are unavailable, N/A, or FAIL; deterministic CI alone is no longer sufficient carrier evidence for a release cut.
+
+### Migration steps
+
+- Update through the same carrier used to install Loom, restart the host, and rerun Setup where the managed block reports an older version.
+- Update custom Plan entry points to load Grill’s resolved handoff instead of re-running Plan-owned interview questions.
+- Provision the supported OMP and Claude CLIs before a release cut, then run `scripts/check-carriers --all --scratch` from the candidate root.
+
+### Adapter impacts
+
+- OMP and Claude gain disposable native install/discovery checks with exact version and identity readback; OpenCode and Codex remain optional where their current CLIs expose no authoritative scratch discovery seam.
+- The package remains a thin OpenCode prose adapter with skills/checker metadata and no OMP extension or runtime-enforcement parity claim.
+- Behavioral eval and comparison tooling is maintainer-only and excluded from the package allowlist. No model pilot is claimed for this release: current evidence is deterministic, model-free test and dry-run validation plus the separately reported carrier smoke result.
+
+### Safety changes
+
+- Live model execution remains blocked by default and requires fresh single-use approval at the exact execution boundary; packet-embedded or caller-supplied consent cannot authorize it.
+- Eval and carrier children use validated executable closures, owned disposable roots, strict schemas and identities, fail-closed malformed/duplicate evidence handling, and shared recursive redaction before persistence.
+- Decision-frontier state remains conversational only, fact workers cannot decide or mutate for the user, and unavailable or contradictory evidence blocks only dependent branches.
+
 ## [7.12.0] - 2026-08-04
 
 Reference-first skill contracts and recovery-pointer hardening.
@@ -1648,7 +1691,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.12.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.13.0...HEAD
+[7.13.0]: https://github.com/zuevrs/loom/compare/v7.12.0...v7.13.0
 [7.12.0]: https://github.com/zuevrs/loom/compare/v7.11.0...v7.12.0
 [7.11.0]: https://github.com/zuevrs/loom/compare/v7.10.0...v7.11.0
 [7.10.0]: https://github.com/zuevrs/loom/compare/v7.9.0...v7.10.0

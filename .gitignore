@@ -7,3 +7,5 @@ __pycache__/
 # Release step 5 builds this on every cut: the tarball plus its unpacked copy.
 # It is inspection scaffolding, never release content.
 .release-pack/
+
+.loom/evals/raw/

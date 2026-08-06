@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+if [[ "${1:-}" == "--changed" ]]; then
+  shift
+  [[ $# -gt 0 ]] || { echo "usage: scripts/check-carriers --changed PATH..." >&2; exit 2; }
+  carriers="$(node --input-type=module -e 'import {carriersForChangedPaths} from "./tooling/carriers/smoke.mjs"; console.log(carriersForChangedPaths(process.argv.slice(1)).join(" "))' "$@")"
+  [[ -n "$carriers" ]] || exit 0
+  node --input-type=module -e 'import {releaseFailed,runSmoke} from "./tooling/carriers/smoke.mjs"; const records=await runSmoke({carriers:process.argv.slice(1),scratch:true,fixture:process.env.LOOM_CARRIER_FIXTURE}); console.log(JSON.stringify(records)); if(releaseFailed(records))process.exit(1)' $carriers
+else
+  node tooling/carriers/smoke.mjs --all --scratch
+fi

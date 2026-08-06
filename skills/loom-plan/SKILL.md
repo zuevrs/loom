@@ -10,7 +10,7 @@ Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md), [`../loom/
 
 ## Trigger
 
-Enter only with a user goal, observed context, and an explicit material boundary. If any is missing or unresolved, route to [`GRILL.md`](GRILL.md).
+Enter only with a goal, context, material boundary, and resolved Grill handoff ([`GRILL.md`](GRILL.md)). Missing or unresolved interview concerns return to Grill; ask only new materialization choices.
 
 Plan never implements. Material implementation requires a Story and at least one Ticket. Add a PRD only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract; count, size, duration, repository breadth, or a public contract alone never earns one.
 
@@ -19,13 +19,13 @@ Plan never implements. Material implementation requires a Story and at least one
 - The user goal and explicit material boundary, including nearest non-goals.
 - Observed code, tests, `.loom/` artifacts, and project truth.
 - Read-only repository/host topology when scope crosses owners.
-- Confirmed decisions and unresolved owner choices from Grill.
+- Resolved Grill handoff ([`GRILL.md`](GRILL.md)).
 
-Read `CONTEXT.md`, scoped ADRs, and host topology only when their terms, constraints, trade-offs, ownership, or placement are load-bearing.
+Read `CONTEXT.md`, scoped ADRs, and host topology when load-bearing.
 
 ## Decision and effect
 
-1. Separate facts, recommendations, assumptions, and owner choices. Ask one recommended question at a time; unresolved material scope returns to Grill.
+1. Consume the Grill handoff as settled evidence; only new materialization choices may be asked. Unresolved interview scope returns to Grill.
 2. Draft the smallest plan in memory: Story plus Tickets; add PRD, ADR, or CONTEXT only on a load-bearing semantic trigger. Create no runtime or implementation state.
 3. Cut vertical Tickets around outcomes. State scope/non-goals, acceptance, blockers/order, and a deterministic Verify seam; prescribe no files, estimates, or steps.
 4. Load every applicable template selected by the inventory and validate each draft. Templates shape drafts, never scope. Missing/invalid required templates stop before preview/write.

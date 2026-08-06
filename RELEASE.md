@@ -47,7 +47,23 @@ bash scripts/smoke
 
 Then scan public/carrier surfaces for stale ritual/runtime references, including removed maintenance/unattended/recipe routing, old hook module names, unsupported enforcement parity, migration language presented as current, and historical receipts presented as proof.
 
-## 5. Pack, unpack, and import the artifact
+## 5. Run live carrier gates
+
+These gates require provisioned, supported OMP and Claude CLIs on the maintainer machine. They perform no provisioning or network setup themselves. Missing required CLIs, unavailable required seams, N/A, or FAIL fails closed; do not substitute the deterministic CI result.
+
+Run the callable release gate:
+
+```bash
+scripts/check-carriers --all --scratch
+```
+
+For any carrier-affecting change, maintainers can run the mapped carrier-change gate with the changed repository paths:
+
+```bash
+scripts/check-carriers --changed PATH...
+```
+
+## 6. Pack, unpack, and import the artifact
 
 Create the artifact locally without publishing:
 
@@ -70,7 +86,7 @@ node -e "const p=require('./.release-pack/unpacked/package/package.json'); if(p.
 
 Where extension import requires host globals, use the repository's deterministic adapter smoke instead and document the exact limitation; never substitute importing the source tree. Remove `.release-pack` only after evidence is recorded and only if it is Loom-created disposable output.
 
-## 6. Verify candidate diff and local refs
+## 7. Verify candidate diff and local refs
 
 1. Review the complete release diff and changelog.
 2. Confirm all version carriers agree with `X.Y.Z`.
@@ -86,7 +102,7 @@ git show --stat --oneline HEAD
 
 Do not tag yet. A local release commit, Verify APPROVE, or Finish is not Publish consent.
 
-## 7. Hard remote-effect confirmation
+## 8. Hard remote-effect confirmation
 
 STOP. Present one exact inventory containing:
 
@@ -99,7 +115,7 @@ STOP. Present one exact inventory containing:
 
 Obtain separate explicit confirmation for that current inventory. If any ref, hash, remote, notes, or effect changes, refresh the inventory and reconfirm. Never bundle guessed or unlisted effects.
 
-## 8. Tag and publish confirmed refs
+## 9. Tag and publish confirmed refs
 
 Only after the hard confirmation:
 
@@ -111,7 +127,7 @@ git push origin refs/tags/vX.Y.Z
 
 Push branch and tag explicitly so partial success is visible. If one succeeds and another fails, stop, record the successful remote effect, refresh remote refs, and seek confirmation for only the remaining effect. Do not delete, move, or force-update a published tag without a new incident-specific plan and confirmation.
 
-## 9. Create the GitHub release
+## 10. Create the GitHub release
 
 After confirming the remote tag resolves to the intended commit:
 
@@ -123,7 +139,7 @@ Release notes reproduce the curated changelog and include exact current upgrade 
 
 If release creation fails after refs were pushed, preserve the refs, report the partial state, refresh with `gh release view`/remote-ref checks, and retry only the missing GitHub release after renewed confirmation when its inventory changed.
 
-## 10. Verify remote state
+## 11. Verify remote state
 
 Run and record:
 

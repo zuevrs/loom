@@ -34,7 +34,7 @@ When an active Story owns the topic, use it as read-only context. A request to c
 
 
 1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a Story, optional material PRD, and Tickets.
-2. **Load the shared interview canon** — before questioning, read and apply the sibling `skills/loom-plan/GRILL.md`. It owns exploration, facts-versus-decisions, question cadence, recommendations, domain probes, pending deltas, ADR offers, language, recovery, proportional depth, and anti-rationalization. Apply only the depth required by the selected Quick/Behavior/Material route. Keep Plan's inbound triage and Story/PRD/Ticket exit gate in Plan; return here when the thread crystallises or the user stops.
+2. **Load the interview canon** — before questioning, read and apply [`INTERVIEW.md`](INTERVIEW.md). It is the sole canonical owner of exploration, facts-versus-decisions, question cadence, recommendations, domain probes, pending deltas, ADR offers, language, proportional depth, readback, and stop discipline. Apply only the depth required by the selected Quick/Behavior/Material route. When the thread crystallises for planning, give Plan the compact conversational handoff in `INTERVIEW.md`; Plan owns only newly-created materialization choices. When explicit complexity appears, load and apply [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md); ordinary Grill does not activate it.
 3. **Resolve the thread** — apply the selected proportional floor and stop when the relevant scope, non-goal, proof, and user-owned choices are explicit. End naturally when investigation finds nothing actionable.
 4. **Explicit materialization gate** — only after the user explicitly asks to act, state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
    - The request activates the capability but does not replace exact confirmation. **Enthusiasm is not a go** — agreement resolves a branch, not an action gate.
@@ -131,7 +131,7 @@ Present one strongest finding and its evidence. If correction is requested, rout
 
 ## Anti-rationalization
 
-Shared interview excuses and responses live only in Plan's canonical [`GRILL.md`](../loom-plan/GRILL.md). Grill adds only action-specific guards:
+Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.md). Grill adds only action-specific guards:
 
 | Excuse | Reality |
 |---|---|
