@@ -40,9 +40,9 @@ Load semantic, session, Git, and host owners only when selected by current inven
 
 ## Exact preview and receipt
 
-The preview names Story and lifecycle; reconciliation rows or exact `No semantic delta`; every operation and path/digest; repository/branch/base/HEAD/index/diff ownership; current verdict boundaries; checks and any integration trigger; groups/order/message/parent/tree/hooks; pointer disposition; tag only if explicitly requested; readback; and exclusions. Ask exactly: `Confirm this exact local Finish inventory?`
+Preview content: Story/lifecycle, reconciliation or `No semantic delta`, operations/paths/digests, repository/branch/base/HEAD/index/diff ownership, verdict boundaries, checks, groups/order/message/parent/tree/hooks, pointer disposition, tag only if explicitly requested, readback, exclusions. Ask exactly: `Confirm this exact local Finish inventory?`
 
-The terminal receipt records proven local commit/tag refs and trees/parents, owner writes and lifecycle/pointer bytes, checks and reused/triggered review evidence, exact remaining inventory or `none`, and exclusions: no push, hosted review, merge, release, history rewrite, cleanup, or unlisted tag. Its `Next action` is exactly one of `/loom publish`, `local completion — no further action`, or `/loom finish` for the named remainder.
+Receipt records: proven local commit/tag refs and trees/parents, owner writes, lifecycle/pointer bytes, checks and reused/triggered review evidence, exact remaining inventory or `none`. Exclusions: no push, hosted review, merge, release, history rewrite, cleanup, or unlisted tag. `Next action`: `/loom publish`, `local completion — no further action`, or `/loom finish` for named remainder.
 
 ## Hard stops
 
@@ -54,9 +54,7 @@ The terminal receipt records proven local commit/tag refs and trees/parents, own
 
 ## Costly failure cautions
 
-- Do not rescan transcripts or the whole repository for drift; compare the bounded result to current owners.
-- Do not treat confirmation, command success, or the diff as proof of a new effect; reread bytes.
-- "Confirmation is a formality" is rationalization; ask the exact confirmation question against the exact preview.
+Compare only bounded current owners (not full transcript); reread bytes after effects (command success proves nothing); confirmation is never a formality.
 
 ## Next action
 

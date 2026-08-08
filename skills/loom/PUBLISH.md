@@ -39,22 +39,17 @@ Load only selected owners.
 
 ## Exact preview and receipt
 
-The preview names the Finish fixed point; current source/remote evidence; every operation, target, destination, visibility, risk, expected identity, precondition, payload/body, instruction digest and optional non-executable description, order, readback, and exclusion. It contains no executable host command or instruction. For example:
+Preview content: Finish fixed point, source/remote evidence, every operation/target/destination/visibility/risk/expected identity/precondition/payload/body/instruction digest and optional non-executable description, order, readback, exclusions. Contains no executable host command or instruction. Confirmation question: `Confirm this exact remote Publish bundle?`
 
-```text
-effect A: push branch api@7b2e1a9, feat/export -> origin/feat/export; private; non-force; expect remote ref 7b2e1a9; instruction sha256:… (publish the named branch without force)
-effect B: create/update review in acme/api, feat/export -> main; title shown; body sha256:…; expect review URL; instruction sha256:… (create or update the named review)
-excluded: local tag creation, merge, release, message, cleanup
-Confirm this exact remote Publish bundle?
-```
-
-The receipt names source identity; each effect as `applied`, `failed`, or `not-attempted` with authoritative URL/ref/identity or exact failure; readback; and remainder or `none`. Never say shipped when any effect failed or was not attempted. Publish writes no pointer, route state, or other artifact.
+Receipt: source identity, each effect as `applied`/`failed`/`not-attempted` with authoritative URL/ref/identity or exact failure, readback, remainder or `none`. Never say shipped when any effect failed or was not attempted. Publish writes no pointer, route state, or other artifact.
 
 ## Hard stops
 
-- **Intent and authority:** no explicit remote intent, unavailable effect, excessive authority, missing exact preview/current confirmation, or load-bearing drift means no instruction.
-- **Evidence and owners:** unsuccessful/stale Finish, source mismatch, local-tag creation, unlisted payload drift, unknown default, conflict, missing permission, or unavailable required owner/tool stops; never use a browser workaround or guessed command.
-- **Execution:** Loom never executes a remote mutation. After the first failed or unverifiable operator effect, stop later instructions, preserve successes, mark the rest not attempted, and perform no rollback or retry loop.
+**Intent and authority:** no explicit remote intent, unavailable effect, excessive authority, missing exact preview/current confirmation, or load-bearing drift means no instruction.
+
+**Evidence and owners:** unsuccessful/stale Finish, source mismatch, local-tag creation, unlisted payload drift, unknown default, conflict, missing permission, or unavailable required owner/tool stops; never use a browser workaround or guessed command.
+
+**Execution:** Loom never executes a remote mutation. After the first failed or unverifiable operator effect, stop later instructions, preserve successes, mark the rest not attempted, and perform no rollback or retry loop.
 
 ## Next action
 
