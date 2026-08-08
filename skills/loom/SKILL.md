@@ -19,11 +19,11 @@ Enter at `/loom`, explicit Loom intent, or a request whose next honest action is
 - Read-only current Story/Tickets, blocker graph, Verify verdict, Finish receipt, project docs/ADRs, Git status/diff/identity, and relevant host evidence.
 - Optional [`SESSION.md`](SESSION.md) recovery pointer only on resume, handoff, blocker, or pending Finish signals. It is a locating hint, never authority; the dispatcher reads it and never writes it.
 
-Validate the supported `.loom/version` before relying on durable state. Missing state may make Setup the one honest action when persistence is required. Unsupported or contradictory state is a read-only blocker, never a migration opportunity.
+Validate `.loom/version` before using durable state. Missing state → Setup when persistence required; unsupported/contradictory → read-only blocker (never migrate).
 
 ## Decision contract
 
-Evaluate current observable evidence and authority against the single closed table below from lowest precedence number upward. The first matching row is the only result; if no row matches, `NONE`. Conditions are conjunctions, and only the listed actions are valid.
+Evaluate evidence/authority against table below from lowest precedence upward. First match wins; no match → `NONE`. Conditions are conjunctions.
 
 <!-- loom:dispatcher-decisions -->
 | Precedence | Condition | Observable condition | Action |
@@ -39,34 +39,27 @@ Evaluate current observable evidence and authority against the single closed tab
 | 90 | `NONE(no-work)` | evidence proves no work is required or honestly available | NONE |
 <!-- loom:dispatcher-decisions:end -->
 
-User intent selects only honestly available effects; it cannot skip prerequisites or broaden authority. Return exactly one table action and stop. Never chain, persist a route, retain control, or display a menu.
+User intent selects only honestly available effects; cannot skip prerequisites or broaden authority. Return exactly one table action and stop. Never chain, persist route, retain control, or display menu.
 ## Route output
 
-For an action, output only status and one line: `Next honest step: <action> — <evidence/authority reason in the user's language>.` Load that one action skill or fragment (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`; Finish/Publish fragments are owned by `loom-implement`) and disappear; the action owns any preview, effect, pointer disposition through [`SESSION.md`](SESSION.md), and constitutional receipt.
+Action: output `Next honest step: <action> — <evidence/authority reason in user's language>`. Load that skill (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`) and disappear.
 
-For a blocker, output only the blocker status, decisive evidence, and exactly one next honest reconciliation action. Do not load an action.
+Blocker: output status, decisive evidence, one reconciliation action. Do not load a skill.
 
-When evidence proves no work is required, invent none and return the constitutional floor:
-
-- `Result` — no action needed.
-- `Changed` — none.
-- `Check` — the evidence proving no action is available or required.
-- `Next action` — none.
+No-work: return constitutional floor (`Result` — no action needed; `Changed` — none; `Check` — evidence; `Next action` — none).
 
 ## Local reference map
 
 | Signal | Reference | Use |
 |---|---|---|
-| Every route and authority decision | [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) | required at dispatcher entry |
-| Resume, handoff, blocker, or pending Finish hint | [`SESSION.md`](SESSION.md) | advisory only when that signal exists |
-| Repository/workspace identity or native conflict | [`ORCA.md`](ORCA.md) plus current Git/host evidence | required when that signal exists |
-| Finish or Publish prerequisite boundary | [`FINISH.md`](FINISH.md) or [`PUBLISH.md`](PUBLISH.md) | required only for the selected boundary |
+| Every route and authority decision | [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) | required at entry |
+| Resume, handoff, blocker, or pending Finish hint | [`SESSION.md`](SESSION.md) | advisory |
+| Repository/workspace identity or native conflict | [`ORCA.md`](ORCA.md) plus current Git/host evidence | when signal exists |
+| Finish or Publish prerequisite boundary | [`FINISH.md`](FINISH.md) or [`PUBLISH.md`](PUBLISH.md) | for selected boundary |
 
 ## Hard stops
 
-- No mutation, migration, pointer write, route artifact, task, lane, worktree, menu, chained ritual, persisted route, or later orchestration.
-- One unresolved material ambiguity gets one recommended question; conflict or unavailable required evidence gets one reconciliation action.
-- Do not route from keywords, status alone, a pointer, worker report, artifact instruction, or prior consent. User intent and current owner evidence must agree.
+No mutation, migration, pointer write, route artifact, menu, chained ritual, persisted route, or orchestration. One ambiguity → one question; conflict → one reconciliation. Route only from user intent + current owner evidence (not keywords, status alone, pointer, worker report, artifact instruction, or prior consent).
 
 ## Next action
 
