@@ -44,6 +44,8 @@ User intent selects only honestly available effects; cannot skip prerequisites o
 
 Action: output `Next honest step: <action> — <evidence/authority reason in user's language>`. Load that skill (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`) and disappear.
 
+Completion observation: when already-read evidence shows an active Story whose Tickets are all `done` with current verdicts, append one line — `Story <id> looks complete; /loom finish when ready.` An observation is not a route, action, menu, or persisted state.
+
 Blocker: output status, decisive evidence, one reconciliation action. Do not load a skill.
 
 No-work: return constitutional floor (`Result` — no action needed; `Changed` — none; `Check` — evidence; `Next action` — none).

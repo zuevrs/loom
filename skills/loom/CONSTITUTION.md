@@ -27,7 +27,7 @@ Verify is independent from the maker. Depth follows boundary and consequences, n
 
 | Name | Boundary | Feedback |
 |---|---|---|
-| **Quick check** | docs, comments, copy, or tests only; no behavior-contract change | Standards; Ticket Spec is `NOT REQUIRED | Quick check | Quick check` |
+| **Quick check** | docs, comments, copy, or newly added tests only; changing or deleting an existing test is Behavior; no behavior-contract change | Standards; Ticket Spec is `NOT REQUIRED | Quick check | Quick check` |
 | **Behavior check** | internal behavior; no public contract or dependency change | Spec + Standards on the behavioral seam |
 | **Full review** | public/external/inter-service contract, auth, persistence/data path, migration, or dependency | Spec + Standards on the touched surface |
 

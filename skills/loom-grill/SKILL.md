@@ -72,8 +72,8 @@ This exchange begins after the canonical interview has resolved the shared decis
 
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
 - Classify depth by the mechanical trigger list in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md); Grill neither redefines depth nor lowers its own classification.
-- **Quick check only** (docs, comments, copy, or tests; no behavior-contract change) may report its digest in **chat**; no Ticket write-back or status change.
-- **Behavior check or higher requires a fresh independent `loom-verify`.** Grill wrote the code, so Grill is the maker and cannot supply Spec: a confirmed delta is the acceptance contract, never the Spec verdict, and Grill's own gate results are evidence, never approval. Hand the boundary, diff identity, and checks to an independent checker context and stop.
+- **Quick check only** (docs, comments, copy, or newly added tests; no behavior-contract change — changing or deleting an existing test is Behavior) may report its digest in **chat**; no Ticket write-back or status change.
+- **Behavior check or higher requires a fresh independent `loom-verify`.** Grill wrote the code, so Grill is the maker and cannot supply Spec: a confirmed delta is the acceptance contract, never the Spec verdict, and Grill's own gate results are evidence, never approval. When the host can spawn fresh checker contexts (the packaged `loom-verify-spec` and `loom-verify-standards` agents), dispatch them with the boundary, diff identity, and checks, then continue the thread with their verdict; otherwise stop and hand the same packet to an explicit `/loom verify`. Either way the verdict comes from the independent contexts, never from Grill.
 - Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior additionally carries a risk note into that independent Verify.
 
 ## Evidence-backed audit requests
@@ -103,7 +103,7 @@ A problem caused by Loom itself belongs to the Loom maintainer, not this project
 | Confirmation is absent or ambiguous | Restate the concrete action and wait for explicit confirmation |
 | Baseline or target path is red | Report the inherited failure and stop before applying |
 | Gates fail after materialization | Fix inline, re-run the gates, and report the result |
-| Materialized change reaches Behavior check or higher | Hand the boundary to an independent `loom-verify`; do not report a verdict here |
+| Materialized change reaches Behavior check or higher | Dispatch fresh independent checkers, or hand to explicit `/loom verify`; Grill itself never issues the verdict |
 | No independent checker context is available | Report the materialized change as unverified with its evidence, and stop |
 | Work no longer fits a coherent local/single-session resolution | Recommend Plan and let the user choose |
 
