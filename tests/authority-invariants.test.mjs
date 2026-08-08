@@ -18,6 +18,15 @@ test("authority safety boundaries remain explicit",()=>{
   assert.doesNotMatch(omp,/runtime-guard|session_stop|tool_call/i);
 });
 
+test("Grill code materialization cannot self-verify a behavior change",()=>{
+  const grill=read("skills/loom-grill/SKILL.md"),constitution=read("skills/loom/CONSTITUTION.md");
+  assert.match(grill,/Behavior check or higher requires a fresh independent `loom-verify`/i,"Grill hands behavior changes to an independent checker");
+  assert.match(grill,/Grill is the maker and cannot supply Spec/i,"Grill cannot supply its own Spec verdict");
+  assert.match(grill,/\*\*Quick check only\*\*[\s\S]{0,160}digest in \*\*chat\*\*/i,"only Quick check keeps the chat digest");
+  assert.doesNotMatch(grill,/use when the semantic boundary fires/i,"conditional-Verify escape stays removed");
+  assert.match(constitution,/maker never lowers its own row/i,"depth classification is mechanical, not maker-discretionary");
+});
+
 test("canonical owners are referenced without duplicate authority",()=>{
   const implement=read("skills/loom-implement/SKILL.md"),orca=read("skills/loom/ORCA.md"),ticket=read("skills/loom-verify/TICKET-RECORD.md");
   assert.match(implement,/AUTHORITY\.md.*canonical owner/is);

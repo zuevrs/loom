@@ -71,41 +71,16 @@ This exchange begins after the canonical interview has resolved the shared decis
 ## Verification
 
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
-- After bounded confirmation for a small fix, treat the confirmed delta as the valid Spec. Apply the canonical Quick check, Behavior check, and Full review selection in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md); Grill does not redefine verification depth.
-- Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior requires a risk note and full Spec + Standards Verify even for a small fix.
-- Full `loom-verify` (spec + standards checkers) → use when the semantic boundary fires and the user chooses to continue in Grill, or when a risk trigger appears.
-- Small fixes without a Ticket file: the verify digest lives in **chat** (or the explicitly requested review description); no Ticket write-back or status change.
+- Classify depth by the mechanical trigger list in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md); Grill neither redefines depth nor lowers its own classification.
+- **Quick check only** (docs, comments, copy, or tests; no behavior-contract change) may report its digest in **chat**; no Ticket write-back or status change.
+- **Behavior check or higher requires a fresh independent `loom-verify`.** Grill wrote the code, so Grill is the maker and cannot supply Spec: a confirmed delta is the acceptance contract, never the Spec verdict, and Grill's own gate results are evidence, never approval. Hand the boundary, diff identity, and checks to an independent checker context and stop.
+- Trust, security, data-loss, destructive migration, external publish, or materially ambiguous behavior additionally carries a risk note into that independent Verify.
 
-## Evidence-backed maintenance discussions
+## Evidence-backed audit requests
 
-With Tend removed, a user may still ask Grill to investigate drift, debt, stale knowledge, or repeated failure. Treat this as one bounded question, not a hidden maintenance sweep:
+An audit request (drift, `loom:` debt, stale knowledge, repeated failure) is one bounded read-only question, never a maintenance sweep. Present one strongest finding with its evidence, then route the correction by owner: knowledge/ADR through Grill's action gate, contract or Ticket changes through Plan, code and debt through Implement, verdict freshness through Verify, install state through Setup, proven merged cleanup through Orca. Never batch unrelated maintenance, never repair install state here, and never create or extend a verdict. Recurring audit needs route to the host's native automation guidance in [`../../docs/unattended.md`](../../docs/unattended.md).
 
-When user experience shows Loom itself caused a repeatable or costly problem—lost context, excess ceremony, wrong route, missed check, or failed resume—do not put it in the current project's `CONTEXT.md`, Story, or ADR. Offer a maintainer report at the existing owner, a `zuevrs/loom` GitHub Issue. Show the exact destination and complete content, using exactly these five concise fields:
-
-```markdown
-## Situation
-<what was happening>
-## Observation
-<what Loom did>
-## Expected
-<what should have happened>
-## Cost
-<impact or wasted effort>
-## Reproduction/Context
-<repeatable steps or relevant context>
-```
-
-Capture observation only: no `Solution`, no `Architecture`, no `implementation plan`, and no `code`. Write only after the operator's explicit approval. After capture, stop with `capture_only`; do not auto-start Grill, Plan, or Implement or fix the problem. A one-off cheap preference stays ordinary conversation and creates nothing.
-
-- compare CONTEXT/ADRs/PRODUCT/DESIGN with current code and name exact contradictory sources;
-- inspect `loom:` debt without deleting or rewriting the marker unless a confirmed implementation actually pays it down;
-- treat stale Ticket state as a Verify/Plan question: an existing APPROVE is insufficient unless its exact Boundary still covers current semantics and repository state; Grill never creates or extends a verdict;
-- surface `needs-info` as one recommended user question; only a confirmed Plan amendment changes its contract/status;
-- recommend Setup when the managed block or `.loom/version` is stale; do not repair installation state from Grill;
-- treat orphaned research or discussion notes as evidence to cite or discard conversationally, not as a reason to invent archive state; and
-- when the same evidence-backed audit need recurs, recommend the host's native automation guidance in `docs/unattended.md`; do not recreate a Loom recipe runner.
-
-Present one strongest finding and its evidence. If correction is requested, route by owner: project knowledge/ADR capture through Grill's explicit materialization gate, contract/Ticket changes through Plan, code/debt work through Implement, verdict freshness through Verify, setup through Setup, and proven merged Orca cleanup through Orca. Never batch unrelated maintenance because the old Tend ritual no longer exists.
+A problem caused by Loom itself belongs to the Loom maintainer, not this project's `CONTEXT.md`, Story, or ADR: see the "Reporting a Loom problem" section of [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md) for the destination and report shape. Capture observation only, after explicit approval, then stop.
 
 ## Hard stops
 
@@ -116,6 +91,7 @@ Present one strongest finding and its evidence. If correction is requested, rout
 - Complete the pre-materialize edge-case checkpoint before the first code write.
 - If baseline gates for the target path are red, stop and report inherited failure before applying.
 - Run objective gates after every code change; materialization is verified only when they pass.
+- **Never close a Behavior-check-or-higher code change on Grill's own evidence** — hand it to a fresh independent `loom-verify` context. Passing gates and a confirmed delta are not a Spec verdict.
 
 ## Failure modes
 
@@ -127,6 +103,8 @@ Present one strongest finding and its evidence. If correction is requested, rout
 | Confirmation is absent or ambiguous | Restate the concrete action and wait for explicit confirmation |
 | Baseline or target path is red | Report the inherited failure and stop before applying |
 | Gates fail after materialization | Fix inline, re-run the gates, and report the result |
+| Materialized change reaches Behavior check or higher | Hand the boundary to an independent `loom-verify`; do not report a verdict here |
+| No independent checker context is available | Report the materialized change as unverified with its evidence, and stop |
 | Work no longer fits a coherent local/single-session resolution | Recommend Plan and let the user choose |
 
 ## Anti-rationalization
@@ -139,10 +117,12 @@ Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.m
 | "User seemed to agree, I'll just do it" | Agreement is a decision signal, not action confirmation. State the concrete action and wait for explicit go. |
 | "I'll skip gates, it's a tiny change" | Run the objective gates; they define whether the materialized change is verified. |
 | "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |
+| "The gates are green and the user confirmed the delta, so it is verified" | Grill is the maker here. Gates are evidence, a confirmed delta is the acceptance contract; neither is an independent Spec verdict. Hand it to a fresh `loom-verify`. |
+| "It is a small behavior fix, chat digest is enough" | Chat digest covers Quick check only. Any behavior-contract change earns a fresh independent checker regardless of diff size. |
 
 ## Done when
 
 - The user signals stop; Grill stays active while they continue the thread
-- Every materialized change passes the objective gates
+- Every materialized change passes the objective gates, and every Behavior-or-higher change carries an independent Verify verdict rather than Grill's own report
 - Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are flushed to `CONTEXT.md` at the action gate
 - Every proposed action is either explicitly confirmed and materialized or explicitly declined

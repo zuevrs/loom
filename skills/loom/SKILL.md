@@ -30,7 +30,7 @@ Evaluate evidence/authority against table below from lowest precedence upward. F
 |---:|---|---|---|
 | 10 | `STOP(missing-authority,stale-authority,contradictory-authority,excessive-authority,unattributed-authority,authority-narrower-than-intent,version-incompatible,unavailable-evidence,conflict,blocker,reconciliation,ambiguous-intent)` | any listed STOP signal is observed; ambiguous intent is closed and cannot route to Grill or Plan | STOP |
 | 20 | `ROUTE(setup)` | explicit setup intent and persistence is required | Setup |
-| 30 | `ROUTE(grill)` | a clear discussion or decision is wanted without artifact writes | Grill |
+| 30 | `ROUTE(grill)` | discussion, investigation, or a decision is wanted; no Story/PRD/Ticket artifact is required and any other write happens only on explicit request | Grill |
 | 40 | `ROUTE(plan)` | a clear request requires Story, Ticket, PRD, or owner artifacts to be created or amended | Plan |
 | 50 | `ROUTE(implement)` | concrete selected Ticket or bounded build/fix has clear acceptance and maker authority | Implement |
 | 60 | `ROUTE(verify)` | finished candidate lacks a current independent Spec/Standards verdict | Verify |

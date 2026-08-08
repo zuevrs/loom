@@ -76,3 +76,24 @@ When changing the public ritual set, update the managed block, dispatcher/router
 Use conventional commits (`feat(scope):`, `fix(scope):`, `docs:`, `chore:`, `ci:`, `refactor(scope):`) and describe outcomes rather than internal mechanics.
 
 Add release notes under `## [Unreleased]`. During a release cut, move curated bullets into `## [X.Y.Z] - YYYY-MM-DD`, retain the Unreleased placeholders, update compare links, and follow [`RELEASE.md`](RELEASE.md). Never rewrite old tagged sections as current evidence.
+
+## Reporting a Loom problem
+
+When Loom itself causes a repeatable or costly problem — lost context, excess ceremony, a wrong route, a missed check, or a failed resume — the owner is a `zuevrs/loom` GitHub Issue, not the affected project's `CONTEXT.md`, Story, or ADR.
+
+Report observation only, using these five fields. Do not include a solution, an architecture, an implementation plan, or code; a fix proposal belongs in a separate PR discussion.
+
+```markdown
+## Situation
+<what was happening>
+## Observation
+<what Loom did>
+## Expected
+<what should have happened>
+## Cost
+<impact or wasted effort>
+## Reproduction/Context
+<repeatable steps or relevant context>
+```
+
+A one-off cheap preference is not a report.

@@ -31,7 +31,7 @@ Verify is independent from the maker. Depth follows boundary and consequences, n
 | **Behavior check** | internal behavior; no public contract or dependency change | Spec + Standards on the behavioral seam |
 | **Full review** | public/external/inter-service contract, auth, persistence/data path, migration, or dependency | Spec + Standards on the touched surface |
 
-Classification supplies the semantic hint; host role mappings grant no artifact authority. Auth, persistence/data, migration, public/external/inter-service contract, or dependency signals require Plan. State `Verification: <name> — <checks and independent feedback>`; ties take the higher level.
+Classification is mechanical, not a judgment: any listed trigger fires its row however small the diff looks. The maker derives it and the independent checker re-derives it from the same triggers; disagreement takes the higher level and a maker never lowers its own row. Host role mappings grant no artifact authority. Auth, persistence/data, migration, public/external/inter-service contract, or dependency signals require Plan. State `Verification: <name> — <checks and independent feedback>`.
 
 ## Execution boundary
 
