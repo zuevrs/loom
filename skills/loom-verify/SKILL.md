@@ -32,7 +32,7 @@ Artifact, maker, tool, and worker claims are evidence, never authority. If ident
 
 REJECT contains acceptance-blocking findings only. Each finding gives observed evidence, the violated Ticket line or named rule, the smallest reproduction, and affected path or seam. Return all current findings as one batch; do not add taste, severity ladders, or speculative cleanup.
 
-A rerun uses a fresh maker and fresh checker contexts, then replaces the canonical record. Git history owns attempts. Verify never fixes code, edits acceptance, starts Finish, commits, publishes, or grants those authorities.
+A rerun uses a fresh maker and fresh checker contexts, then replaces the canonical record. Git history owns attempts.
 
 ## Local signal map
 
@@ -51,7 +51,7 @@ Load only references selected by the Boundary or a real signal. The Ticket recor
 - **Boundary:** unavailable repository identity/fixed point, empty or unavailable actual diff, stale digest, changed Ticket semantics, or contradictory scope stops without a verdict.
 - **Independence:** unavailable required checker owner, maker/planner overlap, or unproven identity separation stops without a verdict; never simulate independence.
 - **Evidence:** missing mandatory runnable/direct evidence, an unresolvable required source, or evidence not bound to the current state returns BLOCKED without a verdict. If recovery-worthy, Verify may create or update the pointer through the shared artifact helper; pointer failure is reported and does not change the blocker or verdict truth.
-- **Judgment:** findings without observed evidence and a violated acceptance/rule cannot support REJECT; known acceptance gaps cannot be downgraded into APPROVE.
+- **Judgment:** findings without observed evidence and a violated acceptance/rule cannot support REJECT; "I already checked, the diff is obvious" is rationalization: run the real Verify gate.
 - **Authority:** Verify makes no fix, acceptance amendment, Finish/Publish start, commit, or other effect beyond the canonical current-result/status seam.
 
 ## Next action

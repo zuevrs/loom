@@ -14,6 +14,32 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Safety changes
 
+## [7.15.0] - 2026-08-08
+
+Anti-rationalization prose: four diagnosis-then-act lures in ritual hard stops, compress-and-swap only.
+
+### Highlights
+
+- Added anti-rationalization lures to the four main execution rituals: Verify (maker self-approve), Implement (scope creep), Plan (Plan→Implement handover), and Finish (confirmation formality). Each lure names the specific rationalization and redirects to the correct action.
+- Achieved compress-and-swap only: all four files are at or below their pre-change byte sizes, no skill budgets, test files, or structural checks were modified.
+- Confirmed byte-equivalent budget discipline: 134/134 tests, full structural smoke clean, no growth.
+
+### Breaking changes
+
+- None. The package contents are unchanged from v7.14.0; only internal ritual prose was edited.
+
+### Migration steps
+
+- No user action required. Update through the same carrier used to install.
+
+### Adapter impacts
+
+- None. All carriers receive the same package contents.
+
+### Safety changes
+
+- None. Authority model, hooks, and runtime seams are unchanged.
+
 ## [7.14.0] - 2026-08-08
 
 Core-lab separation: the published package stays identical, maintainer lab moves to `idea`.
@@ -1719,7 +1745,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.14.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.15.0...HEAD
+[7.15.0]: https://github.com/zuevrs/loom/compare/v7.14.0...v7.15.0
 [7.14.0]: https://github.com/zuevrs/loom/compare/v7.13.0...v7.14.0
 [7.13.0]: https://github.com/zuevrs/loom/compare/v7.12.0...v7.13.0
 [7.12.0]: https://github.com/zuevrs/loom/compare/v7.11.0...v7.12.0

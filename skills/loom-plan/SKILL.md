@@ -61,9 +61,10 @@ Before preview, use [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md) and only applicab
 
 ## Costly failure cautions
 
-- Confirmation of one inventory grants no authority over a changed inventory.
-- Templates shape confirmed artifacts; they do not decide scope.
-- Ticket slicing follows observable outcomes, not repository layers or file count.
+- Confirmation of one inventory authorizes no other inventory.
+- Templates shape drafts, never scope.
+- "I wrote the plan, so I implement" is scope creep; hand off.
+- Ticket slicing follows outcomes, not layers or file count.
 - Six Tickets across two repositories alone use Story and Tickets; semantic overflow that cannot fit there without loss earns a PRD.
 
 ## Next action

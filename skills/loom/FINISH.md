@@ -20,7 +20,7 @@ The implementation diff is an identified input, not a new Finish effect. Unexpla
 1. Validate current identity, active Story, resolved blocker graph, current APPROVE records, unchanged Ticket/diff boundaries, canonical artifacts, repository containment, index safety, and dirty-tree ownership. A blocked Story may continue only for a precisely represented external blocker when the remaining local result is provable.
 2. Compare the actual result and evidence only to Ticket, Story, and current CONTEXT/ADRs. Build a bounded reconciliation packet: `owner -> observed result -> durable changed truth -> disposition`. Promote only durable truth changed by the accepted result to its existing canonical owner. Ordinary implementation stays in Git. A conflict or material amendment stops; Finish never rewrites acceptance to legalize code.
 3. Build the exact local operations inventory. It may include canonical/status reconciliation, exact recovery-pointer rewrite or deletion, and an optional explicit commit. A local tag is included only when the operator explicitly requested that exact tag; otherwise exclude it. Name paths, bytes/digests, groups/order, commit message and parent/tree expectation, hooks, checks, readback, and remaining dirty state. Use one logical group by default and at most two only for an owner/lifecycle split or remaining-only recovery.
-4. Run objective checks against that exact state. Reuse current Ticket Spec/Standards evidence while identity, semantics, diff, behavior, and standards remain unchanged. Trigger one bounded integration Spec+Standards judgment only for observed cross-Ticket behavior, changed aggregate repository boundary, or a new integration contract. Lifecycle/pointer-only changes do not trigger model review.
+4. Run objective checks against that exact state. Reuse current Ticket Spec/Standards evidence while identity, semantics, diff, behavior, and standards remain unchanged. Trigger one bounded integration Spec+Standards judgment only for observed cross-Ticket behavior, changed aggregate repository boundary, or a new integration contract; lifecycle/pointer-only changes do not trigger review.
 5. Present one compact exact preview of every local operation, digest, exclusion, and readback, then ask exactly one confirmation question. Confirmation authorizes only that inventory and expires on drift in identity, HEAD/base, diff/index/path ownership, semantics, verdict, checks, operation, message/group/order, lifecycle/pointer bytes, tag, or expected result.
 6. After confirmation, revalidate the rows for each operation immediately before applying it. Apply only authorized local effects with ordinary host tools; stage only named paths, never bypass hooks, and create no implicit tag. Reread canonical files and Git refs/trees after each effect before continuing.
 7. Preserve proven successes. On partial failure, do not rollback, amend, repeat, or widen them; rewrite an existing pointer to remaining inventory only. After full local Finish, delete the pointer. A pointer cleanup failure is reported and never rolls back proven canonical truth.
@@ -54,9 +54,9 @@ The terminal receipt records proven local commit/tag refs and trees/parents, own
 
 ## Costly failure cautions
 
-- Do not rescan transcripts or the whole repository for semantic drift; compare the bounded accepted result to current owners.
-- Do not rerun Ticket review when its exact boundary is current or spawn integration review without a named trigger.
-- Do not treat confirmation, command success, or the implementation diff as proof of a new Finish effect; reread authoritative bytes and refs.
+- Do not rescan transcripts or the whole repository for drift; compare the bounded result to current owners.
+- Do not treat confirmation, command success, or the diff as proof of a new effect; reread bytes.
+- "Confirmation is a formality" is rationalization; ask the exact confirmation question against the exact preview.
 
 ## Next action
 
