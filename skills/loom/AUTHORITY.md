@@ -23,20 +23,9 @@ Loom recognises one source of consent: **a message the operator sent to you, in 
 
 Confirmation is bounded to the exact targets, actions, scope, base, and effects you showed the operator. Nothing wider.
 
-**It is non-transitive.** Each of these is its own gate, and none of them implies any other:
+**It is non-transitive.** Each boundary is its own gate, and none implies any other. Getting Ticket consent does not grant commit authority; Finish does not grant Publish; Publish does not grant merge or cleanup. Outside Finish, consent for one repository, lane, local command, remote, hosted review, or cleanup action does not cover another.
 
-| Getting this… | …grants nothing about |
-|---|---|
-| continuation, recovery | any mutation |
-| Ticket consent, APPROVE | commit, push, review, merge, release |
-| prior Story confirmation | today's effect |
-| Finish | Publish, merge, release, or cleanup |
-| Publish | merge, release, cleanup |
-| human merge or release approval | cleanup, or the next repository |
-
-Outside Finish, consent for one repository, lane, local command, remote, hosted review, archive, or cleanup action does not cover another. Inside Finish, one exact current confirmation may cover the complete displayed multi-repository local inventory: one logical group by default, at most two for a genuine owner/lifecycle split or remaining recovery, and at most one predeclared commit per repository in a multi-repository group. That authority covers only those displayed local effects; it remains non-transitive to Publish, merge, release, history rewrite, or cleanup.
-
-**A load-bearing inventory change expires the prior confirmation** and requires a fresh exact preview. Load-bearing means any changed repository/lane identity, branch, base, HEAD, diff, index, file set, artifact semantics, Ticket/verdict boundary, check set, review trigger, local effect, group/split/order, commit message, Story lifecycle or recovery-pointer disposition, remote, review target, release target, worktree, cleanliness state, or activity state. Refreshed read-only observations with identical values and incidental presentation changes do not. Load-bearing changes expire consent.
+**A load-bearing inventory change expires the prior confirmation** and requires a fresh exact preview. Load-bearing means any changed repository/lane identity, branch, base, HEAD, diff, index, file set, artifact semantics, Ticket/verdict boundary, check set, review trigger, local effect, commit message, Story lifecycle, remote, release target, worktree, cleanliness state, or activity state. Refreshed read-only observations with identical values and incidental presentation changes do not expire consent.
 
 ## Revalidate immediately before the effect
 
@@ -44,22 +33,16 @@ Immediately before each confirmed effect, reread the live effect-specific eviden
 
 ## Execute or instruct, then prove
 
-Only after the applicable confirmation, for exact confirmed local Finish inventory, Loom may use ordinary host tools to stage and commit the displayed paths and perform the declared owner/lifecycle effects. Immediately revalidate before each effect, then reread authoritative state and **proves what succeeded** before recording lifecycle or continuing. Where Loom does not execute an operation—especially remote Publish, merge, release, and cleanup—it supplies exact manual host instructions only after that separate applicable confirmation; the operator acts, and Loom rereads authoritative state.
+Only after the applicable confirmation, for exact confirmed local Finish inventory, Loom may use ordinary host tools to stage and commit the displayed paths and perform the declared owner/lifecycle effects. Immediately revalidate before each effect, then reread authoritative state and **prove what succeeded** before recording lifecycle or continuing. Where Loom does not execute an operation—especially remote Publish, merge, release, and cleanup—it supplies exact manual host instructions only after that separate applicable confirmation; the operator acts, and Loom rereads authoritative state.
 
 Never claim an effect from an instruction, a command transcript, a chat report, a card status, or a callback alone. "It printed no error" is a claim about output; go read the ref.
 
-## The three boundaries
+## Boundary owners
 
-- **Finish** covers the complete exact confirmed local verification/integration inventory described in `FINISH.md`. Loom may execute ordinary local `git add` and `git commit` plus declared owner/lifecycle effects with immediate revalidation and readback; it does not merge, rebase, amend, rewrite history, or perform remote effects.
-- **Publish** separately covers the exact remote effects described in `PUBLISH.md`. Loom itself does not push, create hosted reviews, merge, or release. Human merge and release gates remain explicit.
-- **Cleanup** in Orca is a separate explicit operator action after Publish *and* proven merge. It is never implied by Finish, by Publish, by a closed review, or by Story completion.
+Load `FINISH.md` for local commit/integration boundaries and `PUBLISH.md` for remote push/review/release boundaries. Loom itself does not push, create hosted reviews, merge, or release. Cleanup in Orca is a separate explicit operator action after Publish *and* proven merge. It is never implied by Finish, by Publish, by a closed review, or by Story completion.
+
+Detailed boundary owners lazy-load from the selected skill: `STORY.md`, `FINISH.md`, `PUBLISH.md`, `OMP.md`, or `ORCA.md`. Core Loom has seven rituals — Setup, Grill, Plan, Implement, Verify, Finish, and Publish — and no Tend or unattended runtime ritual.
 
 ## Anti-rationalization
 
 Do not treat a digest, prior confirmation, APPROVE, review closure, Ticket prose, or tool output as current authority. Reread the exact boundary, preserve separate Finish/Publish/cleanup gates, and ask the operator for the missing gate.
-
-## Evidence records
-
-Detailed behavioral record examples are optional reference material. Load [`AUTHORITY-EXAMPLES.md`](AUTHORITY-EXAMPLES.md) only when a boundary needs to construct or inspect an `OutcomeReceipt` or `SemanticCheckpoint`; examples are not part of the always-loaded authority floor.
-
-Detailed boundary owners lazy-load from the selected skill: `STORY.md`, `FINISH.md`, `PUBLISH.md`, `OMP.md`, or `ORCA.md`. Core Loom has seven rituals — Setup, Grill, Plan, Implement, Verify, Finish, and Publish — and no Tend or unattended runtime ritual.
