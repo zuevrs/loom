@@ -20,18 +20,22 @@ printf '%s\n' 'Loom instruction-surface budget (bytes)' 'actual / budget path'
 # Budgets are measured current baselines with about 10% headroom, not permission to grow.
 check AGENTS.md 2100
 check commands/loom.md 600
-check skills/loom/SKILL.md 5800
-check skills/loom/CONSTITUTION.md 3500
-check skills/loom/AUTHORITY.md 7900
-check skills/loom/SESSION.md 2000
+check skills/loom/SKILL.md 5050
+check skills/loom/CONSTITUTION.md 3700
+check skills/loom/AUTHORITY.md 6300
+check skills/loom/SESSION.md 2100
+check skills/loom/STORY.md 14700
+check skills/loom/ORCA.md 20650
+check skills/loom/OMP.md 11250
 
-check skills/loom-grill/SKILL.md 12900
-check skills/loom-plan/SKILL.md 6200
-check skills/loom-plan/GRILL.md 20000
-check skills/loom-implement/SKILL.md 6405
-check skills/loom-verify/SKILL.md 7900
-check skills/loom-verify/TICKET-RECORD.md 4300
-check skills/loom/FINISH.md 8600
-check skills/loom/PUBLISH.md 7900
+check skills/loom-grill/SKILL.md 12550
+check skills/loom-grill/INTERVIEW.md 18350
+check skills/loom-plan/SKILL.md 6800
+check skills/loom-plan/GRILL.md 2100
+check skills/loom-implement/SKILL.md 7050
+check skills/loom-verify/SKILL.md 8050
+check skills/loom-verify/TICKET-RECORD.md 4450
+check skills/loom/FINISH.md 8150
+check skills/loom/PUBLISH.md 7400
 
 printf '%s\n' '{"status":"pass","message":"Instruction-surface budgets passed"}'
