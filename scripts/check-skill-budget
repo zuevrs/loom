@@ -25,7 +25,10 @@ check skills/loom/CONSTITUTION.md 3700
 check skills/loom/AUTHORITY.md 6300
 check skills/loom/SESSION.md 2100
 check skills/loom/STORY.md 14700
-check skills/loom/ORCA.md 20650
+check skills/loom/ORCA.md 6250
+check skills/loom/ORCA-DISPATCH.md 7800
+check skills/loom/ORCA-RESUME.md 5500
+check skills/loom/ORCA-CLEANUP.md 2850
 check skills/loom/OMP.md 11250
 
 check skills/loom-grill/SKILL.md 12550
