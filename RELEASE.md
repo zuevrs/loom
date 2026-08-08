@@ -49,18 +49,18 @@ Then scan public/carrier surfaces for stale ritual/runtime references, including
 
 ## 5. Run live carrier gates
 
-These gates require provisioned, supported OMP and Claude CLIs on the maintainer machine. They perform no provisioning or network setup themselves. Missing required CLIs, unavailable required seams, N/A, or FAIL fails closed; do not substitute the deterministic CI result.
+These maintainer-local gates require provisioned, supported OMP and Claude CLIs on the maintainer machine. They run from the `idea` maintainer-lab owner against an explicit Loom target; CI does not run them. They perform no provisioning or network setup themselves. Missing required CLIs, unavailable required seams, N/A, or FAIL fails closed; do not substitute the deterministic CI result.
 
-Run the callable release gate:
+Run the callable release gate (from the `idea` repository root, not the Loom root):
 
 ```bash
-scripts/check-carriers --all --scratch
+maintainer-lab/loom/check-carriers --target /path/to/loom --all --scratch
 ```
 
 For any carrier-affecting change, maintainers can run the mapped carrier-change gate with the changed repository paths:
 
 ```bash
-scripts/check-carriers --changed PATH...
+maintainer-lab/loom/check-carriers --target /path/to/loom --changed PATH...
 ```
 
 ## 6. Pack, unpack, and import the artifact

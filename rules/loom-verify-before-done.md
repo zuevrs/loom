@@ -18,4 +18,4 @@ A REJECT-only, stale, missing, or maker-authored digest does not allow `done`. K
 
 No Verify digest → no done.
 
-This rule is prose guidance. OMP has no Loom extension: no `before_agent_start` router injection, no `session_stop` diagnostic, no mutation guard, and no hidden continuation loop. OpenCode, Claude Code, Codex, and OMP receive prose-compatible guidance without runtime diagnostic parity.
+This rule is prose guidance. OMP has no `before_agent_start` router injection, no `session_stop` diagnostic, no mutation guard, and no hidden continuation loop. OpenCode, Claude Code, Codex, and OMP receive prose-compatible guidance without runtime diagnostic parity.

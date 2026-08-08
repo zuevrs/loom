@@ -32,7 +32,7 @@ Read `CONTEXT.md`, scoped ADRs, and host topology when load-bearing.
 5. Preview exact target paths, actions, complete bytes, repository owner/base, and write location.
 6. Ask for one explicit confirmation immediately before writes; it permits only that exact inventory. Any post-preview inventory drift requires re-preview.
 7. Before any write, validate the closed confirmed path set, target and parent filesystem types, complete bytes, and Story/PRD/Ticket/product/design cross-artifact identities. Failure stops with zero writes. After confirmation, write only listed artifacts, read them back, and run artifact validation. Preserve proven writes on partial failure and preview remaining work again; do not infer rollback. If a recovery-worthy decision, blocker, or handoff must survive context, Plan may create or update the pointer through the shared artifact helper; report pointer failure without changing planning truth.
-8. Stop with one lowest-numbered unblocked ready Ticket and the constitutional four-field receipt. Do not start Implement.
+8. Return one lowest-numbered unblocked ready Ticket, the four-field receipt, and `loom-implement` as the explicit next action.
 
 ## Local signal map
 

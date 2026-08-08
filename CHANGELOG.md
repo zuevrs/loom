@@ -14,6 +14,34 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Safety changes
 
+## [7.14.0] - 2026-08-08
+
+Core-lab separation: the published package stays identical, maintainer lab moves to `idea`.
+
+### Highlights
+
+- Removed all maintainer-lab sources (`tooling/`, `scripts/check-carriers`, and their tests) from the Loom repository; they now live under `idea/maintainer-lab/loom/` with an explicit `--target` interface.
+- Simplified `package.json` scripts: `npm test` runs only core tests; `npm run smoke` unchanged; removed `check-carriers` and `grill:pilot` aliases.
+- RELEASE.md live carrier gate instructions now point at the `idea` lab invocation path.
+
+### Breaking changes
+
+- None for users of the published package. The package contents are byte-identical to `7.13.0`.
+- Maintainers who previously ran `scripts/check-carriers` from the Loom root must now invoke `maintainer-lab/loom/check-carriers --target /path/to/loom` from the `idea` repository root.
+
+### Migration steps
+
+- No user action required. Update through the same carrier used to install.
+- Maintainers: run carrier gates from `idea`, not from the Loom root.
+
+### Adapter impacts
+
+- None. All carriers receive the same package contents.
+
+### Safety changes
+
+- None. Authority model, hooks, and runtime seams are unchanged.
+
 ## [7.13.0] - 2026-08-06
 
 Adaptive Grill ownership, model-free behavioral evaluation scaffolding, and fail-closed carrier release gates.
@@ -1691,7 +1719,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.13.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.14.0...HEAD
+[7.14.0]: https://github.com/zuevrs/loom/compare/v7.13.0...v7.14.0
 [7.13.0]: https://github.com/zuevrs/loom/compare/v7.12.0...v7.13.0
 [7.12.0]: https://github.com/zuevrs/loom/compare/v7.11.0...v7.12.0
 [7.11.0]: https://github.com/zuevrs/loom/compare/v7.10.0...v7.11.0
