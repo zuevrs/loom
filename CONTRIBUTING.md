@@ -59,6 +59,12 @@ npm pack --dry-run
 
 Tests and canaries may lag while the v7 integration owner is landing runtime seams. Do not weaken or rewrite them merely to make an incomplete integration green; report the precise mismatch.
 
+## Maintainer evidence tooling
+
+The Grill quality pilot is maintainer evidence only. Its default budget is exactly six cases, two runs per arm, one independent judge, 120 seconds, and $0. It never executes a model or external process by default: `npm run grill:pilot -- --dry-run` only validates and prints the deterministic blinded plan, while `npm run grill:pilot` returns `BLOCKED` with exit 2. Any host-integrated live execution must obtain a fresh, single-use approval at the execution boundary for the exact scope and budget; caller-supplied or packet-embedded consent is not accepted. The judge is a separate pure boundary that receives only opaque A/B outputs, prompt hash, case ID, rubric version, and the explicit quality rubric; it receives no arm or implementer identity.
+
+Maintainer behavioral evaluations also require OMP 17.2.7. Ticket 03 comparison validation accepts a maintained `--comparison-packet` containing the complete pinned baseline/candidate/evidence/carrier inputs and a strict receipt from one already-run host-native bounded worker; the comparator never executes workers, calls models, uses the network, or writes the packet. The evaluator resolves `omp` once from the invoking CLI `PATH` using `/usr/bin/which`, then validates that the result is an absolute executable before starting isolated children. Set `OMP_EXECUTABLE` only to an absolute executable path to override that lookup (for example, `/Users/name/.bun/bin/omp`); it must be executable, and its directory is the only non-system directory added to child `PATH`. On a maintainer machine provisioned with the supported host CLIs, carrier changes use `scripts/check-carriers --changed PATH...`; releases use the fail-closed `scripts/check-carriers --all --scratch` gate.
+
 ## Authoring rituals and carriers
 
 Read [`docs/authoring.md`](docs/authoring.md). Every ritual keeps the required Goal, Inputs, Outputs, Process, Hard stops, Failure modes, and Done when sections. Positive prompting is the default; hard stops and anti-rationalization pairs remain explicit. Keep checker semantics aligned between canonical OMP and host checker dialects.

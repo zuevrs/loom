@@ -10,9 +10,8 @@ For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.m
 1. Understand the real work before changing it.
 2. Ask the user when a choice changes the result; decide harmless details yourself.
 3. Choose the smallest route that fits the work.
-4. Leave a checkable result and independent feedback when work changes behavior.
-5. Do not claim completion without evidence.
-6. Do not perform external or irreversible actions without fresh explicit confirmation.
+4. Leave a checkable result and independent feedback when work changes behavior; never claim completion without them.
+5. Do not perform external or irreversible actions without fresh explicit confirmation.
 
 Keep one Ticket active at a time and respect blockers. The quality loop is Grill → Plan → Implement → Verify → Ship; small concrete work may compress Grill/Plan into compact analysis and skip planning artifacts, but never skips understanding, independent feedback, or the durable capture decision. Material work earns Story and Tickets; PRD is earned only when load-bearing. An explicit `/loom` run may lazily create a short `.loom/session/<session-id>.md` recovery pointer only for compaction, blocker, handoff, resume, or pending Finish delta; it never becomes authority or gets promoted. Implement never self-approves. Run fail-capable checks and obtain current independent feedback before `done`.
 

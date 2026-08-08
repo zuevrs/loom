@@ -25,9 +25,8 @@ The question at every entry is simple: **what is the next honest step?** Loom ma
 1. Understand the real work before changing it.
 2. Ask the user when a choice changes the result; decide harmless details yourself.
 3. Choose the smallest route that fits the work.
-4. Leave a checkable result and independent feedback when the work changes behavior.
-5. Do not claim completion without evidence.
-6. Do not perform external or irreversible actions without fresh explicit confirmation.
+4. Leave a checkable result and independent feedback when work changes behavior; never claim completion without them.
+5. Do not perform external or irreversible actions without fresh explicit confirmation.
 
 Loom is markdown-native guidance plus focused host adapters. It is not a workflow engine, scheduler, unattended runner, auto-merge bot, hosted service, or issue-tracker replacement. Deeper terms live in [`docs/glossary.md`](docs/glossary.md).
 
@@ -52,9 +51,7 @@ Update through the same plugin carrier used to install, restart the host, and re
 
 Git and Node.js 20+ are needed for local development. Public carriers require their own current plugin CLI. Use the troubleshooting list above, preserve exact Doctor output, and restart before concluding an updated adapter is broken.
 
-The Grill quality pilot is maintainer evidence only. Its default budget is exactly six cases, two runs per arm, one independent judge, 120 seconds, and $0. It never executes a model or external process by default: `npm run grill:pilot -- --dry-run` only validates and prints the deterministic blinded plan, while `npm run grill:pilot` returns `BLOCKED` with exit 2. Any host-integrated live execution must obtain a fresh, single-use approval at the execution boundary for the exact scope and budget; caller-supplied or packet-embedded consent is not accepted. The judge is a separate pure boundary that receives only opaque A/B outputs, prompt hash, case ID, rubric version, and the explicit quality rubric; it receives no arm or implementer identity.
-
-Maintainer behavioral evaluations also require OMP 17.2.7. Ticket 03 comparison validation accepts a maintained `--comparison-packet` containing the complete pinned baseline/candidate/evidence/carrier inputs and a strict receipt from one already-run host-native bounded worker; the comparator never executes workers, calls models, uses the network, or writes the packet. The evaluator resolves `omp` once from the invoking CLI `PATH` using `/usr/bin/which`, then validates that the result is an absolute executable before starting isolated children. Set `OMP_EXECUTABLE` only to an absolute executable path to override that lookup (for example, `/Users/name/.bun/bin/omp`); it must be executable, and its directory is the only non-system directory added to child `PATH`. On a maintainer machine provisioned with the supported host CLIs, carrier changes use `scripts/check-carriers --changed PATH...`; releases use the fail-closed `scripts/check-carriers --all --scratch` gate.
+Maintainer-only evidence tooling (Grill quality pilot, behavioral evaluations, carrier checks) is documented in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Host behavior and safety
 
