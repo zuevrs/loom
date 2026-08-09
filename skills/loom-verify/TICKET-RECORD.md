@@ -23,6 +23,8 @@ The canonical Ticket record remains APPROVE/REJECT only. The overall result is b
 
 ## Boundary and identity
 
+Compute digests through the packaged helpers rather than by hand: `hooks/boundary.cjs` derives the Ticket, repository diff, and Boundary digests, and `hooks/verify-gate.cjs` renders, parses, and staleness-checks this exact block; invoke them with the host's Node. Manual digest construction is a fallback only where Node is unavailable, named in the receipt.
+
 The Ticket digest excludes only lifecycle frontmatter `status` and the complete current `## Verify` section. It includes every other Ticket semantic byte. The Boundary combines that digest with ordered repository identity, HEAD, and actual staged, unstaged, deleted, and untracked diff digests. At least one repository diff must be non-empty.
 
 Maker and required checker identities are distinct; runtime also requires distinct Spec and Standards identities. Human identity, when present, is distinct from all three. Optional specialist evidence is attributed through the applicable axis and never changes the schema.

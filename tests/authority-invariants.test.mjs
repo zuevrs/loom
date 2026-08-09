@@ -56,7 +56,7 @@ test("Implement and Plan retain reference-first executable contracts",()=>{
 
 test("Implement execution discipline canaries preserve decision order",()=>{
   const implement=read("skills/loom-implement/SKILL.md");
-  for(const phrase of ["applicable current `CONTEXT.md` and scoped ADR standards", "absence costs nothing", "Before the first edit, run or record", "pre-existing red result", "`loom:` and `ponytail:` ceilings", "load-bearing assumptions", "owner choice", "verification ladder", "Before handoff, read the changed paths and full diff", "current attended user message selecting this exact Ticket", "not Ticket writes", "self-review is evidence, never approval"])assert.match(implement,new RegExp(phrase,"i"),phrase);
+  for(const phrase of ["applicable current `CONTEXT.md` and scoped ADR standards", "absence costs nothing", "Before the first edit, run or record", "pre-existing red result", "`loom:` ceilings", "load-bearing assumptions", "owner choice", "verification ladder", "Before handoff, read the changed paths and full diff", "current attended user message selecting this exact Ticket", "not Ticket writes", "self-review is evidence, never approval"])assert.match(implement,new RegExp(phrase,"i"),phrase);
   assert.ok(implement.indexOf("applicable current `CONTEXT.md` and scoped ADR standards")<implement.indexOf("Make the minimum scoped change"));
   assert.match(implement,/contradiction between applicable standards and the selected owner\/scope/i);
   assert.match(implement,/CONTEXT-FORMAT\.md[\s\S]*ADR-FORMAT\.md[\s\S]*current `CONTEXT\.md`\/scoped ADR owners/i);
@@ -64,7 +64,7 @@ test("Implement execution discipline canaries preserve decision order",()=>{
 });
 
 function implementDisciplineModel(markdown){
-  const marker="loom: {shortcut} — ceiling: {what breaks it}; upgrade: {the move}",required=["Before the first edit, run or record","pre-existing red result","`loom:` and `ponytail:` ceilings","intentionally accepted scoped shortcut",marker,"current Ticket/user must own acceptance if it affects contract","load-bearing assumptions","owner choice","verification ladder","Before handoff, read the changed paths and full diff","self-review is evidence, never approval"];
+  const marker="loom: {shortcut} — ceiling: {what breaks it}; upgrade: {the move}",required=["Before the first edit, run or record","pre-existing red result","`loom:` ceilings","intentionally accepted scoped shortcut",marker,"current Ticket/user must own acceptance if it affects contract","load-bearing assumptions","owner choice","verification ladder","Before handoff, read the changed paths and full diff","self-review is evidence, never approval"];
   for(const phrase of required)assert.ok(markdown.includes(phrase),"missing Implement discipline: "+phrase);
   return {marker,positions:required.map(phrase=>markdown.indexOf(phrase))};
 }
@@ -137,18 +137,23 @@ test("Publish preserves an operator-owned exact remote-effect gate",()=>{
 });
 
 function dispatcherModel(markdown){
+  const STOP_SIGNALS={"missing-authority":/authority is missing/i,"stale-authority":/\bstale\b/i,"contradictory-authority":/contradictory/i,"excessive-authority":/excessive/i,"unattributed-authority":/unattributed/i,"authority-narrower-than-intent":/narrower than the intent/i,"version-incompatible":/version is incompatible/i,"unavailable-evidence":/evidence is unavailable/i,"conflict":/\bconflict\b/i,"blocker":/\bblocker\b/i,"reconciliation":/reconciliation/i,"ambiguous-intent":/ambiguous/i};
   const blocks=[...markdown.matchAll(/<!-- loom:dispatcher-decisions -->\n([\s\S]*?)\n<!-- loom:dispatcher-decisions:end -->/g)];
   assert.equal(blocks.length,1,"unique dispatcher decision table");
   const rows=blocks[0][1].split("\n").filter(line=>/^\| \d+ /.test(line)).map(line=>{
     const [precedence,condition,observable,action]=line.split("|").slice(1,-1).map(cell=>cell.trim());
-    const parsed=condition.match(/^`(STOP|ROUTE|NONE)\(([a-z0-9,-]+)\)`$/);
+    if(condition==="`STOP`"){
+      for(const [signal,pattern] of Object.entries(STOP_SIGNALS))assert.match(observable,pattern,`STOP names ${signal}`);
+      return {precedence:Number(precedence),condition,observable,action,kind:"STOP",signals:Object.keys(STOP_SIGNALS)};
+    }
+    const parsed=condition.match(/^`(ROUTE|NONE)\(([a-z0-9,-]+)\)`$/);
     assert.ok(parsed,`closed condition syntax: ${condition}`);
     return {precedence:Number(precedence),condition,observable,action,kind:parsed[1],signals:parsed[2].split(",")};
   });
+  assert.equal(rows[0]?.kind,"STOP","STOP evaluates first");
   assert.deepEqual(rows.map(row=>row.precedence),[10,20,30,40,50,60,70,80,90]);
   assert.deepEqual(rows.map(row=>row.action),["STOP","Setup","Grill","Plan","Implement","Verify","Finish","Publish","NONE"]);
   assert.equal(new Set(rows.flatMap(row=>row.signals)).size,rows.flatMap(row=>row.signals).length);
-  assert.deepEqual(rows[0].signals,["missing-authority","stale-authority","contradictory-authority","excessive-authority","unattributed-authority","authority-narrower-than-intent","version-incompatible","unavailable-evidence","conflict","blocker","reconciliation","ambiguous-intent"]);
   assert.deepEqual(rows.slice(1,-1).map(row=>row.signals[0]),["setup","grill","plan","implement","verify","finish","publish"]);
   return evidence=>{
     const matches=rows.filter(row=>row.kind==="STOP"?row.signals.some(signal=>evidence.has(signal)):row.kind==="ROUTE"?row.signals.every(signal=>evidence.has(signal)):evidence.has(row.signals[0]));
@@ -170,11 +175,11 @@ test("dispatcher table yields exactly one precedence-backed result",()=>{
 
 test("dispatcher canaries reject reordered, changed, removed, and duplicated decisions",()=>{
   const mutations=[
-    text=>text.replace("| 10 | `STOP(", "| 25 | `STOP("),
+    text=>text.replace("| 10 | `STOP`", "| 25 | `STOP`"),
     text=>text.replace("| STOP |", "| Implement |"),
     text=>text.replace(/^\| 10 \|.*\n/m,""),
     text=>text.replace("<!-- loom:dispatcher-decisions:end -->","| 95 | none-copy | duplicate none | NONE |\n<!-- loom:dispatcher-decisions:end -->"),
-    text=>text.replace(",ambiguous-intent)`", ")`"),
+    text=>text.replace("or intent stays ambiguous after its one question — closed ambiguity never routes to Grill or Plan",""),
   ];
   for(const mutate of mutations)assert.throws(()=>dispatcherModel(mutate(dispatcher)));
 });
@@ -219,8 +224,8 @@ test("Verify orchestration contract rejects old contradictions",()=>{
   for(const phrase of ["before expensive checker", "shared evidence packet", "named checker", "sequential", "one retry", "no runnable checks — {why}", "overlapping blockers"]) assert.match(verify,new RegExp(phrase,"i"));
   assert.match(briefing,/checker report uses `APPROVE\|REJECT\|BLOCKED`/i);
   assert.match(omp,/WORKER-BRIEFING\.md/,"OMP loads the host-neutral worker contract");
-  assert.match(omp,/No independent context exists after one bounded fallback attempt.*`BLOCKED`/i);
-  assert.match(omp,/second failure returns `BLOCKED` with evidence, never REJECT/i);
+  assert.match(briefing,/no independent context exists after one bounded fallback attempt, return `BLOCKED`/i);
+  assert.match(briefing,/second failure returns `BLOCKED` with evidence, never REJECT/i);
   assert.doesNotMatch(omp,/ESCALATE_HUMAN/);
   const record=read("skills/loom-verify/TICKET-RECORD.md");
   assert.match(record,/machine block starts with `Maker:`/i);

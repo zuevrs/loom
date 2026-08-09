@@ -14,13 +14,19 @@ const localMarkdownLinks=text=>markdownLinks(text).filter(destination=>{
   return !/^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(path) && path.toLowerCase().endsWith(".md");
 });
 
-function handoffFields(text){return (text.match(/It must contain exactly:\n\n((?:- .+\n?)+)/)?.[1]??"").split("\n").filter(line=>line.startsWith("- ")).map(line=>normalize(line.slice(2)));}
+function handoffFields(interviewText){
+  const block=interviewText.match(/## Handoff to Plan[\s\S]*?```markdown\n([\s\S]*?)```/)?.[1]??"";
+  return block.split("\n").filter(line=>/^[A-Za-z][^:]*:/.test(line)).map(line=>normalize(line.split(":",1)[0]));
+}
 function ownershipModel(planText=read("skills/loom-plan/GRILL.md"),interviewText=read("skills/loom-grill/INTERVIEW.md"),grillText=read("skills/loom-grill/SKILL.md")){
   const plan=sections(planText),interview=sections(interviewText),handoff=plan["consumed handoff"]??"";
   assert.match(grillText,/INTERVIEW\.md[\s\S]*sole canonical owner/i);
   for(const section of ["check for precedent first","explore before asking","interview rules","model the domain as you grill","the cadence worked","readback correction checkpoint","exit criteria"])assert.ok(interview[section],`Grill owns ${section}`);
   for(const forbidden of ["check for precedent first","explore before asking","interview rules","model the domain as you grill","the cadence worked","readback correction checkpoint","exit criteria"])assert.equal(plan[forbidden],undefined,`Plan duplicates ${forbidden}`);
-  assert.deepEqual(handoffFields(planText),fields.map(normalize),"handoff has exactly the required fields");
+  assert.deepEqual(handoffFields(interviewText),fields.map(normalize),"handoff has exactly the required fields");
+  assert.match(planText,/INTERVIEW\.md[^)]*\)[^\n]*Handoff to Plan/,"Plan references the canonical handoff owner");
+  assert.match(handoff,/never re enumerates them/,"Plan does not re-enumerate the handoff fields");
+  for(const field of fields)assert.doesNotMatch(planText,new RegExp("^- "+field+"$","m"),`Plan re-enumerates ${field}`);
   assert.match(handoff,/conversation context evidence only.*no durable artifact by default/);
   assert.match(handoff,/ask only newly created materialization choices/);
   assert.doesNotMatch(handoff,/ask one recommended question/);
@@ -32,7 +38,9 @@ test("ownership probe rejects duplicated interview canon",()=>assert.throws(()=>
 test("ownership probe rejects Plan reinterview path",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("Ask only newly-created materialization choices","Ask one recommended question at a time")),/ask only newly created materialization choices/));
 test("ownership probe rejects default durable capture",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("creates no durable artifact by default","creates a durable artifact by default")),/durable artifact/));
 test("ownership probe rejects Grill-held Plan authority",()=>{const mutated=normalize(read("skills/loom-grill/INTERVIEW.md").replace("Grill never writes Story, PRD, or Ticket artifacts.","Grill may write Story, PRD, or Ticket artifacts."));assert.match(mutated,/grill may write story prd/);assert.doesNotMatch(mutated,/grill never writes story prd/);});
-for(const field of fields)test(`ownership probe rejects missing ${field} handoff field`,()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace(`- ${field}`,"")),/exactly the required fields/));
+test("ownership probe rejects a re-enumerated handoff copy in Plan",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("## Plan exit","- Objective\n\n## Plan exit")),/re-enumerates Objective/));
+test("ownership probe rejects a dropped canonical-owner reference",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("[`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md) § Handoff to Plan","the interview canon")),/references the canonical handoff owner/));
+for(const field of fields)test(`ownership probe rejects missing ${field} handoff field`,()=>{const mutated=read("skills/loom-grill/INTERVIEW.md").replace(new RegExp("^"+field+": .*\\n","m"),"");assert.notEqual(mutated,read("skills/loom-grill/INTERVIEW.md"),`mutation removed ${field}`);assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md"),mutated),/exactly the required fields/);});
 
 
 test("every local Markdown link in the Grill interview canon resolves",()=>{

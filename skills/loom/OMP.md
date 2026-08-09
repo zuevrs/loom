@@ -29,18 +29,9 @@ That prohibition is a list, not a category. Loom proposes exactly one OMP preset
 Bounded retry and the no-third-identical-attempt rule apply to native automation and worker attempts. Any host-driven repeated attempt must have a finite host-native budget and remain report-only with respect to commit, push, hosted review, merge, release, and cleanup. Silent death is forbidden: timeout, blocker, or failure still produces a structured report with checks, diff summary, Verify state, open questions, and preserved work. The same unchanged error twice stops with the exact error and blocker; never make a third identical attempt. A discovery pass with zero findings writes nothing and reports `no findings`. If an objective red-capable verification gate or required tools/data are unavailable, route to attended work instead of pretending the loop is safe.
 
 
-## Capability and failure matrix
+## Capability and failure
 
-| Condition | Required response |
-|---|---|
-| Named maker/checker resolves | Use it with the explicit bounded role; never infer extra capabilities from its name |
-| Named worker is not found | Record one real failed discovery attempt, then use a generic independent worker/reviewer with the role prose inlined |
-| Parallel checkers unavailable | Run Spec then Standards in independent sequential contexts and record the limitation |
-| No independent context exists after one bounded fallback attempt | `BLOCKED`; maker never simulates its own checker |
-| Context was compacted or replaced | Reconstruct from artifacts and live repository evidence before continuing |
-| Worker yields empty/malformed output | Retry once only when transient; second failure returns `BLOCKED` with evidence, never REJECT |
-| Worker report conflicts with repository/artifacts | Stop and report exact source, field, expected and observed values; never repair by inference |
-| Required evidence, command, tool, or data unavailable after one bounded retry | Return `BLOCKED`; do not claim verification or REJECT |
+Worker discovery, briefing, reports, bounded retry of empty or malformed output, `BLOCKED` transport, and report-versus-repository conflicts follow [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md); Verify owns its own one-retry rule. Compaction or worker replacement recovers through the context lifecycle order above — native context signals never prove durable state.
 
 ## Hard stops
 

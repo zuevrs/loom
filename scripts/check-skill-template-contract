@@ -129,9 +129,14 @@ validate_dispatcher_contract() {
     return
   fi
   actual="$(awk -F'|' '/^\| [0-9]+ /{for(i=2;i<=5;i++){gsub(/^[[:space:]]+|[[:space:]]+$/,"",$i)}; print $2 "|" $3 "|" $5}' <<<"$table")"
-  expected=$'10|`STOP(missing-authority,stale-authority,contradictory-authority,excessive-authority,unattributed-authority,authority-narrower-than-intent,version-incompatible,unavailable-evidence,conflict,blocker,reconciliation,ambiguous-intent)`|STOP\n20|`ROUTE(setup)`|Setup\n30|`ROUTE(grill)`|Grill\n40|`ROUTE(plan)`|Plan\n50|`ROUTE(implement)`|Implement\n60|`ROUTE(verify)`|Verify\n70|`ROUTE(finish)`|Finish\n80|`ROUTE(publish)`|Publish\n90|`NONE(no-work)`|NONE'
+  expected=$'10|`STOP`|STOP\n20|`ROUTE(setup)`|Setup\n30|`ROUTE(grill)`|Grill\n40|`ROUTE(plan)`|Plan\n50|`ROUTE(implement)`|Implement\n60|`ROUTE(verify)`|Verify\n70|`ROUTE(finish)`|Finish\n80|`ROUTE(publish)`|Publish\n90|`NONE(no-work)`|NONE'
   if [ "$actual" != "$expected" ]; then
     errors+=("$name: dispatcher decision table must contain the unique closed ordered actions with STOP first and NONE last")
+  fi
+  stop_observable="$(awk -F'|' '/^\| 10 /{gsub(/^[[:space:]]+|[[:space:]]+$/,"",$4); print $4}' <<<"$table")"
+  expected_stop="authority is missing, stale, contradictory, excessive, unattributed, or narrower than the intent; the version is incompatible; evidence is unavailable; a conflict, blocker, or reconciliation is pending; or intent stays ambiguous after its one question — closed ambiguity never routes to Grill or Plan"
+  if [ "$stop_observable" != "$expected_stop" ]; then
+    errors+=("$name: dispatcher STOP row must name the closed stop-signal set verbatim")
   fi
   rows="$(grep -Ec '^\| [0-9]+ ' <<<"$table" || true)"
   if [ "$rows" -ne 9 ]; then errors+=("$name: dispatcher decision table must contain exactly nine decisions"); fi

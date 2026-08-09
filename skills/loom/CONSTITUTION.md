@@ -29,9 +29,9 @@ Verify is independent from the maker. Depth follows boundary and consequences, n
 |---|---|---|
 | **Quick check** | docs, comments, copy, or newly added tests only; changing or deleting an existing test is Behavior; no behavior-contract change | Standards; Ticket Spec is `NOT REQUIRED | Quick check | Quick check` |
 | **Behavior check** | internal behavior; no public contract or dependency change | Spec + Standards on the behavioral seam |
-| **Full review** | public/external/inter-service contract, auth, persistence/data path, migration, or dependency | Spec + Standards on the touched surface |
+| **Full review** | public/external/inter-service contract, auth or security boundary, persistence/data path or data-loss risk, migration, or dependency | Spec + Standards on the touched surface |
 
-Classification is mechanical, not a judgment: any listed trigger fires its row however small the diff looks. The maker derives it and the independent checker re-derives it from the same triggers; disagreement takes the higher level and a maker never lowers its own row. Host role mappings grant no artifact authority. Auth, persistence/data, migration, public/external/inter-service contract, or dependency signals require Plan. State `Verification: <name> — <checks and independent feedback>`.
+Classification is mechanical, not a judgment: any listed trigger fires its row however small the diff looks. The maker derives it and the independent checker re-derives it from the same triggers; disagreement takes the higher level and a maker never lowers its own row. The Grill/Plan interview selects its depth from this same table plus exactly two interview-only escalation signals owned by the interview canon; no second trigger list exists. Host role mappings grant no artifact authority. Auth/security, persistence/data/data-loss, migration, public/external/inter-service contract, or dependency signals require Plan. State `Verification: <name> — <checks and independent feedback>`.
 
 ## Execution boundary
 

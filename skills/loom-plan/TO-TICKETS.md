@@ -93,10 +93,8 @@ Recommend host-native skills when scope touches security, performance, or CI; do
 
 | Excuse | Reality |
 |---|---|
-| "Slices are obvious, skip the quiz" | Granularity, blockers, and repository scope must settle before the one bundle preview. |
-| "Write Tickets first, quiz after" | No planning write before the quiz, exact whole-bundle preview, and confirmation. |
-| "One big Ticket is simpler" | Use thin end-to-end tracer bullets unless one Ticket is genuinely the whole small plan. |
-| "Database Ticket now, UI Ticket later" | Horizontal layers postpone integration risk; each real Ticket crosses the needed path. |
+| "Slices are obvious — write Tickets now, quiz after" | Granularity, blockers, and repository scope settle in the quiz before the one exact whole-bundle preview and confirmation; no planning write before that. |
+| "One big Ticket is simpler" / "Database Ticket now, UI later" | Use thin end-to-end tracer bullets: horizontal layers postpone integration risk, and one Ticket is right only when it genuinely is the whole small plan. |
 | "Rewrite all Tickets so formatting matches" | Amendment isolation is load-bearing; unaffected Tickets stay byte-for-byte unchanged. |
 | "Add likely files to help Implement" | Paths go stale; behavior, evidence, and scope are the durable contract. |
 | "Create Orca worktrees now" | Plan is read-only toward Orca execution state. |

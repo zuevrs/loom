@@ -29,12 +29,13 @@ check skills/loom/ORCA.md 6250
 check skills/loom/ORCA-DISPATCH.md 7950
 check skills/loom/ORCA-RESUME.md 5500
 check skills/loom/ORCA-CLEANUP.md 2850
-check skills/loom/WORKER-BRIEFING.md 4850
-check skills/loom/OMP.md 7350
+check skills/loom/WORKER-BRIEFING.md 5500
+check skills/loom/OMP.md 6500
 
 check skills/loom-grill/SKILL.md 12550
 check skills/loom-grill/INTERVIEW.md 14700
 check skills/loom-grill/RESEARCH.md 4250
+check skills/loom-grill/DECISION-FRONTIER.md 3250
 check skills/loom-plan/SKILL.md 6800
 check skills/loom-plan/GRILL.md 2100
 check skills/loom-implement/SKILL.md 7050

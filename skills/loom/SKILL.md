@@ -28,7 +28,7 @@ Evaluate evidence/authority against table below from lowest precedence upward. F
 <!-- loom:dispatcher-decisions -->
 | Precedence | Condition | Observable condition | Action |
 |---:|---|---|---|
-| 10 | `STOP(missing-authority,stale-authority,contradictory-authority,excessive-authority,unattributed-authority,authority-narrower-than-intent,version-incompatible,unavailable-evidence,conflict,blocker,reconciliation,ambiguous-intent)` | any listed STOP signal is observed; ambiguous intent is closed and cannot route to Grill or Plan | STOP |
+| 10 | `STOP` | authority is missing, stale, contradictory, excessive, unattributed, or narrower than the intent; the version is incompatible; evidence is unavailable; a conflict, blocker, or reconciliation is pending; or intent stays ambiguous after its one question — closed ambiguity never routes to Grill or Plan | STOP |
 | 20 | `ROUTE(setup)` | explicit setup intent and persistence is required | Setup |
 | 30 | `ROUTE(grill)` | discussion, investigation, or a decision is wanted; no Story/PRD/Ticket artifact is required and any other write happens only on explicit request | Grill |
 | 40 | `ROUTE(plan)` | a clear request requires Story, Ticket, PRD, or owner artifacts to be created or amended | Plan |

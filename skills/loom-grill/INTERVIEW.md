@@ -24,19 +24,19 @@ When correctness depends on a current version, API, CLI or host behavior, compat
 
 ## Interview rules
 
-Select the smallest depth from observed signals before asking questions:
+Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals of its own and nothing else.
 
-- **Quick**: narrow, reversible, local work with a clear proof seam.
-- **Behavior**: an observable behavior change or meaningful assumptions/edge risk without a material cross-boundary decision.
-- **Material**: the closed signal set `irreversible`, `public`, `security`, `data-loss`, `persistence`, `data-path`, `migration`, `inter-service`, or `large-user-owned-trade-off`. Any one of these signals requires Material; no other signal escalates to Material. Material is mandatory for domain modeling. **Quick** is allowed only when no Material signal is present and the work is narrow, reversible, local, and has a clear proof seam. **Behavior** is allowed only when no Material signal is present and the work changes observable behavior or carries meaningful assumptions/edge risk without a material cross-boundary decision; Behavior also requires its own premise and explicit non-goal criteria.
+- **Quick check**: allowed only when no Full review trigger and no interview-only signal is present and the work is narrow, reversible, local, with a clear proof seam.
+- **Behavior check**: allowed only when no Full review trigger and no interview-only signal is present and the work changes observable behavior or carries meaningful assumptions/edge risk. Behavior check also requires its own premise and explicit non-goal criteria.
+- **Material**: any Full review trigger, or either interview-only signal `irreversible` or `large-user-owned-trade-off`, selects Material. Material is mandatory for domain modeling. Disagreement takes the higher depth; the interview never lowers what the trigger list fires.
 
-For Behavior and Material, establish a premise before user questions: an observed failure or unmet outcome, a named cost owner, and why the current path—or one cheapest credible alternative—does not cover it. Investigate missing facts locally; ask only the user-owned premise decision. Show a premise verdict only when it rejects, reframes, or reduces scope; a routine pass stays invisible.
+For Behavior check and Material, establish a premise before user questions: an observed failure or unmet outcome, a named cost owner, and why the current path—or one cheapest credible alternative—does not cover it. Investigate missing facts locally; ask only the user-owned premise decision. Show a premise verdict only when it rejects, reframes, or reduces scope; a routine pass stays invisible.
 
 Admit a question only when its answer can change the objective, boundary or non-goal, a user-owned trade-off, proof, or a prerequisite. Resolve prerequisite dependencies in order and show one visible question. Preserve the existing decision frontier when complexity creates coupled decisions or bounded fact lookups.
 
 Check one cheapest credible alternative. Compare more than one only when a real user-owned trade-off needs it. Recommendations state their evidence and consequences; the user owns the trade-off.
 
-Read back the proportional minimum: Quick states objective, boundary, and proof; Behavior adds an explicit non-goal; Material uses the full correction block with objective, in-scope, out-of-scope, decisions, assumptions, and open user-owned items. Do not force a full readback or a trade-off onto Quick.
+Read back the proportional minimum: Quick check states objective, boundary, and proof; Behavior check adds an explicit non-goal; Material uses the full correction block with objective, in-scope, out-of-scope, decisions, assumptions, and open user-owned items. Do not force a full readback or a trade-off onto Quick check.
 
 Stop when no admissible user-owned questions remain. Ask an extra edge only for an observed risk or an explicit request; do not manufacture branches to rationalize continued grilling.
 
@@ -46,7 +46,7 @@ When terminology, entity, relationship, or code-vocabulary signals appear, apply
 
 ## The cadence, worked
 
-Quick gets one compact alignment check and no unnecessary premise interrogation. Behavior gets the premise gate, then only questions that change the result, boundary, non-goal, proof, or prerequisite, including one wrong-object edge when observed risk warrants it. Material gets the premise gate, signal-based domain modeling, sequential prerequisite questions, and the full correction readback.
+Quick check gets one compact alignment check and no unnecessary premise interrogation. Behavior check gets the premise gate, then only questions that change the result, boundary, non-goal, proof, or prerequisite, including one wrong-object edge when observed risk warrants it. Material gets the premise gate, signal-based domain modeling, sequential prerequisite questions, and the full correction readback.
 
 ## Readback correction checkpoint
 
@@ -60,10 +60,6 @@ The selected depth determines the readback floor above. A readback is a correcti
 > **Open, you own it:** what the 50k-row failure says to the user.
 
 Keep the block proportional; do not add ceremonial verdicts or questions after the stop test passes.
-
-## Verification depth
-
-Use the canonical Quick check, Behavior check, and Full review selection in [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md). Grill identifies changed boundaries and consequences; it does not redefine the tiers.
 
 ## When the grill stops short of an artifact
 
@@ -91,17 +87,19 @@ Decisions: <resolved user-owned trade-offs>
 Assumptions: <confirmed or correction-pending predictions>
 Proof seam: <deterministic verification boundary>
 Unresolved prerequisite: <none, or the blocking fact/decision>
-Selected depth: <Quick | Behavior | Material>
+Selected depth: <Quick check | Behavior check | Material>
 ```
 
 Plan may ask only newly-created materialization choices, such as artifact inventory or placement; it must not reinterview resolved concerns. An unresolved prerequisite stays visible and blocks dependent materialization.
+
+When Plan is deferred past this session, the handoff may survive through the SESSION recovery pointer ([`../loom/SESSION.md`](../loom/SESSION.md)) under its own contract and explicit confirmation: the resolved essence goes in `Decision:` and `/loom plan` in `Next:`. The pointer stays a locating hint, never authority — the consuming Plan re-reads current artifacts and asks again whatever the pointer could not carry.
 
 ## Exit criteria
 
 Exit when the selected depth's readback floor is met and no admissible user-owned question remains. The floors are deliberately different:
 
-- **Quick:** read back the objective, boundary, and proof. A Quick interview may end without a non-goal, trade-off, or full Material correction block.
-- **Behavior:** read back the objective, boundary, explicit non-goal, and proof.
+- **Quick check:** read back the objective, boundary, and proof. A Quick check interview may end without a non-goal, trade-off, or full Material correction block.
+- **Behavior check:** read back the objective, boundary, explicit non-goal, and proof.
 - **Material:** complete the full correction block above: objective, in-scope, out-of-scope, decisions, assumptions, and open user-owned items. Material must also have resolved its premise, domain requirements, and any user-owned trade-offs.
 
 Integrate corrections before applying the stop test. An uncorrected assumption retains the existing confirmed semantics only when the user has had the proportional readback. No `Open` item owned by the user may remain unresolved at the selected floor. The handoff grants no artifact authority.
@@ -127,16 +125,9 @@ Integrate corrections before applying the stop test. An uncorrected assumption r
 | Excuse | Reality |
 |---|---|
 | "Skip scope interview, obvious" | Obvious to you ≠ coherent result; use the smallest depth signalled by the work |
-| "Ask 5 questions at once, faster" | One `ask` call = ONE question. Each answer branches the next. |
-| "The ask tool accepts an array — one call, many questions" | That is batching. One question object per call. |
-| "I'll just pick a sensible default for X" | Silent invention is the failure mode. Ask it when the answer changes an admitted dimension; otherwise record it as a proportional assumption. |
-| "Just ask the questions, skip maintaining the CONTEXT/ADR delta" | The inline delta IS the discipline — challenge, sharpen, update the pending `CONTEXT.md` draft, offer ADRs. A flat multiple-choice quiz is not a grill. Plan keeps that delta pending for its bundle; standalone Grill uses its action gate. |
-| "I'll reconstruct all the CONTEXT terms at the gate" | Reconstruction at the gate is the deviation this rule exists for. Term resolved → pending draft updated before the next question; mutation still waits for the owning gate. |
-| "The brownfield boot draft is enough — I'll true it up at the gate" | The draft is the floor, not the final. Keep the pending delta current after every resolved term; mutation still waits for the owning gate. |
-| "User seems impatient / said 'continue', wrap up" | Resume at the last admissible unanswered question; otherwise apply the selected-depth readback and stop. |
-| "I already know what they want" | Do not silently decide an admitted user-owned dimension; ask one question only when its answer can change the result |
-| "User said ok, that's their decision" | An accepted recommendation is not a stated preference. Name the proposal's origin in the PRD. |
-| "They've been in the whole conversation — a readback is redundant" | Read back the selected depth's floor; a Quick check is not a Material ceremony. |
-| "They keep agreeing, so we're aligned" | "Makes sense" does not settle an affected user-owned decision; stop once the selected floor is explicit and no admissible question remains. |
+| "Ask 5 questions at once — the ask tool even accepts an array" | One `ask` call = ONE question; each answer branches the next, and tool affordance does not change that. |
+| "I'll just pick a sensible default / I already know what they want" | Silent invention is the failure mode. Ask when the answer changes an admitted dimension; otherwise record a proportional assumption. |
+| "I'll reconstruct the CONTEXT/ADR delta at the gate" | The inline delta IS the discipline: term resolved → pending draft updated before the next question; mutation still waits for the owning gate. A flat multiple-choice quiz is not a grill. |
+| "User said ok / keeps agreeing, that's their decision" | An accepted recommendation is not a stated preference; name the proposal's origin, and stop once the selected floor is explicit and no admissible question remains. |
 | "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers. Say so and change the object. |
 | "No ADR triggered, so there's nothing to write" | The ADR triple is one home, not the only one. Offer `CONTEXT.md`, a Story `## Decisions` line, or a `loom:` marker — or say out loud that nothing durable came of it. |

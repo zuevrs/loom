@@ -10,18 +10,9 @@ Ticket state is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `
 
 ## Consumed handoff
 
-Receive the Grill handoff as conversation/context evidence only; it creates no durable artifact by default. It must contain exactly:
+Receive the Grill handoff as conversation/context evidence only; it creates no durable artifact by default. It must contain exactly the eight fields of the canonical handoff shape in [`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md) § Handoff to Plan; this file never re-enumerates them.
 
-- Objective
-- Boundary
-- Non-goals
-- Decisions
-- Assumptions
-- Proof seam
-- Unresolved prerequisite
-- Selected depth
-
-Use the received objective, boundary, non-goals, decisions, assumptions, proof seam, unresolved prerequisite, and selected depth as settled interview evidence. Ask only newly-created materialization choices: artifact inventory, placement, or a conflict discovered while materializing. Return to Grill for a missing handoff field, a contradiction, or any unresolved interview concern.
+Use every received field as settled interview evidence. Ask only newly-created materialization choices: artifact inventory, placement, or a conflict discovered while materializing. Return to Grill for a missing handoff field, a contradiction, or any unresolved interview concern.
 
 ## Plan exit
 

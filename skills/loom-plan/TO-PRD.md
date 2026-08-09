@@ -24,7 +24,6 @@ The destination draft is input to slicing, not permission to revise settled inte
 
 | Excuse | Reality |
 |---|---|
-| "Write the destination before slicing" | Keep it pending. The user confirms one coherent bundle after Ticket slicing and the quiz. |
+| "The destination looks good — write it now, Tickets separately" | Confidence is not confirmation; every planning artifact stays pending until the one coherent bundle preview after Ticket slicing and the quiz. |
 | "Quick clarifying question before writing" | The grill is over. Synthesize; for material work, surface gaps as explicit assumptions in the PRD; otherwise return to Grill if Story content is unresolved. |
-| "The destination looks good, so Tickets can be written separately" | Confidence is not confirmation; all planning artifacts wait for the one complete bundle preview. |
 | "Scope grew while writing" | Cut out-of-scope first; if genuinely new, return to the grill — do not silently expand. |

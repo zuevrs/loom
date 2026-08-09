@@ -34,7 +34,7 @@ When an active Story owns the topic, use it as read-only context. A request to c
 
 
 1. **Route the topic** — confirm it in one sentence. Use Grill for an underspecified investigation, decision, or debug/fix thread; recommend Plan when the user already has buildable scope that needs a Story, optional material PRD, and Tickets.
-2. **Load the interview canon** — before questioning, read and apply [`INTERVIEW.md`](INTERVIEW.md). It is the sole canonical owner of exploration, facts-versus-decisions, question cadence, recommendations, domain probes, pending deltas, ADR offers, language, proportional depth, readback, and stop discipline. Apply only the depth required by the selected Quick/Behavior/Material route. When the thread crystallises for planning, give Plan the compact conversational handoff in `INTERVIEW.md`; Plan owns only newly-created materialization choices. When explicit complexity appears, load and apply [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md); ordinary Grill does not activate it.
+2. **Load the interview canon** — before questioning, read and apply [`INTERVIEW.md`](INTERVIEW.md). It is the sole canonical owner of exploration, facts-versus-decisions, question cadence, recommendations, domain probes, pending deltas, ADR offers, language, proportional depth, readback, and stop discipline. Apply only the depth required by the selected Quick check/Behavior check/Material route. When the thread crystallises for planning, give Plan the compact conversational handoff in `INTERVIEW.md`; Plan owns only newly-created materialization choices. When explicit complexity appears, load and apply [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md); ordinary Grill does not activate it.
 3. **Resolve the thread** — apply the selected proportional floor and stop when the relevant scope, non-goal, proof, and user-owned choices are explicit. End naturally when investigation finds nothing actionable.
 4. **Explicit materialization gate** — only after the user explicitly asks to act, state the decision and proposed action in the user's language: *"Decision: X. Materialize: [concrete steps]?"*
    - The request activates the capability but does not replace exact confirmation. **Enthusiasm is not a go** — agreement resolves a branch, not an action gate.
@@ -84,7 +84,7 @@ A problem caused by Loom itself belongs to the Loom maintainer, not this project
 
 ## Hard stops
 
-- **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing. Enthusiasm resolves a branch, not an action gate.
+- **Never materialize a code write or ADR without explicit user confirmation** — proposing is distinct from doing; the action-gate rule above owns what counts as a go.
 - Never write Story, PRD, or Ticket artifacts — that is Plan territory.
 - Never publish, deploy, or perform another irreversible action without explicit confirmation that names the action.
 - Never expand scope or auto-upgrade to Plan — signal the semantic boundary and let the user choose.
@@ -114,7 +114,6 @@ Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.m
 | Excuse | Reality |
 |---|---|
 | "This feels like Plan, I'll write a PRD" | Keep this ritual inline. Route to Plan only when the user requests planning materialization; otherwise keep discussion freeform. |
-| "User seemed to agree, I'll just do it" | Agreement is a decision signal, not action confirmation. State the concrete action and wait for explicit go. |
 | "I'll skip gates, it's a tiny change" | Run the objective gates; they define whether the materialized change is verified. |
 | "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |
 | "The gates are green and the user confirmed the delta, so it is verified" | Grill is the maker here. Gates are evidence, a confirmed delta is the acceptance contract; neither is an independent Spec verdict. Hand it to a fresh `loom-verify`. |

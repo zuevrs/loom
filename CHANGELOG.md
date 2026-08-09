@@ -6,13 +6,31 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Highlights
 
+- One canonical depth ladder. The Grill/Plan interview derives its depth from the constitutional verification classification — `Quick check | Behavior check | Material` — instead of keeping a second trigger list: Material is any Full review trigger plus the two interview-only signals `irreversible` and `large-user-owned-trade-off`. The false synonymy between interview `Quick` and verification `Quick check` is gone.
+- Transition contracts now have exactly one owner each: the eight-field Grill→Plan handoff lives only in `INTERVIEW.md` (Plan references it and never re-enumerates), and generic worker failure handling — bounded retry of empty/malformed output, `BLOCKED` transport, report-versus-repository conflicts — consolidated into `WORKER-BRIEFING.md` and out of the OMP matrix.
+- Verify digests gained their named mechanical carrier: `TICKET-RECORD.md` directs checkers to the packaged `hooks/boundary.cjs` and `hooks/verify-gate.cjs` helpers; manual hashing is a fallback only where Node is unavailable.
+- The dispatcher STOP row states its closed stop-signal set as prose with the same semantics; the kebab-code pseudo-enum is gone. The set stays byte-locked verbatim and the test model still executes the table.
+- Anti-rationalization tables trimmed to live-run failures by the negation criterion: interview canon 14→7 rows, Grill/TO-PRD/TO-TICKETS compacted; duplicate "enthusiasm" statements deduplicated to one owner per rule.
+- Maintainer-lab residue removed from product skills: the `DECISION-FRONTIER.md` comparator paragraph and the `ponytail:` marker scan in Implement.
+- A deferred Grill→Plan handoff may survive the session through the SESSION recovery pointer under its existing contract and explicit confirmation; the pointer stays a locating hint, never authority.
+
 ### Breaking changes
+
+- Interview depth names `Quick`/`Behavior` are now `Quick check`/`Behavior check`; the handoff field `Selected depth` carries the new values.
+- The dispatcher STOP condition cell is now `STOP`; the signal set lives in the observable-condition column.
 
 ### Migration steps
 
+- None for workspaces; the wave is prose- and test-only.
+
 ### Adapter impacts
 
+- None. `OMP.md` §Capability and failure defers generic worker handling to `WORKER-BRIEFING.md`; no adapter file changed shape.
+
 ### Safety changes
+
+- Full review triggers now explicitly name auth **or security boundary** and persistence/data path **or data-loss risk**, so unified classification lowers no interview depth that the old Material list escalated.
+- Every retired lock moved with its content: worker `BLOCKED` locks target `WORKER-BRIEFING.md`, the STOP-signal set is byte-locked in the template-contract script, and new mutations prove each new lock fail-capable.
 
 ## [7.16.0] - 2026-08-09
 
