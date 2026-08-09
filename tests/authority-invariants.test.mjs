@@ -212,12 +212,13 @@ test("four disposable contract pilots preserve boundaries",()=>{
 
 
 test("Verify orchestration contract rejects old contradictions",()=>{
-  const verify=read("skills/loom-verify/SKILL.md"), omp=read("skills/loom/OMP.md"), orca=read("skills/loom/ORCA.md"), files=["agents/loom-verify-spec.md","agents/loom-verify-standards.md",".claude-plugin/agents/loom-verify-spec.md",".claude-plugin/agents/loom-verify-standards.md"].map(read);
-  for(const text of [verify,omp,orca]) assert.match(text,/fresh maker/i);
-  for(const text of [omp,orca]) assert.doesNotMatch(text,/reuse the same maker|same healthy maker/i);
+  const verify=read("skills/loom-verify/SKILL.md"), omp=read("skills/loom/OMP.md"), briefing=read("skills/loom/WORKER-BRIEFING.md"), orca=read("skills/loom/ORCA.md"), files=["agents/loom-verify-spec.md","agents/loom-verify-standards.md",".claude-plugin/agents/loom-verify-spec.md",".claude-plugin/agents/loom-verify-standards.md"].map(read);
+  for(const text of [verify,briefing,orca]) assert.match(text,/fresh maker/i);
+  for(const text of [omp,briefing,orca]) assert.doesNotMatch(text,/reuse the same maker|same healthy maker/i);
   for(const text of files){ assert.match(text,/blocking findings only/i); assert.doesNotMatch(text,/\b(?:Severity|severity)\b|\|\s*severity\s*\||(?:^|\|)\s*(?:blocker|major|minor|note)\s*(?:\||$)|`(?:blocker|major|minor|note)`/i); }
   for(const phrase of ["before expensive checker", "shared evidence packet", "named checker", "sequential", "one retry", "no runnable checks — {why}", "overlapping blockers"]) assert.match(verify,new RegExp(phrase,"i"));
-  assert.match(omp,/checker report uses `APPROVE\|REJECT\|BLOCKED`/i);
+  assert.match(briefing,/checker report uses `APPROVE\|REJECT\|BLOCKED`/i);
+  assert.match(omp,/WORKER-BRIEFING\.md/,"OMP loads the host-neutral worker contract");
   assert.match(omp,/No independent context exists after one bounded fallback attempt.*`BLOCKED`/i);
   assert.match(omp,/second failure returns `BLOCKED` with evidence, never REJECT/i);
   assert.doesNotMatch(omp,/ESCALATE_HUMAN/);

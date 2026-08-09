@@ -41,7 +41,7 @@ Never claim an effect from an instruction, a command transcript, a chat report, 
 
 Load `FINISH.md` for local commit/integration boundaries and `PUBLISH.md` for remote push/review/release boundaries. Loom itself does not push, create hosted reviews, merge, or release. Cleanup in Orca is a separate explicit operator action after Publish *and* proven merge. It is never implied by Finish, by Publish, by a closed review, or by Story completion.
 
-Detailed boundary owners lazy-load from the selected skill: `STORY.md`, `FINISH.md`, `PUBLISH.md`, `OMP.md`, or `ORCA.md`. Core Loom has seven rituals — Setup, Grill, Plan, Implement, Verify, Finish, and Publish — and no Tend or unattended runtime ritual.
+Detailed boundary owners lazy-load from the selected skill: `STORY.md`, `FINISH.md`, `PUBLISH.md`, `OMP.md`, `ORCA.md`, or `WORKER-BRIEFING.md` for worker dispatch on any host. Core Loom has seven rituals — Setup, Grill, Plan, Implement, Verify, Finish, and Publish — and no Tend or unattended runtime ritual.
 
 ## Anti-rationalization
 
