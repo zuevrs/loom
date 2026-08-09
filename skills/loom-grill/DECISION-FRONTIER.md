@@ -1,11 +1,11 @@
 # Ephemeral decision frontier
 
-Use this discipline only when observed complexity makes Grill's ordinary sequential cadence insufficient: a decision depends on another decision, correctness needs an unresolved fact lookup, multiple boundaries are coupled, several mutually independent user-owned questions are open at once, or a similarly explicit prerequisite is present. A simple question, ordinary ambiguity, or desire for more detail does not activate it. This is an interview discipline, not a runtime or state machine.
+Use this discipline only when observed complexity makes Grill's ordinary sequential cadence insufficient: a decision depends on another decision, correctness needs an unresolved fact lookup, multiple boundaries are coupled, several mutually independent user-owned questions are open at once, or a similarly explicit prerequisite is present. A simple question, ordinary ambiguity, or more detail does not activate it. This is an interview discipline, not a runtime or state machine.
 
 ## Frontier
 
 - Show the frontier in rounds. One round asks every mutually independent, user-owned, load-bearing decision question whose prerequisites are settled — numbered, each with its own recommendation. Two questions where one answer could change the other never share a round; when independence is in doubt, fall back to exactly one visible question at a time.
-- When activation misfires or the round structure does not fit the actual dependency graph, abandon the round immediately and fall back to sequential one-question cadence. Never force a round when it does not preserve the dependency structure.
+- When activation misfires or the round structure does not fit the actual dependency graph, abandon the round immediately and fall back to sequential one-question cadence. Activation misfires when two questions where answering one changes the other share a round, or a question appears before its prerequisite is resolved.
 - Recompute the frontier from each round's answers and integrate every resolved term into the pending delta before the next round.
 - Keep at most one agent-owned, bounded fact lookup at a time, performed by a host-native fact worker. The agent states its narrow question and evidence boundary, performs it directly or delegates it read-only, and owns the synthesis. Never ask the user to obtain an agent-owned fact.
 - Resolve prerequisites in order. Withhold every decision question that depends on an unsettled fact or prior decision. An independent decision may remain visible while an unrelated lookup waits.

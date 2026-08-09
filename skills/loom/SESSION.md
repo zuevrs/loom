@@ -28,3 +28,7 @@ These fields are hints for locating current authority, not authority themselves.
 - Do not treat it as memory, consent, or a mutation permit.
 - Do not promote or mutate canonical owners from this file without the owning ritual’s exact preview and confirmation.
 - Do not hide conflicts with canonical artifacts or live repository/host evidence.
+
+## Host portability
+
+Core rituals, WORKER-BRIEFING, and artifacts are host-agnostic prose. Session/worker facilities are host-specific. OMP.md/ORCA.md adapt OMP; other harnesses need their own adapter.

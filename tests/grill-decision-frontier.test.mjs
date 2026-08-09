@@ -35,7 +35,7 @@ const obligations=[
   ["explicit complex signal activation","preamble",[/observed complexity/],[/decision depends.*another decision|unresolved fact lookup|multiple boundaries.*coupled|explicit prerequisite/],[/simple question.*does not activate/]],
   ["frontier rounds of independent questions","frontier",[/frontier in rounds/],[/every mutually independent.*user owned.*decision question whose prerequisites are settled/],[/numbered.*each with its own recommendation/]],
   ["dependent questions never share a round","frontier",[/one answer could change the other/],[/never share a round/],[/independence is in doubt.*exactly one visible question at a time/]],
-  ["fallback on misfire","frontier",[/activation misfires.*round structure does not fit/],[/abandon the round immediately.*fall back to sequential one question cadence/],[/never force a round/]],
+  ["fallback on misfire","frontier",[/activation misfires.*round structure does not fit/],[/abandon the round immediately.*fall back to sequential one question cadence/],[/activation misfires when.*answering one changes the other share a round.*question appears before its prerequisite is resolved/]],
   ["round recomputation","frontier",[/recompute the frontier/],[/from each round s answers/],[/resolved term into the pending delta before the next round/]],
   ["max one worker","frontier",[/frontier/],[/at most one agent owned.*fact lookup/],[/at a time/]],
   ["prerequisite withholding","frontier",[/depends on.*unsettled fact.*prior decision/],[/withhold every decision question/],[/resolve prerequisites in order/]],
@@ -89,7 +89,7 @@ test("structural-only semantic probe tolerates equivalent wording",()=>{
 
 const mutations=[
   ["activation signal",text=>text.replace("only when observed complexity makes Grill's ordinary sequential cadence insufficient","when Grill wants more detail")],
-  ["simple no-op",text=>text.replace("A simple question, ordinary ambiguity, or desire for more detail does not activate it.","A simple question can activate it.")],
+  ["simple no-op",text=>text.replace("A simple question, ordinary ambiguity, or more detail does not activate it.","A simple question can activate it.")],
   ["visible question bound",text=>text.replace("Two questions where one answer could change the other never share a round; when independence is in doubt, fall back to exactly one visible question at a time.","Ask every open question in one round.")],
   ["round recommendation",text=>text.replace("numbered, each with its own recommendation","numbered")],
   ["round recomputation",text=>text.replace("Recompute the frontier from each round's answers and integrate every resolved term into the pending delta before the next round.","Continue to the next round.")],
