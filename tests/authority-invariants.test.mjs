@@ -38,6 +38,8 @@ test("Constitution owns the human output floor and automation boundary",()=>{
   const constitution=read("skills/loom/CONSTITUTION.md");
   const consumers=["skills/loom-init/SKILL.md","skills/loom-grill/SKILL.md","skills/loom-plan/SKILL.md","skills/loom-implement/SKILL.md","skills/loom-verify/SKILL.md","skills/loom/FINISH.md","skills/loom/PUBLISH.md"].map(read).join("\n");
   assert.deepEqual([...constitution.matchAll(/^- `([^`]+)` —/gm)].map(match=>match[1]),["Result","Changed","Check","Next action"]);
+  assert.match(constitution,/`Result` is the first line — no preamble and no process recap before it; evidence follows the verdict/,"the verdict leads the output");
+  assert.doesNotMatch(constitution.replace("`Result` is the first line — no preamble and no process recap before it; evidence follows the verdict",""),/no preamble and no process recap/);
   assert.doesNotMatch(consumers,/^## Output shape$/m);
   for(const requirement of [/attended and single-pass/i,/objective stop/i,/iteration or time budget/i,/isolated workspace/i,/independent judge/i,/inherits no Finish or Publish authority/i])assert.match(constitution,requirement);
 });
@@ -195,6 +197,22 @@ test("dispatcher pointer remains read-only and cannot carry route state",()=>{
 test("public prose has no removed runtime promises",()=>{
   const text=corpus(["README.md","AGENTS.md","skills/loom/SKILL.md","skills/loom/CONSTITUTION.md","skills/loom/OMP.md","opencode-plugin.mjs"]);
   for(const stale of ["runtime-guard","session_stop","stop-gate-logic.cjs","awaiting-review","migrationPreview","loomRole"])assert.ok(!text.toLowerCase().includes(stale.toLowerCase()),`removed promise returned: ${stale}`);
+});
+
+test("research extra-consent gate stays a two-condition conjunction",()=>{
+  const research=read("skills/loom-grill/RESEARCH.md");
+  assert.match(research,/only when both hold: the invocation uses an external CLI, separate model, or service, \*\*and\*\* it introduces separate authentication, incremental cost, or project-data egress/);
+  assert.match(research,/An invocation that introduces none of those adds no extra consent gate/);
+  assert.match(research,/Normal read-only web\/docs research needs no research-specific permission/);
+  assert.doesNotMatch(research.replace("only when both hold","when either holds"),/only when both hold/);
+});
+
+test("probe output with secrets reaches durable carriers only redacted",()=>{
+  const diagnose=read("skills/loom-implement/DIAGNOSE.md");
+  const rule=/Quote probe output that contains credentials, tokens, or keys only in redacted form/;
+  assert.match(diagnose,rule);
+  assert.match(diagnose,/`## Log`, Verify digests, and reports/);
+  assert.doesNotMatch(diagnose.replace(/Quote probe output that contains credentials, tokens, or keys only in redacted form[^\n]*\n?/,""),rule);
 });
 
 test("four disposable contract pilots preserve boundaries",()=>{

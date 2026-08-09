@@ -12,7 +12,7 @@ Describe work through observable input → decision → effect → evidence → 
 
 ## Human output floor
 
-Every completion or blocker uses exactly these labels:
+Every completion or blocker uses exactly these labels, and `Result` is the first line — no preamble and no process recap before it; evidence follows the verdict:
 
 - `Result` — outcome or blocker.
 - `Changed` — exact paths and effects, or `none`.

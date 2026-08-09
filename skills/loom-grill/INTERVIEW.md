@@ -32,7 +32,7 @@ Select the smallest depth from observed signals before asking questions. Depth i
 
 For Behavior check and Material, establish a premise before user questions: an observed failure or unmet outcome, a named cost owner, and why the current path—or one cheapest credible alternative—does not cover it. Investigate missing facts locally; ask only the user-owned premise decision. Show a premise verdict only when it rejects, reframes, or reduces scope; a routine pass stays invisible.
 
-Admit a question only when its answer can change the objective, boundary or non-goal, a user-owned trade-off, proof, or a prerequisite. Resolve prerequisite dependencies in order and show one visible question. Preserve the existing decision frontier when complexity creates coupled decisions or bounded fact lookups.
+Admit a question only when its answer can change the objective, boundary or non-goal, a user-owned trade-off, proof, or a prerequisite. Resolve prerequisite dependencies in order and show one visible question; a frontier round under [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md) is the only sanctioned batch. Preserve the existing decision frontier when complexity creates coupled decisions or bounded fact lookups. When a decision's owner is not the current interlocutor, name that owner and park the question as an unresolved prerequisite: it blocks dependent materialization, never the whole exit, and never silently becomes an assumption.
 
 Check one cheapest credible alternative. Compare more than one only when a real user-owned trade-off needs it. Recommendations state their evidence and consequences; the user owns the trade-off.
 
@@ -86,7 +86,7 @@ Non-goals: <explicit exclusions>
 Decisions: <resolved user-owned trade-offs>
 Assumptions: <confirmed or correction-pending predictions>
 Proof seam: <deterministic verification boundary>
-Unresolved prerequisite: <none, or the blocking fact/decision>
+Unresolved prerequisite: <none, or the blocking fact/decision — with its named owner when that owner is not the current interlocutor>
 Selected depth: <Quick check | Behavior check | Material>
 ```
 
@@ -108,7 +108,7 @@ Integrate corrections before applying the stop test. An uncorrected assumption r
 
 - Fuzzy objective — keep grilling; no PRD, no tickets.
 - Unresolved ADR conflict in project warp — surface it; ask one resolving question.
-- Keep every `ask` call to exactly one question.
+- Keep every `ask` call to one question by default. The only sanctioned batch is a frontier round of mutually independent questions under [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md); a question whose answer could change another never shares its round.
 - **Enthusiasm is not resolution.** "Interesting", "good idea", and "love it" do not by themselves settle a user-owned decision. Keep an affected branch open until it is resolved, but do not create a new branch after the selected depth's stop test passes.
 
 ## Failure modes
@@ -125,7 +125,7 @@ Integrate corrections before applying the stop test. An uncorrected assumption r
 | Excuse | Reality |
 |---|---|
 | "Skip scope interview, obvious" | Obvious to you ≠ coherent result; use the smallest depth signalled by the work |
-| "Ask 5 questions at once — the ask tool even accepts an array" | One `ask` call = ONE question; each answer branches the next, and tool affordance does not change that. |
+| "Ask 5 questions at once — the ask tool even accepts an array" | Unstructured batching is still batching; the only sanctioned batch is a frontier round of mutually independent questions, and a dependent question waits for its prerequisite. |
 | "I'll just pick a sensible default / I already know what they want" | Silent invention is the failure mode. Ask when the answer changes an admitted dimension; otherwise record a proportional assumption. |
 | "I'll reconstruct the CONTEXT/ADR delta at the gate" | The inline delta IS the discipline: term resolved → pending draft updated before the next question; mutation still waits for the owning gate. A flat multiple-choice quiz is not a grill. |
 | "User said ok / keeps agreeing, that's their decision" | An accepted recommendation is not a stated preference; name the proposal's origin, and stop once the selected floor is explicit and no admissible question remains. |

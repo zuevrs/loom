@@ -4,6 +4,31 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+- Frontier rounds: when the decision frontier is active, one round asks every mutually independent, user-owned question whose prerequisites are settled — numbered, each with its own recommendation — and recomputes the frontier from the answers. Dependent questions never share a round; when independence is in doubt, the interview falls back to one visible question. The default cadence stays one `ask` = one question; the frontier round is the only sanctioned batch.
+- A decision owned by someone who is not the current interlocutor now has a defined fate: the interview names the owner and parks the question as an unresolved prerequisite that blocks dependent materialization — never the whole exit, and never a silent assumption. The handoff's `Unresolved prerequisite` field carries the owner.
+- The constitutional output floor now leads with the verdict: `Result` is the first line, with no preamble or process recap before it; evidence follows.
+- Probe output containing credentials, tokens, or keys is quoted only in redacted form in every durable carrier (debug logs, `## Log`, Verify digests, reports).
+- The external-research extra-consent gate is now a declarative list instead of a 90-word sentence; the two-condition conjunction is unchanged and byte-locked by test.
+
+### Breaking changes
+
+- None. `DECISION-FRONTIER.md` activation gains one signal (several mutually independent open questions); all artifacts, rituals, and handoff shapes keep their names.
+
+### Migration steps
+
+- None.
+
+### Adapter impacts
+
+- None; prose- and test-only wave.
+
+### Safety changes
+
+- The one-question default and its anti-rationalization row now name the frontier round as the only sanctioned batch, closing the "the ask tool accepts an array" loophole without weakening the dependency rule.
+- New fail-capable locks: frontier-round shape, dependent-questions-never-share-a-round, named-owner prerequisite, answer-first output floor, secret redaction, and the research consent conjunction.
+
 ## [7.17.0] - 2026-08-09
 
 One canonical depth ladder, one owner per transition contract, and maintainer-lab residue removed from product skills.
