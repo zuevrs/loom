@@ -4,6 +4,10 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.17.0] - 2026-08-09
+
+One canonical depth ladder, one owner per transition contract, and maintainer-lab residue removed from product skills.
+
 ### Highlights
 
 - One canonical depth ladder. The Grill/Plan interview derives its depth from the constitutional verification classification — `Quick check | Behavior check | Material` — instead of keeping a second trigger list: Material is any Full review trigger plus the two interview-only signals `irreversible` and `large-user-owned-trade-off`. The false synonymy between interview `Quick` and verification `Quick check` is gone.
@@ -1794,7 +1798,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.16.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.17.0...HEAD
+[7.17.0]: https://github.com/zuevrs/loom/compare/v7.16.0...v7.17.0
 [7.16.0]: https://github.com/zuevrs/loom/compare/v7.15.0...v7.16.0
 [7.15.0]: https://github.com/zuevrs/loom/compare/v7.14.0...v7.15.0
 [7.14.0]: https://github.com/zuevrs/loom/compare/v7.13.0...v7.14.0
