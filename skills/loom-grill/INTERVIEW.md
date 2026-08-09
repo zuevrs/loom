@@ -24,7 +24,7 @@ When correctness depends on a current version, API, CLI or host behavior, compat
 
 ## Interview rules
 
-Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals of its own and nothing else.
+Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals.
 
 - **Quick check**: allowed only when no Full review trigger and no interview-only signal is present and the work is narrow, reversible, local, with a clear proof seam.
 - **Behavior check**: allowed only when no Full review trigger and no interview-only signal is present and the work changes observable behavior or carries meaningful assumptions/edge risk. Behavior check also requires its own premise and explicit non-goal criteria.
@@ -63,9 +63,7 @@ Keep the block proportional; do not add ceremonial verdicts or questions after t
 
 ## When the grill stops short of an artifact
 
-An interview can resolve six branches and still produce no standalone Grill artifact: the ADR triple (hard to reverse **+** surprising **+** real trade-off) fails, no term changed, and the user approves no durable action. Every fact then lives in the transcript and dies with the session — and the next session re-derives it, which is the exact cost the precedent scan at the top of this file exists to avoid. Inside Plan, this does not stop pending Story/optional PRD/Ticket drafting; those drafts write nothing and grant no authority.
-
-When Plan consumes this canon's result, every capture stays in the conversational handoff until Plan's one materialization bundle; Plan writes no `CONTEXT.md`, Story decision, ADR, or code-adjacent `loom:` marker from the handoff. A code marker is implementation and routes separately after planning.
+An interview can resolve six branches and produce no standalone Grill artifact: the ADR triple fails, no term changed, no user-approved durable action. Every fact lives in the transcript and dies with the session — the next session re-derives it, which is the cost the precedent scan exists to avoid.
 
 When standalone **Grill** ends without planning materialization, offer the cheapest durable non-planning home for what it produced, and write only what the user approves through Grill's own action gate:
 
@@ -125,7 +123,6 @@ Integrate corrections before applying the stop test. An uncorrected assumption r
 | Excuse | Reality |
 |---|---|
 | "Skip scope interview, obvious" | Obvious to you ≠ coherent result; use the smallest depth signalled by the work |
-| "Ask 5 questions at once — the ask tool even accepts an array" | Unstructured batching is still batching; the only sanctioned batch is a frontier round of mutually independent questions, and a dependent question waits for its prerequisite. |
 | "I'll just pick a sensible default / I already know what they want" | Silent invention is the failure mode. Ask when the answer changes an admitted dimension; otherwise record a proportional assumption. |
 | "I'll reconstruct the CONTEXT/ADR delta at the gate" | The inline delta IS the discipline: term resolved → pending draft updated before the next question; mutation still waits for the owning gate. A flat multiple-choice quiz is not a grill. |
 | "User said ok / keeps agreeing, that's their decision" | An accepted recommendation is not a stated preference; name the proposal's origin, and stop once the selected floor is explicit and no admissible question remains. |
