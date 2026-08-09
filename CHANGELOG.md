@@ -14,6 +14,37 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ### Safety changes
 
+## [7.16.0] - 2026-08-09
+
+Verification holes closed (Grill self-verification, test-edit downgrade), instruction surfaces compressed, and the three largest prose monoliths split into signal-selected satellites.
+
+### Highlights
+
+- Closed the Grill self-verification escape: a Behavior-or-higher change materialized in Grill now always reaches a fresh independent `loom-verify`; only a Quick check (docs, comments, copy, newly added tests) may keep its digest in chat. Where the host can spawn the packaged checker agents, Grill dispatches them inline and continues the thread; elsewhere it stops and hands the packet to explicit `/loom verify`.
+- Made verification-depth classification mechanical: listed triggers fire their row regardless of diff size, the independent checker re-derives the row, disagreement takes the higher level, and a maker never lowers its own row. Changing or deleting an existing test now classifies as Behavior — weakening an assert is a behavior-contract change in executable form.
+- The dispatcher surfaces a finished Story: when already-read evidence shows an active Story with all Tickets done and current verdicts, it appends one observation line pointing at `/loom finish` (an observation, not a route or menu).
+- Split the three largest instruction monoliths into signal-selected satellites, following the existing Plan/Grill pattern: `ORCA.md` (18.8k → 5.6k core + `ORCA-DISPATCH.md`/`ORCA-RESUME.md`/`ORCA-CLEANUP.md`), the interview canon's research contract (→ `RESEARCH.md`, loaded when correctness depends on external facts), and OMP's worker-dispatch prose (→ host-neutral `WORKER-BRIEFING.md`, now reachable from every carrier that spawns workers, not just OMP).
+- Compressed always-loaded context by ~18% (`AUTHORITY.md`, dispatcher, `CONSTITUTION.md`) and the `FINISH.md`/`PUBLISH.md` boundary contracts, preserving every safety invariant and anti-injection passage; deleted the redundant `AUTHORITY-EXAMPLES.md`.
+- The instruction-surface budget now covers every skill file with a measured ~10% ratchet — previously the four largest satellites were unguarded and `GRILL.md` sat at 9% of a dead 20000-byte budget.
+
+### Breaking changes
+
+- None for operators. Skill-internal contracts moved between files; all rituals, commands, and artifacts keep their names and shapes.
+
+### Migration steps
+
+- Update through the same carrier used to install, restart the host, and rerun Setup for stale managed blocks (the managed block's core rules went from six to five: the checkable-result and no-completion-without-evidence rules merged; consent stays separate).
+
+### Adapter impacts
+
+- The npm package adds `skills/loom/ORCA-DISPATCH.md`, `ORCA-RESUME.md`, `ORCA-CLEANUP.md`, `skills/loom/WORKER-BRIEFING.md`, and `skills/loom-grill/RESEARCH.md`, and drops `skills/loom/AUTHORITY-EXAMPLES.md`. All carriers receive the same contents; no adapter code changed.
+
+### Safety changes
+
+- Grill can no longer close a behavior change on its own gate results ("Verify is independent from the maker" now holds structurally, with a fail-capable test locking the boundary).
+- Existing-test edits require independent Spec review; the Quick-tier sentinel no longer covers them.
+- The maintainer problem-report flow (with its `zuevrs/loom` destination) moved out of the runtime Grill skill into `CONTRIBUTING.md`, so user installs no longer carry the maintainer reporting path.
+
 ## [7.15.0] - 2026-08-08
 
 Anti-rationalization prose: four diagnosis-then-act lures in ritual hard stops, compress-and-swap only.
@@ -1745,7 +1776,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.15.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.16.0...HEAD
+[7.16.0]: https://github.com/zuevrs/loom/compare/v7.15.0...v7.16.0
 [7.15.0]: https://github.com/zuevrs/loom/compare/v7.14.0...v7.15.0
 [7.14.0]: https://github.com/zuevrs/loom/compare/v7.13.0...v7.14.0
 [7.13.0]: https://github.com/zuevrs/loom/compare/v7.12.0...v7.13.0
