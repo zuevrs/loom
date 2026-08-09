@@ -35,6 +35,7 @@ const obligations=[
   ["explicit complex signal activation","preamble",[/observed complexity/],[/decision depends.*another decision|unresolved fact lookup|multiple boundaries.*coupled|explicit prerequisite/],[/simple question.*does not activate/]],
   ["frontier rounds of independent questions","frontier",[/frontier in rounds/],[/every mutually independent.*user owned.*decision question whose prerequisites are settled/],[/numbered.*each with its own recommendation/]],
   ["dependent questions never share a round","frontier",[/one answer could change the other/],[/never share a round/],[/independence is in doubt.*exactly one visible question at a time/]],
+  ["fallback on misfire","frontier",[/activation misfires.*round structure does not fit/],[/abandon the round immediately.*fall back to sequential one question cadence/],[/never force a round/]],
   ["round recomputation","frontier",[/recompute the frontier/],[/from each round s answers/],[/resolved term into the pending delta before the next round/]],
   ["max one worker","frontier",[/frontier/],[/at most one agent owned.*fact lookup/],[/at a time/]],
   ["prerequisite withholding","frontier",[/depends on.*unsettled fact.*prior decision/],[/withhold every decision question/],[/resolve prerequisites in order/]],

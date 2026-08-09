@@ -5,6 +5,7 @@ Use this discipline only when observed complexity makes Grill's ordinary sequent
 ## Frontier
 
 - Show the frontier in rounds. One round asks every mutually independent, user-owned, load-bearing decision question whose prerequisites are settled — numbered, each with its own recommendation. Two questions where one answer could change the other never share a round; when independence is in doubt, fall back to exactly one visible question at a time.
+- When activation misfires or the round structure does not fit the actual dependency graph, abandon the round immediately and fall back to sequential one-question cadence. Never force a round when it does not preserve the dependency structure.
 - Recompute the frontier from each round's answers and integrate every resolved term into the pending delta before the next round.
 - Keep at most one agent-owned, bounded fact lookup at a time, performed by a host-native fact worker. The agent states its narrow question and evidence boundary, performs it directly or delegates it read-only, and owns the synthesis. Never ask the user to obtain an agent-owned fact.
 - Resolve prerequisites in order. Withhold every decision question that depends on an unsettled fact or prior decision. An independent decision may remain visible while an unrelated lookup waits.
