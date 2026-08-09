@@ -8,7 +8,7 @@ This file is the canonical contract for Loom v7 durable planning state. Durable 
 
 ## Location and identity
 
-A Story lives at `.loom/<story-id>/STORY.md`; optional material detail lives beside it as `PRD.md` and `tickets/<ticket-id>.md`. The project root owns these artifacts. In a single repository, omitted repository scope means the current root. Stable Story/Ticket identity belongs in files; Orca cards, tasks, lanes, terminals, coordinators, worktrees, and local paths never do.
+A Story lives at `.loom/<story-id>/STORY.md`; optional material detail lives beside it as `PRD.md` and `tickets/<ticket-id>.md`. The project root owns these artifacts. In a single repository, omitted repository scope means the current root. Stable Story/Ticket identity belongs in files; execution runtime state (cards, tasks, lanes, terminals, coordinators, worktrees, local paths) never does.
 
 ## Story schema
 
@@ -49,7 +49,7 @@ Before interruption or context compaction, first classify whether any confirmed 
 
 ## Adaptive continuation
 
-A unique relevant active Story continues by default. Multiple active Stories without coherent Orca context require exactly one recommended question. Unrelated explicit intent follows ordinary routing. A done Story is immutable historical result: never reopen, amend, or add Tickets to it. Follow-up work becomes a linked continuation in a new Story while the original Story, PRD, Tickets, and Verify evidence remain byte-for-byte unchanged.
+A unique relevant active Story continues by default. Multiple active Stories without coherent execution context require exactly one recommended question. Unrelated explicit intent follows ordinary routing. A done Story is immutable historical result: never reopen, amend, or add Tickets to it. Follow-up work becomes a linked continuation in a new Story while the original Story, PRD, Tickets, and Verify evidence remain byte-for-byte unchanged.
 
 A linked continuation uses the ordinary Story schema and Plan materialization gate; add no frontmatter or registry. `## Notes` is optional and freeform for an ordinary Story, except that first-line `Continues:` is reserved as the linked-continuation discriminator. A linked continuation uses that discriminator, and its `## Notes` consists of exactly four nonempty ordered lines, with no additional lines:
 
@@ -68,11 +68,11 @@ First separate facts, recommendations, and decisions. A durable decision is the 
 
 For a requested change, state every classifier explicitly rather than inheriting defaults: Story Intent/Success, Ticket acceptance, public/inter-service contract, repository scope, architecture, data path, security/privacy risk, and verification approach. A **small edit** preserves Story Intent/Success, acceptance, public/inter-service contracts, repository scope, architecture, and data/security risk; it may route directly to Implement with proportional checks and no new ceremony. A **material change** alters any of those boundaries. Route it to Plan's isolated amendment flow: preview the smallest owning Story/PRD/Ticket/ADR delta, affected Verify evidence, and checks, then obtain bounded confirmation. Missing or uncertain boundary is ambiguity, not permission.
 
-After the confirmed amendment, update exactly the smallest owners and leave unaffected files byte-for-byte unchanged. A changed repository set is always material and requires Ticket `repositoryKeys` plus Story/PRD scope review; Plan may inspect Orca read-only but creates no runtime state.
+After the confirmed amendment, update exactly the smallest owners and leave unaffected files byte-for-byte unchanged. A changed repository set is always material and requires Ticket `repositoryKeys` plus Story/PRD scope review; Plan may inspect execution context read-only but creates no runtime state.
 
 After a material semantic change invalidates evidence for acceptance, a public/inter-service contract, data path, or security path, the affected Ticket's current canonical `## Verify` is invalid. Because runtime accepts only the canonical current Verify record, do not write an ad hoc non-canonical `STALE` block. Remove the obsolete approval content or leave the section empty while the Ticket is returned to `ready-for-agent`, and record the exact invalidated boundaries in `## Log`; the next independent Verify replaces it with a canonical current result. do not append history or retain a second current verdict. Return an affected `done` Ticket to `ready-for-agent` until independent Verify replaces the invalid block with a current verdict. Unrelated Tickets and unrelated Verify evidence remain unchanged. Evidence invalidation is never a Ticket status.
 
-A proposed new repository key is planning scope: Plan may query Orca read-only and preview the Story/PRD/Ticket delta, but creates no branch, lane, task, terminal, or worktree. Execution state belongs to later interactions.
+A proposed new repository key is planning scope: Plan may query execution context read-only and preview the Story/PRD/Ticket delta, but creates no branch, lane, task, terminal, or worktree. Execution state belongs to later interactions.
 
 ## State and authority
 
@@ -85,11 +85,11 @@ Ticket completion may update that Ticket to `done` after independent Verify and 
 | Story path and `id` disagree | Stop; do not rely on or update the artifact |
 | Required content is empty or status unknown | Stop read-only and report the exact invalid boundary |
 | Different `.loom/version` major | Read-only hard stop with upgrade guidance; no migration |
-| Multiple active Stories lack coherent Orca context | Ask one question and recommend the strongest candidate |
+| Multiple active Stories lack coherent execution context | Ask one question and recommend the strongest candidate |
 | Follow-up affects active work | Blocking question → affected Ticket `needs-info`; accepted-result defect → affected Ticket `ready-for-agent` with stale Verify invalidated; new scope → amendment. |
 | Follow-up requests work after Story `done` | Preserve the original byte-for-byte and Plan a linked continuation with its own intent, success, delta, PRD threshold, and Tickets. |
 | Recommendation was not explicitly chosen | Persist nothing; ask the unresolved question when it is load-bearing |
-| Resume evidence conflicts across artifacts and Git/Orca | Stop and name exact sources/fields; never repair by inference |
+| Resume evidence conflicts across artifacts and Git/execution context | Stop and name exact sources/fields; never repair by inference |
 | Proposed checkpoint repeats current bytes | `NO_DELTA`; write nothing |
 | No durable factual delta | Write nothing |
 

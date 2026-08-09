@@ -4,6 +4,30 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+- Host-agnostic core, enforced by name: the seven rituals, the interview canon, the authority contract, and the Story schema no longer name a specific host or its tooling. `Orca` in Story/authority prose became `execution context`, the packaged checker agent IDs in Grill became `packaged independent Spec and Standards checkers`, cleanup routes to "the cleanup ritual", and the boundary-owner list points at "host-specific adapter contracts" instead of enumerating `OMP.md`/`ORCA.md`. Adapters keep their own names inside their own files.
+- The precedent scan states the pattern instead of a shell invocation: `grep -rnE '…'` became "scan recursively for the pattern `(#|//|--|;) ?loom:`", so a host without a shell can satisfy the same obligation.
+- `SESSION.md` gained an explicit host-portability boundary: core rituals, `WORKER-BRIEFING.md`, and artifacts are host-agnostic prose; session and worker facilities are host-specific; other harnesses supply their own adapter.
+- The frontier's misfire fallback now names the two concrete misfires it guards against — two questions where answering one changes the other sharing a round, or a question appearing before its prerequisite resolves.
+- Interview rules read answer-first: the three depth options come before the paragraph explaining where depth is derived from.
+
+### Breaking changes
+
+- None. Terminology-only in prose; all rituals, artifacts, fields, and adapter files keep their names and shapes.
+
+### Migration steps
+
+- None.
+
+### Adapter impacts
+
+- None. `OMP.md` and the `ORCA*.md` adapters are unchanged and remain the named owners of host-specific mechanics.
+
+### Safety changes
+
+- No invariant changed. The renames preserve every gate: cleanup stays a separate explicit operator action after Publish and proven merge, and Grill still cannot supply its own Spec verdict.
+
 ## [7.18.0] - 2026-08-10
 
 ### Highlights

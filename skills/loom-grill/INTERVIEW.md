@@ -10,7 +10,7 @@ Stay in the interview phase until its decision branches are resolved. Do not rea
 
 Before the first question, scan `.loom/` for Story titles and their `## Decisions` sections, plus ADR titles. Both are guaranteed to exist by the Story schema, so this is a cheap directory walk and two greps — not a load of every artifact. Name any match and what it decided, or state plainly that none exists.
 
-Then one grep for the ceilings the project recorded in its own source: `grep -rnE '(#|//|--|;) ?loom:' .`, skipping `node_modules`, `.git`, and build output. Each hit is a decision already made, carrying its ceiling and its upgrade trigger right next to the code it constrains. Name the ones inside the area under discussion.
+Then scan recursively for the ceilings the project recorded in its own source: the pattern `(#|//|--|;) ?loom:` across source files, skipping `node_modules`, `.git`, and build output. Each hit is a decision already made, carrying its ceiling and its upgrade trigger right next to the code it constrains. Name the ones inside the area under discussion.
 
 This runs first because the worst grill is the one that re-derives a decision the project already made. The operator answers from memory, the memory is stale, and the new decision quietly contradicts an ADR nobody reread. Two lines of scanning prevent a whole interview.
 
@@ -18,17 +18,17 @@ The markers matter for the same reason and are read even less: Loom writes them 
 
 ## Explore before asking
 
-Research is local-first, including facts **outside the repo**. Read the relevant code, tests, types, installed dependency versions, project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` Stories), and existing patterns before leaving the repo; ask the user only for what exploration cannot establish. **Facts vs decisions**: establish facts from evidence, then ask the user to decide only user-owned intent, preferences, scope edges, and trade-offs. Evidence informs the recommendation, while the user owns the decision.
+Research is local-first, including facts **outside the repo**. Read the relevant code, tests, types, installed dependency versions, project docs (ADRs, `CONTEXT.md`, `PRODUCT.md`, existing `.loom/` Stories), and existing patterns before leaving the repo. Ask the user only for what exploration cannot establish. **Facts vs decisions**: establish facts from evidence, then ask the user to decide only user-owned intent, preferences, scope edges, and trade-offs. Evidence informs the recommendation; the user owns the decision.
 
 When correctness depends on a current version, API, CLI or host behavior, compatibility, dependency behavior, security guidance, or selection of external technology — or the reading is large enough to delegate — load [`RESEARCH.md`](RESEARCH.md). It owns external research, delegation, consent boundaries, and persistence with citations; findings stay pending until the owning ritual's bounded apply.
 
 ## Interview rules
 
-Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals.
-
 - **Quick check**: allowed only when no Full review trigger and no interview-only signal is present and the work is narrow, reversible, local, with a clear proof seam.
 - **Behavior check**: allowed only when no Full review trigger and no interview-only signal is present and the work changes observable behavior or carries meaningful assumptions/edge risk. Behavior check also requires its own premise and explicit non-goal criteria.
 - **Material**: any Full review trigger, or either interview-only signal `irreversible` or `large-user-owned-trade-off`, selects Material. Material is mandatory for domain modeling. Disagreement takes the higher depth; the interview never lowers what the trigger list fires.
+
+Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals.
 
 For Behavior check and Material, establish a premise before user questions: an observed failure or unmet outcome, a named cost owner, and why the current path—or one cheapest credible alternative—does not cover it. Investigate missing facts locally; ask only the user-owned premise decision. Show a premise verdict only when it rejects, reframes, or reduces scope; a routine pass stays invisible.
 
