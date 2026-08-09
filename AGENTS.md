@@ -2,7 +2,7 @@
 
 This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It points to canonical skills; it does not duplicate their boundary contracts.
 
-<!-- loom:begin version=v7.18.0 -->
+<!-- loom:begin version=v7.19.0 -->
 ## Loom engineering partner
 
 For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.md`. At every entry ask: **what is the next honest step?** Follow the dispatcher: explicit intent gets one recommended route and user-language reason; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear.

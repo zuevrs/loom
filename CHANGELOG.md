@@ -4,6 +4,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.19.0] - 2026-08-09
+
 ### Highlights
 
 - Host-agnostic core, enforced by name: the seven rituals, the interview canon, the authority contract, and the Story schema no longer name a specific host or its tooling. `Orca` in Story/authority prose became `execution context`, the packaged checker agent IDs in Grill became `packaged independent Spec and Standards checkers`, cleanup routes to "the cleanup ritual", and the boundary-owner list points at "host-specific adapter contracts" instead of enumerating `OMP.md`/`ORCA.md`. Adapters keep their own names inside their own files.
@@ -1852,7 +1854,9 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.17.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.18.0...HEAD
+[7.19.0]: https://github.com/zuevrs/loom/compare/v7.18.0...v7.19.0
+[7.18.0]: https://github.com/zuevrs/loom/compare/v7.17.0...v7.18.0
 [7.17.0]: https://github.com/zuevrs/loom/compare/v7.16.0...v7.17.0
 [7.16.0]: https://github.com/zuevrs/loom/compare/v7.15.0...v7.16.0
 [7.15.0]: https://github.com/zuevrs/loom/compare/v7.14.0...v7.15.0
