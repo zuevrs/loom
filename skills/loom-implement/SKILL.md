@@ -63,6 +63,7 @@ Load only the reference selected by a real signal. There is no editing-workflow 
 - Passing tests are not Verify.
 - "I am already editing this file, so..." is scope creep; return to the confirmed Ticket boundary.
 - Evidence never expands mutation authority.
+
 ## Next action
 
 Hand the boundary, diff identity, checks, and receipt to independent `loom-verify`. Update the pointer only for a recovery-worthy handoff. Stop this maker assignment.

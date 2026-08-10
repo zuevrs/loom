@@ -40,6 +40,7 @@ Evaluate evidence/authority against table below from lowest precedence upward. F
 <!-- loom:dispatcher-decisions:end -->
 
 User intent selects only honestly available effects; cannot skip prerequisites or broaden authority. Return exactly one table action and stop. Never chain, persist route, retain control, or display menu.
+
 ## Route output
 
 Action: output `Next honest step: <action> — <evidence/authority reason in user's language>`. Load that skill (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`) and disappear.
