@@ -75,20 +75,26 @@ When standalone **Grill** ends without planning materialization, offer the cheap
 
 ## Handoff to Plan
 
-After the interview, when the user chooses Plan materialization, provide this compact conversational/context-only handoff. It creates no durable artifact by default:
+After the interview, when the user chooses Plan materialization, provide this compact conversational/context-only handoff. It creates no durable artifact by default. The first six fields are settled interview evidence; fields 7–13 are Grill proposals that Plan must re-derive and confirm from current evidence, never copy:
 
 ```markdown
 Objective: <resolved outcome>
 Boundary: <resolved scope edge>
 Non-goals: <explicit exclusions>
+Evidence / premise: <observed failure or unmet outcome, named cost owner, and why the current path does not cover it>
 Decisions: <resolved user-owned trade-offs>
 Assumptions: <confirmed or correction-pending predictions>
-Proof seam: <deterministic verification boundary>
-Unresolved prerequisite: <none, or the blocking fact/decision — with its named owner when that owner is not the current interlocutor>
-Selected depth: <Quick check | Behavior check | Material>
+Recommended materiality: <Quick check | Behavior check | Material>
+Recommended artifact topology: <Story only | Story and Tickets | plus PRD when semantic overflow>
+Repository scope: <current root or named logical repository keys>
+Ticket outcome topology and blockers: <proposed vertical outcomes and their order>
+Runnable frontier / execution waves: <which Tickets are runnable now; what waits for a later gate>
+Proof seam and verification depth: <deterministic verification boundary and depth>
+Effect gates and stop conditions: <which effects need their own exact confirmation before they happen>
+Unresolved prerequisites: <none, or the blocking fact/decision — with its named owner when that owner is not the current interlocutor>
 ```
 
-Plan may ask only newly-created materialization choices, such as artifact inventory or placement; it must not reinterview resolved concerns. An unresolved prerequisite stays visible and blocks dependent materialization.
+Plan may ask only newly-created materialization choices, such as artifact inventory or placement; it must not reinterview resolved concerns. Plan confirms the proposal fields (7–13) from current evidence; a proposal the evidence cannot support returns to Grill. An unresolved prerequisite stays visible and blocks dependent materialization.
 
 When Plan is deferred past this session, the handoff may survive through the SESSION recovery pointer ([`../loom/SESSION.md`](../loom/SESSION.md)) under its own contract and explicit confirmation: the resolved essence goes in `Decision:` and `/loom plan` in `Next:`. The pointer stays a locating hint, never authority — the consuming Plan re-reads current artifacts and asks again whatever the pointer could not carry.
 

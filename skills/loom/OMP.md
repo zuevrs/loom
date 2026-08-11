@@ -18,7 +18,7 @@ After compaction, handoff, or worker replacement, reconstruct from artifacts, Gi
 
 ## Workers and decisions
 
-Every maker or checker dispatch outside Orca follows the host-neutral contract in [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md): one fresh maker per material Ticket and rework, the bounded briefing shape, the report shape, `decision-needed`, and the single-escalation rule. Load it before the first dispatch of a session. OMP adds only what is native here: workers arrive through OMP's session and worker facilities, and Orca — when present — coordinates dispatch/recovery without judging quality or choosing models.
+Every maker or checker dispatch outside Orca follows the host-neutral contract in [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md): one fresh maker per material Ticket and rework, the bounded briefing shape, the report shape, `decision-needed`, and the single-escalation rule. Load it before the first dispatch of a session. OMP adds only what is native here: workers arrive through OMP's session and worker facilities, and Orca — when present — coordinates dispatch/recovery without judging quality or choosing models. Dispatch happens inside confirmed waves: one exact wave gate covers only the listed runnable Tickets, and newly runnable Tickets wait for the next gate. Every worker decision need returns to the coordinator, who asks the user through the current `/loom` interaction.
 
 ## Bounded execution guidance
 
@@ -38,5 +38,5 @@ Worker discovery, briefing, reports, bounded retry of empty or malformed output,
 - Skill prose is guidance, not proof of compliance or authority.
 - OMP has no Loom extension, lifecycle callback, mutation guard, completion gate, or automatic retry.
 - No Goal, Advisor, watchdog, TTSR, recipe, permit, witness, or mutation-enforcement claim.
-- No worker chaining across Tickets; no maker self-approval; no fabricated custom-agent availability.
+- No worker chaining across Tickets (a wave dispatches only fresh makers); no maker self-approval; no fabricated custom-agent availability.
 - No project or external write follows merely from compaction, worker completion, APPROVE, or a host notification.

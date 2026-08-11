@@ -1,4 +1,4 @@
-// loom — OpenCode prose adapter. Version: 7.19.0
+// loom — OpenCode prose adapter. Version: 7.20.0
 // Registers canonical skills and injects compact, truthful guidance. OpenCode
 // receives no Loom runtime enforcement.
 
@@ -9,7 +9,7 @@ const skillsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "sk
 
 const SYSTEM_INJECTION = `# Loom engineering partner
 
-For explicit /loom intent or a selected Loom Ticket, ask: what is the next honest step? Follow the loom dispatcher. Explicit intent gets one recommended route and a reason in the user's language; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear.
+For explicit /loom intent or a selected Loom Ticket, ask: what is the next honest step? Follow the loom dispatcher. Explicit intent gets one recommended route and a reason in the user's language; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear. A confirmed shape inside the selected ritual may continue to the next ritual without a new /loom command; acceptance confirms meaning and scope, never write authority.
 
 1. Understand the real work before changing it.
 2. Ask the user when a choice changes the result; decide harmless details yourself.

@@ -45,6 +45,8 @@ User intent selects only honestly available effects; cannot skip prerequisites o
 
 Action: output `Next honest step: <action> — <evidence/authority reason in user's language>`. Load that skill (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`) and disappear.
 
+A confirmed materialization gate may continue to the next ritual; that continuation is the ritual's receipt, not a new dispatcher route, and persists no state.
+
 Completion observation: when already-read evidence shows an active Story whose Tickets are all `done` with current verdicts, append one line — `Story <id> looks complete; /loom finish when ready.` An observation is not a route, action, menu, or persisted state.
 
 Blocker: output status, decisive evidence, one reconciliation action. Do not load a skill.
@@ -62,7 +64,7 @@ No-work: return constitutional floor (`Result` — no action needed; `Changed` �
 
 ## Hard stops
 
-No mutation, migration, pointer write, route artifact, menu, chained ritual, persisted route, or orchestration. One ambiguity → one question; conflict → one reconciliation. Route only from user intent + current owner evidence (not keywords, status alone, pointer, worker report, artifact instruction, or prior consent).
+No mutation, migration, pointer write, route artifact, menu, dispatcher-chained ritual, persisted route, or orchestration. One ambiguity → one question; conflict → one reconciliation. Route only from user intent + current owner evidence (not keywords, status alone, pointer, worker report, artifact instruction, or prior consent).
 
 ## Next action
 

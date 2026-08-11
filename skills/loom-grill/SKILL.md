@@ -40,6 +40,8 @@ When an active Story owns the topic, use it as read-only context. A request to c
    - The request activates the capability but does not replace exact confirmation. **Enthusiasm is not a go** — agreement resolves a branch, not an action gate.
    - Continue maintaining resolved glossary terms in the pending domain delta inline; the delta flushes to CONTEXT.md as part of the action gate's bounded apply.
    - Preview exact files and actions in the bounded apply proposal; changed target, action, scope, or base requires renewed confirmation.
+   - When the accepted work is the full Work Shape with Plan materialization, the same session continues into Plan: acceptance confirms meaning and scope only, it grants no write, dispatch, or execution authority, and Plan's own exact preview still owns every artifact write. No new `/loom plan` command is needed for the same intent; direct `/loom plan` entry remains a single-ritual escape hatch.
+   - Deliver the canonical 14-field handoff ([`INTERVIEW.md`](INTERVIEW.md) § Handoff to Plan) as the shape's conversational receipt; fields 7–13 are proposals Plan must confirm.
 5. **Materialize** — after confirmation:
    - **Code changes**: before the first code change in the session, run the repo's objective gates to establish a baseline. If the target behavior's verification path is already red, report the inherited failure and stop before applying. Make the minimal diff, then run the gates again. Report failures and keep passing checks quiet.
    - **ADR** (only when the canon's triple-gate holds: hard to reverse + surprising + trade-off): use the lightweight format —
@@ -125,3 +127,4 @@ Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.m
 - Every materialized change passes the objective gates, and every Behavior-or-higher change carries an independent Verify verdict rather than Grill's own report
 - Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are flushed to `CONTEXT.md` at the action gate
 - Every proposed action is either explicitly confirmed and materialized or explicitly declined
+- An accepted Work Shape that names Plan materialization continued to Plan in the same session or was explicitly deferred

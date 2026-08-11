@@ -7,7 +7,7 @@ const root=resolve(import.meta.dirname,"..");
 const read=path=>readFileSync(resolve(root,path),"utf8");
 const normalize=text=>text.toLowerCase().replace(/\[[^\]]+\]\([^)]*\)/g," ").replace(/[^a-z0-9]+/g," ").trim();
 const sections=text=>{const result={};let heading="preamble",body=[];for(const line of text.split("\n")){const match=line.match(/^## (.+)$/);if(match){result[normalize(heading)]=normalize(body.join(" "));heading=match[1];body=[];}else body.push(line);}result[normalize(heading)]=normalize(body.join(" "));return result;};
-const fields=["Objective","Boundary","Non-goals","Decisions","Assumptions","Proof seam","Unresolved prerequisite","Selected depth"];
+const fields=["Objective","Boundary","Non-goals","Evidence / premise","Decisions","Assumptions","Recommended materiality","Recommended artifact topology","Repository scope","Ticket outcome topology and blockers","Runnable frontier / execution waves","Proof seam and verification depth","Effect gates and stop conditions","Unresolved prerequisites"];
 const markdownLinks=text=>[...text.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(([,destination])=>destination.trim().replace(/^<|>$/g,""));
 const localMarkdownLinks=text=>markdownLinks(text).filter(destination=>{
   const path=destination.split(/[?#]/,1)[0];
@@ -30,6 +30,10 @@ function ownershipModel(planText=read("skills/loom-plan/GRILL.md"),interviewText
   assert.match(handoff,/conversation context evidence only.*no durable artifact by default/);
   assert.match(handoff,/ask only newly created materialization choices/);
   assert.doesNotMatch(handoff,/ask one recommended question/);
+  assert.match(interviewText,/Grill proposals that Plan must re-derive and confirm/i,"shape fields 7-13 are proposals");
+  assert.match(planText,/re-derive each from current evidence and confirm/i,"Plan confirms proposals, never copies");
+  assert.match(grillText,/new `\/loom plan` command/i,"shape acceptance continues to Plan in-session");
+  assert.match(grillText,/grants no write, dispatch, or execution authority/i,"shape acceptance is meaning only");
   assert.match(normalize(planText),/story prd (and )?ticket authority remains plan only grill never writes them/);assert.doesNotMatch(normalize(interviewText),/grill may write story prd|grill may write them/);
 }
 
@@ -41,6 +45,9 @@ test("ownership probe rejects Grill-held Plan authority",()=>{const mutated=norm
 test("ownership probe rejects a re-enumerated handoff copy in Plan",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("## Plan exit","- Objective\n\n## Plan exit")),/re-enumerates Objective/));
 test("ownership probe rejects a dropped canonical-owner reference",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("[`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md) § Handoff to Plan","the interview canon")),/references the canonical handoff owner/));
 for(const field of fields)test(`ownership probe rejects missing ${field} handoff field`,()=>{const mutated=read("skills/loom-grill/INTERVIEW.md").replace(new RegExp("^"+field+": .*\\n","m"),"");assert.notEqual(mutated,read("skills/loom-grill/INTERVIEW.md"),`mutation removed ${field}`);assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md"),mutated),/exactly the required fields/);});
+test("ownership probe rejects Plan copying shape proposals",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md").replace("re-derive each from current evidence and confirm it","copy each field verbatim")),/Plan confirms proposals, never copies/));
+test("ownership probe rejects Grill write authority on shape acceptance",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md"),read("skills/loom-grill/INTERVIEW.md"),read("skills/loom-grill/SKILL.md").replace("grants no write, dispatch, or execution authority","grants write and dispatch authority")),/shape acceptance is meaning only/));
+test("ownership probe rejects missing in-session continuation",()=>assert.throws(()=>ownershipModel(read("skills/loom-plan/GRILL.md"),read("skills/loom-grill/INTERVIEW.md"),read("skills/loom-grill/SKILL.md").replace("No new `/loom plan` command","The user must run `/loom plan`")),/shape acceptance continues to Plan in-session/));
 
 
 test("every local Markdown link in the Grill interview canon resolves",()=>{

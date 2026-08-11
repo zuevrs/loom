@@ -6,6 +6,10 @@ Start here for the terms users see. Project-specific language belongs in the rep
 
 **Loom** — An engineering partner for coding agents. Use `/loom`; it recommends the next honest step, keeps small work small, preserves meaning when work grows, and asks for evidence before completion. It is not a workflow engine, scheduler, unattended runner, auto-merge bot, hosted service, or issue-tracker replacement.
 
+**Work Shape** — The fourteen-field conversational handoff Grill produces when the user chooses Plan materialization (see the Grill interview canon). Fields 7–13 are Grill proposals that Plan must re-derive and confirm; acceptance confirms meaning and scope, never write authority.
+
+**Execution wave** — One exact gate covering the current runnable frontier of a Story: every Ticket whose blockers are done and whose repository/resource scope does not conflict. Newly runnable Tickets wait for the next gate; wave completion grants no Finish or Publish authority.
+
 **Story** — A compact destination and lifecycle index at `.loom/<story-id>/STORY.md`. It records intent, success, and decisions for material work. Its status is `active`, `blocked`, or `done`.
 
 **PRD** — An optional product/build contract at `.loom/<story-id>/PRD.md`. It is earned when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract; count, size, duration, and repository breadth alone do not earn it.

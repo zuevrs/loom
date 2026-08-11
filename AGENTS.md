@@ -2,10 +2,10 @@
 
 This file demonstrates the compact managed block that Loom Setup copies from the installed tree. It points to canonical skills; it does not duplicate their boundary contracts.
 
-<!-- loom:begin version=v7.19.0 -->
+<!-- loom:begin version=v7.20.0 -->
 ## Loom engineering partner
 
-For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.md`. At every entry ask: **what is the next honest step?** Follow the dispatcher: explicit intent gets one recommended route and user-language reason; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear.
+For explicit `/loom` intent or a selected Loom Ticket, load `skills/loom/SKILL.md`. At every entry ask: **what is the next honest step?** Follow the dispatcher: explicit intent gets one recommended route and user-language reason; bare Workspace entry renders its read-only dashboard and waits. Load at most one action, then disappear. A confirmed shape inside the selected ritual may continue to the next ritual without a new command; acceptance confirms meaning and scope, never write authority.
 
 1. Understand the real work before changing it.
 2. Ask the user when a choice changes the result; decide harmless details yourself.

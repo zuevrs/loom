@@ -18,6 +18,7 @@ Assume unless told otherwise: existing CSV header order is frozen
 Acceptance: export of 100k rows stays under 200MB RSS; archived rows present when filter is off
 Out of scope: the download UI, the retention job
 Repository: api @ feat/csv-export, base 4c5d6e7 — work only here
+Wave: gate covering Tickets 03, 05 — never start a Ticket outside it
 Starting state: clean tree
 Routing hint: Behavior (host may apply its role mapping; otherwise use host default)
 Checks that must be able to go red: npm test -- export, npm run lint
@@ -27,7 +28,7 @@ Stuck or the contract is silent? Ask me before inventing — quote the line you 
 Stop when: acceptance met and checks captured, or blocked twice on the same error
 ```
 
-Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; host-specific escalation applies only when the host supports it.
+Fields that never drop out: role, routing class/hint, contract pointer, acceptance, repository/base, confirmed wave gate, red-capable checks, allowed writes, forbidden effects, escalation path, and stop condition. A worker that guesses one guesses in your name. A maker never asks the user directly: every question returns as `decision-needed` to the coordinator, and the answer arrives as a bounded packet. A maker stops for `decision-needed`, blocker, contract/PRD contradiction, material signal, or failure beyond one obvious bounded local check repair; host-specific escalation applies only when the host supports it.
 
 ## The report
 

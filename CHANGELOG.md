@@ -4,6 +4,30 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.20.0] - 2026-08-11
+
+### Highlights
+
+- The Grill handoff grew from eight to fourteen fields and now carries the full Work Shape: evidence/premise, recommended materiality, artifact topology, repository scope, ticket outcome topology and blockers, runnable frontier/execution waves, proof seam with verification depth, and effect gates, alongside the settled interview evidence. Fields 7–13 are Grill proposals that Plan must re-derive and confirm.
+- Accepting a shape that names Plan materialization continues the same session into Plan without a new `/loom plan` command; acceptance confirms meaning and scope only, and Plan's exact preview still owns every write.
+- Attended wave coordination: one exact wave gate starts the full current runnable frontier (blockers done, no repository/resource conflict); newly runnable Tickets wait for the next gate. Every worker decision need returns to the coordinator and reaches the user through the current `/loom` interaction as `decision-needed`; a wave never inherits Finish or Publish authority, and `worker_done` stays evidence only.
+
+### Breaking changes
+
+- None. The fourteen-field handoff stays conversational/context-only and creates no durable artifact; ritual names, managed-block contracts, and carrier behavior are unchanged.
+
+### Migration steps
+
+- None.
+
+### Adapter impacts
+
+- Prose updates to the OMP and Orca adapters and to the host-neutral worker briefing; no carrier shape or metadata changed.
+
+### Safety changes
+
+- No invariant changed. The wave gate never grants Finish or Publish authority, worker decisions reach the user only through the current `/loom` interaction, `worker_done` remains evidence only, and a confirmed wave is not persisted state.
+
 ## [7.19.0] - 2026-08-09
 
 ### Highlights
@@ -1854,8 +1878,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.18.0...HEAD
-[7.19.0]: https://github.com/zuevrs/loom/compare/v7.18.0...v7.19.0
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.20.0...HEAD
+[7.20.0]: https://github.com/zuevrs/loom/compare/v7.19.0...v7.20.0
 [7.18.0]: https://github.com/zuevrs/loom/compare/v7.17.0...v7.18.0
 [7.17.0]: https://github.com/zuevrs/loom/compare/v7.16.0...v7.17.0
 [7.16.0]: https://github.com/zuevrs/loom/compare/v7.15.0...v7.16.0

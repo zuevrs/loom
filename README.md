@@ -8,7 +8,7 @@
 
 Loom is an engineering partner for coding agents. It helps choose the next honest step, keeps small work small, preserves context when work grows, and requires evidence before completion.
 
-Use one entry point: `/loom`. Add what you want in natural language; Loom recommends a route and explains why. Its internal actions are not a sequence you must learn.
+Use one entry point: `/loom`. Add what you want in natural language; Loom recommends a route and explains why. Its internal actions are not a sequence you must learn — once you accept the recommended shape, the same session continues through the rituals without re-entering `/loom`.
 
 ## How it works
 
@@ -18,7 +18,7 @@ Use one entry point: `/loom`. Add what you want in natural language; Loom recomm
 - Verification is independent from the maker. Its depth follows the changed boundary: **Quick check**, **Behavior check**, or **Full review**.
 - Completion never silently grants commit, push, review, merge, release, or cleanup.
 
-The question at every entry is simple: **what is the next honest step?** Loom may recommend discussing, planning, implementing, verifying, or shipping—but it loads only the action that fits now. Ship means verified local completion plus an explicit decision about durable capture; local Finish and remote Publish remain separate attended boundaries.
+The question at every entry is simple: **what is the next honest step?** Loom may recommend discussing, planning, implementing, verifying, or shipping—but it loads only the action that fits now; a confirmed shape inside that action may continue to the next ritual in the same session without a new command. Ship means verified local completion plus an explicit decision about durable capture; local Finish and remote Publish remain separate attended boundaries.
 
 ## Core rules
 

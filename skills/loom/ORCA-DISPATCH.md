@@ -35,10 +35,10 @@ The claim is advisory, which is exactly why it is written before the maker start
 
 Any Workspace Ticket, including a one-repository Ticket, uses a coherent Orca lane; missing native evidence stops rather than falling back to raw Git.
 
-**A maker that hits real uncertainty asks — it does not decide quietly.** The operator can see every lane's terminal, so the question reaches a human either way; what differs is where the answer lands. Route by materiality, using the classifiers already in `STORY.md` § Adaptive continuation:
+**A maker that hits real uncertainty returns `decision-needed` — it never decides quietly and never asks the user directly.** Every question routes back to the coordinator with one recommended question and its consequences; the coordinator asks the user through the current `/loom` interaction and returns the answer as a bounded packet. An answer that lives only in a terminal dies with the session. Route by materiality, using the classifiers already in `STORY.md` § Adaptive continuation:
 
-- **Not material** — Story Intent and Success, Ticket acceptance, public and inter-service contracts, repository scope, architecture, data path, and security risk all stay as written. The maker asks in its own terminal with a recommendation named, and **writes the answer into the Ticket's `## Log` before continuing**. An answer that lives only in a terminal dies with the session.
-- **Material** — any of those boundaries moves. The maker raises a native escalation to the coordinator and stops that assignment. The coordinator owns the amendment: it previews the smallest Story/PRD/Ticket/ADR delta, takes confirmation, and only then redispatches. A boundary change settled inside one worker is a decision the Story never learns about.
+- **Not material** — Story Intent and Success, Ticket acceptance, public and inter-service contracts, repository scope, architecture, data path, and security risk all stay as written. The coordinator returns the answer to the maker, who **writes it into the Ticket's `## Log` before continuing**.
+- **Material** — any of those boundaries moves. The coordinator owns the amendment: it previews the smallest Story/PRD/Ticket/ADR delta, takes confirmation, and only then redispatches. A boundary change settled inside one worker is a decision the Story never learns about.
 - **Uncertain which** — treat it as material. Guessing low costs an amendment nobody agreed to; guessing high costs one message.
 
 Pause only dependent work. Never guess through `needs-info`, and never let silence become a default: a question with no answer yet is a blocked assignment, not permission to pick.
@@ -50,6 +50,10 @@ Each dispatch is one bounded Ticket or rework assignment; the assignment and rep
 Write native card comments/status only at durable boundaries: confirmed decision or repository addition, assignment accepted or blocked, checks captured, Verify verdict, or explicit handoff. Do not comment for heartbeats, waits, scans, unchanged resumes, background completion, or other live events. A background `worker_done` stays quiet until reconciled into a durable result.
 
 Board status is a durable boundary too, and it is what the operator actually looks at. Move the lane's `workspace-status` when the lane's real state changes — in particular to `in-review` once Publish has proven a hosted review exists for it. A board still showing `in-progress` for work that is out for review makes the operator open lanes to find out what is happening, which is the one thing the board exists to prevent. Read the project's configured status set rather than assuming the defaults.
+
+## Wave gate
+
+One exact wave confirmation starts the full current runnable frontier: every Ticket whose blockers are done and whose repository/resource scope does not conflict. The gate preview lists exactly the Tickets, repositories, and bases it covers; confirmation permits only that inventory. Newly runnable Tickets wait for the next gate and are never added to a confirmed wave; Tickets created by an amendment enter only through a new gate. `worker_done`, APPROVE, or wave completion never extends the gate, and a wave never inherits Finish or Publish authority.
 
 ## Review feedback
 

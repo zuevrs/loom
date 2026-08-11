@@ -27,6 +27,18 @@ test("Grill code materialization cannot self-verify a behavior change",()=>{
   assert.match(constitution,/maker never lowers its own row/i,"depth classification is mechanical, not maker-discretionary");
 });
 
+test("Grill shape gate continues to Plan without granting write authority",()=>{
+  const grill=read("skills/loom-grill/SKILL.md"),interview=read("skills/loom-grill/INTERVIEW.md"),plan=read("skills/loom-plan/GRILL.md"),constitution=read("skills/loom/CONSTITUTION.md");
+  assert.match(grill,/new `\/loom plan` command/i,"shape acceptance continues in-session");
+  assert.match(grill,/grants no write, dispatch, or execution authority/i,"shape acceptance is meaning only");
+  assert.match(interview,/Grill proposals that Plan must re-derive and confirm/i,"fields 7-13 are proposals");
+  assert.match(plan,/re-derive each from current evidence and confirm/i,"Plan confirms proposals");
+  assert.match(constitution,/confirmed materialization gate inside the selected ritual may continue/i,"constitution owns the continuation");
+  assert.match(constitution,/never grants write, dispatch, or execution authority/i,"continuation grants no authority");
+  assert.match(dispatcher,/not a new dispatcher route/i,"dispatcher stays single-route");
+  assert.match(dispatcher,/dispatcher-chained ritual/i,"dispatcher never chains rituals itself");
+});
+
 test("canonical owners are referenced without duplicate authority",()=>{
   const implement=read("skills/loom-implement/SKILL.md"),orca=read("skills/loom/ORCA.md"),ticket=read("skills/loom-verify/TICKET-RECORD.md");
   assert.match(implement,/AUTHORITY\.md.*canonical owner/is);

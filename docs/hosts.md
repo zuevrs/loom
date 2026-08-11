@@ -62,7 +62,7 @@ The plugin packages Loom skills and review prompts where Codex supports them. It
 
 Verification uses independent Spec and Standards judgment over the same current diff, base, acceptance criteria, and check evidence. Reviewers report; they do not edit or approve their own work. Both verdicts must be current before `done`. Host-specific model choices are delivery hints, and user configuration wins.
 
-**Orca runs execution; Loom keeps meaning.** Orca owns repositories, worktrees, cards, tasks, dispatches, terminals, and their liveness. Loom keeps the Story, PRD, Tickets, and current Verify record. The user creates the coordinator worktree/card; work sharing respects blockers and shared resources; worker completion never marks the Story or Ticket done. Finish and Publish stay explicit attended boundaries. See [`orca.md`](orca.md).
+**Orca runs execution; Loom keeps meaning.** Orca owns repositories, worktrees, cards, tasks, dispatches, terminals, and their liveness. Loom keeps the Story, PRD, Tickets, and current Verify record. The user creates the coordinator worktree/card; work sharing respects blockers and shared resources; worker completion never marks the Story or Ticket done. Finish and Publish stay explicit attended boundaries. One exact wave confirmation starts the runnable non-conflicting frontier; newly runnable Tickets wait for the next gate, and wave completion grants no Finish or Publish authority. See [`orca.md`](orca.md).
 
 Loom ships no unattended route, scheduler, runner, or recipes. Use the host's native automation and keep it finite, budgeted, minimally credentialed, and report-only. See [`unattended.md`](unattended.md).
 
