@@ -31,11 +31,10 @@ function reference(text=frontier){
 }
 
 const obligations=[
-  ["simple no activation","preamble",[/simple question.*ordinary ambiguity.*more detail/],[/does not activate/],[/only when observed complexity/]],
-  ["explicit complex signal activation","preamble",[/observed complexity/],[/decision depends.*another decision|unresolved fact lookup|multiple boundaries.*coupled|explicit prerequisite/],[/simple question.*does not activate/]],
-  ["frontier rounds of independent questions","frontier",[/frontier in rounds/],[/every mutually independent.*user owned.*decision question whose prerequisites are settled/],[/numbered.*each with its own recommendation/]],
-  ["dependent questions never share a round","frontier",[/one answer could change the other/],[/never share a round/],[/independence is in doubt.*exactly one visible question at a time/]],
-  ["fallback on misfire","frontier",[/activation misfires.*round structure does not fit/],[/abandon the round immediately.*fall back to sequential one question cadence/],[/activation misfires when.*answering one changes the other share a round.*question appears before its prerequisite is resolved/]],
+  ["default frontier cadence","preamble",[/default interview cadence/],[/frontier is every user owned decision whose prerequisites are settled/],[/frontier rounds are the default.*sequential one question.*fallback.*never the default/]],
+  ["frontier rounds of independent questions","frontier",[/work in rounds/],[/every mutually independent.*user owned.*decision question whose prerequisites are settled/],[/numbered.*each with its own recommendation.*then waits for the user s answers/]],
+  ["dependent questions never share a round","frontier",[/one answer could change the other/],[/never share a round/],[/independence is in doubt.*sequential one question fallback/]],
+  ["fallback on misfire","frontier",[/round misfire or independence doubt/],[/sequential one question cadence is a fallback only/],[/never the default/]],
   ["round recomputation","frontier",[/recompute the frontier/],[/from each round s answers/],[/resolved term into the pending delta before the next round/]],
   ["max one worker","frontier",[/frontier/],[/at most one agent owned.*fact lookup/],[/at a time/]],
   ["prerequisite withholding","frontier",[/depends on.*unsettled fact.*prior decision/],[/withhold every decision question/],[/resolve prerequisites in order/]],
@@ -48,8 +47,11 @@ const obligations=[
   ["worker cannot materialize","frontier",[/lookup result/],[/evidence only/],[/materialize code.*documentation/]],
   ["worker cannot grant authority","frontier",[/lookup result/],[/evidence only/],[/grant authority/]],
   ["ephemeral no persistence","frontier",[/frontier.*conversation only/],[/fresh run starts empty/],[/do not create.*persisted workflow state/]],
+  ["shared-understanding gate","frontier",[/before any materialization gate.*plan handoff.*action/],[/confirm that the user shares the resolved understanding/],[/do not proceed until they confirm/]],
+  ["resolved questions stated","frontier",[/stating the resolved questions and their answers/],[/stating the resolved questions and their answers/],[/stating the resolved questions and their answers/]],
+  ["quick no-question exception","frontier",[/quick check with no admissible questions/],[/do not add a routine confirmation/],[/handoff or action is requested/]],
   ["safe blocker","frontier",[/lookup.*unavailable.*interrupted.*times out.*conflicting evidence/],[/stop the dependent branch.*report.*blocker/],[/do not invent.*fact.*answer.*verdict/]],
-  ["conditional confirmation","frontier",[/decision boundary requires materialization.*explicit confirmation/],[/ask an end confirmation only when/],[/do not add a routine confirmation/]],
+  ["exact materialization consent","frontier",[/materialization boundary.*exact current consent packet/],[/bound to the preview and effects/],[/never a worker callback/]],
   ["unchanged output contract","frontier",[/frontier affects the result/],[/result.*changed.*check.*next action output contract/],[/add no frontier field.*artifact.*digest.*workflow status/]],
 ];
 
@@ -64,7 +66,7 @@ function assertObligationGroups(text=frontier){
 }
 
 function assertLoadedCorpus(skillText=skill,frontierText=frontier,canonText=canon){
-  assert.match(normalize(skillText),/when explicit complexity appears load and apply decision frontier(?: md)? ordinary grill does not activate/);
+  assert.match(normalize(skillText),/frontier rounds are the default cadence.*load and apply decision frontier(?: md)? for every grill interview/);
   assertObligationGroups(frontierText);
   const loaded=normalize(`${skillText}\n${frontierText}\n${canonText}`);
   assert.match(loaded,/story prd and ticket writes always belong to plan/);
@@ -88,10 +90,13 @@ test("structural-only semantic probe tolerates equivalent wording",()=>{
 });
 
 const mutations=[
-  ["activation signal",text=>text.replace("only when observed complexity makes Grill's ordinary sequential cadence insufficient","when Grill wants more detail")],
-  ["simple no-op",text=>text.replace("A simple question, ordinary ambiguity, or more detail does not activate it.","A simple question can activate it.")],
-  ["visible question bound",text=>text.replace("Two questions where one answer could change the other never share a round; when independence is in doubt, fall back to exactly one visible question at a time.","Ask every open question in one round.")],
+  ["default cadence",text=>text.replace("Use this discipline as Grill's default interview cadence whenever the frontier is non-empty","Use this discipline only when complexity is observed")],
+  ["frontier settled-prerequisite scope",text=>text.replace("The frontier is every user-owned decision whose prerequisites are settled","The frontier is only used for complex decisions")],
+  ["frontier round default",text=>text.replace("Work in rounds.","Ask one question at a time.")],
   ["round recommendation",text=>text.replace("numbered, each with its own recommendation","numbered")],
+  ["round waits",text=>text.replace("then waits for the user's answers","then continues without waiting")],
+  ["sequential fallback",text=>text.replace("Sequential one-question cadence is a fallback only for a round misfire or independence doubt, never the default.","Sequential one-question cadence is the default.")],
+  ["dependent question bound",text=>text.replace("Two questions where one answer could change the other never share a round; when independence is in doubt, use the sequential one-question fallback.","Ask dependent questions together.")],
   ["round recomputation",text=>text.replace("Recompute the frontier from each round's answers and integrate every resolved term into the pending delta before the next round.","Continue to the next round.")],
   ["worker bound",text=>text.replace("at most one agent-owned, bounded fact lookup at a time","agent-owned fact lookup")],
   ["dependency ordering",text=>text.replace("Resolve prerequisites in order.","Resolve prerequisites when convenient.")],
@@ -102,11 +107,13 @@ const mutations=[
   ["authority prohibition: mutate",text=>text.replace("mutate Story/PRD/Ticket or workflow state, ","")],
   ["authority prohibition: publish",text=>text.replace("publish an effect, ","")],
   ["authority prohibition: materialize",text=>text.replace("materialize code or documentation, ","")],
-  ["authority prohibition: grant",text=>text.replace(", or grant authority","" )],
+  ["authority prohibition: grant",text=>text.replace(", or grant authority","")],
   ["persistence prohibition",text=>text.replace("Do not create a frontier file, session field, recovery pointer, status, or other persisted workflow state; a fresh run starts empty.","A frontier file may preserve the discussion.")],
+  ["shared-understanding gate",text=>text.replace("explicitly confirm that the user shares the resolved understanding — stating the resolved questions and their answers — and do not proceed until they confirm","proceed without confirming shared understanding")],
+  ["resolved questions stated",text=>text.replace("stating the resolved questions and their answers","stating a one-line summary")],
+  ["quick confirmation exception",text=>text.replace("For a Quick check with no admissible questions, do not add a routine confirmation; that narrow exception does not waive the shared-understanding gate when a handoff or action is requested.","Always add a routine confirmation.")],
   ["safe blocker",text=>text.replace("Do not invent a fact, answer, or verdict.","Use the best available answer.")],
-  ["confirmation requirement",text=>text.replace("Ask an end confirmation only when that decision boundary requires materialization or explicit confirmation","End without confirmation")],
-  ["confirmation not routine",text=>text.replace("do not add a routine confirmation to every Grill","add a routine confirmation to every Grill")],
+  ["materialization consent",text=>text.replace("A materialization boundary still requires an exact current consent packet bound to the preview and effects; it is never a worker callback.","Materialization may use a worker callback.")],
   ["output labels",text=>text.replace("Preserve the constitutional `Result` / `Changed` / `Check` / `Next action` output contract.","Use an output summary.")],
 ];
 

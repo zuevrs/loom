@@ -11,7 +11,7 @@ Load and follow [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHOR
 
 ## Trigger
 
-Enter at `/loom`, explicit Loom intent, or a request whose next honest action is a Loom ritual. The dispatcher reports a route, no action, or blocker; it performs no ritual effect and owns no action receipt.
+Enter at `/loom`, explicit Loom intent, or a request whose next honest action is a Loom ritual. The dispatcher reports a route, no action, or blocker; it performs no ritual effect and owns no receipt.
 
 ## Inputs
 
@@ -45,9 +45,9 @@ User intent selects only honestly available effects; cannot skip prerequisites o
 
 Action: output `Next honest step: <action> — <evidence/authority reason in user's language>`. Load that skill (`loom-init`, `loom-grill`, `loom-plan`, `loom-implement`, or `loom-verify`) and disappear.
 
-A confirmed materialization gate may continue to the next ritual; that continuation is the ritual's receipt, not a new dispatcher route, and persists no state.
+A confirmed materialization gate may continue to the next ritual; that continuation is the ritual's receipt, not a new dispatcher route, and persists no state. Each transition presents a receipt and next-ritual preview, then waits for one confirmation.
 
-Completion observation: when already-read evidence shows an active Story whose Tickets are all `done` with current verdicts, append one line — `Story <id> looks complete; /loom finish when ready.` An observation is not a route, action, menu, or persisted state.
+Completion observation: when already-read evidence shows an active Story with all Tickets `done` and current verdicts, append `Story <id> looks complete; /loom finish when ready.` An observation is not a route, action, menu, or persisted state.
 
 Blocker: output status, decisive evidence, one reconciliation action. Do not load a skill.
 

@@ -70,11 +70,33 @@ test("a decision owned by an absent party parks as a named-owner prerequisite",(
 const canonMutations=[["Behavior check non-goal","Behavior check also requires its own premise and explicit non-goal criteria","Behavior check has no non-goal criterion."],["Material domain modeling","Material is mandatory for domain modeling","Material does not require domain modeling."],...INTERVIEW_SIGNALS.map(signal=>["Material "+signal+" interview signal","`"+signal+"`","removed"]),["single trigger-list ownership","never copied or redefined here","listed here as its own second copy"],["depth derivation","Depth is the verification classification from","Depth is selected here independently of"],["never-lowers rule","Disagreement takes the higher depth; the interview never lowers what the trigger list fires","The interview may lower a fired classification"],["premise coupling","For Behavior check and Material, establish a premise","Behavior check and Material may skip the premise"],["alternative rule","Check one cheapest credible alternative","Skip alternatives"],["stop/readback","Exit when the selected depth's readback floor is met and no admissible user-owned question remains","Exit whenever convenient"],["authority","Grill owns the interview; Plan consumes its handoff and owns only inbound triage","Grill owns Plan artifacts"]];
 for(const [name,needle,replacement] of canonMutations)test("scenario evaluator rejects "+name+" mutation",()=>{const changed=canon.replaceAll(needle,replacement);assert.notEqual(changed,canon);assert.throws(()=>{const policy=parseContract(changed,constitution);assert.equal(policy.authority(),true);assertScenarios(policy);});});
 for(const trigger of FULL_REVIEW_TRIGGERS)test("scenario evaluator rejects removed Full review trigger: "+trigger,()=>{const row=constitution.split("\n").find(line=>line.includes("**Full review**"));assert.ok(row,"Full review row present");const changed=constitution.replace(row,row.replace(trigger,"removed"));assert.notEqual(changed,constitution);assert.throws(()=>assertScenarios(parseContract(canon,changed)));});
-test("authority, Plan ownership, handoff, and frontier remain unchanged",()=>{assert.match(plain(skill),/story, prd, and ticket writes always belong to plan/);assert.match(plain(canon),/objective:.*boundary:.*non-goals:.*evidence \/ premise:.*decisions:.*assumptions:.*recommended materiality:.*recommended artifact topology:.*repository scope:.*ticket outcome topology and blockers:.*runnable frontier \/ execution waves:.*proof seam and verification depth:.*effect gates and stop conditions:.*unresolved prerequisites:/s);assert.match(plain(canon),/recommended materiality: <quick check \| behavior check \| material>/);assert.match(plain(frontier),/every mutually independent, user-owned, load-bearing decision question whose prerequisites are settled/);assert.match(plain(frontier),/never share a round/);assert.match(plain(frontier),/resolve prerequisites in order/);assert.match(plain(frontier),/do not create a frontier file, session field, recovery pointer, status/);assert.match(plain(frontier),/maker never self-approves/);});
-test("the default cadence stays one question and the frontier round is the only sanctioned batch",()=>{
-  assert.match(plain(canon),/keep every `ask` call to one question by default/);
-  assert.match(plain(canon),/the only sanctioned batch is a frontier round of mutually independent questions/);
-  assert.match(plain(canon),/whose answer could change another never shares its round/);
-  assert.throws(()=>assert.match(plain(canon.replace("Keep every `ask` call to one question by default.","Ask freely.")),/keep every `ask` call to one question by default/));
-  assert.throws(()=>assert.match(plain(canon.replaceAll(/[Tt]he only sanctioned batch is a frontier round of mutually independent questions/g,"Batching is a routine cadence")),/the only sanctioned batch is a frontier round of mutually independent questions/));
+test("authority, Plan ownership, handoff, and frontier remain unchanged",()=>{assert.match(plain(skill),/story, prd, and ticket writes always belong to plan/);assert.match(plain(canon),/objective:.*boundary:.*non-goals:.*evidence \/ premise:.*decisions:.*assumptions:.*recommended materiality:.*recommended artifact topology:.*repository scope:.*ticket outcome topology and blockers:.*runnable frontier \/ execution waves:.*proof seam and verification depth:.*effect gates and stop conditions:.*unresolved prerequisites:/s);assert.match(plain(canon),/recommended materiality: <quick check \| behavior check \| material>/);assert.match(plain(frontier),/every mutually independent, user-owned decision question whose prerequisites are settled/);assert.match(plain(frontier),/sequential one-question cadence is a fallback.*never the default/);});
+
+test("frontier rounds are the default cadence and sequential questions are fallback-only",()=>{
+  assert.match(plain(canon),/default cadence.*frontier round/);
+  assert.match(plain(canon),/every mutually independent.*settled-prerequisite.*user-owned question/);
+  assert.match(plain(canon),/number each.*recommendation.*wait and recompute/);
+  assert.match(plain(canon),/sequential one-question cadence only as the fallback/);
+  const noDefault=plain(canon
+    .replaceAll(/the default cadence is a frontier round[\s\S]*?use sequential one-question cadence only as the fallback[^.]*\./gi,"Ask one question at a time.")
+    .replaceAll(/the default cadence for every interview is frontier rounds[^.]*\./gi,"Ask one question at a time."));
+  assert.doesNotMatch(noDefault,/default cadence.*frontier round/);
+  const noFallback=plain(canon.replaceAll(/use sequential one-question cadence only as the fallback[^.]*\./gi,"Ask all questions together."));
+  assert.doesNotMatch(noFallback,/sequential one-question cadence only as the fallback/);
+  assert.match(plain(canon),/when admissible questions exist they share one round/);
+  assert.match(plain(canon),/else that compact check is the whole cadence/);
+  assert.match(plain(canon),/a non-empty frontier runs the frontier-round cadence/);
+  const noQuickRound=plain(canon.replace("when admissible questions exist they share one round, else that compact check is the whole cadence.","ask one question at a time."));
+  assert.doesNotMatch(noQuickRound,/when admissible questions exist they share one round/);
+});
+
+test("shared-understanding gate precedes handoff and action",()=>{
+  assert.match(plain(canon),/before any materialization gate.*plan handoff.*action/);
+  assert.match(plain(canon),/confirm that the user shares the resolved understanding/);
+  assert.match(plain(canon),/stating the resolved questions and their answers/);
+  assert.match(plain(canon),/do not proceed until.*confirmation/);
+  const removed=plain(canon.replace(/Before any materialization gate, Plan handoff, or action, confirm that the user shares the resolved understanding — stating the resolved questions and their answers — and do not proceed without that confirmation\./i,"Proceed directly."));
+  assert.doesNotMatch(removed,/confirm that the user shares the resolved understanding/);
+  const noResolv=plain(canon.replace(/stating the resolved questions and their answers/gi,"stating a one-line summary"));
+  assert.doesNotMatch(noResolv,/stating the resolved questions and their answers/);
 });

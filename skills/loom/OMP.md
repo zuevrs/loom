@@ -14,6 +14,8 @@ Which strategy matters more than it looks. `context-full` summarizes in place, s
 
 Before expected context loss, identify the smallest owning artifacts for every pending confirmed semantic delta. Preview and confirm only writes that their selected interaction already owns. Record no transcript, token counter, model switch, session ID, or compaction event as project truth. An unchanged Story/Ticket is not rewritten merely to announce that context may shrink.
 
+Host-native memory and context tools are first-pass precedent sources: consult agentmemory recall and search plus codegraph before asking the user what the environment already knows. An empty `memory_search` does not end the lookup; try `memory_recall` first.
+
 After compaction, handoff, or worker replacement, reconstruct from artifacts, Git, and native host evidence in this order: validate `.loom/version`; read the selected Story, optional PRD, one Ticket and its blocker statuses; inspect fresh repository HEAD/status/diff for the exact repository set; then recover the last unresolved question, confirmation gate, maker assignment, or Verify boundary. The current Verify boundary belongs to the selected active Ticket and the exact Git fixed point it judged; host callbacks and worker completion cannot advance it. If chat memory conflicts with files or repository evidence, current validated artifacts and live repository state win. Missing attribution or multiple plausible Stories gets one recommended human question, not inference.
 
 ## Workers and decisions

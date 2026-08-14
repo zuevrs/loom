@@ -3,8 +3,6 @@ name: loom
 description: Enter Loom — routes to the right ritual by intent
 ---
 
-Read and follow the `loom` dispatcher skill (`skills/loom/SKILL.md`). On hosts that address skills by URL, invoke `skill://loom` instead: skill reads survive context maintenance, plain file reads do not.
+Follow the `loom` dispatcher skill (`skills/loom/SKILL.md`); on URL hosts use `skill://loom` — skill reads survive compaction, file reads don't.
 
-Everything typed after `/loom` is the user's outcome or target — pass it through verbatim. `/loom` alone is a bare entry and renders the dashboard; it never means Setup.
-
-A confirmed shape may continue to the next ritual without a new `/loom` command; acceptance confirms meaning, never write authority.
+Everything after `/loom` is the user's outcome or target — pass it through; `/loom` alone is a bare entry, renders the dashboard, and never means Setup. A confirmed shape may continue to the next ritual without a new `/loom` command; acceptance confirms meaning, never write authority; each transition ends in a receipt and preview before one confirmation.

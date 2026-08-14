@@ -4,6 +4,11 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+- Grill default cadence restored to Matt Pocock-style frontier rounds: the whole settled-prerequisite frontier of independent user-owned questions is asked each round, numbered with a recommendation per question, and no action starts until the user confirms shared understanding. Large reading delegates to sub-agents by default instead of stalling the interview; sequential one-question cadence is now only the fallback for a round misfire or independence doubt.
+- Ritual continuation is bounded to one transition at a time: a confirmed shape may continue into the next ritual, but every transition presents a receipt of the finished ritual and a preview of the next, then waits for one confirmation.
+
 ## [7.20.0] - 2026-08-11
 
 ### Highlights
