@@ -13,6 +13,28 @@ Before drafting, identify repository scope from the current root and, when avail
 - On amendment, reopen the same Ticket when its acceptance changed; create a new Ticket only for a new independently verifiable slice. Preserve every unaffected Ticket byte-for-byte, including its current Verify.
 
 ## Draft vertical slices
+## Capability map gate
+
+Most requests describe one capability: skip this gate and slice directly. The gate exists for requests that bundle several independently testable capabilities.
+
+**Detection.** Treat a request as multi-capability when any of these holds:
+
+- It names distinct user-facing outcomes, each demoable and verifiable on its own
+- Its acceptance clusters into feature areas that could ship and be verified separately
+- It names module boundaries itself (identity, billing, notifications, reporting)
+
+**Propose the map before drafting Tickets.** One human confirmation on the map gates slicing; the map is conversational/context-only and rides the current Story/PRD surfaces — no new artifact type.
+
+| Module id | Responsibility | Depends on |
+|---|---|---|
+| identity | Accounts, sessions, SSO | — |
+| billing | Plans, invoices, payments | identity |
+
+Build order: identity → billing → …
+
+- **Stable module ids.** Kebab-case, chosen once, never renamed mid-initiative; Tickets select work by these ids.
+- **Dependency direction, no cycles.** Arrows point one way; capabilities that need each other are one module.
+- **Per-module slicing.** Cut Tickets per module in build order; each module's Tickets stay vertical and independently verifiable.
 
 Break the destination into **tracer-bullet Tickets**. Each is a thin, complete, independently verifiable path through all necessary layers—not a horizontal layer checklist, and not merely one repository because Git happened to be split that way.
 

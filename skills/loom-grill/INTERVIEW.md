@@ -2,9 +2,11 @@
 
 ## Canon scope
 
-This file is the sole canonical source for the interview discipline shared by Grill and Plan. Apply `Explore before asking`, `Interview rules`, `Model the domain as you grill`, and `The cadence, worked` as one body. Grill owns the interview; Plan consumes its handoff and owns only inbound triage and Story/PRD/Ticket materialization; Grill never writes Story, PRD, or Ticket artifacts.
+This file is the sole canonical source for the interview discipline shared by Grill and Plan. Grill owns the interview; Plan consumes its handoff and owns only inbound triage and Story/PRD/Ticket materialization; Grill never writes Story, PRD, or Ticket artifacts.
 
 Stay in the interview phase until its decision branches are resolved; do not read Plan's materialization references or create planning artifacts. Plan classifies materiality after the handoff; count, size, duration, or repository breadth alone never earns a PRD.
+
+**Ownership map:** precedent — Check for precedent first; research — Explore before asking; admission/depth/premise — Interview rules; domain modeling — Model the domain as you grill; cadence — The cadence, worked; readback — Readback correction checkpoint; stop test — Exit criteria; gates — Hard stops; no-artifact close — When the grill stops short of an artifact; handoff — Handoff to Plan; tables — Failure modes/Anti-rationalization. One owner per obligation; link, don't restate.
 
 ## Check for precedent first
 
@@ -12,7 +14,7 @@ Before the first question, scan `.loom/` for Story titles and their `## Decision
 
 Then scan recursively for recorded ceilings: the pattern `(#|//|--|;) ?loom:` across source files, skipping `node_modules`, `.git`, and build output. Each hit is a decision already made, carrying its ceiling and upgrade trigger next to the code it constrains; name the ones inside the area under discussion.
 
-This runs first because the worst grill re-derives a decision the project already made: the operator answers from stale memory and the new decision contradicts an ADR nobody reread. Unread `loom:` markers turn a planned upgrade into a permanent assumption. Two lines of scanning prevent a whole interview.
+This runs first because the worst grill re-derives a decision the project already made: the operator answers from stale memory and the new decision contradicts an ADR nobody reread. Unread `loom:` markers turn a planned upgrade into a permanent assumption.
 
 ## Explore before asking
 
@@ -22,35 +24,34 @@ When correctness depends on a current version, API, CLI or host behavior, compat
 
 ## Interview rules
 
-Open every interview with a one-sentence **HYPOTHESIS** of what the user wants plus an honest **CONFIDENCE** percentage; below ~70%, name what is still missing. The number forces honesty — if you cannot predict the user's reaction to the next three questions, it is wrong. Update both as branches resolve.
+Open every interview with a one-sentence **HYPOTHESIS** of what the user wants plus an honest **CONFIDENCE** percentage; below ~70%, name what is still missing. Update both as branches resolve.
 
-Admit a question only when its answer can change the objective, boundary or non-goal, a user-owned trade-off, proof, or a prerequisite. Resolve prerequisite dependencies in order, in frontier rounds per [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md) with the one-question fallback. Every question in a round carries a **GUESS** — your hypothesis for the answer with its reasoning: the user reacts to a wrong guess faster than they generate one, and a guess you can be visibly wrong about keeps the interview honest. Mitigate polite agreement by occasionally guessing where you expect pushback. When answers pattern-match best-practice or convention talk ("scalable", "the standard approach", "I should probably…"), ask: *"If you didn't have to justify this to anyone, what would you actually want?"* When a decision's owner is not the current interlocutor, name that owner and park the question as an unresolved prerequisite: it blocks dependent materialization, never the whole exit, and never silently becomes an assumption.
+Admit a question only when its answer can change the objective, boundary or non-goal, a user-owned trade-off, proof, or a prerequisite. Resolve prerequisite dependencies in order, in frontier rounds per [`DECISION-FRONTIER.md`](DECISION-FRONTIER.md) with the one-question fallback (Hard stops). Every question in a round carries a **GUESS** — your hypothesis for the answer with its reasoning: the user reacts to a wrong guess faster than they generate one, and a guess you can be visibly wrong about keeps the interview honest. Mitigate polite agreement by occasionally guessing where you expect pushback. When answers pattern-match best-practice or convention talk ("scalable", "the standard approach", "I should probably…"), ask: *"If you didn't have to justify this to anyone, what would you actually want?"* When a decision's owner is not the current interlocutor, name that owner and park the question as an unresolved prerequisite: it blocks dependent materialization, never the whole exit, and never silently becomes an assumption.
 - **Quick check**: narrow, reversible, local — no Full review trigger and no interview-only signal is present.
-- **Behavior check**: observable behavior with assumptions/edge risk — no Full review trigger and no interview-only signal is present.
-- **Material**: any Full review trigger, or either interview-only signal `irreversible` or `large-user-owned-trade-off`, selects Material. Material is mandatory for domain modeling. Disagreement takes the higher depth; the interview never lowers what the trigger list fires.
+- **Behavior check**: observable behavior with assumptions/edge risk — same trigger silence as Quick check.
+- **Material**: any Full review trigger, or either interview-only signal `irreversible` or `large-user-owned-trade-off`, selects Material. Disagreement takes the higher depth; the interview never lowers what the trigger list fires.
 
 Select the smallest depth from observed signals before asking questions. Depth is the verification classification from [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md): one mechanical trigger list lives there and is never copied or redefined here. The interview adds exactly two interview-only escalation signals.
 
 For Behavior check and Material, establish a premise before user questions: an observed failure or unmet outcome, a named cost owner, and why the current path—or one cheapest credible alternative—does not cover it. Investigate missing facts locally; ask only the user-owned premise decision. Show a premise verdict only when it rejects, reframes, or reduces scope; a routine pass stays invisible.
 
-
-
 Check one cheapest credible alternative. Compare more than one only when a real user-owned trade-off needs it. Recommendations state their evidence and consequences; the user owns the trade-off.
 
-Read back the proportional minimum: Quick check states objective, boundary, proof; Behavior adds an explicit non-goal; Material uses the full correction block (objective, in-scope, out-of-scope, decisions, assumptions, open user-owned items). Do not force a full readback or trade-off onto Quick check.
-Stop when no admissible user-owned questions remain and you can predict the user's reaction to the next three questions you would ask — that predictability is the shared-understanding signal; ask an extra edge only for an observed risk or an explicit request, never to manufacture branches.
+Read back the proportional minimum per the floor (Readback correction checkpoint).
+
+Stop when you can predict the user's reaction to the next three questions — that predictability is the shared-understanding signal; ask an extra edge only for an observed risk or an explicit request, never to manufacture branches.
 
 ## Model the domain as you grill
 
-When terminology, entity, relationship, or code-vocabulary signals appear, apply domain modeling inline (mandatory for Material): challenge glossary conflicts, sharpen fuzzy terms, test relationships with concrete scenarios, cross-reference code, keep the pending delta current. Offer an ADR only when hard to reverse, surprising without context, and a real trade-off.
+When terminology, entity, relationship, or code-vocabulary signals appear, apply domain modeling inline; Material is mandatory for domain modeling. Challenge glossary conflicts, sharpen fuzzy terms, test relationships with concrete scenarios, cross-reference code, keep the pending delta current. Offer an ADR only when hard to reverse, surprising without context, and a real trade-off.
 
 ## The cadence, worked
 
-Quick check gets one compact alignment check and no unnecessary premise interrogation; when admissible questions exist they share one round, else that compact check is the whole cadence. Behavior check also requires its own premise and explicit non-goal criteria, then only questions that change the result, boundary, non-goal, proof, or prerequisite, including one wrong-object edge when observed risk warrants it; Material gets the premise gate, signal-based domain modeling, and the full correction readback. A non-empty frontier runs the frontier-round cadence; a misfire or independence doubt falls back to one question at a time (Hard stops).
+Quick check gets one compact alignment check and no unnecessary premise interrogation; when admissible questions exist they share one round, else that compact check is the whole cadence. Behavior check also requires its own premise and explicit non-goal criteria (Interview rules), including one wrong-object edge for observed risk; Material: premise gate (Interview rules), signal-based domain modeling (Model the domain as you grill), full correction readback (Readback correction checkpoint). A non-empty frontier runs the frontier-round cadence (Hard stops); a misfire or independence doubt falls back to one question at a time.
 
 ## Readback correction checkpoint
 
-The selected depth determines the readback floor above; a readback is a correction checkpoint, not permission to draft. For Material, print the full block in the user's language:
+The readback floor: Quick check reads back objective, boundary, proof; Behavior adds the non-goal; Material uses the full correction block (objective, in-scope, out-of-scope, decisions, assumptions, open user-owned items). Do not force a full readback or trade-off onto Quick check. A readback is a correction checkpoint, not permission to draft. For Material, print the full block in the user's language:
 
 > **Objective:** the CSV export mirrors the filtered ledger view.
 > **In scope:** export button on the ledger view; filter state through to the query; UTF-8 with BOM.
@@ -59,7 +60,7 @@ The selected depth determines the readback floor above; a readback is a correcti
 > **Assumed, correct me:** `LedgerQuery` is the seam.
 > **Open, you own it:** the 50k-row failure message.
 
-Keep the block proportional; do not add ceremonial verdicts or questions after the stop test passes. Before any action, confirm the user shares the resolved understanding; do not proceed until that confirmation (Hard stops).
+Keep the block proportional; no ceremonial verdicts or questions after the stop test passes. Before any action, confirm the user shares the resolved understanding — do not proceed until that confirmation (Hard stops).
 
 ## When the grill stops short of an artifact
 
@@ -72,8 +73,7 @@ An interview can resolve six branches and produce no Grill artifact: the ADR tri
 
 ## Handoff to Plan
 
-After the interview, when the user chooses Plan materialization, first confirm the user shares the resolved understanding, then give this compact conversational/context-only handoff; it creates no durable artifact by default. The first six fields are settled interview evidence; fields 7–13 are Grill proposals that Plan must re-derive and confirm from current evidence, never copy:
-
+After the interview, when the user chooses Plan materialization, first confirm shared understanding (Hard stops), then give this compact conversational/context-only handoff; it creates no durable artifact by default. The first six fields are settled interview evidence; fields 7–13 are Grill proposals that Plan must re-derive and confirm from current evidence, never copy:
 
 ```markdown
 Objective: <resolved outcome>
@@ -92,19 +92,13 @@ Effect gates and stop conditions: <which effects need their own exact confirmati
 Unresolved prerequisites: <none, or the blocking fact/decision — with its named owner when that owner is not the current interlocutor>
 ```
 
-
-Plan may ask only newly-created materialization choices (inventory, placement); it must not reinterview resolved concerns, and it re-derives proposal fields 7–13 from current evidence — a proposal the evidence cannot support returns to Grill. An unresolved prerequisite stays visible and blocks dependent materialization. When Plan is deferred past this session, the handoff may survive through the SESSION recovery pointer ([`../loom/SESSION.md`](../loom/SESSION.md)) under its own contract: the resolved essence in `Decision:`, `/loom plan` in `Next:`. The pointer stays a locating hint, never authority — the consuming Plan re-reads current artifacts.
+Plan may ask only newly-created materialization choices (inventory, placement), never reinterviewing resolved concerns; a proposal the evidence cannot support returns to Grill. When Plan is deferred past this session, the handoff may survive through the SESSION recovery pointer ([`../loom/SESSION.md`](../loom/SESSION.md)) under its own contract: the resolved essence in `Decision:`, `/loom plan` in `Next:`. The pointer stays a locating hint, never authority — the consuming Plan re-reads current artifacts.
 
 ## Exit criteria
 
-Exit when the selected depth's readback floor is met and no admissible user-owned question remains. The floors are deliberately different:
+Exit when the selected depth's readback floor is met and no admissible user-owned question remains (Readback correction checkpoint). The floors are deliberately different; each depth exits at its own floor — Quick check without ceremony (Hard stops).
 
-- **Quick check:** read back the objective, boundary, and proof; may end without a non-goal, trade-off, or full correction block, and without routine confirmation when no admissible question and no handoff or action is requested.
-- **Behavior check:** read back the objective, boundary, explicit non-goal, and proof.
-- **Material:** complete the full correction block above; premise, domain requirements, and user-owned trade-offs resolved.
-
-
-Integrate corrections before the stop test. An uncorrected assumption keeps existing confirmed semantics only after the proportional readback. No `Open` item owned by the user may remain unresolved at the selected floor; confirming shared understanding is part of the stop test. The handoff grants no artifact authority.
+Integrate corrections before the stop test. An uncorrected assumption keeps existing confirmed semantics only after the proportional readback. No `Open` item owned by the user may remain unresolved at the selected floor; the shared-understanding gate (Hard stops) is part of the stop test.
 
 ## Hard stops
 
@@ -119,7 +113,7 @@ Integrate corrections before the stop test. An uncorrected assumption keeps exis
 | Symptom | Response |
 |---|---|
 | User wants implementation mid-interview | Finish the grill or scope down to single-session (`loom-implement`) |
-| Conflicting ADRs | Surface conflict; sequential one-question fallback for the resolving question |
+| Conflicting ADRs | Surface conflict; resolving question via the one-question fallback (Hard stops) |
 | User says "just do it" without clarity | Push back once when the objective or a load-bearing boundary is fuzzy, then comply if they insist |
 | Stream drops / "continue" | Re-read this file; restate the last unanswered round or fallback question; resume there |
 | Lost thread — "wait, what" | Re-pitch: one line of context, the current question in the `CONTEXT.md` ubiquitous language; no restart |

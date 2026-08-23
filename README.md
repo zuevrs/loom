@@ -41,23 +41,23 @@ Loom v7 supports four public carriers:
 | Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
 | Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
 
-After install or update, restart the host and confirm the Loom partner surface is discoverable. OMP receives Loom through skills and checker prose only; Loom ships no OMP extension or runtime callbacks.
+After install or update, restart the host and confirm the Loom partner surface is discoverable.
 
 ## Upgrade
 
-Update through the same plugin carrier used to install, restart the host, and rerun Setup for stale managed blocks. OMP updates require `omp plugin install git:github.com/zuevrs/loom --force`; without `--force`, cached code may remain active. There is no migration mode in v7: current artifacts and current carrier contracts must validate as-is.
+Update through the same plugin carrier used to install, restart the host, and rerun Setup for stale managed blocks. On OMP, updates require `omp plugin install git:github.com/zuevrs/loom --force`; without `--force`, cached code may remain active. On other carriers, check whether the plugin manager refreshes the package. There is no migration mode in v7: current artifacts and current carrier contracts must validate as-is.
 
 ## Prerequisites & Troubleshooting
 
-Git and Node.js 20+ are needed for local development. Public carriers require their own current plugin CLI. Use the troubleshooting list above, preserve exact Doctor output, and restart before concluding an updated adapter is broken.
+Git and Node.js 20+ are needed for local development. Public carriers require their own current plugin CLI. Use the host's own troubleshooting resources, preserve exact diagnostic output, and restart before concluding an updated adapter is broken.
 
 Maintainer-only evidence tooling (Grill quality pilot, behavioral evaluations, carrier checks) is documented in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Host behavior and safety
 
-No v7 host prevents a stop. OMP is skills/prose-only and Loom ships no OMP extension or callbacks. Live Git freshness is checked by Verify and Finish. Other carriers provide the same prose contracts without claiming OMP hook parity. See [`docs/hosts.md`](docs/hosts.md).
+No v7 host prevents a stop. Every carrier is skills/prose-only: Loom ships no host extension, lifecycle callback, or enforcement hook. Live Git freshness is checked by Verify and Finish. No carrier claims hook or enforcement parity. See [`docs/hosts.md`](docs/hosts.md).
 
-Orca is Loom's orchestration adapter. Loom owns durable work meaning and verification boundaries; Git owns file state; Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness. See [`docs/orca.md`](docs/orca.md).
+On OMP, Orca is Loom's orchestration adapter: Loom owns durable work meaning and verification boundaries; Git owns file state; Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness. OpenCode, Claude Code, and Codex use their native maker facilities. See [`docs/orca.md`](docs/orca.md).
 
 Loom never trades away trust-boundary validation, security, privacy, data-loss prevention, or accessibility. It makes no runtime network calls and sends no telemetry. Native automation remains host-owned, explicitly bounded, and report-only; Loom ships no unattended runner. See [`docs/unattended.md`](docs/unattended.md).
 

@@ -28,6 +28,7 @@ Read `CONTEXT.md`, scoped ADRs, and host topology when load-bearing.
 1. Consume the Grill handoff as settled evidence; only new materialization choices may be asked. Unresolved interview scope returns to Grill. Confirm the handoff's proposal fields (7–13) from current evidence; a proposal the evidence cannot support returns to Grill.
 2. Draft the smallest plan in memory: Story plus Tickets; add PRD, ADR, or CONTEXT only on a load-bearing semantic trigger. Create no runtime or implementation state.
 3. Cut vertical Tickets around outcomes. State scope/non-goals, acceptance, blockers/order, and a deterministic Verify seam; prescribe no files, estimates, or steps.
+Requests bundling several independently testable capabilities first pass the capability-map gate ([`TO-TICKETS.md`](TO-TICKETS.md)): one map confirmation, then slicing per module in dependency order; single-capability requests skip it.
 4. Load every applicable template selected by the inventory and validate each draft. Templates shape drafts, never scope. Missing/invalid required templates stop before preview/write.
 5. Preview exact target paths, actions, complete bytes, repository owner/base, and write location.
 6. Ask for one explicit confirmation immediately before writes; it permits only that exact inventory. Any post-preview inventory drift requires re-preview.

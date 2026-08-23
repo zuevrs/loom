@@ -12,7 +12,7 @@ One exact wave confirmation starts the full current runnable frontier: every Tic
 
 ## Fresh makers
 
-Use a fresh host-native maker for every material Ticket and every rework, including on the same lane. Never persist maker state; compaction, summarization, model switching, or continuation is not freshness. If a fresh maker cannot be created, stop rather than reusing one or simulating independence. No worker chaining across Tickets — a wave dispatches only fresh makers; no maker self-approval.
+Use a fresh host-native maker for every material Ticket and every rework, including on the same lane. Never persist maker state; context compaction, summarization, model switching, or continuation is not freshness. If a fresh maker cannot be created, stop rather than reusing one or simulating independence. No worker chaining across Tickets — a wave dispatches only fresh makers; no maker self-approval.
 
 ## decision-needed
 

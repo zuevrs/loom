@@ -55,7 +55,7 @@ When the user sets up or repairs a multi-repository Workspace:
 
 Malformed local binding JSON/schema is a global stop. A missing or stale individual binding blocks only Tickets referencing that key and their dependents.
 
-## Host preset (on OMP; adapt or omit for other hosts)
+## Host preset (OMP only; other hosts: skip)
 
 When the current host is OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. On other hosts, offer no preset unless an equivalent native, confirmed configuration surface exists. The compaction/model-role preset changes context tuning only. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
 

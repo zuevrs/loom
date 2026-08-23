@@ -27,6 +27,10 @@ A criterion is **unmet** when any of these holds: the diff does not implement it
 
 `APPROVE` only when every row passes. One failing row is `REJECT` — there is no partial verdict.
 
+## Disprove first
+
+Seek disproof before you seek confirmation. Actively hunt for the evidence that would fail the candidate — mutations, missing evidence, vacuous checks, scope leaks — and report it. A candidate holds only when the search for its disproof comes up empty. This posture strengthens evidence-hunting only: it never turns BLOCKED into REJECT and never lowers the verdict bar.
+
 ## Finding format
 
 Each blocking finding is one string with four fields separated by ` | `:
