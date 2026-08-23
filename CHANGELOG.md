@@ -4,10 +4,30 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.21.0] - 2026-08-14
+
 ### Highlights
 
 - Grill default cadence restored to Matt Pocock-style frontier rounds: the whole settled-prerequisite frontier of independent user-owned questions is asked each round, numbered with a recommendation per question, and no action starts until the user confirms shared understanding. Large reading delegates to sub-agents by default instead of stalling the interview; sequential one-question cadence is now only the fallback for a round misfire or independence doubt.
 - Ritual continuation is bounded to one transition at a time: a confirmed shape may continue into the next ritual, but every transition presents a receipt of the finished ritual and a preview of the next, then waits for one confirmation.
+- Host context and memory resolve before the first write: workspace identity comes from native host evidence with no raw-Git fallback, and host-native memory/context tools are a first-pass precedent source — an empty first search tries the tool's other variants before asking the user.
+- The shared-understanding gate states the resolved questions and their answers, and the cadence statements agree: a Quick check with admissible questions still asks them in one round; an empty frontier keeps its single compact alignment check.
+
+### Breaking changes
+
+- None. Ritual names, managed-block contracts, and carrier behavior are unchanged; the interview cadence and gate requirements are behavioral changes inside the existing rituals.
+
+### Migration steps
+
+- None.
+
+### Adapter impacts
+
+- Prose updates to the OMP and Orca adapters; no carrier shape or metadata changed.
+
+### Safety changes
+
+- No invariant changed. Continuation never covers more than one transition and never grants write, dispatch, or Ship authority; a worker decision need still reaches the user only through the current `/loom` interaction.
 
 ## [7.20.0] - 2026-08-11
 
@@ -1883,7 +1903,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.20.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.21.0...HEAD
+[7.21.0]: https://github.com/zuevrs/loom/compare/v7.20.0...v7.21.0
 [7.20.0]: https://github.com/zuevrs/loom/compare/v7.19.0...v7.20.0
 [7.18.0]: https://github.com/zuevrs/loom/compare/v7.17.0...v7.18.0
 [7.17.0]: https://github.com/zuevrs/loom/compare/v7.16.0...v7.17.0
