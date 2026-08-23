@@ -4,6 +4,8 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [7.22.0] - 2026-08-23
+
 ### Highlights
 
 - Execution is now host-neutral: a new `EXECUTION.md` owns the wave-gate, fresh-maker, `decision-needed`, and `worker_done` contract for any host; the OMP and Orca adapters keep mechanics only and defer to it, no core ritual names a host, and loom-init derives workspace bindings from the current host's native facilities. Loom is an agnostic instruction set, not an OMP/Orca tool.
@@ -13,6 +15,22 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 - Plan gains a capability-map gate for multi-capability requests: when a request bundles several independently testable capabilities, Plan proposes a map (stable module ids, dependency direction, build order) and takes one confirmation before slicing Tickets per module in dependency order; single-capability requests skip the gate.
 - The interview canon is consolidated to one owner per obligation with an explicit ownership map (shared-understanding gate, readback floors, cadence, premise, and domain modeling each live in exactly one section), leaving headroom under its budget instead of a 99.9%-full file.
 - A fresh-eyes audit (first-time Claude Code and Codex users) rescoped the public corpus: OMP and Orca now appear only as instances — "On OMP, …" scoping, native-maker-facility wording for other hosts, Orca ownership moved into the OMP section — so a different-host user never reads Loom as an OMP/Orca tool.
+
+### Breaking changes
+
+- None. Ritual names, managed-block contracts, and carrier behavior are unchanged; the interview, checker, and planning behaviors evolve inside the existing rituals.
+
+### Migration steps
+
+- None.
+
+### Adapter impacts
+
+- OMP and Orca adapters now defer to the host-neutral EXECUTION.md contract; no carrier shape or metadata changed.
+
+### Safety changes
+
+- No invariant changed. Continuation still never covers more than one transition and never grants write, dispatch, or Ship authority; worker decisions still reach the user only through the current `/loom` interaction; the disprove-first posture strengthens evidence-hunting without moving any verdict bar.
 
 ## [7.21.0] - 2026-08-14
 
@@ -1913,7 +1931,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.21.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v7.22.0...HEAD
+[7.22.0]: https://github.com/zuevrs/loom/compare/v7.21.0...v7.22.0
 [7.21.0]: https://github.com/zuevrs/loom/compare/v7.20.0...v7.21.0
 [7.20.0]: https://github.com/zuevrs/loom/compare/v7.19.0...v7.20.0
 [7.18.0]: https://github.com/zuevrs/loom/compare/v7.17.0...v7.18.0
