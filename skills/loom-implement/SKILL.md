@@ -50,8 +50,8 @@ For recovery-worthy decisions, blockers, or handoffs, Implement may update the p
 | Non-trivial logic or a new behavioral check | [`TDD.md`](TDD.md) | required |
 | Applicable current project standards exist | [`../loom-plan/CONTEXT-FORMAT.md`](../loom-plan/CONTEXT-FORMAT.md), [`../loom-plan/ADR-FORMAT.md`](../loom-plan/ADR-FORMAT.md), and current `CONTEXT.md`/scoped ADR owners | required when present |
 | Security, privacy, performance, CI, or repository safety concern | [`../loom/AUTHORITY.md`](../loom/AUTHORITY.md) plus external live repository or host-native guidance | required when this signal exists |
-| Workspace, multi-repository, isolation, or worktree delegation | [`../loom/ORCA.md`](../loom/ORCA.md) and current host evidence | required when the signal exists |
-| Confirmed wave or newly runnable frontier | [`../loom/ORCA-DISPATCH.md`](../loom/ORCA-DISPATCH.md) | required when the signal exists |
+| Workspace, multi-repository, isolation, or worktree delegation | [`../loom/EXECUTION.md`](../loom/EXECUTION.md) plus the host adapter only when native context names it | required when the signal exists |
+| Confirmed wave or newly runnable frontier | [`../loom/EXECUTION.md`](../loom/EXECUTION.md) § Wave gate; Orca mechanics only on Orca | required when the signal exists |
 
 Load only the reference selected by a real signal. There is no editing-workflow reference.
 

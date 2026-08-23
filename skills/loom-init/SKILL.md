@@ -48,16 +48,16 @@ Treat the two files as one bounded setup transaction. Before writing, validate e
 When the user sets up or repairs a multi-repository Workspace:
 
 1. Confirm the **dedicated owner Git root** explicitly. Service repositories remain outside the owner checkout.
-2. Query Orca repositories read-only. Present path/remote evidence and let the user select repositories and assign stable logical keys. Never infer identity from display name, basename, or path alone.
+2. Derive repositories from the current host's native workspace facilities read-only — on Orca, its repository/worktree records; on a host without a native workspace facility, offer the local filesystem and Git remotes as the source. Present path/remote evidence and let the user select repositories and assign stable logical keys. Never infer identity from display name, basename, or path alone.
 3. Preview exact bytes for `.loom/local/workspace.json`, the `/.loom/local/` `.gitignore` delta, managed block, and `.loom/version`.
 4. Write only after confirmation. Rebind replaces local bindings only; committed Story/Ticket/CONTEXT/ADR memory stays unchanged unless Plan amends it separately.
 5. For v6 guided import, read the old owner source without mutation, preview the complete v7 destination and bindings, create only the new owner repository after confirmation, and leave the source untouched. Old Verify records remain historical evidence, not current authority.
 
 Malformed local binding JSON/schema is a global stop. A missing or stale individual binding blocks only Tickets referencing that key and their dependents.
 
-## Host preset (OMP)
+## Host preset (on OMP; adapt or omit for other hosts)
 
-On OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. The compaction/model-role preset changes context tuning only. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
+When the current host is OMP, offer host configuration as separate exact previews and confirmations, separate from the managed-block transaction. On other hosts, offer no preset unless an equivalent native, confirmed configuration surface exists. The compaction/model-role preset changes context tuning only. Preserve existing YAML and `.omp/plugin-overrides.json` — merge only the selected keys, never rewrite unrelated settings.
 
 ```yaml
 compaction:

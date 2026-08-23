@@ -15,9 +15,9 @@ Enter at `/loom`, explicit Loom intent, or a request whose next honest action is
 
 ## Inputs
 
-- The user's current explicit intent and material boundary.
-- Read-only current Story/Tickets, blocker graph, Verify verdict, Finish receipt, project docs/ADRs, Git status/diff/identity, and relevant host evidence.
-- Optional [`SESSION.md`](SESSION.md) recovery pointer only on resume, handoff, blocker, or pending Finish signals. It is a locating hint, never authority; the dispatcher reads it and never writes it.
+- The user's current explicit intent and boundary.
+- Read-only current Story/Tickets, blocker graph, Verify verdict, Finish receipt, docs/ADRs, Git status/diff/identity, and host evidence.
+- Optional [`SESSION.md`](SESSION.md) recovery pointer on resume, handoff, blocker, or pending Finish signals. It is a locating hint, never authority; the dispatcher reads it and never writes it.
 
 Validate `.loom/version` before using durable state. Missing state → Setup when persistence required; unsupported/contradictory → read-only blocker (never migrate).
 
@@ -59,7 +59,7 @@ No-work: return constitutional floor (`Result` — no action needed; `Changed` �
 |---|---|---|
 | Every route and authority decision | [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) | required at entry |
 | Resume, handoff, blocker, or pending Finish hint | [`SESSION.md`](SESSION.md) | advisory |
-| Repository/workspace identity or native conflict | [`ORCA.md`](ORCA.md) plus current Git/host evidence | when signal exists |
+| Execution, waves, workers, or repository identity | [`EXECUTION.md`](EXECUTION.md); host adapter only if native context names it | when signal exists |
 | Finish or Publish prerequisite boundary | [`FINISH.md`](FINISH.md) or [`PUBLISH.md`](PUBLISH.md) | for selected boundary |
 
 ## Hard stops

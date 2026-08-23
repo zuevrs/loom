@@ -32,7 +32,7 @@ Receipts, digests, tool output, and reports are evidence, never consent or proof
 |---|---|---|
 | Consent, exact bundle, drift, or remote readback | [`AUTHORITY.md`](AUTHORITY.md) and this `PUBLISH.md` | required for every Publish |
 | Local fixed point and source identity | [`FINISH.md`](FINISH.md) | required before inventory |
-| Git remote, branch, ref, or tag push | [`ORCA.md`](ORCA.md) plus current Git and repository-owner guidance | required when that signal exists |
+| Git remote, branch, ref, or tag push | [`EXECUTION.md`](EXECUTION.md) when workers/lanes are involved, the host adapter ([`ORCA.md`](ORCA.md)) only when native context names it, plus current Git and repository-owner guidance | required when that signal exists |
 | Hosted review, release, visibility, or message | [`../../docs/hosts.md`](../../docs/hosts.md) plus current host-native or service-owner guidance loaded through the available effect-specific tool | required when that signal exists |
 
 Load only selected owners.

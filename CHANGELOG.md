@@ -4,6 +4,12 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+- Execution is now host-neutral: a new `EXECUTION.md` owns the wave-gate, fresh-maker, `decision-needed`, and `worker_done` contract for any host; the OMP and Orca adapters keep mechanics only and defer to it, no core ritual names a host, and loom-init derives workspace bindings from the current host's native facilities. Loom is an agnostic instruction set, not an OMP/Orca tool.
+- The Grill interview gains Osmani-grade depth: every interview opens with a one-sentence HYPOTHESIS and an honest CONFIDENCE percentage (naming what is missing below ~70%), every round question carries a GUESS with its reasoning, best-practice or convention answers get the want-vs-should-want probe, the stop test predicts the user's reaction to the next three questions, and the restate carries an explicit Out of scope line.
+- A lost thread ("wait, what") gets a re-pitch recovery row: one line of context and the current question in the project's ubiquitous language, with no restart.
+
 ## [7.21.0] - 2026-08-14
 
 ### Highlights

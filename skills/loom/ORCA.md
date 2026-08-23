@@ -20,13 +20,13 @@ At every Loom entry, resolve the current Story and repository keys from native O
 
 Orca owns repository identity, default base, branch result, lineage, attribution, project settings, worktree path, and all runtime keys. Accept native results; never impose a branch prefix or persist checkout/runtime metadata in Loom. Create or resume a service lane only through the native Orca flow after an explicit preview of repository, service scope, writer, native base, and worktree action. A new repository, base, or worktree action renews confirmation. Zero coherent matches permits the confirmed native create, one resumes, and multiple or inconsistent matches stop.
 
-Use a fresh host-native maker for every material Ticket and every rework, including on the same lane. Never persist maker state; compaction, summarization, model switching, or continuation is not freshness. If a fresh maker cannot be created, stop rather than reusing one or simulating independence. A confirmed wave covers only the runnable non-conflicting Tickets listed in its gate preview; newly runnable Tickets wait for the next gate.
+Fresh-maker, wave-gate, `decision-needed`, and `worker_done` semantics are owned by [`EXECUTION.md`](EXECUTION.md); this adapter adds only Orca-native mechanics — the fresh maker enters through a native worktree lane and claims it (below) before starting.
 
 ## Local signal map
 
 | Signal | Reference | Use |
 |---|---|---|
-| Dispatch, task DAG, wave gate, lane claim, liveness, maker question, `worker_done`, board status, or review feedback | [`ORCA-DISPATCH.md`](ORCA-DISPATCH.md) | required before the first such operation |
+| Dispatch, task DAG, wave gate, lane claim, liveness, maker question, `worker_done`, board status, or review feedback | [`EXECUTION.md`](EXECUTION.md) for the contract plus [`ORCA-DISPATCH.md`](ORCA-DISPATCH.md) for Orca mechanics | required before the first such operation |
 | Cold resume, handoff, or native context pressure | [`ORCA-RESUME.md`](ORCA-RESUME.md) | required when that signal exists |
 | Cleanup after Publish and proven human merge | [`ORCA-CLEANUP.md`](ORCA-CLEANUP.md) | required only for that explicit operator action |
 

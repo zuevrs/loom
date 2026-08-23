@@ -1,6 +1,6 @@
 # Worker briefing contract
 
-Load only when dispatching a maker or checker worker outside Orca's own dispatch flow — from [`OMP.md`](OMP.md) or any prose-compatible host that can spawn workers. Orca lane mechanics stay in [`ORCA-DISPATCH.md`](ORCA-DISPATCH.md); this file owns what a bounded assignment and its report look like on any host.
+Load only when dispatching a maker or checker worker — the semantic execution contract lives in [`EXECUTION.md`](EXECUTION.md); this file owns what a bounded assignment and its report look like on any host. Orca lane mechanics stay in [`ORCA-DISPATCH.md`](ORCA-DISPATCH.md); OMP specifics stay in [`OMP.md`](OMP.md).
 
 ## Fresh workers and ownership
 

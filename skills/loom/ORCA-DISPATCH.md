@@ -4,13 +4,7 @@ Load only from [`ORCA.md`](ORCA.md) before the first dispatch, task DAG, lane cl
 
 ## Scheduling, assignments, and liveness
 
-Mirror each Ticket's frontmatter `blockedBy` edges in Orca's native task DAG.
-
-**Serialize by dependency, not by repository.** Within one Story, runnable Tickets and rework touching the same repository go in blocker order and then Ticket number, because Ticket 5 builds on Ticket 3's code and a verdict earned against a base that is about to change is worthless. Tickets in independent repositories run in parallel.
-
-**Across Stories there is no repository lock.** Two Stories may hold their own worktree of the same service at the same time: different branches, different directories, and git was built for exactly this. Merge conflicts later are ordinary review work, not a reason to make the second Story wait. Stop only for a genuinely shared non-git resource — a port, a local database, a container name, a build cache — and when you stop, **name the resource**, never "the repository is busy". A resource conflict is usually fixed by configuration, not by queueing.
-
-One explicitly atomic multi-repository Ticket is the sole all-or-nothing case: acquire every named repository lane as one unit, and if all cannot be acquired, start none; hold them until the assignment and Verify finish.
+Mirror each Ticket's frontmatter `blockedBy` edges in Orca's native task DAG. Dependency, conflict, and wave-gate semantics are owned by [`EXECUTION.md`](EXECUTION.md); this adapter adds only what is native to Orca.
 
 **Orca does not lock anything — you prove ownership by observing it.** Before dispatching into a service repository, including for rework:
 
@@ -35,17 +29,11 @@ The claim is advisory, which is exactly why it is written before the maker start
 
 Any Workspace Ticket, including a one-repository Ticket, uses a coherent Orca lane; missing native evidence stops rather than falling back to raw Git.
 
-**A maker that hits real uncertainty returns `decision-needed` — it never decides quietly and never asks the user directly.** Every question routes back to the coordinator with one recommended question and its consequences; the coordinator asks the user through the current `/loom` interaction and returns the answer as a bounded packet. An answer that lives only in a terminal dies with the session. Route by materiality, using the classifiers already in `STORY.md` § Adaptive continuation:
-
-- **Not material** — Story Intent and Success, Ticket acceptance, public and inter-service contracts, repository scope, architecture, data path, and security risk all stay as written. The coordinator returns the answer to the maker, who **writes it into the Ticket's `## Log` before continuing**.
-- **Material** — any of those boundaries moves. The coordinator owns the amendment: it previews the smallest Story/PRD/Ticket/ADR delta, takes confirmation, and only then redispatches. A boundary change settled inside one worker is a decision the Story never learns about.
-- **Uncertain which** — treat it as material. Guessing low costs an amendment nobody agreed to; guessing high costs one message.
-
-Pause only dependent work. Never guess through `needs-info`, and never let silence become a default: a question with no answer yet is a blocked assignment, not permission to pick.
+Uncertainty routing — `decision-needed`, materiality, and the bounded packet back to the maker — is the contract in [`EXECUTION.md`](EXECUTION.md). On Orca, classification follows the classifiers already in `STORY.md` § Adaptive continuation.
 
 Each dispatch is one bounded Ticket or rework assignment; the assignment and report shapes are the host-neutral contract in [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md). Initial dispatch includes the PRD and Ticket. Rework sends a compact delta: current acceptance, confirmed decisions, authoritative base/diff since the previous assignment, latest Verify blockers, relevant check changes, and explicit exclusions. Never send only a task title, the full private Story artifact set, or a transcript. Completion reports changed repositories/files, base SHA and current diff/tree identity, checks, and concise decision/blocker notes.
 
-`worker_done` is evidence only and has deliberately weak meaning: it ends only the matching bounded dispatch. It cannot mutate Ticket disposition or Verify evidence, complete the Ticket, approve work, prove a terminal idle, close a lane, or authorize any Git/host effect. The coordinator rereads Story, PRD, Ticket, current Git evidence, and native Orca state, records maker evidence, and runs independent Spec + Standards Verify. APPROVE may mark that Ticket done and unblock dependents while Story remains `active`. REJECT returns one blocking batch to a fresh maker. Two triggers stop a lane and both end the same way — report, never a third identical attempt: **the same unchanged execution error twice** (dispatch, tooling, or environment failing identically), and **a second REJECT with overlapping unchanged blockers**. The second is the two-strikes rule owned by `loom-verify/TICKET-RECORD.md`; follow it there for the fork you present to the user rather than improvising one here.
+`worker_done` follows the [`EXECUTION.md`](EXECUTION.md) evidence rule. The coordinator rereads Story, PRD, Ticket, current Git evidence, and native Orca state, records maker evidence, and runs independent Spec + Standards Verify.
 
 Write native card comments/status only at durable boundaries: confirmed decision or repository addition, assignment accepted or blocked, checks captured, Verify verdict, or explicit handoff. Do not comment for heartbeats, waits, scans, unchanged resumes, background completion, or other live events. A background `worker_done` stays quiet until reconciled into a durable result.
 
@@ -53,7 +41,7 @@ Board status is a durable boundary too, and it is what the operator actually loo
 
 ## Wave gate
 
-One exact wave confirmation starts the full current runnable frontier: every Ticket whose blockers are done and whose repository/resource scope does not conflict. The gate preview lists exactly the Tickets, repositories, and bases it covers; confirmation permits only that inventory. Newly runnable Tickets wait for the next gate and are never added to a confirmed wave; Tickets created by an amendment enter only through a new gate. `worker_done`, APPROVE, or wave completion never extends the gate, and a wave never inherits Finish or Publish authority.
+Run waves under the [`EXECUTION.md`](EXECUTION.md) gate contract; on Orca, acquire and claim the lanes it names through the native flow above.
 
 ## Review feedback
 

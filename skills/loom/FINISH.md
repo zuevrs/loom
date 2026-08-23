@@ -34,7 +34,7 @@ The implementation diff is an identified input, not a new Finish effect. Unexpla
 | Story/Ticket semantics or blocker graph | [`STORY.md`](STORY.md) | required for canonical truth and material-amendment classification |
 | Recovery pointer exists or partial Finish occurs | [`SESSION.md`](SESSION.md) | required only for exact remaining-only rewrite or full deletion |
 | Current Verify record or integration trigger | [`../loom-verify/TICKET-RECORD.md`](../loom-verify/TICKET-RECORD.md) and [`CONSTITUTION.md`](CONSTITUTION.md) | required for verdict freshness and applicable axes |
-| Repository, multi-repository, or delegated host boundary | [`ORCA.md`](ORCA.md) plus current Git/host-native evidence | required only when that signal exists |
+| Repository, multi-repository, or delegated host boundary | [`EXECUTION.md`](EXECUTION.md) plus the host adapter ([`ORCA.md`](ORCA.md)) only when native context names it, and current Git/host-native evidence | required only when that signal exists |
 
 Load semantic, session, Git, and host owners only when selected by current inventory or a real signal. Reuse owners; create no AS-BUILT file, digest manifest, archive, registry, or new reference.
 

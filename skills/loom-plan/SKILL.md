@@ -47,7 +47,7 @@ Read `CONTEXT.md`, scoped ADRs, and host topology when load-bearing.
 | Active Story/PRD boundary changed or accepted-result evidence may be stale | [`AMEND.md`](AMEND.md) | required when this signal exists |
 | Module interface, seam, or decomposition is load-bearing | [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) plus live repository evidence | advisory |
 | Domain vocabulary changes or a hard-to-reverse surprising trade-off emerges | [`CONTEXT-FORMAT.md`](CONTEXT-FORMAT.md), [`ADR-FORMAT.md`](ADR-FORMAT.md), and the applicable local `CONTEXT.md` or scoped ADR | required when this signal exists |
-| Repository ownership, workspace topology, or execution placement matters | [`../loom/ORCA.md`](../loom/ORCA.md) and current read-only host evidence | required |
+| Repository ownership, workspace topology, or execution placement matters | [`../loom/EXECUTION.md`](../loom/EXECUTION.md) plus the host adapter ([`../loom/ORCA.md`](../loom/ORCA.md) or equivalent) only when native context names it | required |
 
 Before preview, use [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md) and only applicable Story/PRD/product/design/ADR/CONTEXT templates to validate the decided inventory. Create no reference without repeated costly failure, stable ownership, and a real disclosure boundary.
 

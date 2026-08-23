@@ -34,7 +34,9 @@ Start here for the terms users see. Project-specific language belongs in the rep
 
 **`loom:` marker** — A source comment recording a deliberate simplification, its known ceiling, and the upgrade path.
 
-**Orca** — Loom's execution partner for multi-repository work. **Orca runs execution; Loom keeps meaning.** Git owns file state; Orca owns worktrees, tasks, terminals, and liveness; Loom owns Story/Ticket meaning and current verification records.
+**Execution adapter** — A host-specific adapter ([`skills/loom/EXECUTION.md`](../skills/loom/EXECUTION.md) is the host-neutral contract; `OMP.md`/`ORCA.md` are instances) that maps Loom's execution semantics — waves, fresh makers, `decision-needed`, `worker_done` — onto one host's native facilities. Loom's core never requires a named host; absence of an adapter means the contract runs directly on the host's native maker/worker facilities.
+
+**Orca** — Loom's execution-partner adapter for multi-repository work. **Orca runs execution; Loom keeps meaning.** Git owns file state; Orca owns worktrees, tasks, terminals, and liveness; Loom owns Story/Ticket meaning and current verification records.
 
 ## Internal reference terms
 

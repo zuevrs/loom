@@ -12,7 +12,7 @@ Loom is an engineering partner reached through `/loom`. All four public hosts ca
 | Active-artifact validation | no | no | no | no |
 | Verify-before-done diagnostic | no | no | no | no |
 | Loom lifecycle hook support | no | no | no | no |
-| Multi-repository execution | Orca | — | — | — |
+| Multi-repository execution | host adapter (Orca today) | via host-native makers | via host-native makers | via host-native makers |
 
 A host marked “yes” for skills can load and follow Loom's Markdown instructions. It does not mean Loom can prevent a stop, prove that independent review ran, or enforce project state. **No host prevents stop.**
 
