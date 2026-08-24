@@ -78,6 +78,8 @@ Quick check gets one compact alignment check and no unnecessary premise interrog
 
 The frontier is every user-owned decision whose prerequisites are settled; frontier rounds are the default, while sequential one-question cadence is only a fallback when a round misfires or independence is in doubt, never the default. This is an interview discipline, not a runtime or state machine.
 
+- Restate the current **CONFIDENCE** percentage with its delta from the previous round at the top of every round (`~55% → ~75%: auth model and rollout named`). A number that never moves is information: the round narrowed nothing.
+- Three rounds without visible confidence growth trigger the **reframe rule**: the questions are wrong, not the answers — step back and change the object of inquiry (narrow, split, or re-derive the premise) instead of asking a fourth round of the same shape.
 - Work in rounds. Each round asks every mutually independent, user-owned decision question whose prerequisites are settled — numbered, each with its own recommendation — then waits for the user's answers. Two questions where one answer could change the other never share a round; when independence is in doubt, use the sequential one-question fallback.
 - Recompute the frontier from each round's answers and integrate every resolved term into the pending delta before the next round.
 - Sequential one-question cadence is a fallback only for a round misfire or independence doubt, never the default. Abandon a round immediately when two questions where answering one changes the other share it, or when a question appears before its prerequisite is resolved.
@@ -171,5 +173,5 @@ Integrate corrections before the stop test. An uncorrected assumption keeps exis
 | "I'll just pick a sensible default / I already know what they want" | Silent invention is the failure mode. Ask when the answer changes an admitted dimension; otherwise record a proportional assumption. |
 | "I'll reconstruct the CONTEXT/ADR delta at the gate" | The inline delta IS the discipline: term resolved → pending draft updated before the next question. |
 | "User said ok / keeps agreeing, that's their decision" | An accepted recommendation is not a stated preference; name its origin and stop once the floor is explicit. |
-| "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers. Say so and change the object. |
+| "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers — apply the reframe rule (§ Frontier rounds). |
 | "No ADR triggered, so there's nothing to write" | The ADR triple is one home, not the only one. Offer `CONTEXT.md`, a Story `## Decisions` line, or a `loom:` marker — or say so out loud. |
