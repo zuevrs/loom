@@ -31,6 +31,17 @@ Required level-two sections are `## Intent`, `## Success`, and `## Decisions`. O
 
 A small Story is deliberately compact—usually **2–4 lines of body content** across its required sections. It states destination and success, not Ticket details, acceptance checklists, implementation logs, or a transcript. Do not duplicate a Ticket in Story.
 
+## Ticket lifecycle
+
+Ticket frontmatter carries `status` and `blockedBy`. The status set is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`:
+
+- `ready-for-agent` — the Ticket is cut, confirmed, and unblocked; a fresh maker may implement it.
+- `needs-info` — a blocking user-owned question or unresolved contract choice stops work; the Ticket returns to `ready-for-agent` only through a confirmed amendment that resolves the question.
+- `ready-for-human` — cut for work requiring human-only judgment, and held there after Verify APPROVE while the Ticket's Human policy requires approval; it becomes `done` only when the required human approval is recorded.
+- `done` — independent Verify approved it and any required human approval is recorded; a later accepted-result defect returns it to `ready-for-agent` with its stale Verify evidence invalidated.
+
+`blockedBy` is intra-Story only and lists Ticket IDs; a Ticket is runnable only when every blocked-by Ticket is `done`. Readiness, in order: a Ticket is ready for a maker when its status is `ready-for-agent` and its blockers are resolved; it is ready for Verify when the maker reports; it is ready to finish when its `## Verify` record is a current APPROVE and any required human approval is recorded. Story statuses are `active`, `blocked`, and `done`: `blocked` marks a Story stopped on a blocker it cannot resolve internally, such as a blocking user-owned question or the Verify two-strikes fork; `done` is set by Finish only after every declared operation, check, and required review is proven. These states are read and written as plain Markdown; nothing parses or enforces them beyond the reader.
+
 ## Progressive disclosure
 
 A direct concrete small fix may remain Story-free and route straight to Implement. When Plan is invoked, it creates or amends a Story and every planned implementation has at least one Ticket. Add a PRD only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract. Count, size, duration, repository breadth, and a public contract are signals to inspect, never sufficient triggers. Preserve full PRD depth when earned; do not use a thin PRD as ceremony.
@@ -58,7 +69,7 @@ A linked continuation uses the ordinary Story schema and Plan materialization ga
 - `Changes:` a short pointer to the new or changed boundary owned by this Story's Intent/Success/Decisions and optional PRD
 - `Reason:` why this is new work rather than a rewrite of the accepted result
 
-`Continues` is POSIX syntax relative to the new Story directory and accepts exactly one parent step, a valid Story ID, and `STORY.md`; it cannot name the current Story. Resolve it under the same real non-symlink `.loom` directory and require an existing regular non-symlink Story file whose parsed status is `done`. Absolute paths, backslashes, extra traversal, symlink components, missing targets, non-Story files, and active/blocked targets are invalid.
+`Continues` is POSIX syntax relative to the new Story directory and accepts exactly one parent step, a valid Story ID, and `STORY.md`; it cannot name the current Story. Resolve it under the same real non-symlink `.loom` directory and require an existing regular non-symlink Story file whose frontmatter `status` is `done`. Absolute paths, backslashes, extra traversal, symlink components, missing targets, non-Story files, and active/blocked targets are invalid.
 
 The linked continuation has its own new `## Intent` and new `## Success`. It does not copy the original PRD, Tickets, Log, Verify evidence, runtime receipts, or full history. Create only the earned PRD and independently verifiable Tickets for the delta. Intent, Success, Decisions, and optional PRD remain the semantic owners; the four Notes lines summarize linkage and delta only. If Notes contradict an owner, stop and correct the bundle before confirmation. The original link is context, never authority or inherited acceptance.
 
@@ -70,7 +81,7 @@ For a requested change, state every classifier explicitly rather than inheriting
 
 After the confirmed amendment, update exactly the smallest owners and leave unaffected files byte-for-byte unchanged. A changed repository set is always material and requires Ticket `repositoryKeys` plus Story/PRD scope review; Plan may inspect execution context read-only but creates no runtime state.
 
-After a material semantic change invalidates evidence for acceptance, a public/inter-service contract, data path, or security path, the affected Ticket's current canonical `## Verify` is invalid. Because runtime accepts only the canonical current Verify record, do not write an ad hoc non-canonical `STALE` block. Remove the obsolete approval content or leave the section empty while the Ticket is returned to `ready-for-agent`, and record the exact invalidated boundaries in `## Log`; the next independent Verify replaces it with a canonical current result. do not append history or retain a second current verdict. Return an affected `done` Ticket to `ready-for-agent` until independent Verify replaces the invalid block with a current verdict. Unrelated Tickets and unrelated Verify evidence remain unchanged. Evidence invalidation is never a Ticket status.
+After a material semantic change invalidates evidence for acceptance, a public/inter-service contract, data path, or security path, the affected Ticket's current canonical `## Verify` is invalid. The canonical current `## Verify` record is the only current approval; do not write an ad hoc non-canonical `STALE` block. Remove the obsolete approval content or leave the section empty while the Ticket is returned to `ready-for-agent`, and record the exact invalidated boundaries in `## Log`; the next independent Verify replaces it with a canonical current result. do not append history or retain a second current verdict. Return an affected `done` Ticket to `ready-for-agent` until independent Verify replaces the invalid block with a current verdict. Unrelated Tickets and unrelated Verify evidence remain unchanged. Evidence invalidation is never a Ticket status.
 
 A proposed new repository key is planning scope: Plan may query execution context read-only and preview the Story/PRD/Ticket delta, but creates no branch, lane, task, terminal, or worktree. Execution state belongs to later interactions.
 

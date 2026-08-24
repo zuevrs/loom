@@ -20,7 +20,7 @@ After compaction, handoff, or worker replacement, reconstruct from artifacts, Gi
 
 ## Workers and decisions
 
-Maker and checker dispatch follows the host-neutral contract in [`EXECUTION.md`](EXECUTION.md) and [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md); load both before the first dispatch of a session. OMP adds only what is native: workers arrive through OMP's session and worker facilities, and Orca — when present — coordinates dispatch/recovery without judging quality or choosing models.
+Maker and checker dispatch follows the host-neutral contract in [`EXECUTION.md`](EXECUTION.md), including its § Assignments and reports; load it before the first dispatch of a session. OMP adds only what is native: workers arrive through OMP's session and worker facilities, and Orca — when present — coordinates dispatch/recovery without judging quality or choosing models.
 
 ## Bounded execution guidance
 
@@ -33,7 +33,7 @@ Bounded retry and the no-third-identical-attempt rule apply to native automation
 
 ## Capability and failure
 
-Worker discovery, briefing, reports, bounded retry of empty or malformed output, `BLOCKED` transport, and report-versus-repository conflicts follow [`WORKER-BRIEFING.md`](WORKER-BRIEFING.md); Verify owns its own one-retry rule. Compaction or worker replacement recovers through the context lifecycle order above — native context signals never prove durable state.
+Worker discovery, briefing, reports, bounded retry of empty or malformed output, `BLOCKED` transport, and report-versus-repository conflicts follow [`EXECUTION.md`](EXECUTION.md) § Assignments and reports; Verify owns its own one-retry rule. Compaction or worker replacement recovers through the context lifecycle order above — native context signals never prove durable state.
 
 ## Hard stops
 

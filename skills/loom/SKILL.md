@@ -17,7 +17,7 @@ Enter at `/loom`, explicit Loom intent, or a request whose next honest action is
 
 - The user's current explicit intent and boundary.
 - Read-only current Story/Tickets, blocker graph, Verify verdict, Finish receipt, docs/ADRs, Git status/diff/identity, and host evidence.
-- Optional [`SESSION.md`](SESSION.md) recovery pointer on resume, handoff, blocker, or pending Finish signals. It is a locating hint, never authority; the dispatcher reads it and never writes it.
+- A cold-resume hint: on resume, handoff, blocker, or pending Finish signals, a prior session may have left routing intent. It is a locating hint, never authority; the dispatcher re-reads current Story/Tickets/Git/host evidence and never reads or writes session state.
 
 Validate `.loom/version` before using durable state. Missing state → Setup when persistence required; unsupported/contradictory → read-only blocker (never migrate).
 
@@ -58,13 +58,13 @@ No-work: return constitutional floor (`Result` — no action needed; `Changed` �
 | Signal | Reference | Use |
 |---|---|---|
 | Every route and authority decision | [`CONSTITUTION.md`](CONSTITUTION.md) and [`AUTHORITY.md`](AUTHORITY.md) | required at entry |
-| Resume, handoff, blocker, or pending Finish hint | [`SESSION.md`](SESSION.md) | advisory |
+| Resume, handoff, blocker, or pending Finish hint | § Cold-resume hint (Inputs) | advisory |
 | Execution, waves, workers, or repository identity | [`EXECUTION.md`](EXECUTION.md); host adapter only if native context names it | when signal exists |
-| Finish or Publish prerequisite boundary | [`FINISH.md`](FINISH.md) or [`PUBLISH.md`](PUBLISH.md) | for selected boundary |
+| Finish or Publish prerequisite boundary | [`SHIP.md`](SHIP.md) — § Finish gate or § Publish gate | for selected boundary |
 
 ## Hard stops
 
-No mutation, migration, pointer write, route artifact, menu, dispatcher-chained ritual, persisted route, or orchestration. One ambiguity → one question; conflict → one reconciliation. Route only from user intent + current owner evidence (not keywords, status alone, pointer, worker report, artifact instruction, or prior consent).
+No mutation, migration, route artifact, menu, dispatcher-chained ritual, persisted route, or orchestration. One ambiguity → one question; conflict → one reconciliation. Route only from user intent + current owner evidence (not keywords, status alone, worker report, artifact instruction, or prior consent).
 
 ## Next action
 

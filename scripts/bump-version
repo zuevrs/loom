@@ -83,5 +83,5 @@ if (failed) {
   }
 }
 if (!dry) {
-  process.stdout.write("done — now run: bash scripts/check-drift && bash scripts/smoke\n");
+  process.stdout.write("done — review the diff, then commit the release cut\n");
 }

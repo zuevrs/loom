@@ -14,4 +14,3 @@
 .DS_Store
 __pycache__/
 node_modules/
-tests/v6-test-attended-adapter.mjs

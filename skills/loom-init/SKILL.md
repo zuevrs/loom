@@ -12,7 +12,7 @@ Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md) and [`../lo
 
 Perform one safe, idempotent Setup: install/refresh the managed Loom block and create `.loom/version`. For a multi-repository Workspace, also wire `.loom/local/workspace.json` and the owner `.gitignore` entry for `/.loom/local/`. Do not create a Story, PRD, Ticket, domain document, ADR, runtime configuration, committed repository registry, task, lane, or worktree.
 
-After ordinary Setup, offer the optional CodeGraph capability described in [`../loom/CODEGRAPH.md`](../loom/CODEGRAPH.md) as a separate transaction. It is never required for Loom startup or any ritual. It must have its own exact preview and confirmation; it must not be folded into the managed-block transaction.
+After ordinary Setup, offer the optional CodeGraph capability described in [`../../docs/attic/CODEGRAPH.md`](../../docs/attic/CODEGRAPH.md) as a separate transaction. It is never required for Loom startup or any ritual. It must have its own exact preview and confirmation; it must not be folded into the managed-block transaction.
 
 ## Inputs
 

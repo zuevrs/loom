@@ -67,4 +67,4 @@ Finish and Publish stay explicit attended boundaries. One exact wave confirmatio
 
 Loom ships no unattended route, scheduler, runner, or recipes. Use the host's native automation and keep it finite, budgeted, minimally credentialed, and report-only. See [`unattended.md`](unattended.md).
 
-Canonical artifact templates remain beside Plan in `skills/loom-plan/` (`PRD-TEMPLATE.md`, `TICKET-TEMPLATE.md`, `PRODUCT-TEMPLATE.md`, `DESIGN-TEMPLATE.md`, `CONTEXT-FORMAT.md`, and `ADR-FORMAT.md`).
+Canonical artifact templates and formats live inside Plan's own references: the PRD and Ticket templates as sections of [`TO-PRD.md`](../skills/loom-plan/TO-PRD.md) and [`TO-TICKETS.md`](../skills/loom-plan/TO-TICKETS.md), and the CONTEXT/ADR formats as sections of the Plan skill.

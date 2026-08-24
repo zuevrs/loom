@@ -4,6 +4,39 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.0.0] - 2026-08-23
+
+### Highlights
+
+- Loom is now a pure prose package: the entire product is sixteen markdown files — the dispatcher and constitution under `skills/loom/` plus one `SKILL.md` per ritual (Setup, Grill, Plan, Implement, Verify) with only the load-bearing companion prose each ritual needs. Point any agent host at `skills/` and Loom is present; there is nothing to build, run, or install beyond the host's own plugin mechanism.
+- All machinery is removed: the OMP lifecycle hooks (session-start, pre-LLM, sub-agent-spawn), the drift/skill-budget/template contract checkers, the smoke runner, the artifact and workspace tests, and the CI workflow that ran them are gone from the package. The only script left is `scripts/bump-version`, the release version bumper.
+- `.loom` durable state is plain markdown: a Story is `.loom/<story-id>/STORY.md` with optional `PRD.md` and `tickets/<ticket-id>.md` beside it, described entirely by frontmatter plus required prose sections. The session pointer artifact is gone — recovery-worthy notes are recorded in the Ticket `## Log` or the Grill handoff, and a cold resume simply re-reads current artifacts.
+- Budget limits become prose guidance: the machine-checked skill-size and section budgets and their checkers are replaced by plain-text guidance about scope and headroom inside the skills, with no enforced caps and no checker to satisfy.
+- The skill corpus is consolidated to one owner per obligation: the Finish and Publish gates now live together in `SHIP.md`, worker briefing and session lifecycle fold into `EXECUTION.md`, the Grill handoff lives in the Grill interview, and the Plan templates and formats are sections of `loom-plan/SKILL.md` — sixteen files instead of the forty-plus file tree of v7.
+
+### Breaking changes
+
+- The package no longer ships hooks, tests, or scripts: OMP lifecycle hooks, the check/smoke runners, and the test suite are deleted, and no host gets them back. Only the release-only version bumper remains under `scripts/`.
+- `.loom` Verify records are hand-written markdown: the same fields are stated in prose by hand or by the verifying agent instead of being written by machinery. Old machine-written records remain readable as markdown.
+- The skills tree was consolidated and old file paths were removed (for example `FINISH.md`, `PUBLISH.md`, `WORKER-BRIEFING.md`, `SESSION.md`, the Plan template files, and the Grill satellite files). References to removed paths break; load the owning skill instead.
+- This is a major bump because the package contract changed: v8 ships prose and host manifests only, and any consumer that imported Loom's executable surface must stop doing so.
+
+### Migration steps
+
+- Reinstall or refresh the plugin on each host through the host's own plugin mechanism, then restart the host. There is no migration mode and nothing else to run.
+- Existing `.loom` stories stay readable as markdown — no state rewrite or conversion happens, and the story/ticket file layout is unchanged.
+- Verify records keep their field shape in prose: the same fields and verdicts, written as markdown instead of by the removed record writer.
+
+### Adapter impacts
+
+- OMP and Orca adapter prose is unchanged in meaning; both remain skills/checker prose only, with Orca the sole orchestration adapter.
+- Host manifests (`.claude-plugin/`, `.codex-plugin/`, and the OpenCode adapter) are load configuration only: they point the host at skills and checker agents, and the OpenCode adapter still registers skills and injects compact truthful prose. No adapter enforces anything.
+
+### Safety changes
+
+- No invariant changed. Loom still never pushes, creates hosted reviews, merges, or releases, and cleanup remains a separate explicit operator action; completion never silently grants commit, push, review, merge, release, or cleanup.
+- Removing the OMP lifecycle hooks removes the package's last executable surface: v8 contains no code that runs outside the host's own plugin loading, so there is strictly less host-trust surface than v7. Loom still makes no runtime network calls and sends no telemetry, and there is no unattended runner in the package.
+
 ## [7.22.0] - 2026-08-23
 
 ### Highlights
@@ -1931,7 +1964,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v7.22.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.0.0...HEAD
+[8.0.0]: https://github.com/zuevrs/loom/compare/v7.22.0...v8.0.0
 [7.22.0]: https://github.com/zuevrs/loom/compare/v7.21.0...v7.22.0
 [7.21.0]: https://github.com/zuevrs/loom/compare/v7.20.0...v7.21.0
 [7.20.0]: https://github.com/zuevrs/loom/compare/v7.19.0...v7.20.0

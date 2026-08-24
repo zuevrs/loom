@@ -31,21 +31,11 @@ Use repository search and the release diff; do not rely on memory. At minimum in
 - `opencode-plugin.mjs` header
 - any installer/carrier metadata that embeds a version
 
-The v7 package must expose the thin OpenCode main/export and skills/prose-only OMP metadata without any OMP extension. Its positive `files` allowlist must contain canonical skills, agents, public docs, carrier metadata and exactly `hooks/artifacts.cjs`, `hooks/boundary.cjs`, and `hooks/verify-gate.cjs` as runtime seams. Inspect the tarball; an allowlist in source is not proof of packed contents.
+The package is pure prose: skills, agents, public docs, carrier metadata, and the thin OpenCode adapter. Its positive `files` allowlist must match the shipped tree exactly — no hooks, no scripts, no tests. Inspect the tarball; an allowlist in source is not proof of packed contents.
 
-## 4. Run deterministic checks
+## 4. Prose review
 
-Run all commands from the candidate root and retain exact failures:
-
-```bash
-npm test
-bash scripts/check-drift
-bash scripts/check-skill-template-contract
-bash scripts/check-template-sections
-bash scripts/smoke
-```
-
-Then scan public/carrier surfaces for stale ritual/runtime references, including removed maintenance/unattended/recipe routing, old hook module names, unsupported enforcement parity, migration language presented as current, and historical receipts presented as proof.
+There is no test suite. Read the changed skills end to end and scan public/carrier surfaces for stale references: removed machinery (hooks, check scripts, npm test/smoke), dead file names from consolidation, unsupported enforcement parity, migration language presented as current, and historical receipts presented as proof. Grep is the tool; the release owner signs off that the scan ran.
 
 ## 5. Run live carrier gates
 

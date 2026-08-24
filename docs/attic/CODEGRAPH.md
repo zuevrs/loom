@@ -43,7 +43,7 @@ An unavailable, stale, contradictory, or cross-worktree result is a visible capa
 
 ## Ownership
 
-Loom owns its managed `AGENTS.md` block, `.loom` artifacts, ritual skills, checker manifests, and hooks. CodeGraph owns its index and vendor configuration only when its documented setup created them. Loom removes only a Loom-owned MCP registration; use CodeGraph's documented uninstall for vendor-owned data and reread the result.
+Loom owns its managed `AGENTS.md` block, `.loom` artifacts, ritual skills, checker manifests. CodeGraph owns its index and vendor configuration only when its documented setup created them. Loom removes only a Loom-owned MCP registration; use CodeGraph's documented uninstall for vendor-owned data and reread the result.
 
 The CodeGraph project and current MCP details are documented at:
 

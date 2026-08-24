@@ -4,9 +4,9 @@
 
 # Loom
 
-[![checks](https://github.com/zuevrs/loom/actions/workflows/checks.yml/badge.svg)](https://github.com/zuevrs/loom/actions/workflows/checks.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Loom is an engineering partner for coding agents. It helps choose the next honest step, keeps small work small, preserves context when work grows, and requires evidence before completion.
+Loom is a pure-prose engineering partner for coding agents: sixteen markdown files that any agent can follow. Drop `skills/` into your host — or point your host's plugin mechanism at this package — and an agent gains a complete discipline: choose the next honest step, keep small work small, preserve context when work grows, and require evidence before completion. There is no runtime, no code, and no install beyond the host's own plugin mechanism.
 
 Use one entry point: `/loom`. Add what you want in natural language; Loom recommends a route and explains why. Its internal actions are not a sequence you must learn — once you accept the recommended shape, the same session continues through the rituals without re-entering `/loom`.
 
@@ -14,7 +14,7 @@ Use one entry point: `/loom`. Add what you want in natural language; Loom recomm
 
 - A clear small fix goes directly to implementation with a fail-capable check and proportional independent feedback.
 - Every change still follows the quality loop: **Grill → Plan → Implement → Verify → Ship**. Small work compresses Grill/Plan into evidence-based analysis; it does not skip understanding, independent feedback, or the durable capture decision.
-- Material work earns a compact Story, optional material PRD, vertically sliced Tickets, and one exact preview before anything is written. During an explicit `/loom` run, a short recovery pointer may be created only when a decision, blocker, handoff, or pending Finish delta must survive the current context; it is not durable project truth.
+- Material work earns a compact Story, optional material PRD, vertically sliced Tickets, and one exact preview before anything is written. Durable state is plain markdown under `.loom/`; recovery-worthy notes are recorded in the Ticket log or the Grill handoff, and a cold resume simply re-reads current artifacts.
 - Verification is independent from the maker. Its depth follows the changed boundary: **Quick check**, **Behavior check**, or **Full review**.
 - Completion never silently grants commit, push, review, merge, release, or cleanup.
 
@@ -32,30 +32,28 @@ Loom is markdown-native guidance plus focused host adapters. It is not a workflo
 
 ## Install
 
-Loom v7 supports four public carriers:
+Loom ships as prose for four public carriers. In every case the host loads the skills itself — Loom contributes no extension and needs no separate installation step beyond the host's own plugin mechanism:
 
-| Host | Install | Update | Uninstall | v7 capability |
+| Host | Install | Update | Uninstall | Capability |
 |---|---|---|---|---|
-| OMP | `omp plugin install git:github.com/zuevrs/loom` | same command with `--force`, then restart OMP | `omp plugin uninstall loom` | Skills/prose and canonical checker agents; Loom ships no OMP extension |
-| OpenCode | `opencode plugin -g github:zuevrs/loom` | update the configured package/ref, then restart OpenCode | remove `github:zuevrs/loom` from `opencode.json` | Skills plus compact prose injection; no Loom hook/enforcement parity |
-| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents; no Loom hook/enforcement parity |
-| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported; no Loom hook/enforcement parity |
+| OMP | `omp plugin install git:github.com/zuevrs/loom` | same command with `--force`, then restart OMP | `omp plugin uninstall loom` | Skills and canonical checker agents; Loom ships no OMP extension |
+| OpenCode | `opencode plugin -g github:zuevrs/loom` | update the configured package/ref, then restart OpenCode | remove `github:zuevrs/loom` from `opencode.json` | Skills plus compact prose injection |
+| Claude Code | `claude plugin marketplace add zuevrs/loom && claude plugin install loom@loom` | update through Claude's plugin manager, then restart | `/remove-plugin loom` | Prose-compatible skills and packaged checker agents |
+| Codex | `codex plugin marketplace add zuevrs/loom && codex plugin add loom@loom` | update through Codex's plugin manager, then restart | `codex plugin remove loom@loom && codex plugin marketplace remove loom` | Prose-compatible skills and checker prompts where supported |
 
 After install or update, restart the host and confirm the Loom partner surface is discoverable.
 
 ## Upgrade
 
-Update through the same plugin carrier used to install, restart the host, and rerun Setup for stale managed blocks. On OMP, updates require `omp plugin install git:github.com/zuevrs/loom --force`; without `--force`, cached code may remain active. On other carriers, check whether the plugin manager refreshes the package. There is no migration mode in v7: current artifacts and current carrier contracts must validate as-is.
+Update through the same plugin carrier used to install, then restart the host. On OMP, updates require `omp plugin install git:github.com/zuevrs/loom --force`; without `--force`, cached content may remain active. On other carriers, check whether the plugin manager refreshes the package. There is no migration mode: existing `.loom` state stays readable as markdown, and current carrier contracts validate as-is.
 
 ## Prerequisites & Troubleshooting
 
-Git and Node.js 20+ are needed for local development. Public carriers require their own current plugin CLI. Use the host's own troubleshooting resources, preserve exact diagnostic output, and restart before concluding an updated adapter is broken.
-
-Maintainer-only evidence tooling (Grill quality pilot, behavioral evaluations, carrier checks) is documented in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+No runtime or build step is needed to use Loom — the package is markdown and host manifests. Public carriers require their own current plugin CLI. Use the host's own troubleshooting resources, preserve exact diagnostic output, and restart before concluding an updated adapter is broken.
 
 ## Host behavior and safety
 
-No v7 host prevents a stop. Every carrier is skills/prose-only: Loom ships no host extension, lifecycle callback, or enforcement hook. Live Git freshness is checked by Verify and Finish. No carrier claims hook or enforcement parity. See [`docs/hosts.md`](docs/hosts.md).
+No host prevents a stop. Every carrier is prose-only: Loom ships no executable code — no host extension, no lifecycle callback, no enforcement. Live Git freshness is checked by Verify and Finish. No carrier claims enforcement parity. See [`docs/hosts.md`](docs/hosts.md).
 
 On OMP, Orca is Loom's orchestration adapter: Loom owns durable work meaning and verification boundaries; Git owns file state; Orca owns repositories, worktrees, branches, cards, tasks, dispatches, terminals, and liveness. OpenCode, Claude Code, and Codex use their native maker facilities. See [`docs/orca.md`](docs/orca.md).
 
@@ -63,7 +61,7 @@ Loom never trades away trust-boundary validation, security, privacy, data-loss p
 
 ## Contributing and release
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for authoring and deterministic checks. [`RELEASE.md`](RELEASE.md) preserves the complete package/unpack/import/version/changelog/tag/ref/GitHub verification and requires a separate hard confirmation before any remote effect.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for authoring and release discipline. [`RELEASE.md`](RELEASE.md) preserves the complete package/import/version/changelog/tag/ref/GitHub verification and requires a separate hard confirmation before any remote effect.
 
 ## License
 

@@ -22,9 +22,10 @@ The description is the only line of a ritual loaded **before** the ritual is, an
 
 Numbers for this repository's own prose, so the guide obeys its own rule 2:
 
-- A ritual `SKILL.md` past **~180 lines** owes a disclosure decision: keep universal decisions inline and move signal-specific guidance behind a local reference.
+- A skill should stay **roughly one screen of reading** — a ritual an agent can hold in view and finish in one sitting. Past that, owe a disclosure decision: keep universal decisions inline and move signal-specific guidance behind a local reference.
 - Reference material earns a file only when a real signal can select it; keep pointers one hop from the action owner.
-- The managed block in `AGENTS.md` is the only always-loaded surface and remains capped at **20 lines**.
+- Consolidated files may run longer than one screen, but must remain readable in one sitting: long enough to hold the whole contract in view, short enough to finish in a single pass.
+- The managed block in `AGENTS.md` is the **only hard ceiling** left, because it is the one surface injected into every session and pays tokens on every turn: it stays within **20 lines**, and the block itself remains inside that limit. Every other length is guidance, not a gate.
 
 ## Every rule carries its cost
 
@@ -68,24 +69,13 @@ Co-locate templates with the ritual that materializes them. Plan owns PRD, Ticke
 
 Current artifacts are authoritative only when their identity and state validate now. Historical pilots, migration ledgers, transcripts, and prior digests may explain decisions but never prove present behavior or grant authority.
 
-## Deterministic helper modules
-
-Repository checks share three CommonJS helper modules:
-
-1. `hooks/artifacts.cjs` — locate and validate the active artifact from current evidence.
-2. `hooks/boundary.cjs` — compute the content-addressed boundary: a digest over the Ticket (excluding its own `## Verify`) and over each repository's HEAD, staged diff, unstaged diff, and untracked entries. It observes and hashes; it decides and authorizes nothing.
-3. `hooks/verify-gate.cjs` — evaluate Verify-before-done from the active Ticket and current digest/check evidence.
-
-These are deterministic authoring/test helpers, not an OMP extension or lifecycle runtime. Do not duplicate their decisions in adapter prose, rules, checker prompts, or carrier metadata. OMP remains skills/checker prose only.
-
-OpenCode's adapter may register the skill directory and inject compact discipline/router prose only. It must not import workspace/config modules, register old lifecycle hooks, or imply blocking. Claude Code and Codex plugin manifests carry prose-compatible skills and checker metadata their packaging supports; they have no Loom hooks field or enforcement parity claim.
+OpenCode's adapter may register the skill directory and inject compact discipline/router prose only. It must not import workspace/config modules, register lifecycle hooks, or imply blocking. Claude Code and Codex plugin manifests carry prose-compatible skills and checker metadata their packaging supports; they carry no hooks field and claim no enforcement parity.
 
 ## Single source and host dialects
 
 Canonical semantic owner → derived dialect:
 
 - ritual behavior → `skills/**`;
-- deterministic identity/boundary/gate helpers → `hooks/`;
 - OMP checker intent → `agents/loom-verify-*.md`;
 - Claude checker dialect → `.claude-plugin/agents/loom-verify-*.md`;
 - compact carrier summary → managed block and OpenCode injection.
@@ -101,7 +91,7 @@ Checker drift rules:
 5. Model tiers use host-native roles/configuration; user configuration wins. Do not hardcode a provider model as product semantics.
 6. Drift checks compare load-bearing phrases and outcomes, not incidental formatting.
 
-After canonical behavior changes, update only affected dialects, run all drift/doc/package checks, and scan public surfaces for removed ritual and runtime names. Never “fix” drift by weakening the canonical contract.
+After canonical behavior changes, update only affected dialects and scan public surfaces for removed ritual and runtime names. Never “fix” drift by weakening the canonical contract.
 
 ## Authoring checker manifests
 

@@ -8,7 +8,7 @@ Only the latest release line receives security fixes. Loom is pre-1.0 and its co
 
 Loom is local and offline. Its skills and checker prose may read project artifacts and Git state through the host's ordinary tools. Loom ships no OMP extension, lifecycle callback, mutation guard, or runtime network service.
 
-The CommonJS modules under `hooks/` are deterministic parsing/boundary helpers used by repository checks; no packaged OMP runtime wires them to host events. They do not edit project files, run project commands, commit, push, publish, merge, tag, archive, or clean up. There are no runtime network calls and no telemetry.
+The package contains no executable product code — only markdown skills and host manifest files. Nothing in Loom edits project files, runs project commands, commits, pushes, publishes, merges, tags, archives, or cleans up except through the operator's own host tools under the exact previews and confirmations the prose requires. There are no runtime network calls and no telemetry.
 
 ## Installer scope
 

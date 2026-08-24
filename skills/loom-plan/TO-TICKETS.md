@@ -57,9 +57,51 @@ Present the complete proposed breakdown as a numbered list. For each Ticket show
 
 Run the quiz before the exact bundle preview. Then preview every exact path and complete byte of the Story, optional PRD, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and every Ticket. Changed granularity, blocker, content, scope, key, verification, or path requires a fresh complete preview and renewed confirmation. Write nothing before approval.
 
+## Ticket template
+
+Each approved slice becomes `.loom/<story-id>/tickets/<NN>-<slug>.md` written from this template:
+
+````markdown
+---
+id: 01-ticket-slug
+storyId: story-id
+status: ready-for-agent
+blockedBy: []
+repositoryKeys: [api]
+---
+
+## What to build
+
+Replace this body with one thin vertical slice: behavior and contracts, not likely files, estimates, or an implementation checklist. Omit `repositoryKeys` for a one-repository Story rooted at the current project. In a multi-repository Workspace, require stable logical keys such as `[catalog]` or `[notifications]` that match `CONTEXT.md` and the local Orca binding — never filesystem paths or display names. A Ticket may name multiple logical keys when that is the smallest independently verifiable user or contract outcome; Orca lanes are execution transport, not the Ticket boundary.
+
+## Acceptance criteria
+
+- [ ] Replace with one observable acceptance criterion.
+
+## Verification
+
+Human approval: not-required
+
+Replace with a deterministic command that proves the behavior. Use `required` with `ready-for-human`; use `not-required` with `ready-for-agent`; `done` and `needs-info` preserve the selected value.
+
+```bash
+node --test
+```
+
+## Out of scope
+
+- Replace with an explicit exclusion, or remove this optional section.
+
+## Log
+
+- Replace with key decisions, deviations, open questions, or durable prototype evidence as work happens; remove this optional section until needed.
+
+## Verify
+````
+
 ## Write the confirmed bundle
 
-After one explicit confirmation, write the complete approved bundle as one exact transaction. Each approved slice becomes `.loom/<story-id>/tickets/<NN>-<slug>.md` via [`TICKET-TEMPLATE.md`](TICKET-TEMPLATE.md).
+After one explicit confirmation, write the complete approved bundle as one exact transaction. Each approved slice becomes `.loom/<story-id>/tickets/<NN>-<slug>.md` written from the § Ticket template above.
 
 - Frontmatter: `id`, `storyId`, `status`, `blockedBy`, optional `repositoryKeys`.
 - Status is one of `needs-info`, `ready-for-agent`, `ready-for-human`, `done`; Plan never creates `done`.
@@ -89,7 +131,7 @@ Export exactly the rows and columns shown by active filters, streamed as a downl
 Human approval: not-required
 
 ```bash
-npm test -- --grep "csv export"
+node --test --test-name-pattern "csv export"
 ```
 
 ## Out of scope
