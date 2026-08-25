@@ -4,8 +4,14 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.1.0] - 2026-08-25
+
 ### Highlights
 
+- Visible confidence and honest reframe: every grill frontier round reports a confidence delta with its missing items, and three rounds without visible growth trigger an explicit reframe stop instead of another identical round.
+- Risk-first implementation: slices run in risk order — the riskiest or most uncertain slice goes first, so its failure kills the later slices before they are built; a Simplicity check asks whether the smallest thing that satisfies the Ticket has been built before anything larger.
+- Maker self-audit: Implement's step 8 is a named pre-report audit — re-read the diff as a checker, hunt the unsupported acceptance line, and name the audit outcome in the Result.
+- Verify REJECTs feed the grill: every REJECT logs the missing grill question that would have prevented the miss, and the same missing-question pattern twice becomes a canon amendment.
 - Executor form: every skill now separates its executable core from its reference material. Format sections, failure matrices, cleanup classification, worked examples, and anti-rationalization tables move under an explicit `## Reference — read on signal` tail with a one-line signal per subsection, so an agent pays context only for the sections the session actually triggers. The Grill canon gains a first-move skeleton and three negative triggers (`When not to grill`) replacing the anti-rationalization table, and its editor-facing ownership map moves to `docs/authoring.md` — the canon carries no meta-prose.
 
 ## [8.0.0] - 2026-08-23
@@ -1968,7 +1974,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v8.0.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.1.0...HEAD
+[8.1.0]: https://github.com/zuevrs/loom/compare/v8.0.0...v8.1.0
 [8.0.0]: https://github.com/zuevrs/loom/compare/v7.22.0...v8.0.0
 [7.22.0]: https://github.com/zuevrs/loom/compare/v7.21.0...v7.22.0
 [7.21.0]: https://github.com/zuevrs/loom/compare/v7.20.0...v7.21.0
