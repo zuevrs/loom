@@ -55,110 +55,6 @@ Requests bundling several independently testable capabilities first pass the cap
 7. Before any write, validate the closed confirmed path set, target and parent filesystem types, complete bytes, and Story/PRD/Ticket/product/design cross-artifact identities. Failure stops with zero writes. After confirmation, write only listed artifacts, read them back, and run artifact validation. Preserve proven writes on partial failure and preview remaining work again; do not infer rollback. A recovery-worthy decision, blocker, or handoff is recorded in the affected Ticket `## Log` or the Grill handoff; there is no session pointer — a cold resume re-reads current artifacts.
 8. Return one lowest-numbered unblocked ready Ticket, the four-field receipt, and `loom-implement` as the explicit next action.
 
-## Conditional amendment phase
-
-Entry condition: an active or blocked Story/PRD is contradicted or outgrown, including a `needs-info` Ticket naming the contradiction or the Verify two-strikes fork. Story, material PRD, and CONTEXT are current projections while active; a material delta to success, acceptance, scope, public/inter-service contract, repository boundary, architecture/ADR constraint, persistence/data path, or security/privacy enters amendment immediately, before implementation continues. Finish cannot legalize code retrospectively. A done Story and PRD are immutable: follow-up routes to the linked continuation contract in [`../loom/STORY.md`](../loom/STORY.md).
-
-### Procedure
-
-1. Grill only the contradiction and its blast radius. A change to a Ticket's confirmed `repositoryKeys` set is always an amendment and follows this procedure, even when no other PRD text changes. Keep facts and user-owned decisions separate. If the work becomes new scope or needs broad re-planning, stop and return to full Plan.
-2. Draft the exact affected Story/PRD/domain delta through [`TO-PRD.md`](TO-PRD.md), but write nothing. Keep a material PRD current through Story `done`: update the affected requirement/scope text and append one concise dated pointer to its `## Amendments` section (create it once) describing what changed and why; do not turn Amendments into a duplicate history store.
-3. Preserve untouched Tickets byte-for-byte. Re-evaluate only affected Ticket statuses, acceptance criteria, blockers, and Verify freshness. Amend/reopen the same slice when its acceptance changed; create a new Ticket only for a new independently verifiable slice. A new destination becomes a new Story. Do not amend a done Story: any requested correction, extension, or changed boundary becomes a linked continuation with the original preserved byte-for-byte.
-4. An answered `needs-info` Ticket returns to `ready-for-agent` only after the confirmed amendment resolves its contract and the affected rewrite is approved.
-5. Use the quiz and bundle mechanics from [`TO-TICKETS.md`](TO-TICKETS.md) for only the affected slices. Preview the complete affected Story/PRD/domain/Ticket delta as one bundle, obtain one bounded confirmation, and write only that bundle. Changed target, action, scope, draft, blocker, repository key, or base requires a fresh complete preview.
-6. After the confirmed semantic bundle, follow the user's original intent: discussion-only stops; an explicit discuss-and-change request continues through implementation and Verify in the same Story. No new command or repeated ritual handoff is required.
-
-### Hard stops
-
-- No write before the applicable bounded gate.
-- Changed target, action, scope, draft, or base invalidates consent.
-- No new feature scope hidden inside an amendment.
-- No amendment, Ticket reopen, or evidence invalidation inside a done Story; use a linked continuation.
-- No implementation after discussion-only intent; do not discard explicit change intent.
-
-## Brownfield boot — mine before you interview
-
-Trigger: mature repo, no `CONTEXT.md`/`PRODUCT.md`, first Loom plan. Skip on greenfield or when `CONTEXT.md`/`PRODUCT.md` already exist — a README or scattered docs do NOT skip the boot; they are inputs to it.
-
-The grill's explore-don't-ask rule, applied wholesale: on an existing codebase most "questions" are already answered in the code, and a user asked what their own repo could tell you loses trust in the whole interview. Mine first; interview only the remainder.
-
-### Mine (read-only, timeboxed)
-
-Sample, don't exhaust — entry points and configs over full reads; a big repo gets minutes, not an afternoon:
-
-- **Commands**: build/test/lint/format from package scripts, Makefile, CI config — the same discovery verify's gates use
-- **Stack**: languages, frameworks, pinned versions from manifests and lockfiles
-- **Shape**: top-level layout, entry points, where tests live
-- **Conventions**: lint/format configs, naming patterns visible in code, error-handling and logging idioms in 2–3 representative files
-- **Existing knowledge**: README, `docs/`, ADRs anywhere, code comments that smell load-bearing
-
-### Draft, then gate
-
-Write a **draft** `CONTEXT.md` per § CONTEXT.md format from mined facts only — each non-obvious claim names its source file. Unknowns stay unknown: an empty section is honest, an invented convention poisons every later session.
-
-Present the draft to the user for correction **as a pending materialization-bundle delta** before the grill starts. Do not write it yet; the one materialization gate must preview its exact path and complete content with Story/optional PRD before confirmation. The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
-
-Then proceed to the Grill interview (canon: [`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md)), asking only what mining could not answer: intent, priorities, scope edges, trade-offs.
-
-The draft changes nothing about the grill's pending-delta cadence: a term the interview resolves is still added to the conversational delta **before the next question** — the draft is the floor, not the final. A pre-existing file is not permission to defer delta maintenance to the exit gate.
-
-## CONTEXT.md format
-
-```md
-# {Context Name}
-
-{One or two sentences: what this context is.}
-
-## Language
-
-**Term**:
-_Kind_: Contract (optional; Contract names are lowercase kebab-case)
-_Scope_: api, notifications (optional confirmed repository keys; omit for current project-wide)
-Definition in one or two sentences.
-_Avoid_: synonyms not to use
-```
-
-Rules: opinionated vocabulary, tight definitions, project-specific terms only, `_Avoid_` for rejected synonyms. `_Kind_` and `_Scope_` are optional; omission means an ordinary project-wide term. Contract names are stable names, not runtime IDs. Validate scope names against current confirmed repository keys, and validate every ADR Contract reference against a `_Kind_: Contract` entry. Plan previews and confirms CONTEXT writes in the one materialization bundle; delegated workers return decision-needed rather than writing it.
-
-CONTEXT is the current projection of abstract shared language/contracts. Reconcile by surgically replacing only affected definitions and preserving unrelated bytes; add an optional short repository-relative owner pointer only when useful. Never accumulate superseded history, raw payloads, config, secrets, execution IDs, or local paths. Repeatable knowledge a future agent would otherwise rederive may promote here; normal implementation detail stays in Git and Ticket Log.
-
-Single context: one `CONTEXT.md` at repo root. Multi-context: `CONTEXT-MAP.md` pointing to per-context glossaries.
-
-## ADR format
-
-ADRs live in `docs/adr/` as `NNNN-slug.md`. Create the directory lazily. Number = highest existing + 1.
-
-```md
-# ADR-NNNN: {Short decision title}
-
-## Status
-Accepted | Accepted — Supersedes ADR-NNNN | Superseded by ADR-NNNN | Amended by ADR-NNNN
-
-## Scope
-project-wide | repositories: <confirmed-key, ...> | contracts: <Contract-name, ...>
-
-## Context
-{Why this decision came up — the forces at play.}
-
-## Decision
-{What we chose and its key constraints.}
-
-## Why
-{The reasoning — what trade-off we made and why this side wins.}
-
-## Notes
-- {Amendments, links to related ADRs, future considerations.}
-```
-
-Every project ADR has one validated Scope: `project-wide`, confirmed repository keys, named Contracts from `CONTEXT.md`, or both. It becomes `Accepted` at confirmed decision time. An incompatible new decision creates a new Accepted ADR with `Supersedes ADR-NNNN`; the old ADR receives only the reciprocal `Superseded by ADR-NNNN` status pointer—never rewritten rationale. Clarifications and ordinary implementation notes stay in Ticket Log or current CONTEXT as appropriate. Use names in prose and links, never bare IDs; link service-local ADRs rather than copying. Plan previews and confirms ADR writes in its one bundle; delegated workers return decision-needed.
-
-Research-shaped decisions carry their source links in `## Why` or `## Notes` (research discipline: [`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md) § External research and delegation).
-
-Offer an ADR only when **all three** hold:
-1. Hard to reverse — cost of changing your mind later is meaningful
-2. Surprising without context — a future reader will wonder why
-3. Real trade-off — genuine alternatives existed and you picked one for specific reasons
-
 ## Local signal map
 
 | Signal | Reference | Use |
@@ -195,3 +91,117 @@ Before preview, validate the decided inventory against the templates in [`TO-PRD
 ## Next action
 
 Recommend a fresh `loom-implement` maker with the Story, optional PRD, and exactly one ready Ticket. Stop Plan.
+
+## Reference — read on signal
+
+### Conditional amendment phase
+
+Read on signal: an active or blocked Story/PRD is contradicted or outgrown — the Entry condition below fires.
+
+Entry condition: an active or blocked Story/PRD is contradicted or outgrown, including a `needs-info` Ticket naming the contradiction or the Verify two-strikes fork. Story, material PRD, and CONTEXT are current projections while active; a material delta to success, acceptance, scope, public/inter-service contract, repository boundary, architecture/ADR constraint, persistence/data path, or security/privacy enters amendment immediately, before implementation continues. Finish cannot legalize code retrospectively. A done Story and PRD are immutable: follow-up routes to the linked continuation contract in [`../loom/STORY.md`](../loom/STORY.md).
+
+#### Procedure
+
+1. Grill only the contradiction and its blast radius. A change to a Ticket's confirmed `repositoryKeys` set is always an amendment and follows this procedure, even when no other PRD text changes. Keep facts and user-owned decisions separate. If the work becomes new scope or needs broad re-planning, stop and return to full Plan.
+2. Draft the exact affected Story/PRD/domain delta through [`TO-PRD.md`](TO-PRD.md), but write nothing. Keep a material PRD current through Story `done`: update the affected requirement/scope text and append one concise dated pointer to its `## Amendments` section (create it once) describing what changed and why; do not turn Amendments into a duplicate history store.
+3. Preserve untouched Tickets byte-for-byte. Re-evaluate only affected Ticket statuses, acceptance criteria, blockers, and Verify freshness. Amend/reopen the same slice when its acceptance changed; create a new Ticket only for a new independently verifiable slice. A new destination becomes a new Story. Do not amend a done Story: any requested correction, extension, or changed boundary becomes a linked continuation with the original preserved byte-for-byte.
+4. An answered `needs-info` Ticket returns to `ready-for-agent` only after the confirmed amendment resolves its contract and the affected rewrite is approved.
+5. Use the quiz and bundle mechanics from [`TO-TICKETS.md`](TO-TICKETS.md) for only the affected slices. Preview the complete affected Story/PRD/domain/Ticket delta as one bundle, obtain one bounded confirmation, and write only that bundle. Changed target, action, scope, draft, blocker, repository key, or base requires a fresh complete preview.
+6. After the confirmed semantic bundle, follow the user's original intent: discussion-only stops; an explicit discuss-and-change request continues through implementation and Verify in the same Story. No new command or repeated ritual handoff is required.
+
+#### Hard stops
+
+- No write before the applicable bounded gate.
+- Changed target, action, scope, draft, or base invalidates consent.
+- No new feature scope hidden inside an amendment.
+- No amendment, Ticket reopen, or evidence invalidation inside a done Story; use a linked continuation.
+- No implementation after discussion-only intent; do not discard explicit change intent.
+
+### Brownfield boot — mine before you interview
+
+Read on signal: mature repo with no `CONTEXT.md`/`PRODUCT.md` and no prior Loom plan — the Trigger line below decides.
+
+Trigger: mature repo, no `CONTEXT.md`/`PRODUCT.md`, first Loom plan. Skip on greenfield or when `CONTEXT.md`/`PRODUCT.md` already exist — a README or scattered docs do NOT skip the boot; they are inputs to it.
+
+The grill's explore-don't-ask rule, applied wholesale: on an existing codebase most "questions" are already answered in the code, and a user asked what their own repo could tell you loses trust in the whole interview. Mine first; interview only the remainder.
+
+#### Mine (read-only, timeboxed)
+
+Sample, don't exhaust — entry points and configs over full reads; a big repo gets minutes, not an afternoon:
+
+- **Commands**: build/test/lint/format from package scripts, Makefile, CI config — the same discovery verify's gates use
+- **Stack**: languages, frameworks, pinned versions from manifests and lockfiles
+- **Shape**: top-level layout, entry points, where tests live
+- **Conventions**: lint/format configs, naming patterns visible in code, error-handling and logging idioms in 2–3 representative files
+- **Existing knowledge**: README, `docs/`, ADRs anywhere, code comments that smell load-bearing
+
+#### Draft, then gate
+
+Write a **draft** `CONTEXT.md` per § CONTEXT.md format from mined facts only — each non-obvious claim names its source file. Unknowns stay unknown: an empty section is honest, an invented convention poisons every later session.
+
+Present the draft to the user for correction **as a pending materialization-bundle delta** before the grill starts. Do not write it yet; the one materialization gate must preview its exact path and complete content with Story/optional PRD before confirmation. The draft is the interview's floor: corrections cost one message now and a wrong PRD later.
+
+Then proceed to the Grill interview (canon: [`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md)), asking only what mining could not answer: intent, priorities, scope edges, trade-offs.
+
+The draft changes nothing about the grill's pending-delta cadence: a term the interview resolves is still added to the conversational delta **before the next question** — the draft is the floor, not the final. A pre-existing file is not permission to defer delta maintenance to the exit gate.
+
+### CONTEXT.md format
+
+Read on signal: writing or reconciling `CONTEXT.md` — a domain-vocabulary or contract change.
+
+```md
+# {Context Name}
+
+{One or two sentences: what this context is.}
+
+## Language
+
+**Term**:
+_Kind_: Contract (optional; Contract names are lowercase kebab-case)
+_Scope_: api, notifications (optional confirmed repository keys; omit for current project-wide)
+Definition in one or two sentences.
+_Avoid_: synonyms not to use
+```
+
+Rules: opinionated vocabulary, tight definitions, project-specific terms only, `_Avoid_` for rejected synonyms. `_Kind_` and `_Scope_` are optional; omission means an ordinary project-wide term. Contract names are stable names, not runtime IDs. Validate scope names against current confirmed repository keys, and validate every ADR Contract reference against a `_Kind_: Contract` entry. Plan previews and confirms CONTEXT writes in the one materialization bundle; delegated workers return decision-needed rather than writing it.
+
+CONTEXT is the current projection of abstract shared language/contracts. Reconcile by surgically replacing only affected definitions and preserving unrelated bytes; add an optional short repository-relative owner pointer only when useful. Never accumulate superseded history, raw payloads, config, secrets, execution IDs, or local paths. Repeatable knowledge a future agent would otherwise rederive may promote here; normal implementation detail stays in Git and Ticket Log.
+
+Single context: one `CONTEXT.md` at repo root. Multi-context: `CONTEXT-MAP.md` pointing to per-context glossaries.
+
+### ADR format
+
+Read on signal: a hard-to-reverse, surprising, real-trade-off decision emerges and an ADR offer or write is considered.
+
+ADRs live in `docs/adr/` as `NNNN-slug.md`. Create the directory lazily. Number = highest existing + 1.
+
+```md
+# ADR-NNNN: {Short decision title}
+
+## Status
+Accepted | Accepted — Supersedes ADR-NNNN | Superseded by ADR-NNNN | Amended by ADR-NNNN
+
+## Scope
+project-wide | repositories: <confirmed-key, ...> | contracts: <Contract-name, ...>
+
+## Context
+{Why this decision came up — the forces at play.}
+
+## Decision
+{What we chose and its key constraints.}
+
+## Why
+{The reasoning — what trade-off we made and why this side wins.}
+
+## Notes
+- {Amendments, links to related ADRs, future considerations.}
+```
+
+Every project ADR has one validated Scope: `project-wide`, confirmed repository keys, named Contracts from `CONTEXT.md`, or both. It becomes `Accepted` at confirmed decision time. An incompatible new decision creates a new Accepted ADR with `Supersedes ADR-NNNN`; the old ADR receives only the reciprocal `Superseded by ADR-NNNN` status pointer—never rewritten rationale. Clarifications and ordinary implementation notes stay in Ticket Log or current CONTEXT as appropriate. Use names in prose and links, never bare IDs; link service-local ADRs rather than copying. Plan previews and confirms ADR writes in its one bundle; delegated workers return decision-needed.
+
+Research-shaped decisions carry their source links in `## Why` or `## Notes` (research discipline: [`../loom-grill/INTERVIEW.md`](../loom-grill/INTERVIEW.md) § External research and delegation).
+
+Offer an ADR only when **all three** hold:
+1. Hard to reverse — cost of changing your mind later is meaningful
+2. Surprising without context — a future reader will wonder why
+3. Real trade-off — genuine alternatives existed and you picked one for specific reasons

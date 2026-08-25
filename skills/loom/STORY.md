@@ -104,7 +104,11 @@ Ticket completion may update that Ticket to `done` after independent Verify and 
 | Proposed checkpoint repeats current bytes | `NO_DELTA`; write nothing |
 | No durable factual delta | Write nothing |
 
-## Anti-rationalization
+## Reference — read on signal
+
+### Anti-rationalization
+
+Read on signal: a convenience shortcut feels justified while touching Story/Ticket semantics.
 
 | Excuse | Reality |
 |---|---|

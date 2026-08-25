@@ -2,11 +2,25 @@
 
 ## Canon scope
 
-This file is the sole canonical source for the interview discipline shared by Grill and Plan. Grill owns the interview; Plan consumes its handoff and owns only inbound triage and Story/PRD/Ticket materialization; Grill never writes Story, PRD, or Ticket artifacts.
+This file is the sole canonical source for the interview discipline shared by Grill and Plan.
 
-Stay in the interview phase until its decision branches are resolved; do not read Plan's materialization references or create planning artifacts. Plan classifies materiality after the handoff; count, size, duration, or repository breadth alone never earns a PRD.
+Stay in the interview phase until its decision branches are resolved; do not read Plan's materialization references or create planning artifacts.
 
-**Ownership map:** precedent — Check for precedent first; explore — Explore before asking; research — External research and delegation; frontier — Frontier rounds; admission/depth/premise — Interview rules; domain modeling — Model the domain as you grill; cadence — The cadence, worked; readback — Readback correction checkpoint; stop test — Exit criteria; gates — Hard stops; no-artifact close — When the grill stops short of an artifact; handoff — Handoff to Plan; tables — Failure modes/Anti-rationalization. One owner per obligation; link, don't restate.
+## First move
+
+Run this opening sequence before any question; skip it only when § When not to grill fires:
+
+1. **Scan for precedent** — § Check for precedent first: name any matching prior decision, or state plainly that none exists.
+2. **Open with HYPOTHESIS + CONFIDENCE** — § Interview rules: one sentence on what the user wants, an honest percentage, and what is still missing below ~70%.
+3. **Run frontier round 1** — § Frontier rounds: every mutually independent, settled-prerequisite user-owned decision question, numbered, each with its own recommendation.
+
+## When not to grill
+
+The interview is skippable only for these three; otherwise run the first move:
+
+- **Mechanical or unambiguous asks** — objective, boundary, and proof already explicit, no user-owned trade-off open. "Obvious to you" is not that signal; an open admitted dimension still runs the smallest depth the work signals (§ Interview rules).
+- **Pure information requests** — a fact lookup with no decision dimension; answer from evidence (§ Explore before asking), never from "I already know what they want".
+- **User explicitly chose speed and the ask is self-contained** — comply without ceremony; no manufactured branches or extra confirmation.
 
 ## Check for precedent first
 
@@ -69,10 +83,6 @@ Stop when you can predict the user's reaction to the next three questions — th
 ## Model the domain as you grill
 
 When terminology, entity, relationship, or code-vocabulary signals appear, apply domain modeling inline; Material is mandatory for domain modeling. Challenge glossary conflicts, sharpen fuzzy terms, test relationships with concrete scenarios, cross-reference code, keep the pending delta current. Offer an ADR only when hard to reverse, surprising without context, and a real trade-off.
-
-## The cadence, worked
-
-Quick check gets one compact alignment check and no unnecessary premise interrogation; when admissible questions exist they share one round, else that compact check is the whole cadence. Behavior check also requires its own premise and explicit non-goal criteria (Interview rules), including one wrong-object edge for observed risk; Material: premise gate (Interview rules), signal-based domain modeling (Model the domain as you grill), full correction readback (Readback correction checkpoint). A non-empty frontier runs the frontier-round cadence (Hard stops); a misfire or independence doubt falls back to one question at a time.
 
 ## Frontier rounds
 
@@ -165,13 +175,10 @@ Integrate corrections before the stop test. An uncorrected assumption keeps exis
 | Stream drops / "continue" | Re-read this file; restate the last unanswered round or fallback question; resume there |
 | Lost thread — "wait, what" | Re-pitch: one line of context, the current question in the `CONTEXT.md` ubiquitous language; no restart |
 
-## Anti-rationalization
+## Reference — read on signal
 
-| Excuse | Reality |
-|---|---|
-| "Skip scope interview, obvious" | Obvious to you ≠ coherent result; use the smallest depth signalled by the work |
-| "I'll just pick a sensible default / I already know what they want" | Silent invention is the failure mode. Ask when the answer changes an admitted dimension; otherwise record a proportional assumption. |
-| "I'll reconstruct the CONTEXT/ADR delta at the gate" | The inline delta IS the discipline: term resolved → pending draft updated before the next question. |
-| "User said ok / keeps agreeing, that's their decision" | An accepted recommendation is not a stated preference; name its origin and stop once the floor is explicit. |
-| "We circled this four times, one more angle will land it" | Three non-narrowing rounds means the task is wrong, not the answers — apply the reframe rule (§ Frontier rounds). |
-| "No ADR triggered, so there's nothing to write" | The ADR triple is one home, not the only one. Offer `CONTEXT.md`, a Story `## Decisions` line, or a `loom:` marker — or say so out loud. |
+### The cadence, worked
+
+Read on signal: the depth-class cadence (quick check / behavior check / material) needs its worked end-to-end example.
+
+Quick check gets one compact alignment check and no unnecessary premise interrogation; when admissible questions exist they share one round, else that compact check is the whole cadence. Behavior check also requires its own premise and explicit non-goal criteria (Interview rules), including one wrong-object edge for observed risk; Material: premise gate (Interview rules), signal-based domain modeling (Model the domain as you grill), full correction readback (Readback correction checkpoint). A non-empty frontier runs the frontier-round cadence (Hard stops); a misfire or independence doubt falls back to one question at a time.

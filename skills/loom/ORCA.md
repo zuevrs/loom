@@ -83,7 +83,11 @@ Only coherent evidence produces one compact actionable delta. It must name the o
 
 Offer one native handoff only on an actual native context-pressure signal or observed decision loss that the current context cannot safely recover in place. Do not manufacture pressure from token estimates or offer handoff at every phase boundary. Before it, persist the smallest pending semantic delta. Confirmation is valid only for that offer and a validated nonempty actionable delta. Immediately before handoff, rerun the relevant identity/fixed-point checks. Use native handoff in the same coordinator or service lane and send the validated actionable delta—not a transcript or stale summary. After the new session starts, it rereads artifacts/Git/Orca and confirms the delta still matches before acting; handoff delivery alone proves nothing. Record a durable handoff boundary only when it adds a newly confirmed semantic fact. Without confirmation, continue the current session; do not replace it automatically or repeat the offer without a new signal.
 
+## Reference — read on signal
+
 ### Resume failure matrix
+
+Read on signal: a cold resume or handoff surfaces one of these failure symptoms.
 
 | Symptom | Response |
 |---|---|
@@ -96,23 +100,27 @@ Offer one native handoff only on an actual native context-pressure signal or obs
 | Handoff delta is stale at receiver startup | Discard it and rebuild from source owners |
 | Native evidence is unavailable | Stop orchestration with repair guidance; do not fall back to raw Git/worktree control |
 
-## Native cleanup after Publish
+### Native cleanup after Publish
+
+Read on signal: the operator requests cleanup after Publish and proven human merge.
 
 This is the separate explicit operator cleanup action after Publish *and* proven human merge. It is not a ritual, automatic phase, or implication of Story completion. The ownership and identity rules in this file apply throughout.
 
-### Inventory and classification
+#### Inventory and classification
 
 First perform a read-only exact inventory correlating durable merge evidence with native repository/worktree/card keys, actual Git branch/base/HEAD and path, cleanliness, local-branch presence, and active terminal/task/dispatch/blocker/rework state. A closed review, Ticket status, branch name, commit message, missing remote ref, or chat report is not merge proof. Missing, duplicate, orphaned, or contradictory disk/Git/Orca/host identity retains the lane.
 
 Classify every lane. Only a uniquely matched, durably merged, clean, inactive lane is removable by default. Retain closed-unmerged, dirty, active, blocked, rework, ambiguous, and orphaned lanes with the exact reason. Present a separate compact confirmation inventory naming every exact native worktree selector, local path/branch, observed HEAD/base, evidence, ordered native removal and merged-safe local branch action. Any state or inventory change requires re-inventory and renewed confirmation.
 
-### Instruct, verify, and record
+#### Instruct, verify, and record
 
 Loom does not execute cleanup. After confirmation it supplies only the exact native Orca removal instruction for each eligible selector and, after verified native and Git worktree absence, the exact ordinary merged-safe local branch deletion command. The operator executes and reports each action; Loom rereads native Orca and Git inventory before proceeding. Never recommend or fall back to `git worktree remove`, filesystem deletion, raw worktree removal, force, wildcard/bulk cleanup, broad orchestration reset, remote branch deletion, or an action against an unlisted worktree, card, terminal, task, or branch. If native removal fails or absence cannot be proven, retain the lane and branch.
 
 Cleanup is nontransactional per lane. Record completed actions immediately, stop that lane at the first failure, preserve successful earlier effects, and never roll them back or repeat them. Before retrying, rerun the exact read-only inventory and obtain fresh confirmation only for remaining eligible actions. Report removed, retained, and partially failed lanes separately. Internal confirmation may name exact local paths and keys; product-facing prose must omit private Loom paths/IDs, model names, and orchestration, terminal, task, card, or worktree mechanics.
 
-## Anti-rationalization
+### Anti-rationalization
+
+Read on signal: a dispatch, resume, or cleanup shortcut feels justified.
 
 | Excuse | Reality |
 |---|---|

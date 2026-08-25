@@ -4,6 +4,10 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+### Highlights
+
+- Executor form: every skill now separates its executable core from its reference material. Format sections, failure matrices, cleanup classification, worked examples, and anti-rationalization tables move under an explicit `## Reference — read on signal` tail with a one-line signal per subsection, so an agent pays context only for the sections the session actually triggers. The Grill canon gains a first-move skeleton and three negative triggers (`When not to grill`) replacing the anti-rationalization table, and its editor-facing ownership map moves to `docs/authoring.md` — the canon carries no meta-prose.
+
 ## [8.0.0] - 2026-08-23
 
 ### Highlights

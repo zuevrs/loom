@@ -56,20 +56,6 @@ When an active Story owns the topic, use it as read-only context. A request to c
    - Return to the canonical interview while questions remain.
 6. **Semantic boundary** — recommend Plan when the work no longer fits a coherent local, single-session resolution or needs load-bearing decisions or Ticket slicing. File and commit counts are not scope proxies. Before compaction/interruption, offer a checkpoint; keep pending changes in conversation until the checkpoint confirms.
 
-## The distinct cadence, worked
-
-This exchange begins after the canonical interview has resolved the shared decision branches and shows Grill's added edge checkpoint and action gate:
-
-> **Agent:** One edge case before materialization: if the API returns `429` twice and then times out, should attempt 3 still happen, or stop on timeout? I'd recommend stop on timeout to avoid compounding load and user wait. *(waits)*
->
-> **User:** Stop on timeout.
->
-> **Agent:** Decision: rewrite the retry loop to exponential backoff, maximum 3 attempts, and stop on timeout. Materialize by updating `src/client.ts` and running the repo gates? *(waits for explicit go)*
->
-> **User:** Yes, do that.
->
-> **Agent:** *(runs the baseline gates, makes the change, runs the objective gates again, and reports the verified result)*
-
 ## Verification
 
 - Code changes → run the repo's objective gates discovered from package scripts, Makefile, or CI configuration.
@@ -109,7 +95,35 @@ A problem caused by Loom itself belongs to the Loom maintainer, not this project
 | No independent checker context is available | Report the materialized change as unverified with its evidence, and stop |
 | Work no longer fits a coherent local/single-session resolution | Recommend Plan and let the user choose |
 
-## Anti-rationalization
+## Done when
+
+- The user signals stop; Grill stays active while they continue the thread
+- Every materialized change passes the objective gates, and every Behavior-or-higher change carries an independent Verify verdict rather than Grill's own report
+- Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are flushed to `CONTEXT.md` at the action gate
+- Every proposed action is either explicitly confirmed and materialized or explicitly declined
+- An accepted Work Shape that names Plan materialization continued to Plan in the same session or was explicitly deferred
+
+## Reference — read on signal
+
+### The distinct cadence, worked
+
+Read on signal: Grill’s edge-checkpoint and action-gate flow needs a worked end-to-end example.
+
+This exchange begins after the canonical interview has resolved the shared decision branches and shows Grill's added edge checkpoint and action gate:
+
+> **Agent:** One edge case before materialization: if the API returns `429` twice and then times out, should attempt 3 still happen, or stop on timeout? I'd recommend stop on timeout to avoid compounding load and user wait. *(waits)*
+>
+> **User:** Stop on timeout.
+>
+> **Agent:** Decision: rewrite the retry loop to exponential backoff, maximum 3 attempts, and stop on timeout. Materialize by updating `src/client.ts` and running the repo gates? *(waits for explicit go)*
+>
+> **User:** Yes, do that.
+>
+> **Agent:** *(runs the baseline gates, makes the change, runs the objective gates again, and reports the verified result)*
+
+### Anti-rationalization
+
+Read on signal: an action-specific shortcut feels justified mid-grill.
 
 Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.md). Grill adds only action-specific guards:
 
@@ -120,11 +134,3 @@ Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.m
 | "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |
 | "The gates are green and the user confirmed the delta, so it is verified" | Grill is the maker here. Gates are evidence, a confirmed delta is the acceptance contract; neither is an independent Spec verdict. Hand it to a fresh `loom-verify`. |
 | "It is a small behavior fix, chat digest is enough" | Chat digest covers Quick check only. Any behavior-contract change earns a fresh independent checker regardless of diff size. |
-
-## Done when
-
-- The user signals stop; Grill stays active while they continue the thread
-- Every materialized change passes the objective gates, and every Behavior-or-higher change carries an independent Verify verdict rather than Grill's own report
-- Confirmed decisions are captured in lightweight ADRs when the canonical triple-gate holds; resolved domain terms are flushed to `CONTEXT.md` at the action gate
-- Every proposed action is either explicitly confirmed and materialized or explicitly declined
-- An accepted Work Shape that names Plan materialization continued to Plan in the same session or was explicitly deferred

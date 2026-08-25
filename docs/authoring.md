@@ -6,6 +6,14 @@ Loom skills are executable prose. Canonical behavior belongs in the canonical sk
 
 Reference-first action owners use one executable shape: `Trigger`, `Inputs`, `Decision and effect`, `Local signal map`, `Hard stops`, and `Next action`. Setup and Grill retain their established goal/process shape. The dispatcher owns routing, while Finish and Publish use the executable action shape without becoming separate skill directories.
 
+## Canon ownership
+
+The Grill interview canon (`skills/loom-grill/INTERVIEW.md`) keeps one owner per obligation — link, don't restate. Its map lives here, not in the canon:
+
+**Ownership map:** precedent — Check for precedent first; explore — Explore before asking; research — External research and delegation; frontier — Frontier rounds; admission/depth/premise — Interview rules; domain modeling — Model the domain as you grill; cadence — The cadence, worked; readback — Readback correction checkpoint; stop test — Exit criteria; gates — Hard stops; no-artifact close — When the grill stops short of an artifact; handoff — Handoff to Plan; tables — Failure modes/When not to grill.
+
+Maintain the map when the canon's sections move or rename; INTERVIEW.md itself carries no editor-facing meta.
+
 Frontmatter should make user-invoked rituals explicit. Verify may be model-invoked after Implement, but its checker context remains independent. The public router contains exactly Setup, Grill, Plan, Implement, Verify, Finish, and Publish. Do not expose maintenance, unattended, recipes, migration, or historical internals as current rituals.
 
 ## Writing the description
