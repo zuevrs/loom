@@ -4,6 +4,14 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.3.0] - 2026-08-26
+
+### Highlights
+
+- Canon diet: the anti-rationalization tables are consolidated away — the six per-file copies (25 rows plus an authority prose section, 64 lines) are cut with every obligation mapped to a live always-loaded rule, verified line-by-line by fresh checkers. The form was inherited from a source whose skills install independently; Loom loads its constitution at every entry, so the copies carried no obligation their owners did not.
+- No-ops sweep of the heaviest cores: five restatement lines (a skip clause, two shared-understanding gate repeats, a no-fallback repeat, a return-to-Grill repeat) are cut where a named neighboring line carries the same rule; the sweep's full candidate tables keep everything else with recorded reasons.
+- The 14-field Grill→Plan handoff is behaviorally validated: a fresh agent reading only the grill canon produced all fourteen fields with scenario-consistent content; Plan's canon provably refuses a handoff missing a field. Per-field consumption remains shape-level — recorded as a watch-item, not a cut.
+
 ## [8.2.0] - 2026-08-26
 
 ### Highlights
@@ -1984,7 +1992,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v8.2.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.3.0...HEAD
+[8.3.0]: https://github.com/zuevrs/loom/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/zuevrs/loom/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/zuevrs/loom/compare/v8.0.0...v8.1.0
 [8.0.0]: https://github.com/zuevrs/loom/compare/v7.22.0...v8.0.0

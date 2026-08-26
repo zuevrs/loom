@@ -10,7 +10,7 @@ Load and follow [`../loom/CONSTITUTION.md`](../loom/CONSTITUTION.md), [`../loom/
 
 ## Trigger
 
-Enter only with a goal, context, material boundary, and resolved Grill handoff (§ Grill handoff for Plan). Missing or unresolved interview concerns return to Grill; ask only new materialization choices.
+Enter only with a goal, context, material boundary, and resolved Grill handoff (§ Grill handoff for Plan).
 
 Plan never implements. Material implementation requires a Story and at least one Ticket. Add a PRD only when material acceptance or constraints cannot fit in Story and Tickets without semantic loss, or an equivalent load-bearing owner need requires the fuller contract; count, size, duration, repository breadth, or a public contract alone never earns one.
 

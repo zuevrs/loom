@@ -120,17 +120,3 @@ This exchange begins after the canonical interview has resolved the shared decis
 > **User:** Yes, do that.
 >
 > **Agent:** *(runs the baseline gates, makes the change, runs the objective gates again, and reports the verified result)*
-
-### Anti-rationalization
-
-Read on signal: an action-specific shortcut feels justified mid-grill.
-
-Shared interview excuses and responses live only in [`INTERVIEW.md`](INTERVIEW.md). Grill adds only action-specific guards:
-
-| Excuse | Reality |
-|---|---|
-| "This feels like Plan, I'll write a PRD" | Keep this ritual inline. Route to Plan only when the user requests planning materialization; otherwise keep discussion freeform. |
-| "I'll skip gates, it's a tiny change" | Run the objective gates; they define whether the materialized change is verified. |
-| "We'll handle edge cases after coding" | Resolve one adversarial edge case before the first code materialization. |
-| "The gates are green and the user confirmed the delta, so it is verified" | Grill is the maker here. Gates are evidence, a confirmed delta is the acceptance contract; neither is an independent Spec verdict. Hand it to a fresh `loom-verify`. |
-| "It is a small behavior fix, chat digest is enough" | Chat digest covers Quick check only. Any behavior-contract change earns a fresh independent checker regardless of diff size. |

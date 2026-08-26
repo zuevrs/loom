@@ -144,11 +144,3 @@ Only when a user-facing product UI needs a visual system.
 Do not write the Story, PRD, or pending domain/product/design deltas here. Return the complete destination drafts to `SKILL.md`, then read [`TO-TICKETS.md`](TO-TICKETS.md). Orca may be queried read-only for repository keys during Ticket scope; Plan creates no lanes, tasks, branches, or worktrees.
 
 The destination draft is input to slicing, not permission to revise settled intent. If Ticket drafting exposes an uncovered or contradictory product decision, return to Grill; otherwise finish the quiz and present one exact complete bundle for confirmation.
-
-## Anti-rationalization
-
-| Excuse | Reality |
-|---|---|
-| "The destination looks good — write it now, Tickets separately" | Confidence is not confirmation; every planning artifact stays pending until the one coherent bundle preview after Ticket slicing and the quiz. |
-| "Quick clarifying question before writing" | The grill is over. Synthesize; for material work, surface gaps as explicit assumptions in the PRD; otherwise return to Grill if Story content is unresolved. |
-| "Scope grew while writing" | Cut out-of-scope first; if genuinely new, return to the grill — do not silently expand. |

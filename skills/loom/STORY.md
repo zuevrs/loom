@@ -112,19 +112,3 @@ Quiet losses never surface as REJECT; capture them after the work through three 
 | Resume evidence conflicts across artifacts and Git/execution context | Stop and name exact sources/fields; never repair by inference |
 | Proposed checkpoint repeats current bytes | `NO_DELTA`; write nothing |
 | No durable factual delta | Write nothing |
-
-## Reference — read on signal
-
-### Anti-rationalization
-
-Read on signal: a convenience shortcut feels justified while touching Story/Ticket semantics.
-
-| Excuse | Reality |
-|---|---|
-| "Put the Ticket checklist in Story for convenience" | Story is the compact destination index; Ticket owns slice detail. |
-| "This is small, so Plan can skip Tickets" | Direct Implement may skip ceremony; invoked Plan produces at least one Ticket. |
-| "Rewrite the old artifact into v7 while here" | v7 is current-only. Stop read-only; migration is not compatibility. |
-| "The user liked the recommendation" | Enthusiasm is not a confirmed durable decision. |
-| "Only one acceptance line changed; prior Verify is close enough" | In an active Story, invalidate only affected evidence and re-Verify that boundary. After `done`, preserve history and create a linked continuation. |
-| "Compaction is coming; rewrite the Story just in case" | Context pressure is not a semantic delta or write authority. |
-| "The worker made the decision while implementing" | Worker evidence informs the user/coordinator; it does not own durable product truth. |

@@ -57,7 +57,7 @@ orca worktree set --worktree <selector> --comment "loom: <ticket-id> maker runni
 
 The claim is advisory, which is exactly why it is written before the maker starts and rewritten at the Verify verdict. Two live claims on one lane is a stop for human reconciliation, never resolved by recency, `lastActivityAt`, or display name.
 
-Any Workspace Ticket, including a one-repository Ticket, uses a coherent Orca lane; missing native evidence stops rather than falling back to raw Git.
+Any Workspace Ticket, including a one-repository Ticket, uses a coherent Orca lane.
 
 Uncertainty routing — `decision-needed`, materiality, and the bounded packet back to the maker — is the contract in [`EXECUTION.md`](EXECUTION.md). On Orca, classification follows the classifiers already in `STORY.md` § Adaptive continuation.
 
@@ -117,15 +117,3 @@ Classify every lane. Only a uniquely matched, durably merged, clean, inactive la
 Loom does not execute cleanup. After confirmation it supplies only the exact native Orca removal instruction for each eligible selector and, after verified native and Git worktree absence, the exact ordinary merged-safe local branch deletion command. The operator executes and reports each action; Loom rereads native Orca and Git inventory before proceeding. Never recommend or fall back to `git worktree remove`, filesystem deletion, raw worktree removal, force, wildcard/bulk cleanup, broad orchestration reset, remote branch deletion, or an action against an unlisted worktree, card, terminal, task, or branch. If native removal fails or absence cannot be proven, retain the lane and branch.
 
 Cleanup is nontransactional per lane. Record completed actions immediately, stop that lane at the first failure, preserve successful earlier effects, and never roll them back or repeat them. Before retrying, rerun the exact read-only inventory and obtain fresh confirmation only for remaining eligible actions. Report removed, retained, and partially failed lanes separately. Internal confirmation may name exact local paths and keys; product-facing prose must omit private Loom paths/IDs, model names, and orchestration, terminal, task, card, or worktree mechanics.
-
-### Anti-rationalization
-
-Read on signal: a dispatch, resume, or cleanup shortcut feels justified.
-
-| Excuse | Reality |
-|---|---|
-| "The card name is close enough" | Display text is not repository, worktree, or assignment identity. |
-| "The worker said done, mark the Ticket" | `worker_done` ends a dispatch; independent Verify decides disposition. |
-| "The tree is dirty, so resume is unsafe" | A coherent attributable dirty diff is normal resumable evidence. |
-| "Recreate the lane manually" | Orca owns lifecycle; missing native coherence is a stop, not permission for raw Git. |
-| "Send the transcript so the next agent knows everything" | Send the compact source-backed delta; the receiver rereads owners. |
