@@ -9,6 +9,8 @@ This is Loom's canonical authority contract. Load it with `CONSTITUTION.md` at e
 3. Evidence supports a decision but never authorizes an effect.
 4. Every project or external mutation needs explicit, narrow, current human consent at the owning ritual boundary.
 
+Solo mode — a host that cannot create fresh workers — is a declared degraded state, never an equivalent of independence: independence claims are forbidden in it, and public/contract changes are excluded from solo approval.
+
 ## What authority is, and what it is not
 
 Loom's authority is a prose contract. Four things carry it: honest routing, exact previews, immediate revalidation, and host-native human confirmation plus execution through ordinary host tools. There is no executable Loom mutation permit, opaque capability, authority mint, or mutation guard — if you find yourself reaching for a token that proves you may act, it does not exist and you are about to invent one.

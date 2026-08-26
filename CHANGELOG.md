@@ -4,6 +4,16 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.2.0] - 2026-08-26
+
+### Highlights
+
+- Solo mode: a host that cannot create fresh subagents now gets an honest degraded contract instead of a dead end — coordinator and maker roles merge into one context, self-verify quotes the diff for every claimed effect and re-reads acceptance line-by-line, reports and Ticket records say `solo-verified` and never claim checker independence, and public/contract changes are excluded from solo approval (EXECUTION, AUTHORITY).
+- The learning loop sees quiet losses: the Story Outcome section gains three one-line lenses — no-ops (prose that does not change agent behavior → trim or rewrite candidate), tool economy (a cheaper path existed → name it), information access (the agent lacked information it needed → pointer, never more prose).
+- Probe-on-change becomes a wave rule: a Story that changes executor-behavior prose runs one fresh-context probe per changed behavior and records the verdict; a MISS feeds a canon line or a trim, never passes silently.
+- Maker reports prove diff shape for prose and reordering work — the three-time eaten-line pattern closed by the canon's own REJECT-feedback rule.
+- The dispatch surface is behaviorally validated: a fresh agent given only the dispatcher and ritual descriptions routed a build goal to Plan at the table's own precedence, confirmed the material boundary first, and handed open discovery to Grill — zero miscast.
+
 ## [8.1.0] - 2026-08-25
 
 ### Highlights
@@ -1974,7 +1984,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v8.1.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.2.0...HEAD
+[8.2.0]: https://github.com/zuevrs/loom/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/zuevrs/loom/compare/v8.0.0...v8.1.0
 [8.0.0]: https://github.com/zuevrs/loom/compare/v7.22.0...v8.0.0
 [7.22.0]: https://github.com/zuevrs/loom/compare/v7.21.0...v7.22.0

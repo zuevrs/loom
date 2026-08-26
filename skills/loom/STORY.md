@@ -31,6 +31,7 @@ Required level-two sections are `## Intent`, `## Success`, and `## Decisions`. O
 
 A small Story is deliberately compact—usually **2–4 lines of body content** across its required sections. It states destination and success, not Ticket details, acceptance checklists, implementation logs, or a transcript. Do not duplicate a Ticket in Story.
 
+A Story that changes executor-behavior prose — lines an agent executes — runs one fresh-context probe per changed behavior and records the verdict in the Story; a MISS feeds a canon line or a trim, never passes silently.
 ## Ticket lifecycle
 
 Ticket frontmatter carries `status` and `blockedBy`. The status set is exactly `needs-info`, `ready-for-agent`, `ready-for-human`, or `done`:
@@ -88,6 +89,14 @@ A proposed new repository key is planning scope: Plan may query execution contex
 ## State and authority
 
 Ticket completion may update that Ticket to `done` after independent Verify and may update Story facts; it does not itself make the Story `done` or authorize commit, push, publication, hosted review, merge, or cleanup. Finish and Publish are separate explicit interactions with separate bounded authority.
+
+## Outcome
+
+Quiet losses never surface as REJECT; capture them after the work through three one-line lenses, each naming a candidate, not a change:
+
+- **No-ops** — use when a probe or session shows prose that does not change agent behavior: mark it a trim or canon-line-rewrite candidate.
+- **Tool economy** — use when a step forced expensive tool calls where a cheaper path existed: name the cheaper path.
+- **Information access** — use when the agent lacked information it needed: route a pointer or navigation fix, never more prose.
 
 ## Failure modes
 
