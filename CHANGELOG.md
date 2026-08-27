@@ -4,6 +4,12 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.4.0] - 2026-08-26
+
+### Highlights
+
+- Durable fog-of-war: the Story gains an optional `## Not yet specified` section — in-scope areas coming but not yet precisely ticketable, written at durable semantic boundaries as factual one-line deltas. The fog-or-ticket test is sharpness, not answerability; graduation into Tickets happens only through a confirmed amendment. Distilled from wayfinder's one genuinely new concept (the rest was assessed and declined with ceiling triggers), and behaviorally validated: a fresh agent reading only the amended canon wrote the fog lines exactly and refused to invent Tickets, graduate without amendment, or persist runtime state.
+
 ## [8.3.0] - 2026-08-26
 
 ### Highlights
@@ -1992,7 +1998,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v8.3.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.4.0...HEAD
+[8.4.0]: https://github.com/zuevrs/loom/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/zuevrs/loom/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/zuevrs/loom/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/zuevrs/loom/compare/v8.0.0...v8.1.0

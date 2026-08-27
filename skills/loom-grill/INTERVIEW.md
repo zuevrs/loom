@@ -97,6 +97,7 @@ The frontier is every user-owned decision whose prerequisites are settled; front
 - Resolve prerequisites in order. Withhold every decision question that depends on an unsettled fact or prior decision. An independent decision may remain visible while an unrelated lookup waits.
 - A lookup result is evidence only. It cannot decide for the user, replace a visible question, mutate Story/PRD/Ticket or workflow state, publish an effect, materialize code or documentation, or grant authority.
 - Keep the frontier in conversation only. Do not create a frontier file, session field, recovery pointer, status, or other persisted workflow state; a fresh run starts empty.
+- The conversational frontier stays in conversation; its durable projection is the Story's `## Not yet specified` fog, written at the semantic boundary as a factual delta, not workflow state.
 
 A materialization boundary still requires an exact current consent packet bound to the preview and effects; it is never a worker callback. Grill's existing exact materialization gate still owns any confirmed code or non-planning documentation, Plan alone owns planning artifacts, and the maker never self-approves.
 

@@ -27,7 +27,13 @@ status: active
 - `status`: exactly `active`, `blocked`, or `done`
 - no unknown frontmatter keys
 
-Required level-two sections are `## Intent`, `## Success`, and `## Decisions`. Optional sections are `## Scope` and `## Notes`; add them only when useful. Section bodies are ordinary Markdown. Intent and Success are nonempty; Decisions records confirmed decisions and may say `None yet` initially.
+Required level-two sections are `## Intent`, `## Success`, and `## Decisions`. Optional sections are `## Scope`, `## Notes`, and `## Not yet specified`; add them only when useful. Section bodies are ordinary Markdown. Intent and Success are nonempty; Decisions records confirmed decisions and may say `None yet` initially.
+
+`## Not yet specified` is the fog: in-scope areas coming but not yet precisely ticketable.
+The fog-or-ticket test is sharpness, not answerability: ticket a question that can be stated precisely now, even if blocked; leave in fog what cannot.
+- Write the fog only at durable semantic boundaries, as factual one-line deltas naming the area and what stays unsharp.
+- Graduate a fog area into Tickets only through a confirmed amendment; move it out of the Story when ruled out of scope; an empty fog carries no section.
+- The fog is planning semantics projected on the Story, never execution runtime state (Location and identity).
 
 A small Story is deliberately compact—usually **2–4 lines of body content** across its required sections. It states destination and success, not Ticket details, acceptance checklists, implementation logs, or a transcript. Do not duplicate a Ticket in Story.
 

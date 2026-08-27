@@ -46,7 +46,7 @@ After the consumed handoff has no unresolved prerequisite, Plan may classify Sto
 ## Decision and effect
 
 1. Consume the Grill handoff as settled evidence; only new materialization choices may be asked. Unresolved interview scope returns to Grill. Confirm the handoff's proposal fields (7–13) from current evidence; a proposal the evidence cannot support returns to Grill.
-2. Draft the smallest plan in memory: Story plus Tickets; add PRD, ADR, or CONTEXT only on a load-bearing semantic trigger. Create no runtime or implementation state.
+2. Draft the smallest plan in memory: Story plus Tickets; add PRD, ADR, or CONTEXT only on a load-bearing semantic trigger. Create no runtime or implementation state. The bundle may carry fog lines in the Story for areas the grill left unsharp.
 3. Cut vertical Tickets around outcomes. State scope/non-goals, acceptance, blockers/order, and a deterministic Verify seam; prescribe no files, estimates, or steps.
 Requests bundling several independently testable capabilities first pass the capability-map gate ([`TO-TICKETS.md`](TO-TICKETS.md)): one map confirmation, then slicing per module in dependency order; single-capability requests skip it.
 4. Load every applicable template selected by the inventory and validate each draft. Templates shape drafts, never scope. Missing/invalid required templates stop before preview/write.
@@ -116,6 +116,7 @@ Entry condition: an active or blocked Story/PRD is contradicted or outgrown, inc
 - No new feature scope hidden inside an amendment.
 - No amendment, Ticket reopen, or evidence invalidation inside a done Story; use a linked continuation.
 - No implementation after discussion-only intent; do not discard explicit change intent.
+- Graduation is the only path from fog to Ticket: an amendment that resolves a fog area graduates it into the amended bundle.
 
 ### Brownfield boot — mine before you interview
 
