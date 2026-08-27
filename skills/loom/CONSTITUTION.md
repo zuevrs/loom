@@ -20,6 +20,7 @@ Every completion or blocker uses exactly these labels, and `Result` is the first
 - `Next action` — one recommended independent or human action.
 
 Expand only for safety, an exact confirmation inventory, failed output, a conflict, or explicit request.
+A confirmation request ends with its micro-choice — 'Yes / no / refine?' or the concrete go/no-go variant — never an open 'confirm?'.
 
 ## Verification
 

@@ -46,16 +46,16 @@ Break the destination into **tracer-bullet Tickets**. Each is a thin, complete, 
 - `blockedBy` is intra-Story only and contains Ticket IDs. Blockers get lower numbers. Cross-Story ordering is discussed explicitly, not encoded as a hidden edge.
 - Do not include likely files, estimates, or implementation checklists. The implementer traces the real flow against Story/PRD.
 
-## Materialization quiz
+## Materialization preview-confirmation
 
-Present the complete proposed breakdown as a numbered list. For each Ticket show title, `blockedBy`, user stories/contracts/Story success covered, end-to-end behavior and acceptance summary, verification, Human policy, and repository scope. Ask exactly one recommended question at a time until these are settled:
+Present the complete proposed breakdown as a numbered list — for each Ticket show title, `blockedBy`, user stories/contracts/Story success covered, end-to-end behavior and acceptance summary, verification, Human policy, and repository scope — alongside every exact path and complete byte of the Story, optional PRD, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and every Ticket. The preview's numbered Tickets with blockers are the breakdown approval; one confirmation covers granularity and bundle, and nothing is approved sight-unseen. Settle before approving:
 
 - Is granularity too coarse or too fine?
 - Are blocker relationships correct and acyclic?
 - Should any Tickets merge or split?
 - Does each repository scope match ownership and atomicity?
 
-Run the quiz before the exact bundle preview. Then preview every exact path and complete byte of the Story, optional PRD, pending CONTEXT/ADR/PRODUCT/DESIGN deltas, and every Ticket. Changed granularity, blocker, content, scope, key, verification, or path requires a fresh complete preview and renewed confirmation. Write nothing before approval.
+Changed granularity, blocker, content, scope, key, verification, or path requires a fresh complete preview and renewed confirmation. Write nothing before approval.
 
 ## Ticket template
 

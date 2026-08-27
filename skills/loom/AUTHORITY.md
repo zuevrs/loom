@@ -27,6 +27,9 @@ Confirmation is bounded to the exact targets, actions, scope, base, and effects 
 
 **It is non-transitive.** Each boundary is its own gate, and none implies any other. Getting Ticket consent does not grant commit authority; Finish does not grant Publish; Publish does not grant merge or cleanup. Outside Finish, consent for one repository, lane, local command, remote, hosted review, or cleanup action does not cover another.
 
+**Chain consent is the one explicit exception.** An operator-granted pre-grant may cover a named remaining Ticket sequence of identical inventory shape; it never continues silently.
+It expires on the existing load-bearing inventory list — any listed change ends the chain and restores per-gate confirmation.
+
 **A load-bearing inventory change expires the prior confirmation** and requires a fresh exact preview. Load-bearing means any changed repository/lane identity, branch, base, HEAD, diff, index, file set, artifact semantics, Ticket/verdict boundary, check set, review trigger, local effect, commit message, Story lifecycle, remote, release target, worktree, cleanliness state, or activity state. Refreshed read-only observations with identical values and incidental presentation changes do not expire consent.
 
 ## Revalidate immediately before the effect

@@ -143,4 +143,4 @@ Only when a user-facing product UI needs a visual system.
 
 Do not write the Story, PRD, or pending domain/product/design deltas here. Return the complete destination drafts to `SKILL.md`, then read [`TO-TICKETS.md`](TO-TICKETS.md). Orca may be queried read-only for repository keys during Ticket scope; Plan creates no lanes, tasks, branches, or worktrees.
 
-The destination draft is input to slicing, not permission to revise settled intent. If Ticket drafting exposes an uncovered or contradictory product decision, return to Grill; otherwise finish the quiz and present one exact complete bundle for confirmation.
+The destination draft is input to slicing, not permission to revise settled intent. If Ticket drafting exposes an uncovered or contradictory product decision, return to Grill; otherwise present one exact complete bundle — the numbered Ticket breakdown with blockers — for the single preview-confirmation.

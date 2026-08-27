@@ -4,6 +4,14 @@ All notable changes to Loom are documented here. Follows [Keep a Changelog](http
 
 ## [Unreleased]
 
+## [8.5.0] - 2026-08-27
+
+### Highlights
+
+- Chain consent: when Tickets run through serial blockers with an identical inventory shape, the wave gate may offer a chain — one operator-granted consent naming the remaining sequence and its stop conditions (any REJECT, amendment, load-bearing inventory change, or blocker deviation ends it and restores per-gate confirmation). The one explicit exception to consent non-transitivity: a narrow named pre-grant, never silent continuation, never covering a new effect kind or repository.
+- Confirmation compression: the Plan bundle preview is the breakdown approval — the numbered Tickets with blockers are fully visible in the preview, and one confirmation covers granularity and bundle together (the separate granularity quiz turn is gone). Every confirmation request now ends with its micro-choice — `Yes / no / refine?` or the concrete go/no-go — never an open "confirm?".
+- Both behaviors probe-validated fresh-context: a REJECT inside a granted chain correctly stops the next dispatch and restores per-gate confirmation; Plan presents exactly one preview and one confirmation; the confirmation ends with the micro-choice. Grounded in a measured lifecycle run where 6 of 14 user turns on the material path were empty confirmations.
+
 ## [8.4.0] - 2026-08-26
 
 ### Highlights
@@ -1998,7 +2006,8 @@ Distilled from the [awesome-harness-engineering](https://github.com/ai-boost/awe
 - Loop starter catalog (6 starters)
 - `AGENTS.md` managed block with router and discipline
 
-[Unreleased]: https://github.com/zuevrs/loom/compare/v8.4.0...HEAD
+[Unreleased]: https://github.com/zuevrs/loom/compare/v8.5.0...HEAD
+[8.5.0]: https://github.com/zuevrs/loom/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/zuevrs/loom/compare/v8.3.0...v8.4.0
 [8.3.0]: https://github.com/zuevrs/loom/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/zuevrs/loom/compare/v8.1.0...v8.2.0

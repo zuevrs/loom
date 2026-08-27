@@ -10,6 +10,10 @@ Load before the first dispatch, wave gate, worker assignment, `decision-needed`,
 
 One exact wave confirmation starts the full current runnable frontier: every Ticket whose blockers are done and whose repository/resource scope does not conflict. The gate preview lists exactly the Tickets, repositories, and bases it covers; confirmation permits only that inventory. Newly runnable Tickets wait for the next gate and are never added to a confirmed wave; Tickets created by an amendment enter only through a new gate. `worker_done`, APPROVE, or wave completion never extends the gate, and a wave never inherits Finish or Publish authority.
 
+**Chain consent** — when runnable Tickets share an identical inventory shape (same repositories, same effect kinds, only the Ticket advancing through serial blockers), the wave gate may offer a chain: one consent that names the remaining Ticket sequence and its stop conditions.
+The chain ends and per-gate confirmation resumes at the first REJECT on any Ticket, any amendment, any load-bearing inventory change per AUTHORITY's expiry list, or any blocker deviation from the previewed order.
+Offered, never assumed — refusal or silence keeps per-gate confirmation, and a chain never covers a new effect kind or repository.
+
 ## Fresh makers
 
 Use a fresh host-native maker for every material Ticket and every rework, including on the same lane. Never persist maker state; context compaction, summarization, model switching, or continuation is not freshness. If a fresh maker cannot be created, stop rather than reusing one or simulating independence. No worker chaining across Tickets — a wave dispatches only fresh makers; no maker self-approval.
